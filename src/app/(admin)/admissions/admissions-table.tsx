@@ -4,7 +4,7 @@ import { DataTable, type Column, type FilterDef } from "@/components/shared/data
 import { PersonCell } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Badge } from "@/components/ui/badge";
-import { formatDate } from "@/lib/format";
+import { formatDate, formatCampusDisplay } from "@/lib/format";
 import { ADMISSIONS } from "@/lib/mock/institution";
 import type { AdmissionApplication } from "@/types";
 
@@ -23,7 +23,18 @@ const columns: Column<AdmissionApplication>[] = [
   {
     key: "campus",
     header: "Campus",
-    cell: (r) => <span className="text-[13px]">{r.campus}</span>,
+    cell: (r) => {
+      const info = formatCampusDisplay(r.campus);
+      return (
+        <div className="flex flex-col leading-tight">
+          <span className="text-[13px] font-medium text-foreground">{info.primary}</span>
+          {info.secondary && (
+            <span className="text-[11px] text-muted-foreground">{info.secondary}</span>
+          )}
+        </div>
+      );
+    },
+    sortValue: (r) => r.campus,
   },
   {
     key: "stage",
@@ -54,11 +65,22 @@ const columns: Column<AdmissionApplication>[] = [
 ];
 
 const stages = ["Inquiry", "Application", "Interview/Test", "Approved", "Enrolled"];
-const campuses = [...new Set(ADMISSIONS.map((a) => a.campus))];
+const uniqueCampuses = [...new Set(ADMISSIONS.map((a) => a.campus))];
+const campusOptions = uniqueCampuses.map((c) => ({
+  value: c,
+  label: formatCampusDisplay(c).label,
+}));
 
 const filters: FilterDef<AdmissionApplication>[] = [
-  { key: "stage", label: "Stage", options: stages, getValue: (r) => r.stage },
-  { key: "campus", label: "Campus", options: campuses, getValue: (r) => r.campus },
+  { key: "stage", label: "Stage", allLabel: "All Stages", options: stages, getValue: (r) => r.stage },
+  {
+    key: "campus",
+    label: "Campus",
+    allLabel: "All Campuses",
+    options: campusOptions,
+    triggerClassName: "min-w-48 sm:min-w-52",
+    getValue: (r) => r.campus,
+  },
 ];
 
 export function AdmissionsTable() {

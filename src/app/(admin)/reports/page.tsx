@@ -62,7 +62,7 @@ export default function ReportsPage() {
           <BarSeriesChart
             data={GRADE_DISTRIBUTION}
             xKey="grade"
-            series={[{ key: "students", label: "Number of Students", color: "#353955" }]}
+            series={[{ key: "students", label: "Number of Students", color: "#1e4275" }]}
           />
         </SectionCard>
 
@@ -71,9 +71,27 @@ export default function ReportsPage() {
             data={REVENUE_TREND}
             xKey="month"
             series={[
-              { key: "collected", label: "Collected", color: "#353955" },
-              { key: "expected", label: "Expected", color: "#c79a3a" },
-              { key: "expenses", label: "Expenses", color: "#c8463d" },
+              {
+                key: "collected",
+                label: "Collected",
+                color: "#1e4275",
+                strokeWidth: 2.5,
+                fillOpacity: 0.24,
+              },
+              {
+                key: "expected",
+                label: "Expected",
+                color: "#0ea5e9",
+                strokeWidth: 2,
+                fillOpacity: 0.10,
+              },
+              {
+                key: "expenses",
+                label: "Expenses",
+                color: "#3c6fb0",
+                strokeWidth: 2.25,
+                fillOpacity: 0.16,
+              },
             ]}
             format="millions"
           />

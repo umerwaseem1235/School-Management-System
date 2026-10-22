@@ -7,28 +7,147 @@ import type {
 } from "@/types";
 
 export const CLASSES: AcademicClass[] = [
-  { id: "k1", className: "Playgroup", gradeLevel: -1, stream: "General", campus: "Main Campus — Gulberg", sections: 3, students: 72, subjects: 5, classTeacher: "Ms. Rimsha Ali", status: "Active" },
-  { id: "k2", className: "Kindergarten", gradeLevel: 0, stream: "General", campus: "Main Campus — Gulberg", sections: 4, students: 104, subjects: 6, classTeacher: "Ms. Sadia Khan", status: "Active" },
-  { id: "k3", className: "Grade 1", gradeLevel: 1, stream: "General", campus: "Main Campus — Gulberg", sections: 4, students: 128, subjects: 7, classTeacher: "Mrs. Nida Farooq", status: "Active" },
-  { id: "k4", className: "Grade 5", gradeLevel: 5, stream: "General", campus: "DHA Phase 5 Campus", sections: 3, students: 96, subjects: 8, classTeacher: "Mr. Usman Ali", status: "Active" },
-  { id: "k5", className: "Grade 8", gradeLevel: 8, stream: "General", campus: "F-8 Islamabad Campus", sections: 3, students: 101, subjects: 9, classTeacher: "Mrs. Maryam Shah", status: "Active" },
-  { id: "k6", className: "Grade 9", gradeLevel: 9, stream: "Science", campus: "Main Campus — Gulberg", sections: 3, students: 98, subjects: 8, classTeacher: "Mr. Adeel Hassan", status: "Active" },
-  { id: "k7", className: "Grade 9", gradeLevel: 9, stream: "Arts", campus: "Main Campus — Gulberg", sections: 1, students: 34, subjects: 8, classTeacher: "Ms. Kiran Aziz", status: "Active" },
-  { id: "k8", className: "Grade 10", gradeLevel: 10, stream: "Science", campus: "Clifton Karachi Campus", sections: 2, students: 68, subjects: 8, classTeacher: "Mr. Bilal Saeed", status: "Active" },
-  { id: "k9", className: "Grade 11", gradeLevel: 11, stream: "Commerce", campus: "DHA Phase 5 Campus", sections: 2, students: 61, subjects: 7, classTeacher: "Mr. Waqas Anwar", status: "Active" },
-  { id: "k10", className: "Grade 12", gradeLevel: 12, stream: "Science", campus: "F-8 Islamabad Campus", sections: 2, students: 57, subjects: 7, classTeacher: "Dr. Saima Riaz", status: "Inactive" },
+  { id: "k1", className: "Grade 5-A", gradeLevel: 5, stream: "General", campus: "Main Campus — Gulberg", sections: 3, students: 96, subjects: 7, classTeacher: "Mrs. Nida Farooq", status: "Active" },
+  { id: "k2", className: "Grade 6-A", gradeLevel: 6, stream: "General", campus: "Main Campus — Gulberg", sections: 3, students: 92, subjects: 7, classTeacher: "Mr. Usman Ali", status: "Active" },
+  { id: "k3", className: "Grade 7-A", gradeLevel: 7, stream: "General", campus: "Bahria Town Campus", sections: 2, students: 68, subjects: 7, classTeacher: "Mr. Waqas Anwar", status: "Active" },
+  { id: "k4", className: "Grade 8-A", gradeLevel: 8, stream: "General", campus: "F-8 Islamabad Campus", sections: 3, students: 101, subjects: 8, classTeacher: "Mrs. Maryam Shah", status: "Active" },
+  { id: "k5", className: "Grade 9th (Science - Biology)", gradeLevel: 9, stream: "Science", campus: "Main Campus — Gulberg", sections: 3, students: 98, subjects: 8, classTeacher: "Dr. Saima Riaz", status: "Active" },
+  { id: "k6", className: "Grade 9th (Science - Computer)", gradeLevel: 9, stream: "Science", campus: "F-8 Islamabad Campus", sections: 2, students: 64, subjects: 8, classTeacher: "Mr. Usman Ali", status: "Active" },
+  { id: "k7", className: "Grade 9th (Arts)", gradeLevel: 9, stream: "Arts", campus: "Clifton Karachi Campus", sections: 2, students: 52, subjects: 8, classTeacher: "Ms. Kiran Aziz", status: "Active" },
+  { id: "k8", className: "Grade 10th (Science - Biology)", gradeLevel: 10, stream: "Science", campus: "Main Campus — Gulberg", sections: 3, students: 94, subjects: 8, classTeacher: "Mr. Adeel Hassan", status: "Active" },
+  { id: "k9", className: "Grade 10th (Science - Computer)", gradeLevel: 10, stream: "Science", campus: "DHA Phase 5 Campus", sections: 2, students: 62, subjects: 8, classTeacher: "Mr. Bilal Saeed", status: "Active" },
+  { id: "k10", className: "Grade 10th (Arts)", gradeLevel: 10, stream: "Arts", campus: "Clifton Karachi Campus", sections: 2, students: 58, subjects: 8, classTeacher: "Mr. Waqas Anwar", status: "Active" },
+  { id: "k11", className: "Grade 11 (FSc Pre-Medical)", gradeLevel: 11, stream: "Science", campus: "DHA Phase 5 Campus", sections: 2, students: 66, subjects: 6, classTeacher: "Ms. Amina Tariq", status: "Active" },
+  { id: "k12", className: "Grade 11 (FSc Pre-Engineering)", gradeLevel: 11, stream: "Science", campus: "Main Campus — Gulberg", sections: 2, students: 62, subjects: 6, classTeacher: "Mr. Adeel Hassan", status: "Active" },
+  { id: "k13", className: "Grade 11 (ICS)", gradeLevel: 11, stream: "Science", campus: "F-8 Islamabad Campus", sections: 2, students: 54, subjects: 6, classTeacher: "Mr. Usman Ali", status: "Active" },
+  { id: "k14", className: "Grade 12 (FSc Pre-Medical)", gradeLevel: 12, stream: "Science", campus: "DHA Phase 5 Campus", sections: 2, students: 58, subjects: 6, classTeacher: "Ms. Amina Tariq", status: "Active" },
+  { id: "k15", className: "Grade 12 (FSc Pre-Engineering)", gradeLevel: 12, stream: "Science", campus: "F-8 Islamabad Campus", sections: 2, students: 56, subjects: 6, classTeacher: "Dr. Saima Riaz", status: "Active" },
+  { id: "k16", className: "Grade 12 (I.Com)", gradeLevel: 12, stream: "Commerce", campus: "DHA Phase 5 Campus", sections: 2, students: 52, subjects: 7, classTeacher: "Mr. Waqas Anwar", status: "Active" },
 ];
 
 export const SUBJECTS: Subject[] = [
-  { id: "sb1", subjectName: "Mathematics", subjectCode: "MTH-09", className: "Grade 9", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mr. Adeel Hassan" },
-  { id: "sb2", subjectName: "Physics", subjectCode: "PHY-09", className: "Grade 9", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Dr. Saima Riaz" },
-  { id: "sb3", subjectName: "Chemistry", subjectCode: "CHM-09", className: "Grade 9", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Fahad Mir" },
-  { id: "sb4", subjectName: "Biology", subjectCode: "BIO-09", className: "Grade 9", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Ms. Amina Tariq" },
-  { id: "sb5", subjectName: "Computer Science", subjectCode: "CS-09", className: "Grade 9", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Usman Ali" },
-  { id: "sb6", subjectName: "English", subjectCode: "ENG-09", className: "Grade 9", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Maryam Shah" },
-  { id: "sb7", subjectName: "Urdu", subjectCode: "URD-09", className: "Grade 9", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Ms. Kiran Aziz" },
-  { id: "sb8", subjectName: "Islamiat", subjectCode: "ISL-09", className: "Grade 9", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
-  { id: "sb9", subjectName: "Pakistan Studies", subjectCode: "PST-09", className: "Grade 9", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Waqas Anwar" },
+  // Grade 5-A
+  { id: "sb-5-1", subjectName: "Mathematics", subjectCode: "MTH-05", className: "Grade 5-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Nida Farooq" },
+  { id: "sb-5-2", subjectName: "English", subjectCode: "ENG-05", className: "Grade 5-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-5-3", subjectName: "Urdu", subjectCode: "URD-05", className: "Grade 5-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Ms. Kiran Aziz" },
+  { id: "sb-5-4", subjectName: "General Science", subjectCode: "GSC-05", className: "Grade 5-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mr. Usman Ali" },
+  { id: "sb-5-5", subjectName: "Social Studies", subjectCode: "SST-05", className: "Grade 5-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-5-6", subjectName: "Islamiat", subjectCode: "ISL-05", className: "Grade 5-A", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
+
+  // Grade 6-A
+  { id: "sb-6-1", subjectName: "Mathematics", subjectCode: "MTH-06", className: "Grade 6-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Nida Farooq" },
+  { id: "sb-6-2", subjectName: "English", subjectCode: "ENG-06", className: "Grade 6-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-6-3", subjectName: "General Science", subjectCode: "GSC-06", className: "Grade 6-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mr. Usman Ali" },
+  { id: "sb-6-4", subjectName: "Urdu", subjectCode: "URD-06", className: "Grade 6-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Ms. Kiran Aziz" },
+  { id: "sb-6-5", subjectName: "Computer Science", subjectCode: "CS-06", className: "Grade 6-A", isElective: true, maxMarks: 50, passMarks: 20, teacher: "Mr. Usman Ali" },
+
+  // Grade 7-A
+  { id: "sb-7-1", subjectName: "Mathematics", subjectCode: "MTH-07", className: "Grade 7-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mr. Bilal Saeed" },
+  { id: "sb-7-2", subjectName: "English", subjectCode: "ENG-07", className: "Grade 7-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-7-3", subjectName: "Social Studies", subjectCode: "SST-07", className: "Grade 7-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-7-4", subjectName: "General Science", subjectCode: "GSC-07", className: "Grade 7-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Dr. Saima Riaz" },
+  { id: "sb-7-5", subjectName: "Islamiat", subjectCode: "ISL-07", className: "Grade 7-A", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
+
+  // Grade 8-A
+  { id: "sb-8-1", subjectName: "Mathematics", subjectCode: "MTH-08", className: "Grade 8-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mr. Bilal Saeed" },
+  { id: "sb-8-2", subjectName: "English", subjectCode: "ENG-08", className: "Grade 8-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-8-3", subjectName: "General Science", subjectCode: "GSC-08", className: "Grade 8-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Dr. Saima Riaz" },
+  { id: "sb-8-4", subjectName: "Urdu", subjectCode: "URD-08", className: "Grade 8-A", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Ms. Kiran Aziz" },
+  { id: "sb-8-5", subjectName: "Computer Science", subjectCode: "CS-08", className: "Grade 8-A", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Usman Ali" },
+  { id: "sb-8-6", subjectName: "Tarjuma-tul-Quran", subjectCode: "TQ-08", className: "Grade 8-A", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
+
+  // Grade 9th (Science - Biology)
+  { id: "sb-9b-1", subjectName: "Biology", subjectCode: "BIO-09", className: "Grade 9th (Science - Biology)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Ms. Amina Tariq" },
+  { id: "sb-9b-2", subjectName: "Physics", subjectCode: "PHY-09", className: "Grade 9th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Dr. Saima Riaz" },
+  { id: "sb-9b-3", subjectName: "Chemistry", subjectCode: "CHM-09", className: "Grade 9th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Fahad Mir" },
+  { id: "sb-9b-4", subjectName: "Mathematics", subjectCode: "MTH-09", className: "Grade 9th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Adeel Hassan" },
+  { id: "sb-9b-5", subjectName: "English", subjectCode: "ENG-09", className: "Grade 9th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-9b-6", subjectName: "Urdu", subjectCode: "URD-09", className: "Grade 9th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Ms. Kiran Aziz" },
+  { id: "sb-9b-7", subjectName: "Islamiat", subjectCode: "ISL-09", className: "Grade 9th (Science - Biology)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
+  { id: "sb-9b-8", subjectName: "Tarjuma-tul-Quran", subjectCode: "TQ-09", className: "Grade 9th (Science - Biology)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
+
+  // Grade 9th (Science - Computer)
+  { id: "sb-9c-1", subjectName: "Computer Science", subjectCode: "CS-09", className: "Grade 9th (Science - Computer)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Usman Ali" },
+  { id: "sb-9c-2", subjectName: "Physics", subjectCode: "PHY-09C", className: "Grade 9th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Dr. Saima Riaz" },
+  { id: "sb-9c-3", subjectName: "Chemistry", subjectCode: "CHM-09C", className: "Grade 9th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Fahad Mir" },
+  { id: "sb-9c-4", subjectName: "Mathematics", subjectCode: "MTH-09C", className: "Grade 9th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Adeel Hassan" },
+  { id: "sb-9c-5", subjectName: "English", subjectCode: "ENG-09C", className: "Grade 9th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-9c-6", subjectName: "Urdu", subjectCode: "URD-09C", className: "Grade 9th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Ms. Kiran Aziz" },
+  { id: "sb-9c-7", subjectName: "Islamiat", subjectCode: "ISL-09C", className: "Grade 9th (Science - Computer)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
+
+  // Grade 9th (Arts)
+  { id: "sb-9a-1", subjectName: "General Science", subjectCode: "GSC-09", className: "Grade 9th (Arts)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Usman Ali" },
+  { id: "sb-9a-2", subjectName: "General Mathematics", subjectCode: "GMTH-09", className: "Grade 9th (Arts)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Bilal Saeed" },
+  { id: "sb-9a-3", subjectName: "Civics", subjectCode: "CIV-09", className: "Grade 9th (Arts)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-9a-4", subjectName: "Education (Ilm-ut-Taleem)", subjectCode: "EDU-09", className: "Grade 9th (Arts)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mrs. Shagufta Naz" },
+  { id: "sb-9a-5", subjectName: "English", subjectCode: "ENG-09A", className: "Grade 9th (Arts)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-9a-6", subjectName: "Urdu", subjectCode: "URD-09A", className: "Grade 9th (Arts)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Ms. Kiran Aziz" },
+  { id: "sb-9a-7", subjectName: "Tarjuma-tul-Quran", subjectCode: "TQ-09A", className: "Grade 9th (Arts)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
+
+  // Grade 10th (Science - Biology)
+  { id: "sb-10b-1", subjectName: "Biology", subjectCode: "BIO-10", className: "Grade 10th (Science - Biology)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Ms. Amina Tariq" },
+  { id: "sb-10b-2", subjectName: "Physics", subjectCode: "PHY-10", className: "Grade 10th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Dr. Saima Riaz" },
+  { id: "sb-10b-3", subjectName: "Chemistry", subjectCode: "CHM-10", className: "Grade 10th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Fahad Mir" },
+  { id: "sb-10b-4", subjectName: "Mathematics", subjectCode: "MTH-10", className: "Grade 10th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Adeel Hassan" },
+  { id: "sb-10b-5", subjectName: "English", subjectCode: "ENG-10", className: "Grade 10th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-10b-6", subjectName: "Urdu", subjectCode: "URD-10", className: "Grade 10th (Science - Biology)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Ms. Kiran Aziz" },
+  { id: "sb-10b-7", subjectName: "Pakistan Studies", subjectCode: "PST-10", className: "Grade 10th (Science - Biology)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Waqas Anwar" },
+
+  // Grade 10th (Science - Computer)
+  { id: "sb-10c-1", subjectName: "Computer Science", subjectCode: "CS-10", className: "Grade 10th (Science - Computer)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Usman Ali" },
+  { id: "sb-10c-2", subjectName: "Physics", subjectCode: "PHY-10C", className: "Grade 10th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Dr. Saima Riaz" },
+  { id: "sb-10c-3", subjectName: "Chemistry", subjectCode: "CHM-10C", className: "Grade 10th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Fahad Mir" },
+  { id: "sb-10c-4", subjectName: "Mathematics", subjectCode: "MTH-10C", className: "Grade 10th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Bilal Saeed" },
+  { id: "sb-10c-5", subjectName: "English", subjectCode: "ENG-10C", className: "Grade 10th (Science - Computer)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-10c-6", subjectName: "Pakistan Studies", subjectCode: "PST-10C", className: "Grade 10th (Science - Computer)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Waqas Anwar" },
+
+  // Grade 10th (Arts)
+  { id: "sb-10a-1", subjectName: "General Mathematics", subjectCode: "GMTH-10", className: "Grade 10th (Arts)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Bilal Saeed" },
+  { id: "sb-10a-2", subjectName: "General Science", subjectCode: "GSC-10", className: "Grade 10th (Arts)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Mr. Usman Ali" },
+  { id: "sb-10a-3", subjectName: "Civics", subjectCode: "CIV-10", className: "Grade 10th (Arts)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-10a-4", subjectName: "Economics", subjectCode: "ECO-10", className: "Grade 10th (Arts)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-10a-5", subjectName: "Pakistan Studies", subjectCode: "PST-10A", className: "Grade 10th (Arts)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-10a-6", subjectName: "Urdu", subjectCode: "URD-10A", className: "Grade 10th (Arts)", isElective: false, maxMarks: 75, passMarks: 30, teacher: "Ms. Kiran Aziz" },
+
+  // Grade 11 (FSc Pre-Medical)
+  { id: "sb-11m-1", subjectName: "Biology", subjectCode: "BIO-11", className: "Grade 11 (FSc Pre-Medical)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Ms. Amina Tariq" },
+  { id: "sb-11m-2", subjectName: "Physics", subjectCode: "PHY-11", className: "Grade 11 (FSc Pre-Medical)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Dr. Saima Riaz" },
+  { id: "sb-11m-3", subjectName: "Chemistry", subjectCode: "CHM-11", className: "Grade 11 (FSc Pre-Medical)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Fahad Mir" },
+  { id: "sb-11m-4", subjectName: "English", subjectCode: "ENG-11", className: "Grade 11 (FSc Pre-Medical)", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-11m-5", subjectName: "Urdu", subjectCode: "URD-11", className: "Grade 11 (FSc Pre-Medical)", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Ms. Kiran Aziz" },
+  { id: "sb-11m-6", subjectName: "Islamiat", subjectCode: "ISL-11", className: "Grade 11 (FSc Pre-Medical)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Hafiz Zubair" },
+
+  // Grade 11 (FSc Pre-Engineering)
+  { id: "sb-11e-1", subjectName: "Mathematics", subjectCode: "MTH-11", className: "Grade 11 (FSc Pre-Engineering)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Adeel Hassan" },
+  { id: "sb-11e-2", subjectName: "Physics", subjectCode: "PHY-11E", className: "Grade 11 (FSc Pre-Engineering)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Dr. Saima Riaz" },
+  { id: "sb-11e-3", subjectName: "Chemistry", subjectCode: "CHM-11E", className: "Grade 11 (FSc Pre-Engineering)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Fahad Mir" },
+  { id: "sb-11e-4", subjectName: "English", subjectCode: "ENG-11E", className: "Grade 11 (FSc Pre-Engineering)", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Maryam Shah" },
+  { id: "sb-11e-5", subjectName: "Urdu", subjectCode: "URD-11E", className: "Grade 11 (FSc Pre-Engineering)", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Ms. Kiran Aziz" },
+
+  // Grade 11 (ICS)
+  { id: "sb-11c-1", subjectName: "Computer Science", subjectCode: "CS-11", className: "Grade 11 (ICS)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Usman Ali" },
+  { id: "sb-11c-2", subjectName: "Mathematics", subjectCode: "MTH-11C", className: "Grade 11 (ICS)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Adeel Hassan" },
+  { id: "sb-11c-3", subjectName: "Physics", subjectCode: "PHY-11C", className: "Grade 11 (ICS)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Dr. Saima Riaz" },
+  { id: "sb-11c-4", subjectName: "English", subjectCode: "ENG-11C", className: "Grade 11 (ICS)", isElective: false, maxMarks: 100, passMarks: 40, teacher: "Mrs. Maryam Shah" },
+
+  // Grade 12 (FSc Pre-Medical)
+  { id: "sb-12m-1", subjectName: "Biology", subjectCode: "BIO-12", className: "Grade 12 (FSc Pre-Medical)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Ms. Amina Tariq" },
+  { id: "sb-12m-2", subjectName: "Physics", subjectCode: "PHY-12", className: "Grade 12 (FSc Pre-Medical)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Dr. Saima Riaz" },
+  { id: "sb-12m-3", subjectName: "Chemistry", subjectCode: "CHM-12", className: "Grade 12 (FSc Pre-Medical)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Fahad Mir" },
+  { id: "sb-12m-4", subjectName: "Pakistan Studies", subjectCode: "PST-12", className: "Grade 12 (FSc Pre-Medical)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Waqas Anwar" },
+
+  // Grade 12 (FSc Pre-Engineering)
+  { id: "sb-12e-1", subjectName: "Mathematics", subjectCode: "MTH-12", className: "Grade 12 (FSc Pre-Engineering)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Adeel Hassan" },
+  { id: "sb-12e-2", subjectName: "Physics", subjectCode: "PHY-12E", className: "Grade 12 (FSc Pre-Engineering)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Dr. Saima Riaz" },
+  { id: "sb-12e-3", subjectName: "Chemistry", subjectCode: "CHM-12E", className: "Grade 12 (FSc Pre-Engineering)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Fahad Mir" },
+  { id: "sb-12e-4", subjectName: "Pakistan Studies", subjectCode: "PST-12E", className: "Grade 12 (FSc Pre-Engineering)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Waqas Anwar" },
+
+  // Grade 12 (I.Com)
+  { id: "sb-12i-1", subjectName: "Principles of Accounting", subjectCode: "ACC-12", className: "Grade 12 (I.Com)", isElective: true, maxMarks: 100, passMarks: 40, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-12i-2", subjectName: "Commercial Geography", subjectCode: "CGEO-12", className: "Grade 12 (I.Com)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-12i-3", subjectName: "Banking", subjectCode: "BNK-12", className: "Grade 12 (I.Com)", isElective: true, maxMarks: 75, passMarks: 30, teacher: "Mr. Waqas Anwar" },
+  { id: "sb-12i-4", subjectName: "Business Mathematics", subjectCode: "BMTH-12", className: "Grade 12 (I.Com)", isElective: true, maxMarks: 50, passMarks: 20, teacher: "Mr. Adeel Hassan" },
+  { id: "sb-12i-5", subjectName: "Pakistan Studies", subjectCode: "PST-12I", className: "Grade 12 (I.Com)", isElective: false, maxMarks: 50, passMarks: 20, teacher: "Mr. Waqas Anwar" },
 ];
 
 export const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const;

@@ -48,6 +48,31 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   Info: "info",
   Warning: "warning",
   Critical: "danger",
+  // reception & visitors
+  Inside: "success",
+  "Checked Out": "neutral",
+  Overstay: "danger",
+  Expected: "info",
+  New: "info",
+  "In Progress": "warning",
+  "Follow-up": "gold",
+  Converted: "brand",
+  Closed: "neutral",
+  Confirmed: "success",
+  "In Meeting": "brand",
+  Completed: "neutral",
+  Cancelled: "danger",
+  "Received at Gate": "warning",
+  "Handed Over": "success",
+  High: "danger",
+  Medium: "warning",
+  Low: "neutral",
+  // LMS statuses
+  Graded: "brand",
+  "Past Due": "danger",
+  "Live Now": "success",
+  Upcoming: "info",
+  Archived: "neutral",
 };
 
 interface StatusBadgeProps {

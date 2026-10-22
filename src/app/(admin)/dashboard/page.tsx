@@ -10,13 +10,13 @@ import {
   GraduationCap,
   Home,
   Scale,
+  TrendingUp,
   UserPlus,
   Users,
   Wallet,
 } from "lucide-react";
 import { CAMPUSES, RECENT_ACTIVITY } from "@/lib/mock/institution";
 import {
-  ENROLLMENT_TREND,
   WEEKLY_ATTENDANCE,
   CAMPUS_ATTENDANCE_TODAY,
   UPCOMING_EVENTS,
@@ -30,15 +30,16 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import { Meter } from "@/components/shared/meter";
-import { AreaTrendChart, BarSeriesChart, LineTrendChart } from "@/components/charts";
+import {
+  AreaTrendChart,
+  BarSeriesChart,
+  LineTrendChart,
+  EnrollmentGrowthCard,
+} from "@/components/charts";
 
 const totalStudents = CAMPUSES.reduce((s, c) => s + c.students, 0);
 const totalStaff = CAMPUSES.reduce((s, c) => s + c.staff, 0);
 const snap = DASHBOARD_SNAPSHOT;
-const feeCollectedRate =
-  (snap.receivedOct / snap.receivableOct) * 100;
-const salaryDisbursedRate =
-  (snap.salaryPaidOct / snap.salaryPayableOct) * 100;
 
 function KpiGroupHeading({ title, meta }: { title: string; meta?: string }) {
   return (
@@ -99,7 +100,6 @@ export default function DashboardPage() {
       <div className="mb-6">
         <KpiGroupHeading
           title={`Fees — ${snap.activeMonthLabel}`}
-          meta={`${formatPercent(feeCollectedRate)} collected`}
         />
         <StatGrid>
           <StatCard
@@ -129,7 +129,6 @@ export default function DashboardPage() {
       <div className="mb-6">
         <KpiGroupHeading
           title={`Payroll & Attendance — ${snap.activeMonthLabel}`}
-          meta={`${formatPercent(salaryDisbursedRate)} disbursed`}
         />
         <StatGrid>
           <StatCard
@@ -203,9 +202,27 @@ export default function DashboardPage() {
             data={REVENUE_TREND}
             xKey="month"
             series={[
-              { key: "collected", label: "Collected", color: "#353955" },
-              { key: "expected", label: "Expected", color: "#c79a3a" },
-              { key: "expenses", label: "Expenses", color: "#c8463d" },
+              {
+                key: "collected",
+                label: "Collected",
+                color: "#1e4275",
+                strokeWidth: 2.5,
+                fillOpacity: 0.24,
+              },
+              {
+                key: "expected",
+                label: "Expected",
+                color: "#0ea5e9",
+                strokeWidth: 2,
+                fillOpacity: 0.10,
+              },
+              {
+                key: "expenses",
+                label: "Expenses",
+                color: "#3c6fb0",
+                strokeWidth: 2.25,
+                fillOpacity: 0.16,
+              },
             ]}
             format="millions"
           />
@@ -213,15 +230,15 @@ export default function DashboardPage() {
 
         <SectionCard
           title="Enrollment Growth"
-          description="Year-over-year student count"
           className="lg:col-span-2"
+          action={
+            <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-0.5 text-[11px] font-semibold text-success ring-1 ring-success/20">
+              <TrendingUp className="size-3" />
+              +5.0% YoY
+            </span>
+          }
         >
-          <BarSeriesChart
-            data={ENROLLMENT_TREND}
-            xKey="year"
-            series={[{ key: "students", label: "Students", color: "#353955" }]}
-            format="compact"
-          />
+          <EnrollmentGrowthCard />
         </SectionCard>
       </div>
 
@@ -236,8 +253,8 @@ export default function DashboardPage() {
             data={WEEKLY_ATTENDANCE}
             xKey="day"
             series={[
-              { key: "students", label: "Students", color: "#353955" },
-              { key: "staff", label: "Staff", color: "#c79a3a" },
+              { key: "students", label: "Students", color: "#1e4275" },
+              { key: "staff", label: "Staff", color: "#3c6fb0" },
             ]}
             format="percent"
             yDomain={[85, 100]}
@@ -259,7 +276,7 @@ export default function DashboardPage() {
                     {formatPercent(c.rate)}
                   </span>
                 </div>
-                <Meter value={c.rate} />
+                <Meter value={c.rate} size="xs" gradient />
                 <div className="mt-1 flex gap-3 text-[11px] text-muted-foreground">
                   <span className="text-success">{c.present} present</span>
                   <span className="text-danger">{c.absent} absent</span>
@@ -273,10 +290,9 @@ export default function DashboardPage() {
 
       {/* Campus Cards + Activity + Events */}
       <div className="mb-6 grid gap-6 lg:grid-cols-3">
-        {/* Campus summary cards */}
+        {/* Campuses */}
         <SectionCard
           title="Campuses"
-          description={`${CAMPUSES.length} total campuses`}
           action={
             <a
               href="/campuses"
@@ -286,38 +302,34 @@ export default function DashboardPage() {
             </a>
           }
         >
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {CAMPUSES.slice(0, 3).map((c) => (
               <div
                 key={c.id}
-                className="flex items-center gap-3 rounded-xl border border-border/60 bg-cream/40 p-3"
+                className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/20 p-2.5 transition-all hover:bg-muted/40"
               >
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand">
+                <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand ring-1 ring-brand/10">
                   <Building2 className="size-4" />
-                </span>
+                </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-semibold text-foreground">
-                    {c.campusName}
+                    {c.campusName.replace("Main Campus — ", "").replace(" Campus", "")}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
-                    {formatNumber(c.students)} students · {c.staff} staff
+                    {formatNumber(c.students)} students
                   </p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs font-semibold tabular-nums text-foreground">
-                    {formatPercent(c.feeCollectionRate, 1)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">fee rate</p>
-                </div>
+                <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-brand ring-1 ring-brand/10">
+                  {formatPercent(c.feeCollectionRate, 1)}
+                </span>
               </div>
             ))}
           </div>
         </SectionCard>
 
-        {/* Recent activity */}
+        {/* Recent Activity */}
         <SectionCard
           title="Recent Activity"
-          description="Latest system events"
           action={
             <a
               href="/audit-logs"
@@ -327,7 +339,7 @@ export default function DashboardPage() {
             </a>
           }
         >
-          <ul className="space-y-1">
+          <div className="space-y-2.5">
             {RECENT_ACTIVITY.slice(0, 3).map((a) => {
               const iconMap = {
                 admission: UserPlus,
@@ -338,52 +350,58 @@ export default function DashboardPage() {
               };
               const Icon = iconMap[a.type];
               return (
-                <li
+                <div
                   key={a.id}
-                  className="flex gap-3 rounded-lg p-2.5 transition-colors hover:bg-cream/50"
+                  className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/20 p-2.5 transition-all hover:bg-muted/40"
                 >
-                  <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand">
-                    <Icon className="size-3.5" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-foreground">
+                  <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand ring-1 ring-brand/10">
+                    <Icon className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-semibold text-foreground">
                       {a.title}
                     </p>
-                    <p className="text-[12px] text-muted-foreground">
+                    <p className="truncate text-[11px] text-muted-foreground">
                       {a.description}
                     </p>
                   </div>
-                  <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
+                  <span className="shrink-0 text-[10px] text-muted-foreground tabular-nums">
                     {a.time}
                   </span>
-                </li>
+                </div>
               );
             })}
-          </ul>
+          </div>
         </SectionCard>
 
-        {/* Upcoming events */}
+        {/* Upcoming Events */}
         <SectionCard
           title="Upcoming Events"
-          description="Key dates ahead"
+          action={
+            <span className="text-[11px] font-medium text-muted-foreground">
+              Oct 2026
+            </span>
+          }
         >
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {UPCOMING_EVENTS.slice(0, 3).map((e) => (
               <div
                 key={e.title}
-                className="flex items-start gap-3 rounded-xl border border-border/60 bg-cream/40 p-3"
+                className="flex items-center gap-3 rounded-xl border border-border/50 bg-muted/20 p-2.5 transition-all hover:bg-muted/40"
               >
-                <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand text-cream">
-                  <span className="text-base font-bold leading-none">{e.date}</span>
-                  <span className="text-[10px] font-medium uppercase tracking-wide opacity-80">
+                <div className="flex size-9 shrink-0 flex-col items-center justify-center rounded-lg bg-brand-50 text-brand ring-1 ring-brand/10">
+                  <span className="text-[9px] font-bold uppercase leading-none tracking-wider text-brand/70">
                     {e.month}
                   </span>
+                  <span className="text-xs font-extrabold leading-none text-brand mt-0.5">
+                    {e.date}
+                  </span>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-foreground">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-foreground">
                     {e.title}
                   </p>
-                  <p className="mt-0.5 text-[12px] text-muted-foreground">
+                  <p className="truncate text-[11px] text-muted-foreground">
                     {e.meta}
                   </p>
                 </div>

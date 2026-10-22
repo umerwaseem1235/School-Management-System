@@ -1,5 +1,8 @@
-import { Phone } from "lucide-react";
-import { ModulePlaceholder } from "@/components/shared/module-placeholder";
+import {
+  VISITOR_PASSES,
+  FRONT_DESK_INQUIRIES,
+} from "@/lib/mock/reception";
+import { ReceptionClient } from "./reception-client";
 
 export const metadata = {
   title: "Reception",
@@ -7,16 +10,9 @@ export const metadata = {
 
 export default function ReceptionPage() {
   return (
-    <ModulePlaceholder
-      title="Reception"
-      description="Front-desk workspace for managing visitors, admission inquiries, appointments, and incoming calls across all campuses."
-      icon={Phone}
-      points={[
-        "Visitor entry & gate passes",
-        "Admission inquiry handling",
-        "Appointment scheduling",
-        "Call & message log",
-      ]}
+    <ReceptionClient
+      initialVisitorPasses={VISITOR_PASSES}
+      initialInquiries={FRONT_DESK_INQUIRIES}
     />
   );
 }

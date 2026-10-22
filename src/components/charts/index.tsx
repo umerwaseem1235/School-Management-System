@@ -34,6 +34,9 @@ export interface Series {
   key: string;
   label: string;
   color: string;
+  strokeDasharray?: string;
+  fillOpacity?: number;
+  strokeWidth?: number;
 }
 
 type Row = Record<string, string | number>;
@@ -80,8 +83,16 @@ export function AreaTrendChart({
         <defs>
           {series.map((s) => (
             <linearGradient key={s.key} id={`fill-${s.key}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={`var(--color-${s.key})`} stopOpacity={0.28} />
-              <stop offset="95%" stopColor={`var(--color-${s.key})`} stopOpacity={0.02} />
+              <stop
+                offset="5%"
+                stopColor={`var(--color-${s.key})`}
+                stopOpacity={s.fillOpacity ?? 0.22}
+              />
+              <stop
+                offset="95%"
+                stopColor={`var(--color-${s.key})`}
+                stopOpacity={s.fillOpacity ? s.fillOpacity * 0.08 : 0.01}
+              />
             </linearGradient>
           ))}
         </defs>
@@ -109,8 +120,10 @@ export function AreaTrendChart({
             dataKey={s.key}
             type="monotone"
             stroke={`var(--color-${s.key})`}
-            strokeWidth={2.25}
+            strokeWidth={s.strokeWidth ?? 2.25}
+            strokeDasharray={s.strokeDasharray}
             fill={`url(#fill-${s.key})`}
+            activeDot={{ r: 5, strokeWidth: 2, stroke: "#ffffff" }}
           />
         ))}
         {showLegend && <ChartLegend content={<ChartLegendContent />} />}
@@ -218,52 +231,98 @@ export function DonutChart({
   centerLabel,
   className,
   format,
+  innerRadius = "68%",
+  showTooltip = true,
+  activeIndex,
+  onHoverIndex,
+  centerValueClassName,
+  centerLabelClassName,
 }: {
   data: DonutSlice[];
   centerValue?: string;
   centerLabel?: string;
   className?: string;
   format?: ValueFormat;
+  innerRadius?: string | number;
+  showTooltip?: boolean;
+  activeIndex?: number | null;
+  onHoverIndex?: (index: number | null) => void;
+  centerValueClassName?: string;
+  centerLabelClassName?: string;
 }) {
   const config: ChartConfig = Object.fromEntries(
     data.map((d) => [d.name, { label: d.name, color: d.color }])
   );
+  const isDonut = innerRadius !== 0 && innerRadius !== "0" && innerRadius !== "0%";
+
   return (
     <div className={cn("relative mx-auto aspect-square w-full max-w-[220px]", className)}>
       <ChartContainer config={config} className="aspect-square h-full w-full">
         <PieChart>
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel formatter={(v, n) => (
-              <div className="flex w-full items-center justify-between gap-4">
-                <span className="text-muted-foreground">{n}</span>
-                <span className="font-mono font-semibold">{fmt(format, v as number)}</span>
-              </div>
-            )} />}
-          />
+          {showTooltip && (
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel formatter={(v, n) => (
+                <div className="flex w-full items-center justify-between gap-4">
+                  <span className="text-muted-foreground">{n}</span>
+                  <span className="font-mono font-semibold">{fmt(format, v as number)}</span>
+                </div>
+              )} />}
+            />
+          )}
           <Pie
             data={data}
             dataKey="value"
             nameKey="name"
-            innerRadius="68%"
+            startAngle={90}
+            endAngle={-270}
+            innerRadius={innerRadius}
             outerRadius="100%"
-            paddingAngle={2}
-            strokeWidth={0}
+            paddingAngle={isDonut ? 2 : 1}
+            stroke="var(--background, #ffffff)"
+            strokeWidth={1.5}
+            onMouseEnter={(_, index) => onHoverIndex?.(index)}
+            onMouseLeave={() => onHoverIndex?.(null)}
           >
-            {data.map((d) => (
-              <Cell key={d.name} fill={d.color} />
-            ))}
+            {data.map((d, index) => {
+              const isHovered = activeIndex === index;
+              const hasActive = activeIndex !== null && activeIndex !== undefined;
+              return (
+                <Cell
+                  key={d.name}
+                  fill={d.color}
+                  opacity={hasActive ? (isHovered ? 1 : 0.45) : 1}
+                  stroke={isHovered ? "#ffffff" : "var(--background, #ffffff)"}
+                  strokeWidth={isHovered ? 2.5 : 1.5}
+                  className="transition-all duration-200 cursor-pointer"
+                />
+              );
+            })}
           </Pie>
         </PieChart>
       </ChartContainer>
-      {(centerValue || centerLabel) && (
+      {(centerValue || centerLabel) && isDonut && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
-          <div>
+          <div className="px-2">
             {centerValue && (
-              <p className="font-heading text-xl font-bold text-brand">{centerValue}</p>
+              <p
+                className={cn(
+                  "font-heading font-bold text-brand leading-none",
+                  centerValueClassName ?? "text-base"
+                )}
+              >
+                {centerValue}
+              </p>
             )}
             {centerLabel && (
-              <p className="text-xs text-muted-foreground">{centerLabel}</p>
+              <p
+                className={cn(
+                  "mt-1 text-muted-foreground leading-tight truncate max-w-[110px]",
+                  centerLabelClassName ?? "text-[10.5px]"
+                )}
+              >
+                {centerLabel}
+              </p>
             )}
           </div>
         </div>
@@ -272,27 +331,65 @@ export function DonutChart({
   );
 }
 
-/** Legend list rendered next to donuts. */
+/** Pie series chart component alias */
+export function PieSeriesChart({
+  variant = "donut",
+  ...props
+}: Omit<React.ComponentProps<typeof DonutChart>, "innerRadius"> & {
+  variant?: "pie" | "donut";
+  innerRadius?: string | number;
+}) {
+  return (
+    <DonutChart
+      {...props}
+      innerRadius={variant === "pie" ? 0 : (props.innerRadius ?? "68%")}
+    />
+  );
+}
+
+/** Legend list rendered next to donuts and pie charts. */
 export function DonutLegend({
   data,
   format,
+  className,
+  activeIndex,
+  onHoverIndex,
 }: {
   data: DonutSlice[];
   format?: ValueFormat;
+  className?: string;
+  activeIndex?: number | null;
+  onHoverIndex?: (index: number | null) => void;
 }) {
   const total = data.reduce((s, d) => s + d.value, 0);
   return (
-    <ul className="space-y-2.5">
-      {data.map((d) => (
-        <li key={d.name} className="flex items-center gap-3 text-sm">
-          <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color }} />
-          <span className="flex-1 text-muted-foreground">{d.name}</span>
-          <span className="font-semibold tabular-nums text-foreground">{fmt(format, d.value)}</span>
-          <span className="w-12 text-right text-xs tabular-nums text-muted-foreground">
-            {((d.value / total) * 100).toFixed(1)}%
-          </span>
-        </li>
-      ))}
+    <ul className={cn("space-y-1.5", className)}>
+      {data.map((d, index) => {
+        const isHovered = activeIndex === index;
+        return (
+          <li
+            key={d.name}
+            onMouseEnter={() => onHoverIndex?.(index)}
+            onMouseLeave={() => onHoverIndex?.(null)}
+            className={cn(
+              "flex items-center gap-2.5 text-xs rounded-md px-1.5 py-0.5 transition-colors cursor-pointer",
+              isHovered ? "bg-muted/70 text-foreground font-medium" : "hover:bg-muted/30"
+            )}
+          >
+            <span
+              className={cn("size-2.5 shrink-0 rounded-full transition-transform ring-1 ring-black/5", isHovered && "scale-125")}
+              style={{ background: d.color }}
+            />
+            <span className="flex-1 truncate text-muted-foreground">{d.name}</span>
+            <span className="font-semibold tabular-nums text-foreground">{fmt(format, d.value)}</span>
+            <span className="w-12 text-right text-[11px] tabular-nums text-muted-foreground">
+              {total > 0 ? ((d.value / total) * 100).toFixed(1) : 0}%
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
+
+export { EnrollmentGrowthCard } from "./enrollment-growth-card";

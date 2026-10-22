@@ -11,10 +11,16 @@ export type Status = "Active" | "Inactive" | "Suspended" | "Pending";
 
 export type Role =
   | "Super Admin"
+  | "Campus Admin"
+  | "Principal"
   | "HR Admin"
+  | "Accountant"
+  | "Exam Controller"
+  | "Receptionist"
   | "Teacher"
   | "Student"
-  | "Parent";
+  | "Parent"
+  | "IT Support";
 
 export interface Campus {
   id: ID;
@@ -37,8 +43,16 @@ export interface User {
   id: ID;
   name: string;
   email: string;
+  phone?: string;
   role: Role;
   campus: string;
+  department?: string;
+  designation?: string;
+  employeeCode?: string;
+  studentRollNo?: string;
+  assignedClasses?: string;
+  assignedSubjects?: string;
+  guardianName?: string;
   status: Status;
   lastLogin: string;
   avatar?: string;
@@ -114,6 +128,62 @@ export interface TimetablePeriod {
   room: string;
 }
 
+export interface LmsCourse {
+  id: ID;
+  title: string;
+  courseCode: string;
+  className: string;
+  subject: string;
+  teacher: string;
+  campus: string;
+  totalLessons: number;
+  completedLessons: number;
+  enrolledStudents: number;
+  activeAssignments: number;
+  status: "Active" | "Completed" | "Archived";
+  colorTone?: "brand" | "ocean" | "gold" | "success" | "warning";
+}
+
+export interface LmsAssignment {
+  id: ID;
+  title: string;
+  courseName: string;
+  className: string;
+  teacher: string;
+  dueDate: string;
+  totalSubmissions: number;
+  totalStudents: number;
+  maxMarks: number;
+  status: "Active" | "Graded" | "Past Due";
+}
+
+export interface LmsMaterial {
+  id: ID;
+  title: string;
+  subject: string;
+  className: string;
+  fileType: "PDF" | "DOCX" | "SLIDES" | "VIDEO" | "LINK";
+  fileSize?: string;
+  uploadedBy: string;
+  uploadDate: string;
+  downloadCount: number;
+  url?: string;
+}
+
+export interface LmsLiveClass {
+  id: ID;
+  title: string;
+  subject: string;
+  className: string;
+  teacher: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  platform: "Zoom" | "Google Meet" | "MS Teams" | "Internal LMS";
+  status: "Live Now" | "Upcoming" | "Completed";
+  joinUrl?: string;
+}
+
 export type AttendanceStatus = "P" | "A" | "L" | "H" | "E";
 
 export interface ExamTerm {
@@ -178,6 +248,28 @@ export interface Employee {
   status: Status;
 }
 
+export interface StaffMember {
+  id: ID;
+  empCode: string;
+  name: string;
+  gender: "Male" | "Female";
+  designation: string;
+  department: string;
+  campus: string;
+  type: "Teaching" | "Non-Teaching";
+  joiningDate: string;
+  phone: string;
+  email: string;
+  qualification: string;
+  cnic?: string;
+  assignedClasses?: string;
+  assignedSubjects?: string;
+  classTeacherOf?: string;
+  experience?: string;
+  basicSalary?: number;
+  status: Status;
+}
+
 export interface PayrollRun {
   id: ID;
   monthYear: string;
@@ -236,4 +328,78 @@ export interface ActivityItem {
   description: string;
   time: string;
   type: "admission" | "fee" | "exam" | "hr" | "system";
+}
+
+export type VisitorStatus = "Inside" | "Checked Out" | "Overstay" | "Expected";
+
+export interface VisitorPass {
+  id: ID;
+  passNumber: string;
+  visitorName: string;
+  phone: string;
+  cnic?: string;
+  purpose: "Parent Meeting" | "Admission Inquiry" | "Vendor / Supplier" | "Official Visit" | "Maintenance" | "Other";
+  hostPerson: string;
+  hostDepartment: string;
+  campus: string;
+  checkInTime: string;
+  checkOutTime?: string;
+  vehicleNo?: string;
+  companionsCount: number;
+  status: VisitorStatus;
+  date: string;
+}
+
+export type InquiryStatus = "New" | "In Progress" | "Follow-up" | "Converted" | "Closed";
+export type InquiryPriority = "High" | "Medium" | "Low";
+
+export interface FrontDeskInquiry {
+  id: ID;
+  inquiryCode: string;
+  callerName: string;
+  phone: string;
+  email?: string;
+  inquiryType: "Admission" | "Fee Structure" | "Transfer Certificate" | "Transport" | "General";
+  studentName?: string;
+  targetClass?: string;
+  campus: string;
+  assignedTo: string;
+  followUpDate: string;
+  status: InquiryStatus;
+  priority: InquiryPriority;
+  notes: string;
+  createdAt: string;
+}
+
+export type AppointmentStatus = "Scheduled" | "Confirmed" | "In Meeting" | "Completed" | "Cancelled";
+
+export interface Appointment {
+  id: ID;
+  appointmentCode: string;
+  visitorName: string;
+  phone: string;
+  withPerson: string;
+  department: string;
+  campus: string;
+  scheduledDate: string;
+  timeSlot: string;
+  room: string;
+  purpose: string;
+  status: AppointmentStatus;
+}
+
+export type PostalType = "Incoming Courier" | "Outgoing Dispatch";
+export type PostalStatus = "Received at Gate" | "Handed Over" | "Dispatched" | "Pending Collection";
+
+export interface PostalDispatch {
+  id: ID;
+  trackingNumber: string;
+  type: PostalType;
+  sender: string;
+  recipient: string;
+  department: string;
+  campus: string;
+  courierCompany: string;
+  receivedOrDispatchedAt: string;
+  status: PostalStatus;
 }

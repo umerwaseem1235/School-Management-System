@@ -30,10 +30,14 @@ export interface Column<T> {
   headerClassName?: string;
 }
 
+export type FilterOption = string | { value: string; label: string };
+
 export interface FilterDef<T> {
   key: string;
   label: string;
-  options: string[];
+  options: FilterOption[];
+  allLabel?: string;
+  triggerClassName?: string;
   getValue: (row: T) => string;
 }
 
@@ -50,9 +54,24 @@ interface DataTableProps<T> {
   bulkActions?: (selected: string[]) => React.ReactNode;
   emptyMessage?: string;
   className?: string;
+  tableClassName?: string;
 }
 
 const ALL = "__all__";
+
+function getAllFilterLabel(f: FilterDef<unknown>): string {
+  if (f.allLabel) return f.allLabel;
+  const lower = f.label.toLowerCase();
+  if (lower === "campus") return "All Campuses";
+  if (lower === "class") return "All Classes";
+  if (lower === "status") return "All Statuses";
+  if (f.label.endsWith("s")) return `All ${f.label}`;
+  if (f.label.endsWith("y")) return `All ${f.label.slice(0, -1)}ies`;
+  if (f.label.endsWith("ch") || f.label.endsWith("sh") || f.label.endsWith("x")) {
+    return `All ${f.label}es`;
+  }
+  return `All ${f.label}s`;
+}
 
 /**
  * Generic, typed client-side data table.
@@ -72,6 +91,7 @@ export function DataTable<T>({
   bulkActions,
   emptyMessage = "No records found.",
   className,
+  tableClassName,
 }: DataTableProps<T>) {
   const [query, setQuery] = React.useState("");
   const [filterState, setFilterState] = React.useState<Record<string, string>>({});
@@ -140,9 +160,9 @@ export function DataTable<T>({
   return (
     <div className={cn("flex flex-col", className)}>
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 px-5 pb-4 lg:flex-row lg:items-center">
+      <div className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center">
         {searchFn && (
-          <div className="relative w-full lg:max-w-xs">
+          <div className="relative w-full sm:w-64 md:w-72 shrink-0">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
@@ -151,29 +171,48 @@ export function DataTable<T>({
                 setPage(0);
               }}
               placeholder={searchPlaceholder}
-              className="h-9 w-full rounded-lg border border-input bg-background/60 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:bg-white focus:ring-3 focus:ring-ring/20"
+              className="h-9 w-full rounded-lg border border-input bg-background/60 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:bg-white focus:ring-2 focus:ring-ring/20"
             />
           </div>
         )}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {filters.map((f) => {
-            const items = [{ value: ALL, label: `All ${f.label}` }, ...f.options.map((o) => ({ value: o, label: o }))];
+            const normalizedOptions: { value: string; label: string }[] = f.options.map((o) =>
+              typeof o === "string" ? { value: o, label: o } : o
+            );
+            const allLabel = getAllFilterLabel(f as FilterDef<unknown>);
+            const items = [{ value: ALL, label: allLabel }, ...normalizedOptions];
+            const currentValue = filterState[f.key] ?? ALL;
+
             return (
               <Select
                 key={f.key}
                 items={items}
-                value={filterState[f.key] ?? ALL}
+                value={currentValue}
                 onValueChange={(v) => {
                   setFilterState((s) => ({ ...s, [f.key]: String(v) }));
                   setPage(0);
                 }}
               >
-                <SelectTrigger className="h-9! min-w-36 rounded-lg bg-background/60">
+                <SelectTrigger
+                  className={cn(
+                    "h-9! min-w-28 rounded-lg border-border/80 bg-background/80 text-xs sm:text-[13px] font-medium shadow-2xs hover:bg-muted/40 transition-colors",
+                    f.triggerClassName
+                  )}
+                >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  align="start"
+                  alignItemWithTrigger={false}
+                  className="w-auto min-w-[210px] max-w-xs p-1.5 shadow-lg border border-border/70 rounded-xl"
+                >
                   {items.map((it) => (
-                    <SelectItem key={it.value} value={it.value}>
+                    <SelectItem
+                      key={it.value}
+                      value={it.value}
+                      className="cursor-pointer py-1.5 px-2.5 text-xs sm:text-[13px] font-medium rounded-md"
+                    >
                       {it.label}
                     </SelectItem>
                   ))}
@@ -182,7 +221,7 @@ export function DataTable<T>({
             );
           })}
         </div>
-        <div className="flex items-center gap-2 lg:ml-auto">
+        <div className="flex items-center gap-2 md:ml-auto">
           {selectable && selected.size > 0 && (
             <div className="flex items-center gap-2 rounded-lg bg-brand-50 py-1 pl-3 pr-1 text-xs font-medium text-brand">
               {selected.size} selected
@@ -195,7 +234,7 @@ export function DataTable<T>({
 
       {/* Table */}
       <div className="overflow-x-auto scrollbar-thin-light">
-        <table className="w-full min-w-[720px] text-sm">
+        <table className={cn("w-full text-sm", tableClassName ?? "min-w-[720px]")}>
           <thead>
             <tr className="border-y border-border/70 bg-muted/60">
               {selectable && (

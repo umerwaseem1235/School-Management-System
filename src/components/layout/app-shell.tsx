@@ -23,9 +23,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="mx-auto w-full max-w-[1480px]">{children}</div>
             </main>
             <footer className="border-t border-border/70 px-4 py-4 text-xs text-muted-foreground md:px-8">
-              <div className="mx-auto flex max-w-[1480px] flex-wrap items-center justify-between gap-2">
+              <div className="mx-auto flex max-w-[1480px] items-center justify-center text-center">
                 <span>© 2026 EduSphere School Management System · v2.0</span>
-                <span>MongoDB Atlas · All systems operational</span>
               </div>
             </footer>
           </div>

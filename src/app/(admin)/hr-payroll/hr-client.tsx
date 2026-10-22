@@ -8,7 +8,7 @@ import { BarSeriesChart } from "@/components/charts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/shared/section-card";
-import { formatCurrency, formatCurrencyCompact, formatDate } from "@/lib/format";
+import { formatCurrency, formatCurrencyCompact, formatDate, formatCampusDisplay } from "@/lib/format";
 import { EMPLOYEES, PAYROLL_RUNS, LEAVE_REQUESTS, DEPARTMENT_HEADCOUNT } from "@/lib/mock/operations";
 import type { Employee, LeaveRequest } from "@/types";
 import { Check, Download, FileText, Users, DollarSign, Calendar, X } from "lucide-react";
@@ -19,7 +19,22 @@ const empColumns: Column<Employee>[] = [
   { key: "employee", header: "Employee", cell: (r) => <PersonCell name={r.name} subtitle={r.empCode} />, sortValue: (r) => r.name },
   { key: "designation", header: "Designation", cell: (r) => <span className="text-[13px]">{r.designation}</span>, sortValue: (r) => r.designation },
   { key: "department", header: "Department", cell: (r) => <span className="text-[13px]">{r.department}</span> },
-  { key: "campus", header: "Campus", cell: (r) => <span className="text-[13px]">{r.campus}</span> },
+  {
+    key: "campus",
+    header: "Campus",
+    cell: (r) => {
+      const info = formatCampusDisplay(r.campus);
+      return (
+        <div className="flex flex-col leading-tight">
+          <span className="text-[13px] font-medium text-foreground">{info.primary}</span>
+          {info.secondary && (
+            <span className="text-[11px] text-muted-foreground">{info.secondary}</span>
+          )}
+        </div>
+      );
+    },
+    sortValue: (r) => r.campus,
+  },
   { key: "type", header: "Type", cell: (r) => <Badge variant={r.type === "Teaching" ? "default" : "secondary"}>{r.type}</Badge> },
   { key: "joining", header: "Joined", cell: (r) => <span className="text-[13px] tabular-nums text-muted-foreground">{formatDate(r.joiningDate)}</span> },
   { key: "salary", header: "Salary", cell: (r) => <span className="font-mono text-[13px] font-semibold tabular-nums">{formatCurrency(r.basicSalary)}</span>, sortValue: (r) => r.basicSalary, className: "text-right", headerClassName: "text-right" },
@@ -27,13 +42,23 @@ const empColumns: Column<Employee>[] = [
 ];
 
 const empDepts = [...new Set(EMPLOYEES.map((e) => e.department))];
-const empCampuses = [...new Set(EMPLOYEES.map((e) => e.campus))];
+const empCampuses = [...new Set(EMPLOYEES.map((e) => e.campus))].map((c) => ({
+  value: c,
+  label: formatCampusDisplay(c).label,
+}));
 
 const empFilters: FilterDef<Employee>[] = [
-  { key: "department", label: "Department", options: empDepts, getValue: (r) => r.department },
-  { key: "campus", label: "Campus", options: empCampuses, getValue: (r) => r.campus },
-  { key: "type", label: "Type", options: ["Teaching", "Non-Teaching"], getValue: (r) => r.type },
-  { key: "status", label: "Status", options: ["Active", "Inactive", "Suspended", "Pending"], getValue: (r) => r.status },
+  { key: "department", label: "Department", allLabel: "All Departments", options: empDepts, getValue: (r) => r.department },
+  {
+    key: "campus",
+    label: "Campus",
+    allLabel: "All Campuses",
+    options: empCampuses,
+    triggerClassName: "min-w-48 sm:min-w-52",
+    getValue: (r) => r.campus,
+  },
+  { key: "type", label: "Type", allLabel: "All Types", options: ["Teaching", "Non-Teaching"], getValue: (r) => r.type },
+  { key: "status", label: "Status", allLabel: "All Statuses", options: ["Active", "Inactive", "Suspended", "Pending"], getValue: (r) => r.status },
 ];
 
 /* ─── Leave columns ─── */

@@ -43,6 +43,7 @@
 
   /* Brand tokens */
   --color-brand: #091d3e;
+  --color-brand-foreground: #ffffff;
   --color-brand-50: #eef3f9;
   --color-brand-100: #d9e4f2;
   --color-brand-200: #b3c6e2;

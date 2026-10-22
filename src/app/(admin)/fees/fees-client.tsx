@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency, formatCurrencyCompact, formatDate } from "@/lib/format";
+import { formatCurrency, formatCurrencyCompact, formatDate, formatCampusDisplay } from "@/lib/format";
 import {
   REVENUE_TREND,
   FEE_CHALLANS,
@@ -43,7 +43,18 @@ const challanColumns: Column<FeeChallan>[] = [
   {
     key: "campus",
     header: "Campus",
-    cell: (r) => <span className="text-[13px]">{r.campus}</span>,
+    cell: (r) => {
+      const info = formatCampusDisplay(r.campus);
+      return (
+        <div className="flex flex-col leading-tight">
+          <span className="text-[13px] font-medium text-foreground">{info.primary}</span>
+          {info.secondary && (
+            <span className="text-[11px] text-muted-foreground">{info.secondary}</span>
+          )}
+        </div>
+      );
+    },
+    sortValue: (r) => r.campus,
   },
   {
     key: "month",
@@ -90,26 +101,33 @@ const challanColumns: Column<FeeChallan>[] = [
   },
 ];
 
-const challanCampuses = [...new Set(FEE_CHALLANS.map((c) => c.campus))];
+const challanCampuses = [...new Set(FEE_CHALLANS.map((c) => c.campus))].map((c) => ({
+  value: c,
+  label: formatCampusDisplay(c).label,
+}));
 
 const challanFilters: FilterDef<FeeChallan>[] = [
   {
     key: "status",
     label: "Status",
+    allLabel: "All Statuses",
     options: ["Paid", "Unpaid", "Partial", "Overdue"],
+    triggerClassName: "min-w-36",
     getValue: (r) => r.status,
   },
   {
     key: "campus",
     label: "Campus",
+    allLabel: "All Campuses",
     options: challanCampuses,
+    triggerClassName: "min-w-48 sm:min-w-52",
     getValue: (r) => r.campus,
   },
 ];
 
 /* ─── Expense donut ─── */
 
-const EXPENSE_COLORS = ["#353955", "#c79a3a", "#2f8f6b", "#c8463d", "#3c6fb0", "#c7841f"];
+const EXPENSE_COLORS = ["#1e4275", "#c7841f", "#2f8f6b", "#c8463d", "#3c6fb0", "#3f6396"];
 const expenseDonut = EXPENSES.map((e, i) => ({
   name: e.category,
   value: e.value,
@@ -226,9 +244,27 @@ export function FeesClient() {
             data={REVENUE_TREND}
             xKey="month"
             series={[
-              { key: "collected", label: "Collected", color: "#353955" },
-              { key: "expected", label: "Expected", color: "#c79a3a" },
-              { key: "expenses", label: "Expenses", color: "#c8463d" },
+              {
+                key: "collected",
+                label: "Collected",
+                color: "#1e4275",
+                strokeWidth: 2.5,
+                fillOpacity: 0.24,
+              },
+              {
+                key: "expected",
+                label: "Expected",
+                color: "#0ea5e9",
+                strokeWidth: 2,
+                fillOpacity: 0.10,
+              },
+              {
+                key: "expenses",
+                label: "Expenses",
+                color: "#3c6fb0",
+                strokeWidth: 2.25,
+                fillOpacity: 0.16,
+              },
             ]}
             format="millions"
           />
