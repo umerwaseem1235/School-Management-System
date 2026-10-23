@@ -226,12 +226,14 @@ export function StudentsTable({
       {
         key: "student",
         header: "Student",
+        align: "left",
         cell: (r) => <PersonCell name={r.name} subtitle={r.admissionNumber} />,
         sortValue: (r) => r.name,
       },
       {
         key: "class",
         header: "Class & Section",
+        align: "center",
         cell: (r) => (
           <span className="text-[13px] font-medium text-foreground/90">
             {r.className} - {r.section}
@@ -241,10 +243,11 @@ export function StudentsTable({
       {
         key: "campus",
         header: "Campus",
+        align: "center",
         cell: (r) => {
           const info = formatCampusDisplay(r.campus);
           return (
-            <div className="flex flex-col leading-tight">
+            <div className="inline-flex flex-col items-center justify-center leading-tight">
               <span className="text-[13px] font-medium text-foreground">{info.primary}</span>
               {info.secondary && (
                 <span className="text-[11px] text-muted-foreground">{info.secondary}</span>
@@ -257,32 +260,39 @@ export function StudentsTable({
       {
         key: "feeStatus",
         header: "Fee Status",
+        align: "center",
         cell: (r) => (
-          <FeeStatusDropdown
-            status={r.feeStatus}
-            studentName={r.name}
-            onFeeStatusChange={(newStatus) => onFeeStatusChange?.(r.id, newStatus)}
-          />
+          <div className="flex items-center justify-center">
+            <FeeStatusDropdown
+              status={r.feeStatus}
+              studentName={r.name}
+              onFeeStatusChange={(newStatus) => onFeeStatusChange?.(r.id, newStatus)}
+            />
+          </div>
         ),
         sortValue: (r) => r.feeStatus,
       },
       {
         key: "status",
         header: "Status",
+        align: "center",
         cell: (r) => (
-          <StudentStatusDropdown
-            status={r.status}
-            studentName={r.name}
-            onStatusChange={(newStatus) => onStatusChange?.(r.id, newStatus)}
-          />
+          <div className="flex items-center justify-center">
+            <StudentStatusDropdown
+              status={r.status}
+              studentName={r.name}
+              onStatusChange={(newStatus) => onStatusChange?.(r.id, newStatus)}
+            />
+          </div>
         ),
         sortValue: (r) => r.status,
       },
       {
         key: "actions",
-        header: "",
+        header: "Action",
+        align: "center",
         cell: (r) => (
-          <div className="flex items-center justify-end pr-2">
+          <div className="flex items-center justify-center">
             <Button
               variant="outline"
               size="xs"
@@ -290,14 +300,14 @@ export function StudentsTable({
                 onViewStudent?.(r);
                 setSelectedStudent(r);
               }}
-              className="h-7.5 gap-1.5 px-3 rounded-lg text-xs font-semibold text-foreground/80 border-border/80 hover:border-brand/40 hover:bg-brand-50 hover:text-brand shadow-2xs transition-all duration-150 active:scale-95"
+              className="h-7.5 gap-1.5 px-3 rounded-lg text-xs font-semibold text-foreground/80 border-border/80 hover:border-brand/40 hover:bg-brand-50 hover:text-brand shadow-2xs transition-all duration-150 active:scale-95 cursor-pointer"
             >
               <Eye className="size-3.5 text-brand" />
               <span>View</span>
             </Button>
           </div>
         ),
-        className: "w-24 text-right",
+        className: "whitespace-nowrap",
       },
     ],
     [onStatusChange, onFeeStatusChange, onViewStudent]

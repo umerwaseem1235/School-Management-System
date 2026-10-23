@@ -187,6 +187,7 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
       {
         key: "name",
         header: "User & Profile",
+        align: "left",
         cell: (row) => {
           let detailTag = "";
           if (row.role === "Teacher") {
@@ -207,15 +208,14 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
           return <PersonCell name={row.name} subtitle={subtitle} />;
         },
         sortValue: (row) => row.name,
-        className: "px-3.5 py-3 min-w-0 max-w-[260px]",
-        headerClassName: "px-3.5",
       },
       {
         key: "role",
         header: "Role",
+        align: "center",
         cell: (row) => (
           <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${getRoleBadgeStyle(
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${getRoleBadgeStyle(
               row.role
             )}`}
           >
@@ -223,12 +223,12 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
           </span>
         ),
         sortValue: (row) => row.role,
-        className: "px-2.5 py-3 whitespace-nowrap",
-        headerClassName: "px-2.5",
+        className: "whitespace-nowrap",
       },
       {
         key: "campus",
         header: "Campus / Scope",
+        align: "center",
         cell: (row) => {
           const info = formatCampusDisplay(row.campus);
           const secondaryDisplay =
@@ -239,7 +239,7 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
               : row.department || info.secondary || "Central Operations";
 
           return (
-            <div className="flex flex-col leading-tight min-w-0">
+            <div className="inline-flex flex-col items-center justify-center leading-tight min-w-0">
               <span className="text-[13px] font-medium text-foreground truncate">
                 {info.primary}
               </span>
@@ -253,30 +253,29 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
           );
         },
         sortValue: (row) => row.campus,
-        className: "px-3 py-3 min-w-0",
-        headerClassName: "px-3",
       },
       {
         key: "lastLogin",
         header: "Last Login",
+        align: "center",
         cell: (row) => (
           <span className="text-[12px] tabular-nums text-muted-foreground whitespace-nowrap">
             {row.lastLogin ? formatDateTime(row.lastLogin) : "Never"}
           </span>
         ),
         sortValue: (row) => row.lastLogin ?? "",
-        className: "px-2.5 py-3 whitespace-nowrap",
-        headerClassName: "px-2.5",
+        className: "whitespace-nowrap",
       },
       {
         key: "actions",
         header: "Status / Actions",
+        align: "center",
         cell: (row) => {
           const isSuperAdmin = row.role === "Super Admin";
 
           if (isSuperAdmin) {
             return (
-              <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+              <div className="flex items-center justify-center gap-2 whitespace-nowrap">
                 {/* Static Protected Status Badge - no dropdown */}
                 <StatusBadge status={row.status} />
 
@@ -293,7 +292,7 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
           }
 
           return (
-            <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
               {/* Clickable Status Badge Dropdown */}
               <UserStatusDropdown
                 status={row.status}
@@ -316,8 +315,7 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
             </div>
           );
         },
-        className: "px-3.5 py-3 text-right whitespace-nowrap",
-        headerClassName: "px-3.5 text-right",
+        className: "whitespace-nowrap",
       },
     ],
     [onSelectUser, onStatusChange]

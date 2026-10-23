@@ -26,6 +26,7 @@ export interface Column<T> {
   cell: (row: T) => React.ReactNode;
   /** Returns a primitive used for sorting. Enables sorting when provided. */
   sortValue?: (row: T) => string | number;
+  align?: "left" | "center" | "right";
   className?: string;
   headerClassName?: string;
 }
@@ -160,7 +161,7 @@ export function DataTable<T>({
   return (
     <div className={cn("flex flex-col", className)}>
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center">
+      <div className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
         {searchFn && (
           <div className="relative w-full sm:w-64 md:w-72 shrink-0">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -175,61 +176,61 @@ export function DataTable<T>({
             />
           </div>
         )}
-        <div className="flex items-center gap-2 flex-wrap">
-          {filters.map((f) => {
-            const normalizedOptions: { value: string; label: string }[] = f.options.map((o) =>
-              typeof o === "string" ? { value: o, label: o } : o
-            );
-            const allLabel = getAllFilterLabel(f as FilterDef<unknown>);
-            const items = [{ value: ALL, label: allLabel }, ...normalizedOptions];
-            const currentValue = filterState[f.key] ?? ALL;
+        {(filters.length > 0 || (selectable && selected.size > 0) || toolbar) && (
+          <div className="flex items-center gap-2 flex-wrap md:ml-auto md:justify-end">
+            {filters.map((f) => {
+              const normalizedOptions: { value: string; label: string }[] = f.options.map((o) =>
+                typeof o === "string" ? { value: o, label: o } : o
+              );
+              const allLabel = getAllFilterLabel(f as FilterDef<unknown>);
+              const items = [{ value: ALL, label: allLabel }, ...normalizedOptions];
+              const currentValue = filterState[f.key] ?? ALL;
 
-            return (
-              <Select
-                key={f.key}
-                items={items}
-                value={currentValue}
-                onValueChange={(v) => {
-                  setFilterState((s) => ({ ...s, [f.key]: String(v) }));
-                  setPage(0);
-                }}
-              >
-                <SelectTrigger
-                  className={cn(
-                    "h-9! min-w-28 rounded-lg border-border/80 bg-background/80 text-xs sm:text-[13px] font-medium shadow-2xs hover:bg-muted/40 transition-colors",
-                    f.triggerClassName
-                  )}
+              return (
+                <Select
+                  key={f.key}
+                  items={items}
+                  value={currentValue}
+                  onValueChange={(v) => {
+                    setFilterState((s) => ({ ...s, [f.key]: String(v) }));
+                    setPage(0);
+                  }}
                 >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent
-                  align="start"
-                  alignItemWithTrigger={false}
-                  className="w-auto min-w-[210px] max-w-xs p-1.5 shadow-lg border border-border/70 rounded-xl"
-                >
-                  {items.map((it) => (
-                    <SelectItem
-                      key={it.value}
-                      value={it.value}
-                      className="cursor-pointer py-1.5 px-2.5 text-xs sm:text-[13px] font-medium rounded-md"
-                    >
-                      {it.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            );
-          })}
-        </div>
-        <div className="flex items-center gap-2 md:ml-auto">
-          {selectable && selected.size > 0 && (
-            <div className="flex items-center gap-2 rounded-lg bg-brand-50 py-1 pl-3 pr-1 text-xs font-medium text-brand">
-              {selected.size} selected
-              {bulkActions?.(Array.from(selected))}
-            </div>
-          )}
-          {toolbar}
-        </div>
+                  <SelectTrigger
+                    className={cn(
+                      "h-9! min-w-28 rounded-lg border-border/80 bg-background/80 text-xs sm:text-[13px] font-medium shadow-2xs hover:bg-muted/40 transition-colors",
+                      f.triggerClassName
+                    )}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent
+                    align="end"
+                    alignItemWithTrigger={false}
+                    className="w-auto min-w-[210px] max-w-xs p-1.5 shadow-lg border border-border/70 rounded-xl"
+                  >
+                    {items.map((it) => (
+                      <SelectItem
+                        key={it.value}
+                        value={it.value}
+                        className="cursor-pointer py-1.5 px-2.5 text-xs sm:text-[13px] font-medium rounded-md"
+                      >
+                        {it.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            })}
+            {selectable && selected.size > 0 && (
+              <div className="flex items-center gap-2 rounded-lg bg-brand-50 py-1 pl-3 pr-1 text-xs font-medium text-brand">
+                {selected.size} selected
+                {bulkActions?.(Array.from(selected))}
+              </div>
+            )}
+            {toolbar}
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -246,13 +247,23 @@ export function DataTable<T>({
                   />
                 </th>
               )}
-              {columns.map((col) => {
+              {columns.map((col, idx) => {
                 const active = sort?.key === col.key;
+                const alignClass =
+                  col.align === "center"
+                    ? "text-center"
+                    : col.align === "right"
+                    ? "text-right"
+                    : "text-left";
+
                 return (
                   <th
                     key={col.key}
                     className={cn(
-                      "whitespace-nowrap px-5 py-3 text-left text-[11.5px] font-semibold uppercase tracking-wider text-muted-foreground",
+                      "whitespace-nowrap px-4 py-3 text-[11.5px] font-semibold uppercase tracking-wider text-muted-foreground",
+                      idx === 0 && !selectable && "pl-6",
+                      idx === columns.length - 1 && "pr-6",
+                      alignClass,
                       col.headerClassName
                     )}
                   >
@@ -262,6 +273,8 @@ export function DataTable<T>({
                         onClick={() => toggleSort(col.key)}
                         className={cn(
                           "inline-flex items-center gap-1 uppercase transition-colors hover:text-brand",
+                          col.align === "center" && "mx-auto justify-center",
+                          col.align === "right" && "ml-auto justify-end",
                           active && "text-brand"
                         )}
                       >
@@ -313,11 +326,29 @@ export function DataTable<T>({
                       />
                     </td>
                   )}
-                  {columns.map((col) => (
-                    <td key={col.key} className={cn("px-5 py-3 align-middle", col.className)}>
-                      {col.cell(row)}
-                    </td>
-                  ))}
+                  {columns.map((col, idx) => {
+                    const alignClass =
+                      col.align === "center"
+                        ? "text-center"
+                        : col.align === "right"
+                        ? "text-right"
+                        : "text-left";
+
+                    return (
+                      <td
+                        key={col.key}
+                        className={cn(
+                          "px-4 py-3.5 align-middle",
+                          idx === 0 && !selectable && "pl-6",
+                          idx === columns.length - 1 && "pr-6",
+                          alignClass,
+                          col.className
+                        )}
+                      >
+                        {col.cell(row)}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}

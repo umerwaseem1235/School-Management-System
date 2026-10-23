@@ -23,14 +23,19 @@ import {
   Users,
   School,
   BookOpen,
-  Layers,
   Pencil,
   Trash2,
   Search,
   GraduationCap,
+  Building2,
+  ArrowRight,
+  Layers,
+  Eye,
 } from "lucide-react";
+import { ViewClassDialog } from "./view-class-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { AddClassDialog } from "./add-class-dialog";
+import { EditClassDialog } from "./edit-class-dialog";
 import { EditSubjectDialog } from "./edit-subject-dialog";
 import { AddSubjectDialog } from "./add-subject-dialog";
 import { toast } from "sonner";
@@ -43,12 +48,67 @@ export default function AcademicsPage() {
   // Dialog states
   const [isAddClassOpen, setIsAddClassOpen] = React.useState(false);
   const [isAddSubjectOpen, setIsAddSubjectOpen] = React.useState(false);
+  const [editingClass, setEditingClass] = React.useState<AcademicClass | null>(null);
+  const [viewingClass, setViewingClass] = React.useState<AcademicClass | null>(null);
   const [editingSubject, setEditingSubject] = React.useState<Subject | null>(null);
+
+  // Class search & filter state
+  const [classSearch, setClassSearch] = React.useState("");
+  const [classCampusFilter, setClassCampusFilter] = React.useState("ALL");
+  const [classStatusFilter, setClassStatusFilter] = React.useState("ALL");
 
   // Subject search & filter state
   const [subjectSearch, setSubjectSearch] = React.useState("");
   const [subjectClassFilter, setSubjectClassFilter] = React.useState("ALL");
   const [subjectTypeFilter, setSubjectTypeFilter] = React.useState("ALL");
+
+  // Campuses for classes filter
+  const classCampuses = React.useMemo(() => {
+    return Array.from(new Set(classes.map((c) => c.campus).filter(Boolean)));
+  }, [classes]);
+
+  // Overall stats
+  const totalStudents = React.useMemo(() => {
+    return classes.reduce((sum, c) => sum + ((c as any).studentsCount || c.students || 0), 0);
+  }, [classes]);
+
+  const totalSections = React.useMemo(() => {
+    return classes.reduce((sum, c) => sum + ((c as any).sectionsCount || c.sections || 0), 0);
+  }, [classes]);
+
+  // Filtered classes
+  const filteredClasses = React.useMemo(() => {
+    return classes.filter((cls) => {
+      const q = classSearch.toLowerCase().trim();
+      const matchesSearch =
+        q === "" ||
+        cls.className.toLowerCase().includes(q) ||
+        (cls.campus && cls.campus.toLowerCase().includes(q)) ||
+        (cls.classTeacher && cls.classTeacher.toLowerCase().includes(q)) ||
+        String(cls.gradeLevel).includes(q);
+
+      const matchesCampus =
+        classCampusFilter === "ALL" || cls.campus === classCampusFilter;
+
+      const matchesStatus =
+        classStatusFilter === "ALL" || (cls.status || "Active") === classStatusFilter;
+
+      return matchesSearch && matchesCampus && matchesStatus;
+    });
+  }, [classes, classSearch, classCampusFilter, classStatusFilter]);
+
+  const handleUpdateClass = (updated: AcademicClass) => {
+    setClasses((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+  };
+
+  const handleDeleteClass = (id: string, name: string) => {
+    if (confirm(`Are you sure you want to delete "${name}"?`)) {
+      setClasses((prev) => prev.filter((c) => c.id !== id && c.className !== name));
+      toast.info("Class Removed", {
+        description: `"${name}" has been removed from the academic directory.`,
+      });
+    }
+  };
 
   // Sorted list of all classes for the Subject tab class dropdown
   const availableClasses = React.useMemo(() => {
@@ -156,91 +216,284 @@ export default function AcademicsPage() {
           </TabsTrigger>
         </TabsList>
 
-        {/* TAB 1: Classes Grid */}
+        {/* TAB 1: Classes Table */}
         <TabsContent value="classes" className="space-y-4 outline-none">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {classes.map((cls) => (
-              <Card
-                key={cls.id || cls.className}
-                className="rounded-2xl border border-border/80 bg-card hover:shadow-md transition-all duration-200 overflow-hidden"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start gap-2">
-                    <div className="min-w-0">
-                      <CardTitle
-                        className="text-base font-semibold text-foreground truncate"
-                        title={cls.className}
-                      >
-                        {cls.className}
-                      </CardTitle>
-                      <CardDescription className="text-xs text-muted-foreground mt-0.5 truncate">
-                        Grade {cls.gradeLevel} • {cls.campus}
-                      </CardDescription>
-                    </div>
-                    {cls.stream && (
-                      <Badge
-                        variant="secondary"
-                        className="text-[11px] font-semibold shrink-0 gap-1 px-2 py-0.5"
-                      >
-                        <Layers className="size-3 text-muted-foreground" />
-                        {cls.stream}
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3.5">
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="flex flex-col p-2 bg-muted/40 rounded-xl">
-                      <span className="font-bold text-xs text-foreground tabular-nums">
-                        {(cls as any).sectionsCount || cls.sections}
-                      </span>
-                      <span className="text-muted-foreground text-[10px] uppercase font-semibold">
-                        Sections
-                      </span>
-                    </div>
-                    <div className="flex flex-col p-2 bg-muted/40 rounded-xl">
-                      <span className="font-bold text-xs text-foreground tabular-nums">
-                        {(cls as any).studentsCount || cls.students}
-                      </span>
-                      <span className="text-muted-foreground text-[10px] uppercase font-semibold">
-                        Students
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleViewClassSubjects(cls.className)}
-                      className="flex flex-col p-2 bg-muted/40 hover:bg-brand-soft/60 rounded-xl transition-colors cursor-pointer group"
-                      title={`View subjects for ${cls.className}`}
-                    >
-                      <span className="font-bold text-xs text-foreground group-hover:text-brand tabular-nums">
-                        {subjects.filter((s) => s.className === cls.className).length ||
-                          (cls as any).subjectsCount ||
-                          cls.subjects}
-                      </span>
-                      <span className="text-muted-foreground group-hover:text-brand text-[10px] uppercase font-semibold">
-                        Subjects
-                      </span>
-                    </button>
-                  </div>
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand shrink-0">
+                <School className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs text-muted-foreground font-medium block">Total Classes</span>
+                <span className="text-base font-bold text-foreground tabular-nums">{classes.length}</span>
+              </div>
+            </div>
 
-                  <div className="flex justify-between items-center text-xs bg-muted/20 px-2.5 py-1.5 rounded-lg truncate">
-                    <span className="text-muted-foreground flex items-center gap-1.5">
-                      <Users className="size-3.5 text-muted-foreground" />
-                      Class Teacher
-                    </span>
-                    <span className="font-medium text-foreground truncate max-w-[160px]">
-                      {cls.classTeacher || (cls as any).teacher}
-                    </span>
-                  </div>
+            <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand shrink-0">
+                <Users className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs text-muted-foreground font-medium block">Total Students</span>
+                <span className="text-base font-bold text-foreground tabular-nums">{totalStudents.toLocaleString()}</span>
+              </div>
+            </div>
 
-                  <div className="flex justify-between items-center text-xs pt-0.5">
-                    <span className="text-muted-foreground font-medium">Class Status</span>
-                    <StatusBadge status={cls.status || "Active"} dot={false} />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand shrink-0">
+                <Layers className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs text-muted-foreground font-medium block">Total Sections</span>
+                <span className="text-base font-bold text-foreground tabular-nums">{totalSections}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand shrink-0">
+                <BookOpen className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs text-muted-foreground font-medium block">Curriculum Subjects</span>
+                <span className="text-base font-bold text-foreground tabular-nums">{subjects.length}</span>
+              </div>
+            </div>
           </div>
+
+          <Card className="rounded-2xl border border-border/80 overflow-hidden bg-card shadow-xs">
+            {/* Table Section Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-border/70 bg-muted/20">
+              <div className="flex items-center gap-2.5">
+                <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
+                  <School className="size-4" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-semibold text-foreground">
+                    Academic Classes Directory
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-50 text-brand font-mono">
+                    {filteredClasses.length} {filteredClasses.length === 1 ? "Class" : "Classes"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Filter Toolbar */}
+            <div className="flex flex-col md:flex-row md:items-center gap-3 px-5 py-3.5 border-b border-border/60">
+              <div className="relative w-full sm:w-64 md:w-72 shrink-0">
+                <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search classes…"
+                  value={classSearch}
+                  onChange={(e) => setClassSearch(e.target.value)}
+                  className="pl-9 h-9 text-xs w-full bg-background/60"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 md:ml-auto">
+                {/* Campus Filter */}
+                <Select
+                  value={classCampusFilter}
+                  onValueChange={(val) => {
+                    if (val) setClassCampusFilter(val);
+                  }}
+                >
+                  <SelectTrigger className="h-9 text-xs w-[190px] shrink-0 font-medium">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <Building2 className="size-3.5 text-muted-foreground shrink-0" />
+                      <SelectValue placeholder="All Campuses" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[260px]">
+                    <SelectItem value="ALL">All Campuses</SelectItem>
+                    {classCampuses.map((c) => (
+                      <SelectItem key={c} value={c} className="text-xs">
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Status Filter */}
+                <Select
+                  value={classStatusFilter}
+                  onValueChange={(val) => {
+                    if (val) setClassStatusFilter(val);
+                  }}
+                >
+                  <SelectTrigger className="h-9 text-xs w-[130px] shrink-0 font-medium">
+                    <SelectValue placeholder="All Statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All Statuses</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {(classSearch || classCampusFilter !== "ALL" || classStatusFilter !== "ALL") && (
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => {
+                      setClassSearch("");
+                      setClassCampusFilter("ALL");
+                      setClassStatusFilter("ALL");
+                    }}
+                    className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    Reset
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Table */}
+            <div>
+              <Table className="w-full text-sm">
+                <TableHeader>
+                  <TableRow className="bg-muted/60 border-b border-border/70">
+                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-left">
+                      Class & Campus
+                    </TableHead>
+                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center">
+                      Class Teacher
+                    </TableHead>
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Capacity
+                    </TableHead>
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Subjects
+                    </TableHead>
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Status
+                    </TableHead>
+                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-right">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredClasses.length > 0 ? (
+                    filteredClasses.map((cls) => {
+                      const classSubjectsCount =
+                        subjects.filter((s) => s.className === cls.className).length ||
+                        (cls as any).subjectsCount ||
+                        cls.subjects ||
+                        0;
+
+                      return (
+                        <TableRow
+                          key={cls.id || cls.className}
+                          className="hover:bg-muted/30 transition-colors border-b border-border/60"
+                        >
+                          {/* Class & Campus */}
+                          <TableCell className="font-medium text-xs text-foreground px-5 py-3 text-left">
+                            <div className="flex flex-col min-w-0">
+                              <span className="font-semibold text-foreground text-[13px] leading-tight truncate">
+                                {cls.className}
+                              </span>
+                              <span className="text-[11px] text-muted-foreground mt-0.5 truncate flex items-center gap-1.5">
+                                <span>Grade {cls.gradeLevel}</span>
+                                <span className="text-muted-foreground/60">•</span>
+                                <span className="truncate">{cls.campus}</span>
+                              </span>
+                            </div>
+                          </TableCell>
+
+                          {/* Class Teacher */}
+                          <TableCell className="text-xs px-4 py-3 text-center">
+                            <span className="font-medium text-foreground truncate inline-block max-w-[160px]">
+                              {cls.classTeacher || (cls as any).teacher || "Unassigned"}
+                            </span>
+                          </TableCell>
+
+                          {/* Capacity (Students & Sections) */}
+                          <TableCell className="text-xs px-3 py-3 text-center">
+                            <div className="inline-flex flex-col items-center justify-center leading-tight">
+                              <span className="font-semibold text-xs tabular-nums text-foreground">
+                                {(cls as any).studentsCount || cls.students} Students
+                              </span>
+                              <span className="text-[11px] text-muted-foreground font-medium mt-0.5">
+                                {(cls as any).sectionsCount || cls.sections} Sections
+                              </span>
+                            </div>
+                          </TableCell>
+
+                          {/* Subjects */}
+                          <TableCell className="text-xs px-3 py-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => handleViewClassSubjects(cls.className)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand hover:bg-brand-100/80 transition-all cursor-pointer shadow-2xs group"
+                              title={`View ${classSubjectsCount} subjects for ${cls.className}`}
+                            >
+                              <BookOpen className="size-3 text-brand" />
+                              <span className="tabular-nums">{classSubjectsCount}</span>
+                              <ArrowRight className="size-2.5 opacity-60 transition-transform group-hover:translate-x-0.5" />
+                            </button>
+                          </TableCell>
+
+                          {/* Status */}
+                          <TableCell className="text-xs px-3 py-3 text-center">
+                            <StatusBadge status={cls.status || "Active"} dot={false} />
+                          </TableCell>
+
+                          {/* Actions */}
+                          <TableCell className="px-5 py-3 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Button
+                                variant="outline"
+                                size="xs"
+                                onClick={() => setViewingClass(cls)}
+                                className="h-7.5 px-2.5 text-xs font-semibold text-brand hover:bg-brand-soft/50 hover:text-brand border-border/80 cursor-pointer shadow-2xs gap-1.5"
+                                title="View full class details & subjects"
+                              >
+                                <Eye className="size-3.5" />
+                                <span>View</span>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="xs"
+                                onClick={() => setEditingClass(cls)}
+                                className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-brand hover:bg-brand-soft/40 cursor-pointer"
+                                title="Edit Class"
+                              >
+                                <Pencil className="size-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="xs"
+                                onClick={() => handleDeleteClass(cls.id, cls.className)}
+                                className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-danger hover:bg-danger-soft/60 cursor-pointer"
+                                title="Delete Class"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-12 text-xs text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <School className="size-8 text-muted-foreground/50" />
+                          <p className="font-medium text-sm text-foreground">No classes found</p>
+                          <p className="text-xs text-muted-foreground">
+                            Try adjusting your search query or campus filter.
+                          </p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
         </TabsContent>
 
         {/* TAB 2: Subjects Table with Class Dropdown, Search & Editing */}
@@ -281,7 +534,7 @@ export default function AcademicsPage() {
                 <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search subjects..."
+                  placeholder="Search subjects…"
                   value={subjectSearch}
                   onChange={(e) => setSubjectSearch(e.target.value)}
                   className="pl-9 h-9 text-xs w-full bg-background/60"
@@ -433,6 +686,25 @@ export default function AcademicsPage() {
         open={isAddClassOpen}
         onOpenChange={setIsAddClassOpen}
         onAddClass={handleAddClass}
+      />
+
+      {/* Edit Class Interactive Dialog */}
+      <EditClassDialog
+        classItem={editingClass}
+        open={!!editingClass}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setEditingClass(null);
+        }}
+        onUpdateClass={handleUpdateClass}
+      />
+
+      {/* View Class Interactive Dialog */}
+      <ViewClassDialog
+        classItem={viewingClass}
+        open={!!viewingClass}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) setViewingClass(null);
+        }}
       />
 
       {/* Edit Subject Interactive Dialog */}

@@ -131,6 +131,7 @@ export function ReceptionClient({
       {
         key: "visitor",
         header: "Visitor",
+        align: "left",
         cell: (r) => (
           <div className="flex flex-col min-w-0">
             <span className="font-semibold text-foreground text-[13px] leading-tight truncate">
@@ -140,71 +141,69 @@ export function ReceptionClient({
           </div>
         ),
         sortValue: (r) => r.visitorName,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
+        className: "whitespace-nowrap",
       },
       {
         key: "host",
         header: "Whom to Meet & Purpose",
+        align: "center",
         cell: (r) => (
-          <div className="flex flex-col min-w-0">
+          <div className="inline-flex flex-col items-center justify-center min-w-0">
             <span className="text-xs font-semibold text-foreground leading-tight truncate">
               {r.hostPerson}
             </span>
             <div className="mt-1">
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-muted text-muted-foreground">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-muted text-muted-foreground">
                 {r.purpose}
               </span>
             </div>
           </div>
         ),
         sortValue: (r) => r.hostPerson,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
       },
       {
         key: "campus",
         header: "Campus",
+        align: "center",
         cell: (r) => (
           <span className="text-xs text-muted-foreground font-medium block truncate">
             {formatCampusDisplay(r.campus).primary}
           </span>
         ),
         sortValue: (r) => r.campus,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
       },
       {
         key: "timing",
         header: "Timing",
+        align: "center",
         cell: (r) => (
-          <div className="flex flex-col text-xs font-mono leading-tight whitespace-nowrap">
+          <div className="inline-flex flex-col items-center justify-center text-xs font-mono leading-tight whitespace-nowrap">
             <span className="text-foreground">In: {r.checkInTime}</span>
             <span className="text-muted-foreground text-[11px]">
               Out: {r.checkOutTime || "—"}
             </span>
           </div>
         ),
-        className: "px-4 py-3 whitespace-nowrap",
-        headerClassName: "px-4",
+        className: "whitespace-nowrap",
       },
       {
         key: "actions",
         header: "Status / Action",
+        align: "center",
         cell: (r) => {
           const isInside = r.status === "Inside" || r.status === "Overstay";
           if (!isInside) {
             return (
-              <div className="flex items-center justify-end">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-muted text-muted-foreground whitespace-nowrap">
+              <div className="flex items-center justify-center">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-muted text-muted-foreground whitespace-nowrap">
                   Checked Out
                 </span>
               </div>
             );
           }
           return (
-            <div className="flex items-center justify-end gap-2 whitespace-nowrap">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-soft text-warning">
+            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-warning-soft text-warning">
                 Inside
               </span>
               <Button
@@ -219,8 +218,7 @@ export function ReceptionClient({
             </div>
           );
         },
-        className: "px-4 py-3 text-right whitespace-nowrap",
-        headerClassName: "px-4 text-right",
+        className: "whitespace-nowrap",
       },
     ],
     [handleCheckOutVisitor]
@@ -285,6 +283,7 @@ export function ReceptionClient({
       {
         key: "caller",
         header: "Caller / Inquirer",
+        align: "left",
         cell: (r) => (
           <div className="flex flex-col min-w-0">
             <span className="font-semibold text-foreground text-[13px] leading-tight truncate">
@@ -294,61 +293,59 @@ export function ReceptionClient({
           </div>
         ),
         sortValue: (r) => r.callerName,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
+        className: "whitespace-nowrap",
       },
       {
         key: "inquiryType",
         header: "Category & Message",
+        align: "center",
         cell: (r) => (
-          <div className="flex flex-col min-w-0">
+          <div className="inline-flex flex-col items-center justify-center min-w-0 max-w-[280px]">
             <div>
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-semibold bg-brand-50 text-brand">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-brand-50 text-brand">
                 {r.inquiryType}
               </span>
             </div>
-            <p className="text-xs text-foreground/80 line-clamp-1 mt-0.5">
+            <p className="text-xs text-foreground/80 line-clamp-1 mt-0.5 text-center">
               {r.notes}
             </p>
           </div>
         ),
         sortValue: (r) => r.inquiryType,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
       },
       {
         key: "campus",
         header: "Campus",
+        align: "center",
         cell: (r) => (
           <span className="text-xs text-muted-foreground font-medium block truncate">
             {formatCampusDisplay(r.campus).primary}
           </span>
         ),
         sortValue: (r) => r.campus,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
       },
       {
         key: "createdAt",
         header: "Date",
+        align: "center",
         cell: (r) => (
           <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
             {r.createdAt}
           </span>
         ),
         sortValue: (r) => r.createdAt,
-        className: "px-4 py-3 whitespace-nowrap",
-        headerClassName: "px-4",
+        className: "whitespace-nowrap",
       },
       {
         key: "actions",
         header: "Status / Action",
+        align: "center",
         cell: (r) => {
           const isResolved = r.status === "Closed" || r.status === "Converted";
           return (
-            <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
               <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
                   isResolved
                     ? "bg-success-soft text-success"
                     : "bg-warning-soft text-warning"
@@ -367,8 +364,7 @@ export function ReceptionClient({
             </div>
           );
         },
-        className: "px-4 py-3 text-right whitespace-nowrap",
-        headerClassName: "px-4 text-right",
+        className: "whitespace-nowrap",
       },
     ],
     [handleToggleInquiryStatus]

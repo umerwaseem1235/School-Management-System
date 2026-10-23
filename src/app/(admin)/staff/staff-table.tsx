@@ -144,9 +144,10 @@ export function StaffTable({
       {
         key: "staff",
         header: "Staff Member",
+        align: "left",
         cell: (r) => (
           <div className="flex items-center gap-3 min-w-0">
-            <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand font-heading text-xs font-bold ring-1 ring-brand/20">
+            <div className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand font-heading text-xs font-bold ring-1 ring-brand/20">
               {initials(r.name)}
             </div>
             <div className="flex flex-col min-w-0">
@@ -160,18 +161,17 @@ export function StaffTable({
           </div>
         ),
         sortValue: (r) => r.name,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
       },
       {
         key: "designation",
         header: "Role & Department",
+        align: "center",
         cell: (r) => (
-          <div className="flex flex-col min-w-0">
+          <div className="inline-flex flex-col items-center justify-center min-w-0">
             <span className="text-xs font-semibold text-foreground leading-tight truncate">
               {r.designation}
             </span>
-            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+            <div className="flex items-center justify-center gap-1.5 mt-1 flex-wrap">
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-muted text-muted-foreground">
                 {r.department}
               </span>
@@ -188,16 +188,15 @@ export function StaffTable({
           </div>
         ),
         sortValue: (r) => r.designation,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
       },
       {
         key: "campus",
         header: "Campus",
+        align: "center",
         cell: (r) => {
           const info = formatCampusDisplay(r.campus);
           return (
-            <div className="flex flex-col leading-tight min-w-0">
+            <div className="inline-flex flex-col items-center justify-center leading-tight min-w-0">
               <span className="text-xs font-medium text-foreground truncate">{info.primary}</span>
               {info.secondary && (
                 <span className="text-[11px] text-muted-foreground truncate">{info.secondary}</span>
@@ -206,26 +205,25 @@ export function StaffTable({
           );
         },
         sortValue: (r) => r.campus,
-        className: "px-4 py-3",
-        headerClassName: "px-4",
       },
       {
         key: "contact",
         header: "Phone",
+        align: "center",
         cell: (r) => (
           <span className="text-xs font-mono font-medium text-foreground whitespace-nowrap">
             {r.phone}
           </span>
         ),
         sortValue: (r) => r.phone,
-        className: "px-4 py-3 whitespace-nowrap",
-        headerClassName: "px-4",
+        className: "whitespace-nowrap",
       },
       {
         key: "actions",
         header: "Status / Action",
+        align: "center",
         cell: (r) => (
-          <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+          <div className="flex items-center justify-center gap-2 whitespace-nowrap">
             {/* Clickable Status Badge Dropdown */}
             <StaffStatusDropdown
               status={r.status}
@@ -245,8 +243,7 @@ export function StaffTable({
             </Button>
           </div>
         ),
-        className: "px-4 py-3 text-right whitespace-nowrap",
-        headerClassName: "px-4 text-right",
+        className: "whitespace-nowrap",
       },
     ],
     [onSelectStaff, onStatusChange]
