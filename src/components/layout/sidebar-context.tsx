@@ -3,35 +3,68 @@
 import * as React from "react";
 
 interface SidebarState {
+  isLocked: boolean;
+  isHovered: boolean;
+  setIsHovered: (hovered: boolean) => void;
+  isExpanded: boolean;
   collapsed: boolean;
+  toggleSidebar: () => void;
   toggleCollapsed: () => void;
+  isPinned: boolean;
+  togglePinned: () => void;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
 }
 
 const SidebarContext = React.createContext<SidebarState | null>(null);
 
-const STORAGE_KEY = "sms.sidebar.collapsed";
+const STORAGE_LOCKED_KEY = "sms.sidebar.locked";
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = React.useState(false);
+  const [isLocked, setIsLocked] = React.useState(true);
+  const [isHovered, setIsHovered] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   // Restore persisted preference after mount (avoids SSR mismatch).
   React.useEffect(() => {
-    if (localStorage.getItem(STORAGE_KEY) === "1") setCollapsed(true);
+    try {
+      const stored = localStorage.getItem(STORAGE_LOCKED_KEY);
+      if (stored !== null) {
+        setIsLocked(stored === "1");
+      }
+    } catch {
+      // localStorage may fail in some environments
+    }
   }, []);
 
-  const toggleCollapsed = React.useCallback(() => {
-    setCollapsed((prev) => {
-      localStorage.setItem(STORAGE_KEY, prev ? "0" : "1");
-      return !prev;
+  const toggleSidebar = React.useCallback(() => {
+    setIsLocked((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(STORAGE_LOCKED_KEY, next ? "1" : "0");
+      } catch {}
+      return next;
     });
   }, []);
 
+  const isExpanded = isLocked || isHovered;
+  const collapsed = !isExpanded;
+
   const value = React.useMemo(
-    () => ({ collapsed, toggleCollapsed, mobileOpen, setMobileOpen }),
-    [collapsed, toggleCollapsed, mobileOpen]
+    () => ({
+      isLocked,
+      isHovered,
+      setIsHovered,
+      isExpanded,
+      collapsed,
+      toggleSidebar,
+      toggleCollapsed: toggleSidebar,
+      isPinned: isLocked,
+      togglePinned: toggleSidebar,
+      mobileOpen,
+      setMobileOpen,
+    }),
+    [isLocked, isHovered, isExpanded, collapsed, toggleSidebar, mobileOpen]
   );
 
   return (

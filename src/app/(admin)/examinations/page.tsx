@@ -88,7 +88,7 @@ export default function ExaminationsPage() {
           <BarSeriesChart
             data={GRADE_DISTRIBUTION}
             xKey="grade"
-            series={[{ key: "students", label: "Students", color: "#353955" }]}
+            series={[{ key: "students", label: "Students", color: "#1e4275" }]}
           />
         </SectionCard>
 

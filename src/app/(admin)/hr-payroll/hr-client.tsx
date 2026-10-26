@@ -16,7 +16,7 @@ import { Check, Download, FileText, Users, DollarSign, Calendar, X } from "lucid
 /* ─── Employee columns ─── */
 
 const empColumns: Column<Employee>[] = [
-  { key: "employee", header: "Employee", cell: (r) => <PersonCell name={r.name} subtitle={r.empCode} />, sortValue: (r) => r.name },
+  { key: "employee", header: "Employee", cell: (r) => <PersonCell name={r.name} subtitle={r.empCode} showAvatar={false} />, sortValue: (r) => r.name },
   { key: "designation", header: "Designation", cell: (r) => <span className="text-[13px]">{r.designation}</span>, sortValue: (r) => r.designation },
   { key: "department", header: "Department", cell: (r) => <span className="text-[13px]">{r.department}</span> },
   {
@@ -149,8 +149,8 @@ export function HRClient() {
               data={DEPARTMENT_HEADCOUNT}
               xKey="department"
               series={[
-                { key: "teaching", label: "Teaching", color: "#353955" },
-                { key: "nonTeaching", label: "Non-Teaching", color: "#c79a3a" },
+                { key: "teaching", label: "Teaching", color: "#1e4275" },
+                { key: "nonTeaching", label: "Non-Teaching", color: "#0ea5e9" },
               ]}
               stacked
               showLegend

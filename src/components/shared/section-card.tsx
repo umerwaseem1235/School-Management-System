@@ -20,6 +20,8 @@ export function SectionCard({
   contentClassName,
   flush = false,
 }: SectionCardProps) {
+  const hasHeader = Boolean(title || action);
+
   return (
     <section
       className={cn(
@@ -36,8 +38,13 @@ export function SectionCard({
         className="absolute inset-x-1/4 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-primary/50 to-transparent"
       />
 
-      {(title || action) && (
-        <header className="relative z-10 flex items-start justify-between gap-4 px-6 pt-6 pb-2">
+      {hasHeader && (
+        <header
+          className={cn(
+            "relative z-20 flex justify-between gap-4 px-6 pt-5 pb-2.5",
+            description ? "items-start" : "items-center"
+          )}
+        >
           <div className="min-w-0">
             {title && (
               <h2 className="font-heading text-[15px] font-semibold text-foreground tracking-tight">
@@ -53,7 +60,14 @@ export function SectionCard({
           {action && <div className="shrink-0">{action}</div>}
         </header>
       )}
-      <div className={cn("relative z-10 flex-1", !flush && "px-6 pb-6 pt-4", flush && "pt-4", contentClassName)}>
+      <div
+        className={cn(
+          "relative z-10 flex-1",
+          !flush && (hasHeader ? "px-6 pt-2.5 pb-5" : "px-6 py-5"),
+          flush && (hasHeader ? "pt-2.5" : "pt-5"),
+          contentClassName
+        )}
+      >
         {children}
       </div>
     </section>

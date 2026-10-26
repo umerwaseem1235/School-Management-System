@@ -23,7 +23,7 @@ export const metadata = {
 const genderDonut = GENDER_SPLIT.map((g) => ({
   name: g.name,
   value: g.value,
-  color: g.name === "Male" ? "#353955" : "#c79a3a",
+  color: g.name === "Male" ? "#1e4275" : "#0ea5e9",
 }));
 
 export default function ReportsPage() {
@@ -36,7 +36,7 @@ export default function ReportsPage() {
           <LineTrendChart
             data={ENROLLMENT_TREND}
             xKey="year"
-            series={[{ key: "students", label: "Students", color: "#353955" }]}
+            series={[{ key: "students", label: "Students", color: "#1e4275" }]}
           />
         </SectionCard>
 
@@ -45,8 +45,8 @@ export default function ReportsPage() {
             data={RETENTION}
             xKey="year"
             series={[
-              { key: "retention", label: "Retention Rate (%)", color: "#2f8f6b" },
-              { key: "dropout", label: "Dropout Rate (%)", color: "#c8463d" },
+              { key: "retention", label: "Retention Rate (%)", color: "#1e4275" },
+              { key: "dropout", label: "Dropout Rate (%)", color: "#0ea5e9" },
             ]}
           />
         </SectionCard>
@@ -71,27 +71,9 @@ export default function ReportsPage() {
             data={REVENUE_TREND}
             xKey="month"
             series={[
-              {
-                key: "collected",
-                label: "Collected",
-                color: "#1e4275",
-                strokeWidth: 2.5,
-                fillOpacity: 0.24,
-              },
-              {
-                key: "expected",
-                label: "Expected",
-                color: "#0ea5e9",
-                strokeWidth: 2,
-                fillOpacity: 0.10,
-              },
-              {
-                key: "expenses",
-                label: "Expenses",
-                color: "#3c6fb0",
-                strokeWidth: 2.25,
-                fillOpacity: 0.16,
-              },
+              { key: "collected", label: "Collected", color: "#1e4275" },
+              { key: "expected", label: "Expected", color: "#0ea5e9" },
+              { key: "expenses", label: "Expenses", color: "#93c5fd" },
             ]}
             format="millions"
           />
@@ -101,7 +83,7 @@ export default function ReportsPage() {
           <LineTrendChart
             data={MONTHLY_ATTENDANCE}
             xKey="month"
-            series={[{ key: "rate", label: "Attendance Rate (%)", color: "#3c6fb0" }]}
+            series={[{ key: "rate", label: "Attendance Rate (%)", color: "#0ea5e9" }]}
             format="percent"
             yDomain={[85, 100]}
           />

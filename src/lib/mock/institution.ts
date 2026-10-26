@@ -133,12 +133,12 @@ export const STUDENTS: Student[] = Array.from({ length: 48 }, (_, i) => {
   const female = ["Ayesha", "Fatima", "Maryam", "Hira", "Sara", "Iqra", "Amna", "Noor", "Zara", "Laiba"].includes(first);
   return {
     id: `s${i + 1}`,
-    admissionNumber: `SMS-2026-${String(412 + i).padStart(4, "0")}`,
+    admissionNumber: `2026-${String(412 + i).padStart(4, "0")}`,
     rollNo: `${10 + (i % 40)}`,
     name: `${first} ${last}`,
     gender: female ? "Female" : "Male",
     className: classes[i % classes.length],
-    section: sections[i % sections.length],
+    section: sections[(Math.floor(i / classes.length) + (i % classes.length)) % sections.length],
     campus: CAMPUSES[i % 4].campusName,
     guardian: `${lastNames[(i + 2) % lastNames.length]} ${last}`,
     phone: `03${(i % 5) + 0}${i % 10}-${String(1000000 + i * 7919).slice(0, 7)}`,

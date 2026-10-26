@@ -21,13 +21,18 @@ const ROUTE_MAP: Record<string, { title: string; group: string }> = {
   "/paper-generator": { title: "Paper Generator", group: "Examinations" },
   "/results": { title: "Results", group: "Examinations" },
   "/certificates": { title: "Certificates", group: "Examinations" },
-  "/attendance": { title: "Attendance", group: "Student Life" },
+  "/attendance": { title: "Attendance Overview", group: "Attendance" },
+  "/attendance/overview": { title: "Attendance Overview", group: "Attendance" },
+  "/attendance/students": { title: "Student Attendance", group: "Attendance" },
+  "/attendance/staff": { title: "Staff Attendance", group: "Attendance" },
+  "/attendance/leave-requests": { title: "Leave Requests", group: "Attendance" },
+  "/attendance/leave-policy": { title: "Leave Policy", group: "Attendance" },
+  "/attendance/reports": { title: "Attendance Reports", group: "Attendance" },
   "/sports": { title: "Sports", group: "Student Life" },
   "/library": { title: "Library", group: "Student Life" },
   "/hostel": { title: "Hostel Management", group: "Student Life" },
   "/fees": { title: "Fee Management", group: "Finance" },
   "/accounts": { title: "Accounts", group: "Finance" },
-  "/monthly-accounts": { title: "Monthly Accounts", group: "Finance" },
   "/expenses": { title: "Expenses", group: "Finance" },
   "/inventory": { title: "Inventory", group: "Operations" },
   "/transport": { title: "Transport", group: "Operations" },
@@ -58,11 +63,11 @@ export function Breadcrumbs({ className }: { className?: string }) {
 
   return (
     <nav aria-label="Breadcrumb" className={cn("flex min-w-0 items-center gap-2", className)}>
-      <span className="hidden text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 sm:inline shrink-0">
+      <span className="hidden text-xs font-semibold uppercase tracking-wider text-[#0D1C42]/65 sm:inline shrink-0">
         {current.group}
       </span>
-      <span className="hidden text-muted-foreground/40 sm:inline shrink-0">/</span>
-      <h1 className="truncate font-heading text-sm font-bold tracking-tight text-foreground">
+      <span className="hidden text-[#0D1C42]/30 sm:inline shrink-0">/</span>
+      <h1 className="truncate font-heading text-sm font-bold tracking-tight text-[#0D1C42]">
         {current.title}
       </h1>
     </nav>

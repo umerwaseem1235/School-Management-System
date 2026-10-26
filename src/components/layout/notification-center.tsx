@@ -105,7 +105,7 @@ export function NotificationCenter({ className }: { className?: string }) {
       <DropdownMenuTrigger
         aria-label="Notifications"
         className={cn(
-          "group relative grid size-8.5 place-items-center rounded-lg border border-border bg-white text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "group relative grid size-8.5 place-items-center rounded-[4px] border border-brand/18 bg-white text-foreground/85 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06)] transition-all duration-150 hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 data-[state=open]:border-[#091d3e] data-[state=open]:bg-brand-50/70",
           className
         )}
       >
@@ -117,14 +117,14 @@ export function NotificationCenter({ className }: { className?: string }) {
 
       <DropdownMenuContent
         align="end"
-        className="w-84 sm:w-92 p-0 rounded-xl shadow-lg border-border bg-white"
+        className="w-84 sm:w-92 p-0 rounded-[4px] shadow-lg border border-brand/15 bg-white overflow-hidden"
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border bg-muted/30 px-4 py-2.5">
+        <div className="flex items-center justify-between border-b border-border/70 bg-muted/30 px-4 py-2.5">
           <div className="flex items-center gap-2">
             <p className="font-heading text-xs font-bold text-foreground">Notifications</p>
             {unreadCount > 0 && (
-              <span className="rounded-full bg-brand px-1.5 py-0.2 text-[10px] font-bold text-cream">
+              <span className="rounded-[3px] bg-brand-50 px-1.5 py-0.2 text-[10px] font-bold text-brand ring-1 ring-brand/15">
                 {unreadCount}
               </span>
             )}
@@ -142,15 +142,15 @@ export function NotificationCenter({ className }: { className?: string }) {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-1 border-b border-border px-3 py-1.5 bg-muted/10">
+        <div className="flex gap-1.5 border-b border-border/70 px-3 py-1.5 bg-muted/10">
           <button
             type="button"
             onClick={() => setTab("all")}
             className={cn(
-              "rounded-md px-2 py-0.5 text-xs font-medium transition-colors",
+              "rounded-[3px] px-2.5 py-0.5 text-xs font-semibold tracking-[0.01em] transition-all",
               tab === "all"
-                ? "bg-brand text-cream"
-                : "text-muted-foreground hover:bg-muted"
+                ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]"
+                : "border border-transparent text-muted-foreground hover:bg-brand-50/60 hover:text-brand"
             )}
           >
             All ({items.length})
@@ -159,10 +159,10 @@ export function NotificationCenter({ className }: { className?: string }) {
             type="button"
             onClick={() => setTab("urgent")}
             className={cn(
-              "rounded-md px-2 py-0.5 text-xs font-medium transition-colors",
+              "rounded-[3px] px-2.5 py-0.5 text-xs font-semibold tracking-[0.01em] transition-all",
               tab === "urgent"
-                ? "bg-danger text-white"
-                : "text-muted-foreground hover:bg-muted"
+                ? "border border-danger/40 bg-danger text-white shadow-xs"
+                : "border border-transparent text-muted-foreground hover:bg-danger-soft/40 hover:text-danger"
             )}
           >
             Urgent (2)
@@ -182,13 +182,13 @@ export function NotificationCenter({ className }: { className?: string }) {
                 <div
                   key={item.id}
                   className={cn(
-                    "group relative flex items-start gap-2.5 rounded-lg p-2 transition-colors hover:bg-muted/40",
+                    "group relative flex items-start gap-2.5 rounded-[3px] p-2 transition-colors hover:bg-muted/40",
                     !item.read && "bg-brand-50/30"
                   )}
                 >
                   <span
                     className={cn(
-                      "grid size-7 shrink-0 place-items-center rounded-md mt-0.5",
+                      "grid size-7 shrink-0 place-items-center rounded-[3px] mt-0.5",
                       item.tone
                     )}
                   >

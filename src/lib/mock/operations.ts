@@ -93,13 +93,13 @@ export const EXPENSES = [
 export const EMPLOYEES: Employee[] = [
   { id: "em1", empCode: "EMP-0012", name: "Dr. Ayesha Siddiqui", designation: "Principal", department: "Administration", campus: "Gulberg", type: "Non-Teaching", joiningDate: "2008-08-01", basicSalary: 420000, status: "Active" },
   { id: "em2", empCode: "EMP-0148", name: "Mr. Adeel Hassan", designation: "Senior Teacher — Mathematics", department: "Sciences", campus: "Gulberg", type: "Teaching", joiningDate: "2014-03-15", basicSalary: 165000, status: "Active" },
-  { id: "em3", empCode: "EMP-0211", name: "Mrs. Maryam Shah", designation: "Head of English", department: "Languages", campus: "Gulberg", type: "Teaching", joiningDate: "2016-08-01", basicSalary: 158000, status: "Active" },
+  { id: "em3", empCode: "EMP-0211", name: "Mrs. Maryam Shah", designation: "Head of English", department: "Languages & Literature", campus: "Gulberg", type: "Teaching", joiningDate: "2016-08-01", basicSalary: 158000, status: "Active" },
   { id: "em4", empCode: "EMP-0274", name: "Mr. Usman Ali", designation: "Teacher — Computer Science", department: "Technology", campus: "DHA Phase 5", type: "Teaching", joiningDate: "2019-01-10", basicSalary: 118000, status: "Active" },
   { id: "em5", empCode: "EMP-0302", name: "Dr. Saima Riaz", designation: "Senior Teacher — Physics", department: "Sciences", campus: "F-8 Islamabad", type: "Teaching", joiningDate: "2015-09-01", basicSalary: 172000, status: "Active" },
   { id: "em6", empCode: "EMP-0355", name: "Ms. Nadia Hussain", designation: "HR Manager", department: "Human Resources", campus: "Gulberg", type: "Non-Teaching", joiningDate: "2017-05-22", basicSalary: 185000, status: "Active" },
   { id: "em7", empCode: "EMP-0389", name: "Mr. Tariq Mehmood", designation: "Accounts Officer", department: "Finance", campus: "DHA Phase 5", type: "Non-Teaching", joiningDate: "2018-11-05", basicSalary: 128000, status: "Active" },
   { id: "em8", empCode: "EMP-0412", name: "Mr. Bilal Saeed", designation: "Teacher — Chemistry", department: "Sciences", campus: "Clifton", type: "Teaching", joiningDate: "2020-08-01", basicSalary: 104000, status: "Suspended" },
-  { id: "em9", empCode: "EMP-0447", name: "Ms. Kiran Aziz", designation: "Teacher — Urdu", department: "Languages", campus: "Gulberg", type: "Teaching", joiningDate: "2021-02-15", basicSalary: 96000, status: "Active" },
+  { id: "em9", empCode: "EMP-0447", name: "Ms. Kiran Aziz", designation: "Teacher — Urdu", department: "Languages & Literature", campus: "Gulberg", type: "Teaching", joiningDate: "2021-02-15", basicSalary: 96000, status: "Active" },
   { id: "em10", empCode: "EMP-0481", name: "Mr. Saad Mehmood", designation: "Teacher — Biology", department: "Sciences", campus: "Bahria Town", type: "Teaching", joiningDate: "2026-09-01", basicSalary: 92000, status: "Pending" },
 ];
 
@@ -122,7 +122,7 @@ export const LEAVE_REQUESTS: LeaveRequest[] = [
 
 export const DEPARTMENT_HEADCOUNT = [
   { department: "Sciences", teaching: 86, nonTeaching: 12 },
-  { department: "Languages", teaching: 74, nonTeaching: 6 },
+  { department: "Languages & Literature", teaching: 74, nonTeaching: 6 },
   { department: "Humanities", teaching: 58, nonTeaching: 5 },
   { department: "Technology", teaching: 32, nonTeaching: 14 },
   { department: "Primary", teaching: 96, nonTeaching: 18 },

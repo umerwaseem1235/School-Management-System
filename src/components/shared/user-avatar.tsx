@@ -44,12 +44,27 @@ export function UserAvatar({
 export function PersonCell({
   name,
   subtitle,
+  showAvatar = true,
+  className,
 }: {
   name: string;
   subtitle?: string;
+  showAvatar?: boolean;
+  className?: string;
 }) {
+  if (!showAvatar) {
+    return (
+      <div className={cn("min-w-0", className)}>
+        <p className="truncate font-medium text-foreground">{name}</p>
+        {subtitle && (
+          <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+        )}
+      </div>
+    );
+  }
+
   return (
-    <div className="flex items-center gap-3">
+    <div className={cn("flex items-center gap-3", className)}>
       <UserAvatar name={name} />
       <div className="min-w-0">
         <p className="truncate font-medium text-foreground">{name}</p>

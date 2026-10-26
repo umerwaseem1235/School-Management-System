@@ -181,7 +181,7 @@ export function BarSeriesChart({
       <BarChart
         data={data}
         layout={horizontal ? "vertical" : "horizontal"}
-        margin={{ left: horizontal ? 8 : 0, right: 12, top: 8 }}
+        margin={{ left: horizontal ? 8 : -10, right: 12, top: 12, bottom: 4 }}
         barCategoryGap={horizontal ? 10 : "22%"}
       >
         <CartesianGrid vertical={horizontal} horizontal={!horizontal} strokeDasharray="4 4" />
@@ -192,8 +192,15 @@ export function BarSeriesChart({
           </>
         ) : (
           <>
-            <XAxis dataKey={xKey} tickLine={false} axisLine={false} tickMargin={10} />
-            <YAxis tickLine={false} axisLine={false} width={48} domain={yDomain} tickFormatter={(v) => fmt(format, v)} />
+            <XAxis
+              dataKey={xKey}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+              interval={0}
+              tick={{ fontSize: 11 }}
+            />
+            <YAxis tickLine={false} axisLine={false} width={44} domain={yDomain} tickFormatter={(v) => fmt(format, v)} />
           </>
         )}
         <ChartTooltip cursor={{ fill: "var(--muted)" }} content={<ChartTooltipContent />} />

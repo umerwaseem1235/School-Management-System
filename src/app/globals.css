@@ -133,4 +133,11 @@
     scrollbar-width: thin;
     scrollbar-color: rgb(53 57 85 / 0.2) transparent;
   }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }

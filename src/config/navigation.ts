@@ -10,12 +10,15 @@ import {
   FileText,
   Award,
   CalendarCheck,
+  UserCheck,
+  CalendarClock,
+  BarChart3,
   Trophy,
   Library,
   Building2,
   Wallet,
+  Banknote,
   Calculator,
-  Receipt,
   CreditCard,
   Package,
   Bus,
@@ -24,6 +27,11 @@ import {
   Mail,
   Settings,
   Phone,
+  ShieldCheck,
+  RotateCcw,
+  SlidersHorizontal,
+  AlertCircle,
+  Scale,
   type LucideIcon,
 } from "lucide-react";
 
@@ -32,6 +40,7 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   badge?: string;
+  exact?: boolean;
 }
 
 export interface NavGroup {
@@ -48,7 +57,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     ],
-    defaultExpanded: true,
+    defaultExpanded: false,
   },
   {
     label: "Administration",
@@ -59,7 +68,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Staff", href: "/staff", icon: Users },
       { title: "Users & Roles", href: "/users", icon: UserCog },
     ],
-    defaultExpanded: true,
+    defaultExpanded: false,
   },
   {
     label: "Academics",
@@ -67,6 +76,20 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Academic Management", href: "/academics", icon: BookOpen },
       { title: "LMS", href: "/lms", icon: MonitorPlay },
+    ],
+    defaultExpanded: false,
+  },
+  {
+    label: "Attendance",
+    icon: CalendarCheck,
+    items: [
+      { title: "Overview", href: "/attendance", icon: LayoutDashboard, exact: true },
+      { title: "Student Attendance", href: "/attendance/students", icon: GraduationCap },
+      { title: "Staff Attendance", href: "/attendance/staff", icon: UserCheck },
+      { title: "Leave Requests", href: "/attendance/leave-requests", icon: CalendarClock, badge: "5" },
+      { title: "Leave Policy", href: "/attendance/leave-policy", icon: ShieldCheck },
+      { title: "Student Attendance Report", href: "/attendance/reports", icon: BarChart3 },
+      { title: "Staff Attendance Report", href: "/attendance/staff-reports", icon: FileText },
     ],
     defaultExpanded: false,
   },
@@ -87,7 +110,6 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Student Life",
     icon: GraduationCap,
     items: [
-      { title: "Attendance", href: "/attendance", icon: CalendarCheck },
       { title: "Sports", href: "/sports", icon: Trophy },
       { title: "Library", href: "/library", icon: Library },
       { title: "Hostel Management", href: "/hostel", icon: Building2 },
@@ -98,9 +120,15 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Finance",
     icon: Wallet,
     items: [
-      { title: "Fee Management", href: "/fees", icon: Wallet },
+      { title: "Fee Management", href: "/fees", icon: Wallet, exact: true },
+      { title: "Staff Payroll", href: "/fees/payroll", icon: Banknote },
+      { title: "Refund", href: "/fees/refund", icon: RotateCcw },
+      { title: "Update Fee", href: "/fees/update-fee", icon: SlidersHorizontal },
+      { title: "Fines", href: "/fees/fines", icon: AlertCircle },
+      { title: "Scholarship", href: "/fees/scholarships", icon: Award },
+      { title: "Adjustment", href: "/fees/adjustments", icon: Scale },
+      { title: "Reports", href: "/fees/reports", icon: BarChart3 },
       { title: "Accounts", href: "/accounts", icon: Calculator },
-      { title: "Monthly Accounts", href: "/monthly-accounts", icon: Receipt },
       { title: "Expenses", href: "/expenses", icon: CreditCard },
     ],
     defaultExpanded: false,

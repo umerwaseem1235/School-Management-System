@@ -2,13 +2,24 @@
 
 import * as React from "react";
 import {
-  ArrowDownUp,
   ArrowDown,
   ArrowUp,
+  Building2,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
+  Clock3,
+  FileText,
   Inbox,
+  Layers,
+  Phone,
   Search,
+  ShieldCheck,
+  SlidersHorizontal,
+  TrendingUp,
+  UserRound,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -22,13 +33,79 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 export interface Column<T> {
   key: string;
-  header: string;
+  header: React.ReactNode;
+  align?: "left" | "center" | "right";
+  headerAlign?: "left" | "center" | "right";
+  icon?: LucideIcon;
   cell: (row: T) => React.ReactNode;
   /** Returns a primitive used for sorting. Enables sorting when provided. */
   sortValue?: (row: T) => string | number;
-  align?: "left" | "center" | "right";
   className?: string;
   headerClassName?: string;
+}
+
+function resolveHeaderIcon(key: string, header: React.ReactNode): LucideIcon {
+  const headerStr = typeof header === "string" ? header : "";
+  const token = `${key} ${headerStr}`.toLowerCase();
+  if (
+    token.includes("student") ||
+    token.includes("employee") ||
+    token.includes("applicant") ||
+    token.includes("teacher") ||
+    token.includes("person")
+  ) {
+    return UserRound;
+  }
+  if (
+    token.includes("class") ||
+    token.includes("campus") ||
+    token.includes("department") ||
+    token.includes("wing")
+  ) {
+    return Building2;
+  }
+  if (
+    token.includes("arrival") ||
+    token.includes("scan") ||
+    token.includes("check") ||
+    token.includes("time")
+  ) {
+    return Clock3;
+  }
+  if (
+    token.includes("rate") ||
+    token.includes("monthly") ||
+    token.includes("cumulative") ||
+    token.includes("trend")
+  ) {
+    return TrendingUp;
+  }
+  if (token.includes("status") || token.includes("risk")) {
+    return ShieldCheck;
+  }
+  if (
+    token.includes("roll") ||
+    token.includes("action") ||
+    token.includes("override") ||
+    token.includes("decision")
+  ) {
+    return SlidersHorizontal;
+  }
+  if (
+    token.includes("date") ||
+    token.includes("streak") ||
+    token.includes("duration") ||
+    token.includes("days")
+  ) {
+    return CalendarDays;
+  }
+  if (token.includes("guardian") || token.includes("phone") || token.includes("contact")) {
+    return Phone;
+  }
+  if (token.includes("leave") || token.includes("reason") || token.includes("type")) {
+    return FileText;
+  }
+  return Layers;
 }
 
 export type FilterOption = string | { value: string; label: string };
@@ -36,10 +113,15 @@ export type FilterOption = string | { value: string; label: string };
 export interface FilterDef<T> {
   key: string;
   label: string;
-  options: FilterOption[];
   allLabel?: string;
-  triggerClassName?: string;
+  options?: FilterOption[];
   getValue: (row: T) => string;
+  className?: string;
+  triggerClassName?: string;
+  dependsOn?: {
+    key: string;
+    getOptions?: (parentValue: string) => string[];
+  };
 }
 
 interface DataTableProps<T> {
@@ -59,20 +141,6 @@ interface DataTableProps<T> {
 }
 
 const ALL = "__all__";
-
-function getAllFilterLabel(f: FilterDef<unknown>): string {
-  if (f.allLabel) return f.allLabel;
-  const lower = f.label.toLowerCase();
-  if (lower === "campus") return "All Campuses";
-  if (lower === "class") return "All Classes";
-  if (lower === "status") return "All Statuses";
-  if (f.label.endsWith("s")) return `All ${f.label}`;
-  if (f.label.endsWith("y")) return `All ${f.label.slice(0, -1)}ies`;
-  if (f.label.endsWith("ch") || f.label.endsWith("sh") || f.label.endsWith("x")) {
-    return `All ${f.label}es`;
-  }
-  return `All ${f.label}s`;
-}
 
 /**
  * Generic, typed client-side data table.
@@ -105,6 +173,12 @@ export function DataTable<T>({
     let rows = data.filter((row) => {
       if (q && searchFn && !searchFn(row, q)) return false;
       return filters.every((f) => {
+        if (f.dependsOn) {
+          const parentVal = filterState[f.dependsOn.key];
+          if (!parentVal || parentVal === ALL) {
+            return true;
+          }
+        }
         const v = filterState[f.key];
         return !v || v === ALL || f.getValue(row) === v;
       });
@@ -161,10 +235,10 @@ export function DataTable<T>({
   return (
     <div className={cn("flex flex-col", className)}>
       {/* Toolbar */}
-      <div className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-2 px-6 pb-5 lg:flex-row lg:items-center">
         {searchFn && (
-          <div className="relative w-full sm:w-64 md:w-72 shrink-0">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative w-full sm:w-72 lg:w-72 shrink-0">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
               onChange={(e) => {
@@ -172,74 +246,130 @@ export function DataTable<T>({
                 setPage(0);
               }}
               placeholder={searchPlaceholder}
-              className="h-9 w-full rounded-lg border border-input bg-background/60 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:bg-white focus:ring-2 focus:ring-ring/20"
+              className="h-9 w-full rounded-[4px] border border-brand/18 bg-white pl-9 pr-3 text-xs font-medium text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] outline-none transition-colors placeholder:font-normal placeholder:text-muted-foreground/85 hover:border-brand/30 focus:border-ring focus:bg-white focus:ring-3 focus:ring-ring/20"
             />
           </div>
         )}
-        {(filters.length > 0 || (selectable && selected.size > 0) || toolbar) && (
-          <div className="flex items-center gap-2 flex-wrap md:ml-auto md:justify-end">
-            {filters.map((f) => {
-              const normalizedOptions: { value: string; label: string }[] = f.options.map((o) =>
-                typeof o === "string" ? { value: o, label: o } : o
-              );
-              const allLabel = getAllFilterLabel(f as FilterDef<unknown>);
-              const items = [{ value: ALL, label: allLabel }, ...normalizedOptions];
-              const currentValue = filterState[f.key] ?? ALL;
+        <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
+          {filters.map((f) => {
+            if (f.dependsOn) {
+              const parentVal = filterState[f.dependsOn.key];
+              if (!parentVal || parentVal === ALL) {
+                return null;
+              }
+            }
 
-              return (
-                <Select
-                  key={f.key}
-                  items={items}
-                  value={currentValue}
-                  onValueChange={(v) => {
-                    setFilterState((s) => ({ ...s, [f.key]: String(v) }));
-                    setPage(0);
-                  }}
+            const currentOptions =
+              (f.dependsOn?.getOptions
+                ? f.dependsOn.getOptions(filterState[f.dependsOn.key] || "")
+                : f.options) || [];
+
+            const isCampus =
+              f.key.toLowerCase().includes("campus") ||
+              f.label.toLowerCase().includes("campus");
+
+            const formatOptLabel = (raw: string) => {
+              if (isCampus) {
+                if (/^Main(\s+Campus)?(\s*[-—–]\s*Gulberg)?$/i.test(raw) || /^Gulberg$/i.test(raw)) {
+                  return "Main Campus";
+                }
+                return raw
+                  .replace(/\s*[-—–]\s*Gulberg$/i, "")
+                  .replace(/\s+Campus$/i, "")
+                  .replace(/^Campus\s+/i, "")
+                  .trim();
+              }
+              return raw;
+            };
+
+            const defaultAllLabel = f.allLabel
+              ? f.allLabel
+              : f.label.toLowerCase() === "class"
+                ? "All Class"
+                : f.label.toLowerCase() === "section"
+                  ? "All Sections"
+                  : f.label.toLowerCase() === "department"
+                    ? "All Departments"
+                    : f.label.toLowerCase() === "category"
+                      ? "All Categories"
+                      : `All ${f.label}`;
+
+            const items = [
+              { value: ALL, label: defaultAllLabel },
+              ...currentOptions.map((o) =>
+                typeof o === "string"
+                  ? { value: o, label: formatOptLabel(o) }
+                  : { value: o.value, label: o.label }
+              ),
+            ];
+
+            const selectNode = (
+              <Select
+                key={f.key}
+                items={items}
+                value={filterState[f.key] ?? ALL}
+                onValueChange={(v) => {
+                  setFilterState((s) => {
+                    const next = { ...s, [f.key]: String(v) };
+                    filters.forEach((other) => {
+                      if (other.dependsOn?.key === f.key) {
+                        delete next[other.key];
+                      }
+                    });
+                    return next;
+                  });
+                  setPage(0);
+                }}
+              >
+                <SelectTrigger
+                  className={cn(
+                    "h-9! w-[140px] rounded-[4px] border-brand/18 bg-white text-xs font-medium shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] hover:border-brand/30",
+                    f.className,
+                    f.triggerClassName
+                  )}
                 >
-                  <SelectTrigger
-                    className={cn(
-                      "h-9! min-w-28 rounded-lg border-border/80 bg-background/80 text-xs sm:text-[13px] font-medium shadow-2xs hover:bg-muted/40 transition-colors",
-                      f.triggerClassName
-                    )}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent
-                    align="end"
-                    alignItemWithTrigger={false}
-                    className="w-auto min-w-[210px] max-w-xs p-1.5 shadow-lg border border-border/70 rounded-xl"
-                  >
-                    {items.map((it) => (
-                      <SelectItem
-                        key={it.value}
-                        value={it.value}
-                        className="cursor-pointer py-1.5 px-2.5 text-xs sm:text-[13px] font-medium rounded-md"
-                      >
-                        {it.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="min-w-[var(--anchor-width)] w-auto max-w-[220px]">
+                  {items.map((it) => (
+                    <SelectItem key={it.value} value={it.value}>
+                      {it.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+
+            if (f.dependsOn) {
+              return (
+                <div
+                  key={f.key}
+                  className="animate-in fade-in-0 slide-in-from-left-3 zoom-in-95 duration-200 ease-out fill-mode-forwards"
+                >
+                  {selectNode}
+                </div>
               );
-            })}
-            {selectable && selected.size > 0 && (
-              <div className="flex items-center gap-2 rounded-lg bg-brand-50 py-1 pl-3 pr-1 text-xs font-medium text-brand">
-                {selected.size} selected
-                {bulkActions?.(Array.from(selected))}
-              </div>
-            )}
-            {toolbar}
-          </div>
-        )}
+            }
+
+            return selectNode;
+          })}
+          {selectable && selected.size > 0 && (
+            <div className="flex items-center gap-2 rounded-lg bg-brand-50 py-1 pl-3 pr-1 text-xs font-medium text-brand">
+              {selected.size} selected
+              {bulkActions?.(Array.from(selected))}
+            </div>
+          )}
+          {toolbar}
+        </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto scrollbar-thin-light">
-        <table className={cn("w-full text-sm", tableClassName ?? "min-w-[720px]")}>
+        <table className={cn("w-full text-sm", tableClassName ?? "min-w-[720px] table-fixed")}>
           <thead>
-            <tr className="border-y border-border/70 bg-muted/60">
+            <tr className="border-y border-[#dbe4f0] bg-gradient-to-b from-[#f8fafd] via-[#f4f7fc] to-[#eef3fa] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95)]">
               {selectable && (
-                <th className="w-10 py-3 pl-5">
+                <th className="relative w-11 py-3.5 pl-5 pr-2 after:pointer-events-none after:absolute after:right-0 after:top-1/2 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[#d8e2f0]">
                   <Checkbox
                     checked={allOnPageSelected}
                     onCheckedChange={toggleAllOnPage}
@@ -247,23 +377,33 @@ export function DataTable<T>({
                   />
                 </th>
               )}
-              {columns.map((col, idx) => {
-                const active = sort?.key === col.key;
-                const alignClass =
-                  col.align === "center"
-                    ? "text-center"
-                    : col.align === "right"
-                    ? "text-right"
-                    : "text-left";
+              {columns.map((col) => {
+                const active = Boolean(col.sortValue && sort?.key === col.key);
+                const headerAlign =
+                  col.headerAlign ??
+                  (col.headerClassName?.includes("text-center")
+                    ? "center"
+                    : col.headerClassName?.includes("text-right")
+                    ? "right"
+                    : col.headerClassName?.includes("text-left")
+                    ? "left"
+                    : col.align ??
+                      (col.className?.includes("text-center")
+                        ? "center"
+                        : col.className?.includes("text-right")
+                        ? "right"
+                        : "left"));
+                const isCenter = headerAlign === "center";
+                const isRight = headerAlign === "right";
 
                 return (
                   <th
                     key={col.key}
                     className={cn(
-                      "whitespace-nowrap px-4 py-3 text-[11.5px] font-semibold uppercase tracking-wider text-muted-foreground",
-                      idx === 0 && !selectable && "pl-6",
-                      idx === columns.length - 1 && "pr-6",
-                      alignClass,
+                      "relative whitespace-nowrap px-5 py-3.5 align-middle select-none not-last:after:pointer-events-none not-last:after:absolute not-last:after:right-0 not-last:after:top-1/2 not-last:after:h-4 not-last:after:w-px not-last:after:-translate-y-1/2 not-last:after:bg-[#d8e2f0]",
+                      isCenter ? "text-center" : isRight ? "text-right" : "text-left",
+                      active &&
+                        "bg-[#e8f0fe]/45 before:pointer-events-none before:absolute before:inset-x-3 before:bottom-0 before:h-[2px] before:rounded-full before:bg-[#1d4ed8]",
                       col.headerClassName
                     )}
                   >
@@ -272,23 +412,71 @@ export function DataTable<T>({
                         type="button"
                         onClick={() => toggleSort(col.key)}
                         className={cn(
-                          "inline-flex items-center gap-1 uppercase transition-colors hover:text-brand",
-                          col.align === "center" && "mx-auto justify-center",
-                          col.align === "right" && "ml-auto justify-end",
-                          active && "text-brand"
+                          "group/th inline-flex cursor-pointer items-center gap-1.5 rounded-lg py-0.5 transition-colors",
+                          isCenter
+                            ? "w-full justify-center text-center"
+                            : isRight
+                            ? "w-full justify-end text-right"
+                            : "text-left",
+                          active
+                            ? "text-[#091d3e]"
+                            : "text-[#1e293b] hover:text-[#091d3e]"
                         )}
                       >
-                        {col.header}
-                        {!active ? (
-                          <ArrowDownUp className="size-3 opacity-50" />
-                        ) : sort?.dir === "asc" ? (
-                          <ArrowUp className="size-3" />
-                        ) : (
-                          <ArrowDown className="size-3" />
+                        {col.icon && (
+                          <col.icon
+                            className={cn(
+                              "size-3.5 shrink-0 transition-colors",
+                              active
+                                ? "text-[#1d4ed8]"
+                                : "text-[#091d3e]/55 group-hover/th:text-[#091d3e]"
+                            )}
+                          />
                         )}
+                        <span className="text-[12.5px] font-bold tracking-[-0.01em]">
+                          {col.header}
+                        </span>
+                        <span
+                          className={cn(
+                            "grid size-4 shrink-0 place-items-center rounded transition-all duration-150",
+                            active
+                              ? "text-[#1d4ed8]"
+                              : "text-[#94a3b8] group-hover/th:text-[#091d3e]"
+                          )}
+                        >
+                          {!active ? (
+                            <ChevronsUpDown className="size-3.5" strokeWidth={2} />
+                          ) : sort?.dir === "asc" ? (
+                            <ArrowUp className="size-3" strokeWidth={2.4} />
+                          ) : (
+                            <ArrowDown className="size-3" strokeWidth={2.4} />
+                          )}
+                        </span>
                       </button>
                     ) : (
-                      col.header
+                      <div
+                        className={cn(
+                          "inline-flex items-center gap-1.5 py-0.5 text-[#1e293b]",
+                          isCenter
+                            ? "w-full justify-center text-center"
+                            : isRight
+                            ? "w-full justify-end text-right"
+                            : ""
+                        )}
+                      >
+                        {typeof col.header === "string" ? (
+                          <>
+                            {col.icon && (
+                              <col.icon className="size-3.5 text-[#091d3e]/60 shrink-0" />
+                            )}
+                            <span className="text-[12.5px] font-bold tracking-[-0.01em]">
+                              {col.header}
+                            </span>
+                          </>
+                        ) : (
+                          col.header
+                        )}
+                      </div>
                     )}
                   </th>
                 );
@@ -313,7 +501,7 @@ export function DataTable<T>({
                 <tr
                   key={id}
                   className={cn(
-                    "transition-colors hover:bg-cream/60",
+                    "h-[61px] transition-colors hover:bg-cream/60",
                     isSel && "bg-brand-50/60"
                   )}
                 >
@@ -326,22 +514,29 @@ export function DataTable<T>({
                       />
                     </td>
                   )}
-                  {columns.map((col, idx) => {
-                    const alignClass =
-                      col.align === "center"
-                        ? "text-center"
-                        : col.align === "right"
-                        ? "text-right"
-                        : "text-left";
-
+                  {columns.map((col) => {
+                    const cellAlign =
+                      col.align ??
+                      (col.className?.includes("text-center")
+                        ? "center"
+                        : col.className?.includes("text-right")
+                        ? "right"
+                        : col.className?.includes("text-left")
+                        ? "left"
+                        : col.headerAlign === "center"
+                        ? "left"
+                        : col.headerClassName?.includes("text-center")
+                        ? "center"
+                        : col.headerClassName?.includes("text-right")
+                        ? "right"
+                        : "left");
                     return (
                       <td
                         key={col.key}
                         className={cn(
-                          "px-4 py-3.5 align-middle",
-                          idx === 0 && !selectable && "pl-6",
-                          idx === columns.length - 1 && "pr-6",
-                          alignClass,
+                          "overflow-hidden px-5 py-3 align-middle",
+                          cellAlign === "center" && "text-center",
+                          cellAlign === "right" && "text-right",
                           col.className
                         )}
                       >
@@ -352,29 +547,59 @@ export function DataTable<T>({
                 </tr>
               );
             })}
+            {/* Filler rows so card height and column widths remain 100% constant on partial pages */}
+            {pageRows.length > 0 &&
+              pageRows.length < pageSize &&
+              Array.from({ length: pageSize - pageRows.length }).map((_, idx) => (
+                <tr
+                  key={`filler-row-${idx}`}
+                  aria-hidden="true"
+                  className={cn(
+                    "h-[61px] select-none pointer-events-none",
+                    idx === 0 ? "border-border/60" : "border-transparent"
+                  )}
+                >
+                  {selectable && (
+                    <td className="h-[61px] py-3 pl-5 border-none">
+                      <div className="size-4 invisible" />
+                    </td>
+                  )}
+                  {columns.map((col) => (
+                    <td
+                      key={`filler-cell-${idx}-${col.key}`}
+                      className={cn("h-[61px] px-5 py-3 border-none", col.className)}
+                    >
+                      <div className="h-[37px] invisible select-none">&nbsp;</div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
 
       {/* Pagination */}
-      <div className="flex flex-col items-center justify-between gap-3 border-t border-border/70 px-5 py-3.5 text-xs text-muted-foreground sm:flex-row">
-        <p>
-          Showing{" "}
-          <span className="font-semibold text-foreground">
-            {filtered.length === 0 ? 0 : safePage * pageSize + 1}–
-            {Math.min((safePage + 1) * pageSize, filtered.length)}
-          </span>{" "}
-          of <span className="font-semibold text-foreground">{filtered.length}</span> records
-        </p>
-        <div className="flex items-center gap-1">
+      <div className="flex flex-col gap-3 border-t border-border/70 px-6 py-3.5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-1.5 tabular-nums select-none">
+          <span>Showing</span>
+          <span className="inline-flex h-6 w-[52px] shrink-0 items-center justify-center rounded-[3px] border border-brand/15 bg-white font-semibold tabular-nums text-foreground shadow-2xs">
+            {filtered.length === 0 ? 0 : safePage * pageSize + 1}–{Math.min((safePage + 1) * pageSize, filtered.length)}
+          </span>
+          <span>
+            of <strong className="font-semibold text-foreground">{filtered.length}</strong> entries
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
           <PagerButton disabled={safePage === 0} onClick={() => setPage(safePage - 1)} label="Previous page">
-            <ChevronLeft className="size-4" />
+            <ChevronLeft className="size-3.5" />
           </PagerButton>
           {Array.from({ length: pageCount }, (_, i) => i)
             .filter((i) => i === 0 || i === pageCount - 1 || Math.abs(i - safePage) <= 1)
             .map((i, idx, arr) => (
               <React.Fragment key={i}>
-                {idx > 0 && i - arr[idx - 1] > 1 && <span className="px-1">…</span>}
+                {idx > 0 && i - arr[idx - 1] > 1 && (
+                  <span className="px-1 text-muted-foreground/60 select-none">…</span>
+                )}
                 <PagerButton active={i === safePage} onClick={() => setPage(i)} label={`Page ${i + 1}`}>
                   {i + 1}
                 </PagerButton>
@@ -385,7 +610,7 @@ export function DataTable<T>({
             onClick={() => setPage(safePage + 1)}
             label="Next page"
           >
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-3.5" />
           </PagerButton>
         </div>
       </div>
@@ -413,8 +638,12 @@ function PagerButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "grid h-8 min-w-8 place-items-center rounded-lg px-2 text-xs font-semibold transition-colors disabled:pointer-events-none disabled:opacity-40",
-        active ? "bg-brand text-cream" : "text-foreground hover:bg-muted"
+        "inline-flex size-8 items-center justify-center rounded-[4px] border text-xs font-semibold tabular-nums transition-all select-none cursor-pointer",
+        active
+          ? "border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_2px_4px_rgb(9_29_62/0.25)]"
+          : "border-brand/18 bg-white text-foreground/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] hover:border-brand/35 hover:bg-brand-50/50 hover:text-brand",
+        disabled &&
+          "pointer-events-none cursor-not-allowed border-border/50 bg-muted/30 text-muted-foreground/35 shadow-none opacity-60"
       )}
     >
       {children}

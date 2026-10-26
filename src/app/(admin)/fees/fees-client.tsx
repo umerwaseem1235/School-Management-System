@@ -1,29 +1,19 @@
 "use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import * as React from "react";
+import { Download, Plus, Printer, Wallet, CreditCard, TrendingUp, UserCheck } from "lucide-react";
+import { toast } from "sonner";
+import { PageHeader } from "@/components/shared/page-header";
+import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
-import { PersonCell } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SectionCard } from "@/components/shared/section-card";
-import { AreaTrendChart, DonutChart, DonutLegend } from "@/components/charts";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatCurrency, formatCurrencyCompact, formatDate, formatCampusDisplay } from "@/lib/format";
-import {
-  REVENUE_TREND,
-  FEE_CHALLANS,
-  FEE_STRUCTURES,
-  SCHOLARSHIPS,
-  EXPENSES,
-} from "@/lib/mock/operations";
+import { ActionButton } from "@/components/shared/action-button";
+import { formatCurrency, formatCurrencyCompact, formatDate, formatNumber } from "@/lib/format";
+import { FEE_CHALLANS } from "@/lib/mock/operations";
 import type { FeeChallan } from "@/types";
+import { exportFeeChallansPdf, printFeeReport } from "./fee-export";
+import { AddFeeDialog } from "./add-fee-dialog";
 
 /* ─── Challan Table ─── */
 
@@ -31,257 +21,232 @@ const challanColumns: Column<FeeChallan>[] = [
   {
     key: "challanNumber",
     header: "Challan #",
+    align: "center",
     cell: (r) => <span className="font-mono text-xs">{r.challanNumber}</span>,
-    sortValue: (r) => r.challanNumber,
+    className: "text-center",
+    headerClassName: "text-center",
   },
   {
     key: "student",
     header: "Student",
-    cell: (r) => <PersonCell name={r.student} subtitle={r.className} />,
-    sortValue: (r) => r.student,
+    align: "center",
+    cell: (r) => (
+      <div className="min-w-0 text-center">
+        <p className="truncate font-medium text-foreground">{r.student}</p>
+        <p className="truncate text-xs text-muted-foreground">{r.className}</p>
+      </div>
+    ),
+    className: "text-center",
+    headerClassName: "text-center",
   },
   {
     key: "campus",
     header: "Campus",
-    cell: (r) => {
-      const info = formatCampusDisplay(r.campus);
-      return (
-        <div className="flex flex-col leading-tight">
-          <span className="text-[13px] font-medium text-foreground">{info.primary}</span>
-          {info.secondary && (
-            <span className="text-[11px] text-muted-foreground">{info.secondary}</span>
-          )}
-        </div>
-      );
-    },
-    sortValue: (r) => r.campus,
+    align: "center",
+    cell: (r) => <span className="text-[13px]">{r.campus}</span>,
+    className: "text-center",
+    headerClassName: "text-center",
   },
   {
     key: "month",
     header: "Month",
+    align: "center",
     cell: (r) => <span className="text-[13px]">{r.monthYear}</span>,
+    className: "text-center",
+    headerClassName: "text-center",
   },
   {
     key: "dueDate",
     header: "Due Date",
+    align: "center",
     cell: (r) => (
       <span className="text-[13px] tabular-nums text-muted-foreground">
         {formatDate(r.dueDate)}
       </span>
     ),
-    sortValue: (r) => r.dueDate,
+    className: "text-center",
+    headerClassName: "text-center",
   },
   {
     key: "amount",
-    header: "Amount",
+    header: "Amount Due",
+    align: "center",
     cell: (r) => (
       <span className="font-mono text-[13px] font-semibold tabular-nums">
         {formatCurrency(r.totalPayable)}
       </span>
     ),
-    sortValue: (r) => r.totalPayable,
-    className: "text-right",
-    headerClassName: "text-right",
+    className: "text-center",
+    headerClassName: "text-center",
   },
   {
     key: "paid",
     header: "Paid",
+    align: "center",
     cell: (r) => (
       <span className="font-mono text-[13px] tabular-nums text-muted-foreground">
         {formatCurrency(r.paid)}
       </span>
     ),
-    className: "text-right",
-    headerClassName: "text-right",
+    className: "text-center",
+    headerClassName: "text-center",
   },
   {
     key: "status",
     header: "Status",
-    cell: (r) => <StatusBadge status={r.status} />,
+    align: "center",
+    cell: (r) => (
+      <div className="flex justify-center">
+        <StatusBadge status={r.status} />
+      </div>
+    ),
+    className: "text-center",
+    headerClassName: "text-center",
   },
 ];
 
-const challanCampuses = [...new Set(FEE_CHALLANS.map((c) => c.campus))].map((c) => ({
-  value: c,
-  label: formatCampusDisplay(c).label,
-}));
+const challanCampuses = [...new Set(FEE_CHALLANS.map((c) => c.campus))];
 
 const challanFilters: FilterDef<FeeChallan>[] = [
   {
     key: "status",
     label: "Status",
-    allLabel: "All Statuses",
     options: ["Paid", "Unpaid", "Partial", "Overdue"],
-    triggerClassName: "min-w-36",
     getValue: (r) => r.status,
   },
   {
     key: "campus",
     label: "Campus",
-    allLabel: "All Campuses",
     options: challanCampuses,
-    triggerClassName: "min-w-48 sm:min-w-52",
     getValue: (r) => r.campus,
   },
 ];
 
-/* ─── Expense donut ─── */
-
-const EXPENSE_COLORS = ["#1e4275", "#c7841f", "#2f8f6b", "#c8463d", "#3c6fb0", "#3f6396"];
-const expenseDonut = EXPENSES.map((e, i) => ({
-  name: e.category,
-  value: e.value,
-  color: EXPENSE_COLORS[i % EXPENSE_COLORS.length],
-}));
-
 /* ─── Component ─── */
 
 export function FeesClient() {
+  const [challans, setChallans] = React.useState<FeeChallan[]>(FEE_CHALLANS);
+  const [addOpen, setAddOpen] = React.useState(false);
+
+  const totalRevenue = 15_420_000;
+  const outstanding = 2_100_000;
+  const collectionRate = 94.2;
+  const totalStudents = 5_662;
+  const paidStudents = Math.round((totalStudents * collectionRate) / 100); // 5,334
+
+  const handleCreate = React.useCallback((challan: FeeChallan) => {
+    setChallans((prev) => [challan, ...prev]);
+    toast.success(
+      `Fee detail added for ${challan.student} (${challan.challanNumber}).`
+    );
+  }, []);
+
+  const handlePrint = () => {
+    const ok = printFeeReport({ challans });
+    if (ok) {
+      toast.info("Opening print preview for Fee Challans…");
+    }
+  };
+
+  const handleExportPdf = () => {
+    const ok = exportFeeChallansPdf(challans);
+    if (ok) {
+      toast.success(
+        `Fee Challans register (${challans.length} challans) downloaded as PDF.`
+      );
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-6">
-      <Tabs defaultValue="challans" className="w-full">
-        <TabsList>
-          <TabsTrigger value="challans">Challans</TabsTrigger>
-          <TabsTrigger value="structures">Structures</TabsTrigger>
-          <TabsTrigger value="scholarships">Scholarships</TabsTrigger>
-        </TabsList>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        title="Fees & Financial Management"
+        className="mb-0 lg:mb-0"
+        actions={
+          <>
+            <ActionButton tone="outline" size="md" onClick={handlePrint}>
+              <Printer />
+              <span>Print</span>
+            </ActionButton>
+            <ActionButton tone="pdf" size="md" onClick={handleExportPdf}>
+              <Download />
+              <span>Export PDF</span>
+            </ActionButton>
+            <ActionButton
+              tone="primary"
+              size="md"
+              onClick={() => setAddOpen(true)}
+            >
+              <Plus />
+              <span>Add Fee Detail</span>
+            </ActionButton>
+          </>
+        }
+      />
 
-        <TabsContent value="challans" className="mt-4">
-          <SectionCard flush>
-            <DataTable
-              data={FEE_CHALLANS}
-              columns={challanColumns}
-              getRowId={(r) => r.id}
-              filters={challanFilters}
-              searchPlaceholder="Search challans or students…"
-              searchFn={(r, q) =>
-                r.student.toLowerCase().includes(q) ||
-                r.challanNumber.toLowerCase().includes(q)
-              }
-              pageSize={8}
-            />
-          </SectionCard>
-        </TabsContent>
+      <StatGrid>
+        <StatCard
+          label="Total Revenue (Oct)"
+          value={formatCurrencyCompact(totalRevenue)}
+          icon={Wallet}
+        />
+        <StatCard
+          label="Outstanding Dues"
+          value={formatCurrencyCompact(outstanding)}
+          icon={CreditCard}
+        />
+        <StatCard
+          label="Collection Rate"
+          value={`${collectionRate}%`}
+          icon={TrendingUp}
+        />
+        <StatCard
+          label="Paid Students"
+          title={`${formatNumber(paidStudents)} / ${formatNumber(totalStudents)}`}
+          value={
+            <span className="inline-flex items-baseline justify-center gap-1">
+              <span className="font-bold text-foreground">
+                {formatNumber(paidStudents)}
+              </span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                / {formatNumber(totalStudents)}
+              </span>
+            </span>
+          }
+          icon={UserCheck}
+        />
+      </StatGrid>
 
-        <TabsContent value="structures" className="mt-4">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {FEE_STRUCTURES.map((fs) => {
-              const total = fs.feeHeads.reduce((s, h) => s + h.amount, 0);
-              return (
-                <div
-                  key={fs.id}
-                  className="flex flex-col gap-4 rounded-xl border border-border/60 bg-card p-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold">{fs.className}</h4>
-                    <Badge variant="secondary">{fs.academicYear}</Badge>
-                  </div>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Head</TableHead>
-                        <TableHead>Freq.</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {fs.feeHeads.map((h, idx) => (
-                        <TableRow key={idx}>
-                          <TableCell className="text-xs font-medium">
-                            {h.headName}
-                          </TableCell>
-                          <TableCell className="text-xs">{h.frequency}</TableCell>
-                          <TableCell className="text-right text-xs">
-                            {formatCurrency(h.amount)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                  <div className="mt-auto flex items-center justify-between border-t pt-2">
-                    <span className="font-medium">Monthly Total</span>
-                    <span className="font-semibold">{formatCurrency(total)}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </TabsContent>
+      {/* Standalone Section Heading & Table Card */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-base font-bold tracking-tight text-foreground sm:text-lg">
+            Fee Challans & Collection Register
+          </h2>
+        </div>
 
-        <TabsContent value="scholarships" className="mt-4">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {SCHOLARSHIPS.map((s) => (
-              <div
-                key={s.name}
-                className="flex flex-col gap-3 rounded-xl border border-border/60 bg-card p-4"
-              >
-                <div className="flex items-start justify-between">
-                  <h4 className="font-semibold">{s.name}</h4>
-                  <Badge>{s.type}</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">{s.rule}</p>
-                <div className="mt-auto flex items-center justify-between pt-4 text-sm">
-                  <div>
-                    <span className="font-medium">{s.beneficiaries}</span>{" "}
-                    beneficiaries
-                  </div>
-                  <div>
-                    <span className="font-medium text-success">
-                      {formatCurrencyCompact(s.monthlyValue)}
-                    </span>{" "}
-                    /mo
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <SectionCard title="Revenue Trend" description="Monthly collection (Rs in millions)">
-          <AreaTrendChart
-            data={REVENUE_TREND}
-            xKey="month"
-            series={[
-              {
-                key: "collected",
-                label: "Collected",
-                color: "#1e4275",
-                strokeWidth: 2.5,
-                fillOpacity: 0.24,
-              },
-              {
-                key: "expected",
-                label: "Expected",
-                color: "#0ea5e9",
-                strokeWidth: 2,
-                fillOpacity: 0.10,
-              },
-              {
-                key: "expenses",
-                label: "Expenses",
-                color: "#3c6fb0",
-                strokeWidth: 2.25,
-                fillOpacity: 0.16,
-              },
-            ]}
-            format="millions"
+        <SectionCard flush contentClassName="pt-5">
+          <DataTable
+            data={challans}
+            columns={challanColumns}
+            getRowId={(r) => r.id}
+            filters={challanFilters}
+            searchPlaceholder="Search challans or students…"
+            searchFn={(r, q) =>
+              r.student.toLowerCase().includes(q) ||
+              r.challanNumber.toLowerCase().includes(q)
+            }
+            pageSize={8}
           />
         </SectionCard>
-
-        <SectionCard title="Expense Breakdown" description="Category-wise distribution (Rs in millions)">
-          <div className="flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-8">
-            <DonutChart
-              data={expenseDonut}
-              centerValue="Rs 49.3M"
-              centerLabel="Total"
-              format="compact"
-            />
-            <DonutLegend data={expenseDonut} format="compact" />
-          </div>
-        </SectionCard>
       </div>
+
+      <AddFeeDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        existing={challans}
+        onCreate={handleCreate}
+      />
     </div>
   );
 }

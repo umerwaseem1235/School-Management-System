@@ -8,9 +8,10 @@ interface SplitMetric {
 
 interface StatCardProps {
   label: string;
-  value: string;
+  value: React.ReactNode;
   icon: LucideIcon;
   className?: string;
+  title?: string;
   /** Optional split footer (e.g. Today | Month for birthday cards). */
   split?: [SplitMetric, SplitMetric];
 }
@@ -20,6 +21,7 @@ export function StatCard({
   value,
   icon: Icon,
   className,
+  title,
   split,
 }: StatCardProps) {
   return (
@@ -43,7 +45,10 @@ export function StatCard({
       <p className="relative mt-2 min-w-0 text-xs font-semibold leading-snug tracking-[0.01em] text-foreground">
         {label}
       </p>
-      <p className="relative mt-1 w-full truncate font-heading text-base font-bold leading-none tracking-tight tabular-nums text-foreground" title={value}>
+      <p
+        className="relative mt-1 w-full truncate font-heading text-base font-bold leading-none tracking-tight tabular-nums text-foreground"
+        title={title ?? (typeof value === "string" ? value : undefined)}
+      >
         {value}
       </p>
       <span

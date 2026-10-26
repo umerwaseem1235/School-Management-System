@@ -1,47 +1,44 @@
 import { cn } from "@/lib/utils";
 
 const tones = {
-  brand: "bg-brand",
-  gold: "bg-gold",
-  success: "bg-success",
-  warning: "bg-warning",
-  danger: "bg-danger",
-  info: "bg-info",
-  ocean: "bg-[#3c6fb0]",
+  brand: "bg-gradient-to-r from-[#091d3e] via-[#16345f] to-[#1e4275]",
+  "blue-gradient": "bg-gradient-to-r from-[#091d3e] via-[#16345f] to-[#1e4275]",
+  "premium-blue": "bg-gradient-to-r from-[#091d3e] via-[#16345f] to-[#234e8a]",
+  "dark-blue": "bg-gradient-to-r from-[#091d3e] via-[#16345f] to-[#1e4275]",
+  "ocean-blue": "bg-gradient-to-r from-[#1e4275] via-[#0284c7] to-[#38bdf8]",
+  "sky-blue": "bg-gradient-to-r from-[#0284c7] via-[#0ea5e9] to-[#38bdf8]",
+  "light-blue": "bg-gradient-to-r from-[#38bdf8] to-[#93c5fd]",
+  gold: "bg-gradient-to-r from-amber-500 to-amber-400",
+  success: "bg-gradient-to-r from-emerald-600 to-teal-400",
+  warning: "bg-gradient-to-r from-amber-500 to-orange-400",
+  danger: "bg-gradient-to-r from-rose-600 to-red-400",
+  info: "bg-gradient-to-r from-blue-600 to-sky-400",
+  ocean: "bg-gradient-to-r from-[#1e4275] via-[#0284c7] to-[#38bdf8]",
 } as const;
 
-const sizes = {
-  xs: "h-1",
-  sm: "h-1.5",
-  md: "h-2",
-  lg: "h-2.5",
+const sizeClasses = {
+  xs: "h-1.5",
+  sm: "h-2",
+  md: "h-2.5",
+  lg: "h-3",
 } as const;
 
-/** Lightweight, server-renderable progress bar. */
+/** Lightweight, server-renderable progress bar using a cohesive blue spectrum by default. */
 export function Meter({
   value,
   tone,
-  color,
-  gradient,
   className,
-  indicatorClassName,
-  size = "md",
+  size = "xs",
+  gradient: _gradient,
 }: {
   value: number;
   tone?: keyof typeof tones;
-  color?: string;
-  gradient?: boolean | string;
   className?: string;
-  indicatorClassName?: string;
   size?: "xs" | "sm" | "md" | "lg";
+  /** Accepted for compatibility; tones are already gradients. */
+  gradient?: boolean;
 }) {
-  const auto = value >= 90 ? "success" : value >= 75 ? "brand" : value >= 60 ? "warning" : "danger";
-  const gradientStyle =
-    typeof gradient === "string"
-      ? gradient
-      : gradient === true
-        ? "linear-gradient(90deg, #1e4275 0%, #3c6fb0 55%, #60a5fa 100%)"
-        : undefined;
+  const auto: keyof typeof tones = "dark-blue";
 
   return (
     <div
@@ -50,27 +47,17 @@ export function Meter({
       aria-valuemin={0}
       aria-valuemax={100}
       className={cn(
-        "w-full overflow-hidden rounded-full bg-muted/70",
-        sizes[size] ?? "h-2",
+        "w-full overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200/80 shadow-[inset_0_1px_1.5px_rgba(0,0,0,0.06)]",
+        sizeClasses[size],
         className
       )}
     >
       <div
         className={cn(
-          "h-full rounded-full transition-all duration-300",
-          !color && !gradient && tones[tone ?? auto],
-          indicatorClassName
+          "h-full rounded-full transition-all duration-500 ease-out shadow-[0_1px_2px_rgba(9,29,62,0.28)]",
+          tones[tone ?? auto]
         )}
-        style={{
-          width: `${Math.min(100, Math.max(0, value))}%`,
-          ...(gradientStyle
-            ? { background: gradientStyle }
-            : color
-              ? color.includes("gradient")
-                ? { background: color }
-                : { backgroundColor: color }
-              : {}),
-        }}
+        style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
   );

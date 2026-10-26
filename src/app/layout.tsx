@@ -7,7 +7,6 @@ const inter = Inter({ variable: "--font-app-sans", subsets: ["latin"] });
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-app-heading",
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
 });
 const mono = JetBrains_Mono({ variable: "--font-app-mono", subsets: ["latin"] });
 

@@ -40,39 +40,25 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   "Marks Entry": "gold",
   Moderation: "warning",
   Published: "success",
-  // payroll
+  // payroll & refunds
   Draft: "neutral",
   Processing: "warning",
   Disbursed: "brand",
+  Processed: "brand",
   // audit
   Info: "info",
   Warning: "warning",
   Critical: "danger",
-  // reception & visitors
-  Inside: "success",
-  "Checked Out": "neutral",
-  Overstay: "danger",
-  Expected: "info",
-  New: "info",
-  "In Progress": "warning",
-  "Follow-up": "gold",
-  Converted: "brand",
-  Closed: "neutral",
-  Confirmed: "success",
-  "In Meeting": "brand",
-  Completed: "neutral",
-  Cancelled: "danger",
-  "Received at Gate": "warning",
-  "Handed Over": "success",
-  High: "danger",
-  Medium: "warning",
-  Low: "neutral",
-  // LMS statuses
-  Graded: "brand",
-  "Past Due": "danger",
-  "Live Now": "success",
-  Upcoming: "info",
-  Archived: "neutral",
+  // attendance
+  Present: "success",
+  Absent: "danger",
+  Late: "warning",
+  "On Leave": "info",
+  Excused: "info",
+  "Half Day": "gold",
+  "Short Leave": "gold",
+  Submitted: "success",
+  Verified: "brand",
 };
 
 interface StatusBadgeProps {
@@ -82,7 +68,7 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export function StatusBadge({ status, tone, dot = true, className }: StatusBadgeProps) {
+export function StatusBadge({ status, tone, dot = false, className }: StatusBadgeProps) {
   const resolved = tone ?? STATUS_TONE[status] ?? "neutral";
   return (
     <span
