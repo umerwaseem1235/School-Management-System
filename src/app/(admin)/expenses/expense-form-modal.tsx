@@ -263,6 +263,7 @@ export function ExpenseFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. INV-2026-8910"
                   value={invoiceNo}
                   onChange={(e) => setInvoiceNo(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground"
@@ -296,6 +297,7 @@ export function ExpenseFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Estate & Facilities"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"
@@ -325,7 +327,7 @@ export function ExpenseFormModal({
               </label>
               <input
                 type="text"
-                placeholder="Brief justification and billing scope…"
+                placeholder="e.g. Monthly utility billing settlement for Gulberg Campus (Units: 14,250 kWh)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"
@@ -346,7 +348,7 @@ export function ExpenseFormModal({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. LESCO Commercial / Sigma Labs"
+                  placeholder="e.g. LESCO Commercial / Sigma Scientific Labs"
                   value={vendorName}
                   onChange={(e) => setVendorName(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"
@@ -358,6 +360,7 @@ export function ExpenseFormModal({
                 </label>
                 <input
                   type="text"
+                  placeholder="e.g. 1928471-4 / STRN-32778700"
                   value={vendorNtn}
                   onChange={(e) => setVendorNtn(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground"
@@ -372,6 +375,7 @@ export function ExpenseFormModal({
                 </label>
                 <input
                   type="text"
+                  placeholder="e.g. Meezan Bank / HBL / Bank Alfalah"
                   value={vendorBank}
                   onChange={(e) => setVendorBank(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"
@@ -383,6 +387,7 @@ export function ExpenseFormModal({
                 </label>
                 <input
                   type="text"
+                  placeholder="e.g. PK36MEZN0002010103984712"
                   value={vendorAccountNo}
                   onChange={(e) => setVendorAccountNo(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground"
@@ -411,6 +416,7 @@ export function ExpenseFormModal({
                   type="number"
                   min={0}
                   required
+                  placeholder="e.g. 185000"
                   value={grossAmount}
                   onChange={(e) => setGrossAmount(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs font-bold text-foreground"
@@ -423,6 +429,7 @@ export function ExpenseFormModal({
                 <input
                   type="number"
                   min={0}
+                  placeholder="e.g. 29600"
                   value={taxAmount}
                   onChange={(e) => setTaxAmount(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground"
@@ -435,6 +442,7 @@ export function ExpenseFormModal({
                 <input
                   type="number"
                   min={0}
+                  placeholder="e.g. 8325"
                   value={whtDeduction}
                   onChange={(e) => setWhtDeduction(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-danger"
@@ -466,6 +474,7 @@ export function ExpenseFormModal({
                 </label>
                 <input
                   type="text"
+                  placeholder="e.g. Tariq Mehmood (Estate Manager)"
                   value={requestedBy}
                   onChange={(e) => setRequestedBy(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"

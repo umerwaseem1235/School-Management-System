@@ -770,6 +770,7 @@ export function FinesClient() {
                   type="number"
                   required
                   min={1}
+                  placeholder="e.g. 1500"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   className={fieldClass}

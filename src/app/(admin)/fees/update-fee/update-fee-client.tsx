@@ -386,6 +386,7 @@ export function UpdateFeeClient() {
                   type="number"
                   required
                   min={1}
+                  placeholder="e.g. 18500"
                   value={tuitionFee}
                   onChange={(e) => setTuitionFee(e.target.value)}
                   className={fieldClass}
@@ -395,6 +396,7 @@ export function UpdateFeeClient() {
                 <input
                   type="number"
                   min={0}
+                  placeholder="e.g. 2500"
                   value={labCharges}
                   onChange={(e) => setLabCharges(e.target.value)}
                   className={fieldClass}
@@ -407,6 +409,7 @@ export function UpdateFeeClient() {
                 <input
                   type="number"
                   min={0}
+                  placeholder="e.g. 1000"
                   value={sportsCharges}
                   onChange={(e) => setSportsCharges(e.target.value)}
                   className={fieldClass}
@@ -416,6 +419,7 @@ export function UpdateFeeClient() {
                 <input
                   type="number"
                   min={0}
+                  placeholder="e.g. 1000"
                   value={libraryFund}
                   onChange={(e) => setLibraryFund(e.target.value)}
                   className={fieldClass}
@@ -425,6 +429,7 @@ export function UpdateFeeClient() {
                 <input
                   type="number"
                   min={0}
+                  placeholder="e.g. 1500"
                   value={utilitySurcharge}
                   onChange={(e) => setUtilitySurcharge(e.target.value)}
                   className={fieldClass}

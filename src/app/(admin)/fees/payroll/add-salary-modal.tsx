@@ -674,6 +674,7 @@ export function AddSalaryModal({
                   <label className={labelClass}>Base Pay *</label>
                   <input
                     type="number"
+                    placeholder="e.g. 85000"
                     value={baseSalary}
                     onChange={(e) =>
                       handleBaseSalaryChange(Number(e.target.value))
@@ -696,6 +697,7 @@ export function AddSalaryModal({
                   <label className={labelClass}>House Rent (30%)</label>
                   <input
                     type="number"
+                    placeholder="e.g. 25500"
                     value={houseRentAllowance}
                     onChange={(e) => {
                       setHouseRentAllowance(Number(e.target.value));
@@ -718,6 +720,7 @@ export function AddSalaryModal({
                   <label className={labelClass}>Medical (10%)</label>
                   <input
                     type="number"
+                    placeholder="e.g. 8500"
                     value={medicalAllowance}
                     onChange={(e) => {
                       setMedicalAllowance(Number(e.target.value));
@@ -740,6 +743,7 @@ export function AddSalaryModal({
                   <label className={labelClass}>Conveyance</label>
                   <input
                     type="number"
+                    placeholder="e.g. 6000"
                     value={conveyanceAllowance}
                     onChange={(e) => {
                       setConveyanceAllowance(Number(e.target.value));
@@ -762,6 +766,7 @@ export function AddSalaryModal({
                   <label className={labelClass}>Special Allowance</label>
                   <input
                     type="number"
+                    placeholder="e.g. 5000"
                     value={specialAllowance}
                     onChange={(e) => {
                       setSpecialAllowance(Number(e.target.value));
@@ -784,6 +789,7 @@ export function AddSalaryModal({
                   <label className={labelClass}>Withholding Tax</label>
                   <input
                     type="number"
+                    placeholder="e.g. 4250"
                     value={taxDeduction}
                     onChange={(e) => {
                       setTaxDeduction(Number(e.target.value));
@@ -806,6 +812,7 @@ export function AddSalaryModal({
                   <label className={labelClass}>Provident Fund</label>
                   <input
                     type="number"
+                    placeholder="e.g. 7000"
                     value={providentFund}
                     onChange={(e) => {
                       setProvidentFund(Number(e.target.value));
@@ -828,6 +835,7 @@ export function AddSalaryModal({
                   <label className={labelClass}>Loan Recovery</label>
                   <input
                     type="number"
+                    placeholder="e.g. 0"
                     value={loanDeduction}
                     onChange={(e) => {
                       setLoanDeduction(Number(e.target.value));

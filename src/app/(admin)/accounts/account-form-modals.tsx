@@ -130,12 +130,12 @@ export function StudentAccountFormModal({
       setClassName("Grade 9");
       setSection("A");
       setCampus("Gulberg");
-      setStudentEmail(`student.${nextRoll}@student.opus.edu.pk`);
+      setStudentEmail(`student.${nextRoll}@student.edusphere.edu.pk`);
       setStudentPassword(`Std@Student#${nextRoll}`);
       setGuardianName("");
       setGuardianRelation("Father");
       setPhone("+92 300 4100000");
-      setParentEmail(`parent.${nextRoll}@parent.opus.edu.pk`);
+      setParentEmail(`parent.${nextRoll}@parent.edusphere.edu.pk`);
       setParentPassword(`Prt@Parent#${nextRoll}`);
       setAssignedByAdmin("Student Admin — Gulberg");
       setCredentialStatus("Active");
@@ -237,7 +237,7 @@ export function StudentAccountFormModal({
                       .toLowerCase()
                       .replace(/[^a-z0-9]+/g, ".")
                       .replace(/^\.+|\.+$/g, "") || "student";
-                  setStudentEmail(`${slug}.${rollNo}@student.opus.edu.pk`);
+                  setStudentEmail(`${slug}.${rollNo}@student.edusphere.edu.pk`);
                   setStudentPassword(makeSmartPassword("Std", studentName));
                 }}
                 className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline cursor-pointer"
@@ -268,6 +268,7 @@ export function StudentAccountFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. 1049"
                   value={rollNo}
                   onChange={(e) => setRollNo(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground focus:border-brand focus:outline-none"
@@ -334,6 +335,7 @@ export function StudentAccountFormModal({
                 <input
                   type="email"
                   required
+                  placeholder="student.1049@student.edusphere.edu.pk"
                   value={studentEmail}
                   onChange={(e) => setStudentEmail(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground focus:border-brand focus:outline-none"
@@ -346,6 +348,7 @@ export function StudentAccountFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Std@Zain#1049"
                   value={studentPassword}
                   onChange={(e) => setStudentPassword(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs font-bold text-emerald-700 focus:border-brand focus:outline-none"
@@ -369,7 +372,7 @@ export function StudentAccountFormModal({
                       .toLowerCase()
                       .replace(/[^a-z0-9]+/g, ".")
                       .replace(/^\.+|\.+$/g, "") || "parent";
-                  setParentEmail(`${slug}.${rollNo}@parent.opus.edu.pk`);
+                  setParentEmail(`${slug}.${rollNo}@parent.edusphere.edu.pk`);
                   setParentPassword(makeSmartPassword("Prt", guardianName));
                 }}
                 className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline cursor-pointer"
@@ -418,6 +421,7 @@ export function StudentAccountFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. 0300-1234567"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground"
@@ -433,6 +437,7 @@ export function StudentAccountFormModal({
                 <input
                   type="email"
                   required
+                  placeholder="parent.1049@parent.edusphere.edu.pk"
                   value={parentEmail}
                   onChange={(e) => setParentEmail(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground"
@@ -445,6 +450,7 @@ export function StudentAccountFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Prt@Tariq#1049"
                   value={parentPassword}
                   onChange={(e) => setParentPassword(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs font-bold text-emerald-700"
@@ -461,6 +467,7 @@ export function StudentAccountFormModal({
               </label>
               <input
                 type="text"
+                placeholder="e.g. Student Admin — Gulberg Campus"
                 value={assignedByAdmin}
                 onChange={(e) => setAssignedByAdmin(e.target.value)}
                 className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"
@@ -574,7 +581,7 @@ export function StaffAccountFormModal({
       setCampus("Gulberg");
       setPhone("0300-4182910");
       setCnic("35202-1928371-1");
-      setStaffEmail(`staff.${nextNum}@staff.opus.edu.pk`);
+      setStaffEmail(`staff.${nextNum}@staff.edusphere.edu.pk`);
       setStaffPassword(`Stf@Staff#${nextNum}`);
       setPortalRole("Teacher Portal");
       setAssignedByAdmin("Staff Admin — HR & IT");
@@ -693,6 +700,7 @@ export function StaffAccountFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. EMP-104 or TCH-041"
                   value={empCode}
                   onChange={(e) => setEmpCode(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground"
@@ -708,6 +716,7 @@ export function StaffAccountFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Senior Lecturer / Head of Dept"
                   value={designation}
                   onChange={(e) => setDesignation(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"
@@ -720,6 +729,7 @@ export function StaffAccountFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Mathematics & Sciences"
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"
@@ -759,7 +769,7 @@ export function StaffAccountFormModal({
                       .toLowerCase()
                       .replace(/[^a-z0-9]+/g, ".")
                       .replace(/^\.+|\.+$/g, "") || "staff";
-                  setStaffEmail(`${slug}@staff.opus.edu.pk`);
+                  setStaffEmail(`${slug}@staff.edusphere.edu.pk`);
                   setStaffPassword(makeSmartPassword("Stf", name));
                 }}
                 className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline cursor-pointer"
@@ -777,6 +787,7 @@ export function StaffAccountFormModal({
                 <input
                   type="email"
                   required
+                  placeholder="ayesha.siddiqui@staff.edusphere.edu.pk"
                   value={staffEmail}
                   onChange={(e) => setStaffEmail(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs text-foreground"
@@ -789,6 +800,7 @@ export function StaffAccountFormModal({
                 <input
                   type="text"
                   required
+                  placeholder="e.g. Stf@Ayesha#104"
                   value={staffPassword}
                   onChange={(e) => setStaffPassword(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs font-bold text-emerald-700"
@@ -821,6 +833,7 @@ export function StaffAccountFormModal({
                 </label>
                 <input
                   type="text"
+                  placeholder="e.g. Staff Admin — HR & IT Directorate"
                   value={assignedByAdmin}
                   onChange={(e) => setAssignedByAdmin(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 text-xs text-foreground"

@@ -240,7 +240,7 @@ export function AddFeeDialog({
                 type="number"
                 min={0}
                 className={cn(fieldClass, "tabular-nums")}
-                placeholder="0"
+                placeholder="e.g. 24500"
                 value={form.totalPayable}
                 onChange={(e) => set("totalPayable", e.target.value)}
               />
@@ -250,7 +250,7 @@ export function AddFeeDialog({
                 type="number"
                 min={0}
                 className={cn(fieldClass, "tabular-nums")}
-                placeholder="0"
+                placeholder="e.g. 24500"
                 value={form.paid}
                 onChange={(e) => set("paid", e.target.value)}
               />

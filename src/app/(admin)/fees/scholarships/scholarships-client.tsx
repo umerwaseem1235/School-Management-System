@@ -655,6 +655,7 @@ export function ScholarshipsClient() {
                   min={5}
                   max={100}
                   required
+                  placeholder="e.g. 50"
                   value={editConcessionPercent}
                   onChange={(e) => setEditConcessionPercent(e.target.value)}
                   className={fieldClass}
@@ -665,6 +666,7 @@ export function ScholarshipsClient() {
                   type="number"
                   min={500}
                   required
+                  placeholder="e.g. 12500"
                   value={editMonthlyValue}
                   onChange={(e) => setEditMonthlyValue(e.target.value)}
                   className={fieldClass}
@@ -809,6 +811,7 @@ export function ScholarshipsClient() {
                   min={5}
                   max={100}
                   required
+                  placeholder="e.g. 50"
                   value={concessionPercent}
                   onChange={(e) => setConcessionPercent(e.target.value)}
                   className={fieldClass}
@@ -819,6 +822,7 @@ export function ScholarshipsClient() {
                   type="number"
                   min={500}
                   required
+                  placeholder="e.g. 12500"
                   value={monthlyValue}
                   onChange={(e) => setMonthlyValue(e.target.value)}
                   className={fieldClass}

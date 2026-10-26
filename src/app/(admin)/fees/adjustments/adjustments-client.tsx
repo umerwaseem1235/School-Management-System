@@ -559,6 +559,7 @@ export function AdjustmentsClient() {
                   type="number"
                   min={1}
                   required
+                  placeholder="e.g. 5000"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   className={fieldClass}
@@ -580,6 +581,7 @@ export function AdjustmentsClient() {
             <Field label="Authorizing Authority">
               <input
                 type="text"
+                placeholder="e.g. Principal Secretariat / Accounts Committee"
                 value={authorizedBy}
                 onChange={(e) => setAuthorizedBy(e.target.value)}
                 className={fieldClass}
@@ -888,6 +890,7 @@ export function AdjustmentsClient() {
                   type="number"
                   min={1}
                   required
+                  placeholder="e.g. 5000"
                   value={editAmount}
                   onChange={(e) => setEditAmount(e.target.value)}
                   className={fieldClass}
@@ -910,6 +913,7 @@ export function AdjustmentsClient() {
               <Field label="Authorizing Authority">
                 <input
                   type="text"
+                  placeholder="e.g. Principal Secretariat / Accounts Committee"
                   value={editAuthorizedBy}
                   onChange={(e) => setEditAuthorizedBy(e.target.value)}
                   className={fieldClass}

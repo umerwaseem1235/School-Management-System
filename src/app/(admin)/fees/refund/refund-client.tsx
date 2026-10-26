@@ -832,7 +832,7 @@ export function RefundClient() {
                 <input
                   type="number"
                   min={0}
-                  placeholder="e.g. 20000"
+                  placeholder="e.g. 45000"
                   value={originalAmount}
                   onChange={(e) => setOriginalAmount(e.target.value)}
                   className={fieldClass}
@@ -887,7 +887,7 @@ export function RefundClient() {
             <Field label="Parent / Student Notification Statement">
               <input
                 type="text"
-                placeholder="Brief reason submitted by parent or student…"
+                placeholder="e.g. Relocating to Islamabad; security deposit refund requested with cleared dues."
                 value={notificationNote}
                 onChange={(e) => setNotificationNote(e.target.value)}
                 className={fieldClass}

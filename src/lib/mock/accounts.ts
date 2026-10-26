@@ -256,7 +256,7 @@ function buildAllStudentAccounts(): StudentAccountRecord[] {
       className: clsPart.trim(),
       section: secPart.trim(),
       campus: campusShort,
-      studentEmail: `${stdSlug}.${sfr.rollNo}@student.opus.edu.pk`,
+      studentEmail: `${stdSlug}.${sfr.rollNo}@student.edusphere.edu.pk`,
       studentPassword: `Std@${stdToken}#${sfr.rollNo}`,
       studentPortalStatus: credentialStatus,
       studentLastLogin:
@@ -266,7 +266,7 @@ function buildAllStudentAccounts(): StudentAccountRecord[] {
       guardianName: sfr.fatherName,
       guardianRelation: "Father",
       phone: `+92 3${index % 5}${index % 9} ${String(4102938 + index * 19381).slice(0, 7)}`,
-      parentEmail: `${prtSlug}.${sfr.rollNo}@parent.opus.edu.pk`,
+      parentEmail: `${prtSlug}.${sfr.rollNo}@parent.edusphere.edu.pk`,
       parentPassword: `Prt@${prtToken}#${sfr.rollNo}`,
       parentPortalStatus: credentialStatus,
       parentLastLogin:
@@ -330,7 +330,7 @@ function buildAllStudentAccounts(): StudentAccountRecord[] {
       className: st.className,
       section: st.section,
       campus: campusShort,
-      studentEmail: `${stdSlug}.${st.rollNo}@student.opus.edu.pk`,
+      studentEmail: `${stdSlug}.${st.rollNo}@student.edusphere.edu.pk`,
       studentPassword: `Std@${stdToken}#${st.rollNo}`,
       studentPortalStatus: credentialStatus,
       studentLastLogin:
@@ -340,7 +340,7 @@ function buildAllStudentAccounts(): StudentAccountRecord[] {
       guardianName: st.guardian,
       guardianRelation: idx % 5 === 0 ? "Mother" : "Father",
       phone: st.phone,
-      parentEmail: `${prtSlug}.${st.rollNo}@parent.opus.edu.pk`,
+      parentEmail: `${prtSlug}.${st.rollNo}@parent.edusphere.edu.pk`,
       parentPassword: `Prt@${prtToken}#${st.rollNo}`,
       parentPortalStatus: credentialStatus,
       parentLastLogin:
@@ -503,7 +503,7 @@ function buildAllStaffAccounts(): StaffAccountRecord[] {
         matchedMember?.phone ??
         `03${(index % 4) + 1}${(index * 3) % 9}-${String(4182910 + index * 23191).slice(0, 7)}`,
       joiningDate: sal.joiningDate,
-      staffEmail: `${staffSlug}@staff.opus.edu.pk`,
+      staffEmail: `${staffSlug}@staff.edusphere.edu.pk`,
       staffPassword: `Stf@${staffToken}#${empDigits}`,
       portalRole: role,
       assignedModules: modules,
@@ -583,7 +583,7 @@ function buildAllStaffAccounts(): StaffAccountRecord[] {
         `3520${(idx % 2) + 1}-${String(1928371 + idx * 412839).slice(0, 7)}-${(idx % 9) + 1}`,
       phone: member.phone,
       joiningDate: member.joiningDate,
-      staffEmail: `${staffSlug}@staff.opus.edu.pk`,
+      staffEmail: `${staffSlug}@staff.edusphere.edu.pk`,
       staffPassword: `Stf@${staffToken}#${empDigits}`,
       portalRole: role,
       assignedModules: modules,
