@@ -77,6 +77,15 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   "Off Duty": "neutral",
   Allocated: "brand",
   Waitlisted: "warning",
+  // fixed assets
+  "In Service": "success",
+  "Under Repair": "warning",
+  Retired: "neutral",
+  Completed: "success",
+  "Due Soon": "warning",
+  Assigned: "brand",
+  Depreciating: "info",
+  "Fully Depreciated": "neutral",
 };
 
 interface StatusBadgeProps {
