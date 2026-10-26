@@ -8,14 +8,6 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Meter } from "@/components/shared/meter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,8 +18,6 @@ import {
 import {
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
 } from "@/components/ui/tabs";
 import {
   BookOpen,
@@ -37,18 +27,15 @@ import {
   Plus,
   Upload,
   Calendar,
-  Users,
   CheckCircle2,
   ExternalLink,
   Download,
   FileCheck,
-  Search,
-  Layers,
-  GraduationCap,
-  MapPin,
   Clock,
   MoreVertical,
   Copy,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -90,10 +77,8 @@ export function LmsClient({
   const [selectedCourseForAssignment, setSelectedCourseForAssignment] = React.useState<string | undefined>(undefined);
   const [viewingSyllabusCourse, setViewingSyllabusCourse] = React.useState<LmsCourse | null>(null);
 
-  // Course tab local search & filters
-  const [courseSearch, setCourseSearch] = React.useState("");
-  const [courseSubjectFilter, setCourseSubjectFilter] = React.useState("ALL");
-  const [courseStatusFilter, setCourseStatusFilter] = React.useState("ALL");
+  // Active LMS portion dropdown selector
+  const [activeTab, setActiveTab] = React.useState<"courses" | "assignments" | "materials" | "virtual">("courses");
 
   // Key KPI metrics calculations
   const activeCoursesCount = courses.filter((c) => c.status === "Active").length;
@@ -106,25 +91,47 @@ export function LmsClient({
 
   const totalDownloadsSum = materials.reduce((acc, m) => acc + m.downloadCount, 0);
 
-  // Filtered courses
-  const filteredCourses = React.useMemo(() => {
-    return courses.filter((c) => {
-      const matchesSearch =
-        courseSearch === "" ||
-        c.title.toLowerCase().includes(courseSearch.toLowerCase()) ||
-        c.courseCode.toLowerCase().includes(courseSearch.toLowerCase()) ||
-        c.teacher.toLowerCase().includes(courseSearch.toLowerCase()) ||
-        c.className.toLowerCase().includes(courseSearch.toLowerCase());
+  // LMS portions metadata for dropdown selector
+  const sections = React.useMemo(
+    () => [
+      {
+        id: "courses" as const,
+        label: "Courses & Syllabus",
+        subtitle: `${courses.length} courses`,
+        description: "Curriculum plans, subjects & lesson progress",
+        icon: BookOpen,
+        count: courses.length,
+      },
+      {
+        id: "assignments" as const,
+        label: "Homework & Assignments",
+        subtitle: `${activeAssignmentsCount} active tasks`,
+        description: "Homework submission tracking & evaluations",
+        icon: FileText,
+        count: assignments.length,
+      },
+      {
+        id: "materials" as const,
+        label: "Study Materials & Notes",
+        subtitle: `${materials.length} resources`,
+        description: "Textbooks, slides, worksheets & PDFs",
+        icon: FolderArchive,
+        count: materials.length,
+      },
+      {
+        id: "virtual" as const,
+        label: "Live Virtual Classes",
+        subtitle: `${liveClasses.filter((c) => c.status === "Live Now").length} live now`,
+        description: "Digital classrooms, webinars & meetings",
+        icon: Video,
+        count: liveClasses.length,
+      },
+    ],
+    [courses.length, assignments.length, materials.length, liveClasses, activeAssignmentsCount]
+  );
 
-      const matchesSubject =
-        courseSubjectFilter === "ALL" || c.subject === courseSubjectFilter;
-
-      const matchesStatus =
-        courseStatusFilter === "ALL" || c.status === courseStatusFilter;
-
-      return matchesSearch && matchesSubject && matchesStatus;
-    });
-  }, [courses, courseSearch, courseSubjectFilter, courseStatusFilter]);
+  const activeSectionObj =
+    sections.find((s) => s.id === activeTab) || sections[0];
 
   // Unique subjects for filter (comprehensive Pakistani school subjects + courses)
   const courseSubjects = React.useMemo(() => {
@@ -481,6 +488,350 @@ export function LmsClient({
     [materials]
   );
 
+  // Courses Columns (Responsive 5-Column Zero-Horizontal Scroll Layout)
+  const courseColumns: Column<LmsCourse>[] = React.useMemo(
+    () => [
+      {
+        key: "title",
+        header: "Course & Code",
+        cell: (r) => (
+          <div className="flex items-center gap-2.5 min-w-0 py-0.5">
+            <div className="size-8 rounded-lg bg-brand-50 text-brand dark:bg-brand-soft flex items-center justify-center shrink-0">
+              <BookOpen className="size-4" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <button
+                  type="button"
+                  onClick={() => setViewingSyllabusCourse(r)}
+                  className="font-semibold text-foreground text-xs leading-snug truncate hover:text-brand transition-colors cursor-pointer text-left"
+                  title={r.title}
+                >
+                  {r.title}
+                </button>
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5 text-[11px] text-muted-foreground min-w-0">
+                <span className="inline-flex items-center px-1.5 py-0 rounded text-[10px] font-bold tracking-wider uppercase bg-brand-50 text-brand dark:bg-brand-soft ring-1 ring-inset ring-brand/15 shrink-0">
+                  {r.courseCode}
+                </span>
+                <span className="truncate">{r.subject}</span>
+                <span>•</span>
+                <span className="truncate">{r.campus}</span>
+              </div>
+            </div>
+          </div>
+        ),
+        sortValue: (r) => r.title,
+        className: "px-3 py-2.5 min-w-0 max-w-[260px]",
+        headerClassName: "px-3",
+      },
+      {
+        key: "class",
+        header: "Class & Instructor",
+        cell: (r) => (
+          <div className="flex flex-col min-w-0 leading-tight">
+            <span className="text-xs font-medium text-foreground truncate">
+              {r.className}
+            </span>
+            <span className="text-[11px] text-muted-foreground truncate">
+              {r.teacher}
+            </span>
+          </div>
+        ),
+        sortValue: (r) => r.className,
+        className: "px-2.5 py-2.5 min-w-0 max-w-[160px]",
+        headerClassName: "px-2.5",
+      },
+      {
+        key: "enrollment",
+        header: "Enrollment & Tasks",
+        cell: (r) => (
+          <div className="flex flex-col min-w-0 leading-tight whitespace-nowrap">
+            <span className="text-xs font-medium text-foreground tabular-nums">
+              {r.enrolledStudents} Students
+            </span>
+            <span className="text-[11px] text-muted-foreground tabular-nums mt-0.5">
+              {r.activeAssignments} Active Tasks
+            </span>
+          </div>
+        ),
+        sortValue: (r) => r.enrolledStudents,
+        className: "px-2.5 py-2.5 whitespace-nowrap",
+        headerClassName: "px-2.5",
+      },
+      {
+        key: "progress",
+        header: "Curriculum Progress",
+        cell: (r) => {
+          const pct = Math.round((r.completedLessons / r.totalLessons) * 100);
+          return (
+            <div className="flex flex-col gap-1 w-28 sm:w-32 min-w-0">
+              <div className="flex items-center justify-between text-[11px] leading-none">
+                <span className="font-semibold text-foreground tabular-nums">
+                  {r.completedLessons}/{r.totalLessons} Lessons
+                </span>
+                <span className="text-muted-foreground tabular-nums">{pct}%</span>
+              </div>
+              <Meter value={pct} tone={r.colorTone ?? "brand"} size="xs" />
+            </div>
+          );
+        },
+        sortValue: (r) => r.completedLessons / r.totalLessons,
+        className: "px-2.5 py-2.5",
+        headerClassName: "px-2.5",
+      },
+      {
+        key: "actions",
+        header: "Status / Action",
+        cell: (r) => (
+          <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
+            <StatusBadge status={r.status} dot={false} />
+            <Button
+              variant="outline"
+              size="xs"
+              onClick={() => setViewingSyllabusCourse(r)}
+              className="h-7 px-2 text-xs font-semibold cursor-pointer border-border/80 hover:bg-muted"
+              title="View course syllabus & curriculum"
+            >
+              <BookOpen className="size-3 mr-1 text-muted-foreground" />
+              Syllabus
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer transition-colors"
+                title="Course options"
+              >
+                <MoreVertical className="size-3.5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44">
+                <DropdownMenuItem
+                  onClick={() => setViewingSyllabusCourse(r)}
+                  className="text-xs cursor-pointer"
+                >
+                  <BookOpen className="size-3.5 mr-2 text-muted-foreground" />
+                  View Curriculum
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleOpenAssignmentForCourse(r)}
+                  className="text-xs cursor-pointer"
+                >
+                  <Plus className="size-3.5 mr-2 text-muted-foreground" />
+                  New Assignment
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => setIsMaterialDialogOpen(true)}
+                  className="text-xs cursor-pointer"
+                >
+                  <Upload className="size-3.5 mr-2 text-muted-foreground" />
+                  Upload Material
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => handleCopyCourseCode(r.courseCode)}
+                  className="text-xs cursor-pointer"
+                >
+                  <Copy className="size-3.5 mr-2 text-muted-foreground" />
+                  Copy Code ({r.courseCode})
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+        className: "px-3 py-2.5 text-right whitespace-nowrap",
+        headerClassName: "px-3 text-right",
+      },
+    ],
+    []
+  );
+
+  const courseFilters = React.useMemo<FilterDef<LmsCourse>[]>(
+    () => [
+      {
+        key: "subject",
+        label: "Subject",
+        allLabel: "All Subjects",
+        options: courseSubjects,
+        triggerClassName: "w-[170px] shrink-0",
+        getValue: (r) => r.subject,
+      },
+      {
+        key: "class",
+        label: "Class",
+        allLabel: "All Classes",
+        options: sortPakistaniClasses(
+          Array.from(
+            new Set([
+              ...PAKISTANI_SCHOOL_CLASSES,
+              ...courses.map((c) => c.className),
+            ])
+          )
+        ),
+        triggerClassName: "w-[185px] shrink-0",
+        getValue: (r) => r.className,
+      },
+      {
+        key: "status",
+        label: "Status",
+        allLabel: "All Statuses",
+        options: ["Active", "Completed", "Archived"],
+        triggerClassName: "w-[130px] shrink-0",
+        getValue: (r) => r.status,
+      },
+    ],
+    [courses, courseSubjects]
+  );
+
+  // Live Virtual Classes Columns (Responsive 5-Column Zero-Horizontal Scroll Layout)
+  const liveClassColumns: Column<LmsLiveClass>[] = React.useMemo(
+    () => [
+      {
+        key: "title",
+        header: "Session & Subject",
+        cell: (r) => (
+          <div className="flex items-center gap-2.5 min-w-0 py-0.5">
+            <div className="size-8 rounded-lg bg-brand-50 text-brand dark:bg-brand-soft flex items-center justify-center shrink-0">
+              <Video className="size-4" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="font-semibold text-foreground text-xs leading-snug truncate" title={r.title}>
+                {r.title}
+              </span>
+              <span className="text-[11px] text-muted-foreground truncate">
+                {r.subject}
+              </span>
+            </div>
+          </div>
+        ),
+        sortValue: (r) => r.title,
+        className: "px-3 py-2.5 min-w-0 max-w-[260px]",
+        headerClassName: "px-3",
+      },
+      {
+        key: "class",
+        header: "Class & Instructor",
+        cell: (r) => (
+          <div className="flex flex-col min-w-0 leading-tight">
+            <span className="text-xs font-medium text-foreground truncate">
+              {r.className}
+            </span>
+            <span className="text-[11px] text-muted-foreground truncate">
+              {r.teacher}
+            </span>
+          </div>
+        ),
+        sortValue: (r) => r.className,
+        className: "px-2.5 py-2.5 min-w-0 max-w-[160px]",
+        headerClassName: "px-2.5",
+      },
+      {
+        key: "schedule",
+        header: "Date & Timing",
+        cell: (r) => (
+          <div className="flex flex-col min-w-0 leading-tight whitespace-nowrap">
+            <div className="flex items-center gap-1 text-xs text-foreground">
+              <Calendar className="size-3 text-muted-foreground shrink-0" />
+              <span>{r.date}</span>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-mono text-muted-foreground mt-0.5">
+              <Clock className="size-3 text-muted-foreground/70 shrink-0" />
+              <span>{r.startTime} – {r.endTime}</span>
+            </div>
+          </div>
+        ),
+        sortValue: (r) => `${r.date} ${r.startTime}`,
+        className: "px-2.5 py-2.5 whitespace-nowrap",
+        headerClassName: "px-2.5",
+      },
+      {
+        key: "platform",
+        header: "Platform",
+        cell: (r) => (
+          <Badge variant="outline" className="text-[11px] font-semibold gap-1.5 px-2 py-0.5 whitespace-nowrap">
+            <Video className="size-3 text-brand" />
+            {r.platform}
+          </Badge>
+        ),
+        sortValue: (r) => r.platform,
+        className: "px-2.5 py-2.5 whitespace-nowrap",
+        headerClassName: "px-2.5",
+      },
+      {
+        key: "actions",
+        header: "Status / Action",
+        cell: (r) => {
+          const isLive = r.status === "Live Now";
+          return (
+            <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+              {isLive ? (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-soft text-success ring-1 ring-inset ring-success/25">
+                  <span className="size-1.5 rounded-full bg-success animate-ping" />
+                  Live Now
+                </span>
+              ) : (
+                <StatusBadge status={r.status} dot={false} />
+              )}
+              <Button
+                variant={isLive ? "default" : "outline"}
+                size="xs"
+                onClick={() => handleJoinClass(r)}
+                disabled={r.status === "Completed"}
+                className={cn(
+                  "h-7 px-2.5 text-xs font-semibold cursor-pointer",
+                  isLive
+                    ? "bg-success hover:bg-success/90 text-white border-transparent"
+                    : "border-border/80 hover:bg-muted"
+                )}
+              >
+                <ExternalLink className={cn("size-3 mr-1 shrink-0", isLive ? "text-white" : "text-muted-foreground")} />
+                {isLive ? "Join Live" : r.status === "Completed" ? "Ended" : "Launch"}
+              </Button>
+            </div>
+          );
+        },
+        className: "px-3 py-2.5 text-right whitespace-nowrap",
+        headerClassName: "px-3 text-right",
+      },
+    ],
+    []
+  );
+
+  const liveClassFilters = React.useMemo<FilterDef<LmsLiveClass>[]>(
+    () => [
+      {
+        key: "status",
+        label: "Status",
+        allLabel: "All Statuses",
+        options: ["Live Now", "Upcoming", "Completed"],
+        triggerClassName: "w-[130px] shrink-0",
+        getValue: (r) => r.status,
+      },
+      {
+        key: "platform",
+        label: "Platform",
+        allLabel: "All Platforms",
+        options: Array.from(new Set(["Zoom", "Google Meet", "MS Teams", ...liveClasses.map((c) => c.platform)])),
+        triggerClassName: "w-[140px] shrink-0",
+        getValue: (r) => r.platform,
+      },
+      {
+        key: "class",
+        label: "Class",
+        allLabel: "All Classes",
+        options: sortPakistaniClasses(
+          Array.from(
+            new Set([
+              ...PAKISTANI_SCHOOL_CLASSES,
+              ...liveClasses.map((c) => c.className),
+            ])
+          )
+        ),
+        triggerClassName: "w-[185px] shrink-0",
+        getValue: (r) => r.className,
+      },
+    ],
+    [liveClasses]
+  );
+
   return (
     <div className="space-y-6 overflow-x-hidden">
       {/* Top Header */}
@@ -528,7 +879,7 @@ export function LmsClient({
       />
 
       {/* KPI Stats Row */}
-      <StatGrid>
+      <StatGrid className="max-w-none">
         <StatCard
           label="Active Courses"
           value={formatNumber(activeCoursesCount)}
@@ -548,265 +899,180 @@ export function LmsClient({
           label="Learning Resources"
           value={formatNumber(materials.length)}
           icon={FolderArchive}
-          split={[
-            { label: "Files", value: formatNumber(materials.length) },
-            { label: "Downloads", value: formatNumber(totalDownloadsSum) },
-          ]}
         />
       </StatGrid>
 
-      {/* Main Tabs */}
-      <Tabs defaultValue="courses" className="space-y-5">
-        <TabsList className="bg-muted/60 p-1 rounded-xl">
-          <TabsTrigger value="courses" className="rounded-lg text-xs font-medium px-4">
-            <BookOpen className="size-3.5 mr-2" />
-            Courses & Syllabus
-          </TabsTrigger>
-          <TabsTrigger value="assignments" className="rounded-lg text-xs font-medium px-4">
-            <FileText className="size-3.5 mr-2" />
-            Assignments ({assignments.length})
-          </TabsTrigger>
-          <TabsTrigger value="materials" className="rounded-lg text-xs font-medium px-4">
-            <FolderArchive className="size-3.5 mr-2" />
-            Study Materials ({materials.length})
-          </TabsTrigger>
-          <TabsTrigger value="virtual" className="rounded-lg text-xs font-medium px-4">
-            <Video className="size-3.5 mr-2" />
-            Live Virtual Classes ({liveClasses.length})
-          </TabsTrigger>
-        </TabsList>
+      {/* LMS Controlled Tabs with Single Dropdown Selector */}
+      <Tabs
+        value={activeTab}
+        onValueChange={(val) => setActiveTab(val as any)}
+        className="space-y-4"
+      >
+        {/* Module Dropdown Selector Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3.5 py-2 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[260px] sm:min-w-[300px]">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex size-7 items-center justify-center rounded-lg bg-brand-soft text-brand shadow-2xs shrink-0 group-hover:scale-105 transition-transform">
+                    <activeSectionObj.icon className="size-4" />
+                  </div>
+                  <div className="flex flex-col text-left min-w-0">
+                    <span className="text-xs font-bold text-foreground leading-tight truncate">
+                      {activeSectionObj.label}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground font-normal leading-tight">
+                      {activeSectionObj.subtitle}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge
+                    variant="secondary"
+                    className="text-[10px] font-bold px-1.5 py-0 tabular-nums"
+                  >
+                    {activeSectionObj.count}
+                  </Badge>
+                  <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </div>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="start"
+                className="w-[310px] p-1.5 rounded-2xl shadow-xl border-border/80"
+              >
+                {sections.map((sec) => {
+                  const Icon = sec.icon;
+                  const isSelected = activeTab === sec.id;
+                  return (
+                    <DropdownMenuItem
+                      key={sec.id}
+                      onClick={() => setActiveTab(sec.id)}
+                      className={cn(
+                        "flex items-center justify-between p-2.5 rounded-xl cursor-pointer text-xs transition-colors my-0.5",
+                        isSelected
+                          ? "bg-brand-soft text-brand font-semibold"
+                          : "hover:bg-muted/70 text-foreground"
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={cn(
+                            "flex size-8 items-center justify-center rounded-lg shrink-0",
+                            isSelected
+                              ? "bg-brand text-cream shadow-xs"
+                              : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          <Icon className="size-4" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-semibold text-xs leading-tight truncate">
+                            {sec.label}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                            {sec.description}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                        <Badge
+                          variant={isSelected ? "default" : "outline"}
+                          className={cn(
+                            "text-[10px] font-bold px-1.5 py-0 tabular-nums",
+                            isSelected ? "bg-brand text-cream" : ""
+                          )}
+                        >
+                          {sec.count}
+                        </Badge>
+                        {isSelected && <Check className="size-3.5 text-brand" />}
+                      </div>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Context Action for Currently Selected Portion */}
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            {activeTab === "courses" && (
+              <Button
+                size="sm"
+                onClick={() => setIsCourseDialogOpen(true)}
+                className="h-8 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
+              >
+                <Plus className="size-3.5" />
+                <span>Add Course</span>
+              </Button>
+            )}
+            {activeTab === "assignments" && (
+              <Button
+                size="sm"
+                onClick={handleOpenNewAssignmentGlobal}
+                className="h-8 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
+              >
+                <Plus className="size-3.5" />
+                <span>New Assignment</span>
+              </Button>
+            )}
+            {activeTab === "materials" && (
+              <Button
+                size="sm"
+                onClick={() => setIsMaterialDialogOpen(true)}
+                className="h-8 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
+              >
+                <Upload className="size-3.5" />
+                <span>Upload Material</span>
+              </Button>
+            )}
+            {activeTab === "virtual" && (
+              <Button
+                size="sm"
+                onClick={() => setIsLiveClassDialogOpen(true)}
+                className="h-8 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
+              >
+                <Video className="size-3.5" />
+                <span>Schedule Class</span>
+              </Button>
+            )}
+          </div>
+        </div>
 
         {/* TAB 1: Courses & Syllabus */}
         <TabsContent value="courses" className="space-y-4 outline-none">
-          {/* Professional Clean Filter Toolbar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border">
-            <div className="relative flex-1 min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search courses..."
-                value={courseSearch}
-                onChange={(e) => setCourseSearch(e.target.value)}
-                className="pl-9 h-9 text-xs w-full"
-              />
+          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
+            {/* Professional Section Header */}
+            <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border/70 bg-muted/20">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
+                <BookOpen className="size-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Courses & Curriculum Syllabus</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {courses.length} total courses • {activeCoursesCount} active across academic grades
+                </p>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <Select
-                value={courseSubjectFilter}
-                onValueChange={(val) => {
-                  if (val) setCourseSubjectFilter(val);
-                }}
-              >
-                <SelectTrigger className="h-9 text-xs w-[170px] shrink-0">
-                  <SelectValue placeholder="All Subjects" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  <SelectItem value="ALL">All Subjects</SelectItem>
-                  {courseSubjects.map((sub) => (
-                    <SelectItem key={sub} value={sub}>
-                      {sub}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={courseStatusFilter}
-                onValueChange={(val) => {
-                  if (val) setCourseStatusFilter(val);
-                }}
-              >
-                <SelectTrigger className="h-9 text-xs w-[130px] shrink-0">
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All Statuses</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="Archived">Archived</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsCourseDialogOpen(true)}
-                className="h-9 text-xs font-semibold cursor-pointer shrink-0"
-              >
-                <Plus className="size-3.5 mr-1" />
-                Add Course
-              </Button>
-            </div>
+            <DataTable
+              data={courses}
+              columns={courseColumns}
+              getRowId={(r) => r.id}
+              filters={courseFilters}
+              searchPlaceholder="Search courses…"
+              searchFn={(r, q) =>
+                r.title.toLowerCase().includes(q.toLowerCase()) ||
+                r.courseCode.toLowerCase().includes(q.toLowerCase()) ||
+                r.subject.toLowerCase().includes(q.toLowerCase()) ||
+                r.teacher.toLowerCase().includes(q.toLowerCase()) ||
+                r.className.toLowerCase().includes(q.toLowerCase())
+              }
+              pageSize={8}
+              tableClassName="w-full text-sm"
+              emptyMessage="No courses found."
+            />
           </div>
-
-          {/* Clean 3-Column Responsive Course Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredCourses.map((course) => {
-              const progressPct = Math.round(
-                (course.completedLessons / course.totalLessons) * 100
-              );
-
-              return (
-                <div
-                  key={course.id}
-                  className="group relative flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-4 transition-all duration-200 hover:shadow-md hover:border-brand/40 min-w-0 overflow-hidden"
-                >
-                  <div className="space-y-3 min-w-0">
-                    {/* Header Row: Badges, Status & Context Menu */}
-                    <div className="flex items-center justify-between gap-2 min-w-0">
-                      <div className="flex items-center gap-1.5 min-w-0 truncate">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold tracking-wider uppercase bg-brand-50 text-brand ring-1 ring-inset ring-brand/15 shrink-0">
-                          {course.courseCode}
-                        </span>
-                        <Badge variant="outline" className="text-[11px] font-medium truncate max-w-[120px]">
-                          {course.subject}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        <StatusBadge status={course.status} dot={false} />
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer transition-colors"
-                            title="Course options"
-                          >
-                            <MoreVertical className="size-3.5" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem
-                              onClick={() => setViewingSyllabusCourse(course)}
-                              className="text-xs cursor-pointer"
-                            >
-                              <BookOpen className="size-3.5 mr-2 text-muted-foreground" />
-                              View Curriculum
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleOpenAssignmentForCourse(course)}
-                              className="text-xs cursor-pointer"
-                            >
-                              <Plus className="size-3.5 mr-2 text-muted-foreground" />
-                              New Assignment
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setIsMaterialDialogOpen(true)}
-                              className="text-xs cursor-pointer"
-                            >
-                              <Upload className="size-3.5 mr-2 text-muted-foreground" />
-                              Upload Material
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleCopyCourseCode(course.courseCode)}
-                              className="text-xs cursor-pointer"
-                            >
-                              <Copy className="size-3.5 mr-2 text-muted-foreground" />
-                              Copy Code ({course.courseCode})
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-
-                    {/* Course Title & Grade */}
-                    <div className="min-w-0">
-                      <h3
-                        onClick={() => setViewingSyllabusCourse(course)}
-                        className="font-heading font-semibold text-sm sm:text-base text-foreground leading-snug truncate group-hover:text-brand transition-colors cursor-pointer"
-                        title={course.title}
-                      >
-                        {course.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate flex items-center gap-1">
-                        <GraduationCap className="size-3.5 shrink-0 text-muted-foreground" />
-                        <span className="font-medium text-foreground">{course.className}</span>
-                        <span>•</span>
-                        <span className="truncate">{course.campus}</span>
-                      </p>
-                    </div>
-
-                    {/* Teacher Line */}
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/30 px-2.5 py-1.5 rounded-lg truncate">
-                      <Users className="size-3.5 text-muted-foreground shrink-0" />
-                      <span className="text-foreground font-medium truncate">{course.teacher}</span>
-                    </div>
-
-                    {/* Symmetrical 3-Box Metrics Grid */}
-                    <div className="grid grid-cols-3 gap-2 py-1 text-center">
-                      <div className="flex flex-col p-2 bg-muted/40 rounded-lg">
-                        <span className="font-bold text-xs text-foreground tabular-nums">
-                          {course.enrolledStudents}
-                        </span>
-                        <span className="text-muted-foreground text-[10px] uppercase font-semibold">
-                          Students
-                        </span>
-                      </div>
-                      <div className="flex flex-col p-2 bg-muted/40 rounded-lg">
-                        <span className="font-bold text-xs text-foreground tabular-nums">
-                          {course.completedLessons}/{course.totalLessons}
-                        </span>
-                        <span className="text-muted-foreground text-[10px] uppercase font-semibold">
-                          Lessons
-                        </span>
-                      </div>
-                      <div className="flex flex-col p-2 bg-muted/40 rounded-lg">
-                        <span className="font-bold text-xs text-foreground tabular-nums">
-                          {course.activeAssignments}
-                        </span>
-                        <span className="text-muted-foreground text-[10px] uppercase font-semibold">
-                          Tasks
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="space-y-1 pt-0.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground font-medium text-[11px]">
-                          Curriculum Progress
-                        </span>
-                        <span className="font-semibold text-foreground text-[11px] tabular-nums">
-                          {progressPct}%
-                        </span>
-                      </div>
-                      <Meter value={progressPct} tone={course.colorTone ?? "brand"} size="sm" />
-                    </div>
-                  </div>
-
-                  {/* Symmetrical 2-Button Card Footer (50% / 50% width, never moves outside!) */}
-                  <div className="pt-3 mt-3 border-t border-border/70 flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setViewingSyllabusCourse(course)}
-                      className="flex-1 min-w-0 h-8 text-xs font-semibold cursor-pointer hover:bg-muted/70"
-                    >
-                      <BookOpen className="size-3.5 mr-1.5 text-muted-foreground shrink-0" />
-                      <span className="truncate">Syllabus</span>
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleOpenAssignmentForCourse(course)}
-                      className="flex-1 min-w-0 h-8 text-xs font-semibold bg-primary hover:bg-primary/90 text-white cursor-pointer shadow-xs"
-                    >
-                      <Plus className="size-3.5 mr-1 shrink-0 text-white" />
-                      <span className="truncate text-white">New Task</span>
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {filteredCourses.length === 0 && (
-            <div className="p-8 text-center rounded-xl border border-dashed border-border bg-card">
-              <BookOpen className="size-8 mx-auto text-muted-foreground/60 mb-2" />
-              <p className="text-sm font-medium text-foreground">No courses match your filter.</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Try adjusting your search query or subject filter.
-              </p>
-            </div>
-          )}
         </TabsContent>
 
         {/* TAB 2: Assignments & Homework */}
@@ -830,7 +1096,7 @@ export function LmsClient({
               columns={assignmentColumns}
               getRowId={(r) => r.id}
               filters={assignmentFilters}
-              searchPlaceholder="Search assignments..."
+              searchPlaceholder="Search assignments…"
               searchFn={(r, q) =>
                 r.title.toLowerCase().includes(q.toLowerCase()) ||
                 r.courseName.toLowerCase().includes(q.toLowerCase()) ||
@@ -865,7 +1131,7 @@ export function LmsClient({
               columns={materialColumns}
               getRowId={(r) => r.id}
               filters={materialFilters}
-              searchPlaceholder="Search materials..."
+              searchPlaceholder="Search materials…"
               searchFn={(r, q) =>
                 r.title.toLowerCase().includes(q.toLowerCase()) ||
                 r.subject.toLowerCase().includes(q.toLowerCase()) ||
@@ -881,121 +1147,38 @@ export function LmsClient({
 
         {/* TAB 4: Live Virtual Classes */}
         <TabsContent value="virtual" className="space-y-4 outline-none">
-          {/* Header toolbar for Live Classes */}
-          <div className="flex items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border">
-            <div className="flex items-center gap-2">
-              <Video className="size-4 text-brand" />
-              <span className="text-xs font-semibold text-foreground">
-                Scheduled Digital Classrooms & Webinars
-              </span>
+          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
+            {/* Professional Section Header */}
+            <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-border/70 bg-muted/20">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
+                <Video className="size-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">Live Virtual Classes & Webinars</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {liveClasses.length} scheduled sessions • {liveClasses.filter((c) => c.status === "Live Now").length} live now
+                </p>
+              </div>
             </div>
-            <Button
-              size="sm"
-              onClick={() => setIsLiveClassDialogOpen(true)}
-              className="h-8 text-xs font-semibold bg-primary hover:bg-primary/90 text-white cursor-pointer"
-            >
-              <Plus className="size-3.5 mr-1.5 text-white" />
-              Schedule Class
-            </Button>
+
+            <DataTable
+              data={liveClasses}
+              columns={liveClassColumns}
+              getRowId={(r) => r.id}
+              filters={liveClassFilters}
+              searchPlaceholder="Search classes…"
+              searchFn={(r, q) =>
+                r.title.toLowerCase().includes(q.toLowerCase()) ||
+                r.subject.toLowerCase().includes(q.toLowerCase()) ||
+                r.teacher.toLowerCase().includes(q.toLowerCase()) ||
+                r.className.toLowerCase().includes(q.toLowerCase()) ||
+                r.platform.toLowerCase().includes(q.toLowerCase())
+              }
+              pageSize={8}
+              tableClassName="w-full text-sm"
+              emptyMessage="No live virtual classes found."
+            />
           </div>
-
-          {/* Clean 3-Column Virtual Class Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {liveClasses.map((item) => {
-              const isLive = item.status === "Live Now";
-
-              return (
-                <div
-                  key={item.id}
-                  className={cn(
-                    "flex flex-col justify-between rounded-2xl border p-4 bg-card transition-all duration-200 hover:shadow-md min-w-0 overflow-hidden",
-                    isLive
-                      ? "border-success/50 ring-1 ring-success/20 bg-success-soft/5"
-                      : "border-border/80"
-                  )}
-                >
-                  <div className="space-y-3 min-w-0">
-                    {/* Header: Platform & Status */}
-                    <div className="flex items-center justify-between gap-2 min-w-0">
-                      <Badge variant="outline" className="text-xs font-semibold gap-1.5 px-2 py-0.5">
-                        <Video className="size-3.5 text-brand" />
-                        {item.platform}
-                      </Badge>
-                      {isLive ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-success-soft text-success ring-1 ring-inset ring-success/25 animate-pulse">
-                          <span className="size-2 rounded-full bg-success animate-ping" />
-                          Live Now
-                        </span>
-                      ) : (
-                        <StatusBadge status={item.status} dot={false} />
-                      )}
-                    </div>
-
-                    {/* Topic & Subject */}
-                    <div className="min-w-0">
-                      <h4 className="font-heading font-semibold text-sm sm:text-base text-foreground leading-snug line-clamp-2">
-                        {item.title}
-                      </h4>
-                      <p className="text-xs text-muted-foreground mt-1 font-medium truncate">
-                        {item.className} • {item.subject}
-                      </p>
-                    </div>
-
-                    {/* Symmetrical Info Box for Teacher & Timing */}
-                    <div className="rounded-xl bg-muted/40 p-2.5 space-y-2 text-xs border border-border/50">
-                      <div className="flex items-center gap-1.5 text-foreground font-medium truncate">
-                        <Users className="size-3.5 text-muted-foreground shrink-0" />
-                        <span className="truncate">{item.teacher}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-muted-foreground text-[11.5px] border-t border-border/50 pt-1.5">
-                        <span className="flex items-center gap-1 truncate">
-                          <Calendar className="size-3 shrink-0 text-muted-foreground" />
-                          {item.date}
-                        </span>
-                        <span className="flex items-center gap-1 font-mono font-medium text-foreground shrink-0">
-                          <Clock className="size-3 text-muted-foreground" />
-                          {item.startTime} – {item.endTime}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Join Action - Full width button that NEVER overflows */}
-                  <div className="pt-3 mt-3 border-t border-border/70">
-                    <Button
-                      onClick={() => handleJoinClass(item)}
-                      disabled={item.status === "Completed"}
-                      className={cn(
-                        "w-full h-8 text-xs font-semibold cursor-pointer shadow-xs",
-                        isLive
-                          ? "bg-success hover:bg-success/90 text-white"
-                          : "bg-primary hover:bg-primary/90 text-white"
-                      )}
-                    >
-                      <ExternalLink className="size-3.5 mr-1.5 shrink-0 text-white" />
-                      <span className="text-white">
-                        {isLive
-                          ? "Join Live Class"
-                          : item.status === "Completed"
-                          ? "Session Ended"
-                          : "Launch Class Link"}
-                      </span>
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {liveClasses.length === 0 && (
-            <div className="p-8 text-center rounded-xl border border-dashed border-border bg-card">
-              <Video className="size-8 mx-auto text-muted-foreground/60 mb-2" />
-              <p className="text-sm font-medium text-foreground">No live sessions scheduled.</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Click "Schedule Class" above to set up an online lecture.
-              </p>
-            </div>
-          )}
         </TabsContent>
       </Tabs>
 
