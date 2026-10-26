@@ -188,7 +188,7 @@ export function InventoryFormModal({
               departmentOrVendor:
                 supplierName.trim() || "Allied Paper & Stationery Mart",
               actor: custodian.trim() || "M. Tariq Mehmood",
-              remarks: "Opening store stock registered in Finance Inventory",
+              remarks: "Opening store stock registered in Central Inventory",
             },
           ],
     };

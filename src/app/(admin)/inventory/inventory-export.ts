@@ -233,7 +233,7 @@ export function exportInventoryStockPdf(items: InventoryItemRecord[]) {
     s += pdfText(
       34,
       24,
-      "Confidential Financial & Store Record - EduSphere Super Admin Finance Suite",
+      "Confidential Operations & Store Record - EduSphere Super Admin Operations Suite",
       "F1",
       7.5,
       [0.45, 0.5, 0.58]
@@ -338,7 +338,7 @@ export function exportPurchaseOrdersPdf(orders: PurchaseOrderRecord[]) {
   s += pdfText(
     34,
     24,
-    "Confidential Procurement Record - EduSphere Super Admin Finance Suite",
+    "Confidential Procurement Record - EduSphere Super Admin Operations Suite",
     "F1",
     7.5,
     [0.45, 0.5, 0.58]
@@ -441,7 +441,7 @@ export function exportIssuancePdf(issuances: DepartmentalIssuanceRecord[]) {
   s += pdfText(
     34,
     24,
-    "Confidential Store Requisition Record - EduSphere Super Admin Finance Suite",
+    "Confidential Store Requisition Record - EduSphere Super Admin Operations Suite",
     "F1",
     7.5,
     [0.45, 0.5, 0.58]
@@ -891,7 +891,7 @@ export function printInventoryRegister(items: InventoryItemRecord[]): boolean {
     <div class="meta">
       <div><strong>Date:</strong> ${new Date().toLocaleDateString("en-GB")}</div>
       <div><strong>Total SKUs:</strong> ${items.length}</div>
-      <div><strong>Authority:</strong> Finance & Central Store</div>
+      <div><strong>Authority:</strong> Operations & Central Store</div>
     </div>
   </div>
   <div class="kpis">

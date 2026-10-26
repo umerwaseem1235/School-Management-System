@@ -130,14 +130,14 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Reports", href: "/fees/reports", icon: BarChart3 },
       { title: "Accounts", href: "/accounts", icon: Calculator },
       { title: "Expenses", href: "/expenses", icon: CreditCard },
-      { title: "Inventory", href: "/inventory", icon: Package },
     ],
     defaultExpanded: false,
   },
   {
     label: "Operations",
-    icon: Bus,
+    icon: Package,
     items: [
+      { title: "Inventory", href: "/inventory", icon: Package },
       { title: "Transport", href: "/transport", icon: Bus },
       { title: "Assets", href: "/assets", icon: Box },
     ],
