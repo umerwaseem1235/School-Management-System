@@ -68,6 +68,15 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   Issued: "brand",
   Returned: "neutral",
   Cancelled: "danger",
+  // transport & fleet
+  "On Route": "success",
+  Operational: "success",
+  "In Maintenance": "warning",
+  Standby: "info",
+  "On Duty": "success",
+  "Off Duty": "neutral",
+  Allocated: "brand",
+  Waitlisted: "warning",
 };
 
 interface StatusBadgeProps {
