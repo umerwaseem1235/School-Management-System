@@ -43,7 +43,7 @@ export function QuickActions({ className }: { className?: string }) {
         <ChevronDown className="size-3 text-cream/70 transition-transform group-data-[popup-open]:rotate-180" />
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-56 p-1 rounded-xl shadow-lg border-border bg-white">
+      <DropdownMenuContent align="end" className="w-60 p-1.5 rounded-xl shadow-xl border border-border/80 bg-popover text-popover-foreground">
         <DropdownMenuGroup>
           <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Administrative Actions

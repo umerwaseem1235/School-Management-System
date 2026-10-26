@@ -99,7 +99,7 @@ export function Topbar() {
               <ChevronDown className="size-3 text-muted-foreground transition-transform group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-68 p-1 rounded-xl shadow-lg border-border bg-white">
+            <DropdownMenuContent align="end" className="w-72 sm:w-80 p-1.5 rounded-xl shadow-xl border border-border/80 bg-popover text-popover-foreground">
               <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Institutional Campus
               </DropdownMenuLabel>
@@ -159,7 +159,7 @@ export function Topbar() {
               <ChevronDown className="size-3 text-muted-foreground transition-transform group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" className="w-48 p-1 rounded-xl shadow-lg border-border bg-white">
+            <DropdownMenuContent align="end" className="w-52 p-1.5 rounded-xl shadow-xl border border-border/80 bg-popover text-popover-foreground">
               <DropdownMenuLabel className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Academic Year
               </DropdownMenuLabel>
@@ -208,7 +208,7 @@ export function Topbar() {
 
             <DropdownMenuContent
               align="end"
-              className="w-56 p-1 rounded-xl shadow-lg border-border bg-white"
+              className="w-60 p-1.5 rounded-xl shadow-xl border border-border/80 bg-popover text-popover-foreground"
             >
               <div className="px-2 py-2 border-b border-border mb-1">
                 <p className="text-xs font-semibold text-foreground">Hamza Tariq</p>

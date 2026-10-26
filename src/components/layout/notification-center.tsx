@@ -117,7 +117,7 @@ export function NotificationCenter({ className }: { className?: string }) {
 
       <DropdownMenuContent
         align="end"
-        className="w-84 sm:w-92 p-0 rounded-xl shadow-lg border-border bg-white"
+        className="w-80 sm:w-96 p-0 rounded-xl shadow-2xl border border-border/80 bg-popover text-popover-foreground overflow-hidden"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border bg-muted/30 px-4 py-2.5">
