@@ -59,6 +59,15 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   "Short Leave": "gold",
   Submitted: "success",
   Verified: "brand",
+  // inventory & procurement
+  "In Stock": "success",
+  "Low Stock": "warning",
+  "Out of Stock": "danger",
+  Received: "success",
+  Ordered: "info",
+  Issued: "brand",
+  Returned: "neutral",
+  Cancelled: "danger",
 };
 
 interface StatusBadgeProps {
