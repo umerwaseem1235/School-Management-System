@@ -633,39 +633,7 @@ export function LmsClient({
   return (
     <div className="space-y-6 overflow-x-hidden">
       {/* Top Header */}
-      <PageHeader
-        title="Learning Management System (LMS)"
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsCourseDialogOpen(true)}
-              className="h-9 text-xs font-semibold cursor-pointer"
-            >
-              <Plus className="size-3.5 mr-1.5" />
-              Add Course
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsMaterialDialogOpen(true)}
-              className="h-9 text-xs font-semibold cursor-pointer"
-            >
-              <Upload className="size-3.5 mr-1.5" />
-              Upload Material
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleOpenNewAssignmentGlobal}
-              className="h-9 text-xs font-semibold bg-primary hover:bg-primary/90 text-white cursor-pointer shadow-sm"
-            >
-              <FileText className="size-3.5 mr-1.5 text-white" />
-              New Assignment
-            </Button>
-          </div>
-        }
-      />
+      <PageHeader title="Learning Management System (LMS)" />
 
       {/* KPI Stats Row */}
       <StatGrid className="max-w-none">

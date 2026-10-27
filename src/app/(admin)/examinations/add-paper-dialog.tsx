@@ -103,19 +103,19 @@ export function AddPaperDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden rounded-2xl border border-border/80 shadow-2xl">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-brand-soft/60 via-background to-background p-6 border-b border-border/70">
+      <DialogContent className="sm:max-w-[520px] max-h-[88vh] p-0 overflow-hidden rounded-2xl border border-border/80 shadow-2xl flex flex-col">
+        {/* Header - Fixed at Top */}
+        <div className="bg-gradient-to-r from-brand-soft/60 via-background to-background px-6 py-4 border-b border-border/70 shrink-0">
           <DialogHeader>
-            <div className="flex items-center gap-3.5 pr-8">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-brand text-cream shadow-sm shrink-0">
-                <CalendarDays className="size-5.5" />
+            <div className="flex items-center gap-3 pr-6">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brand text-cream shadow-sm shrink-0">
+                <CalendarDays className="size-5" />
               </div>
               <div className="min-w-0">
-                <DialogTitle className="text-base sm:text-lg font-bold text-foreground leading-tight truncate">
+                <DialogTitle className="text-base font-bold text-foreground leading-tight truncate">
                   Add Paper to Datesheet
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-1">
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
                   Schedule an examination paper with timing, room, and marks criteria.
                 </DialogDescription>
               </div>
@@ -123,8 +123,12 @@ export function AddPaperDialog({
           </DialogHeader>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* Form Body - Scrollable Container */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col min-h-0 flex-1 overflow-hidden"
+        >
+          <div className="p-6 overflow-y-auto space-y-4 flex-1">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-foreground">Examination Term</Label>
             <Select value={termId} onValueChange={(val) => { if (val) setTermId(val); }}>
@@ -294,7 +298,10 @@ export function AddPaperDialog({
             />
           </div>
 
-          <DialogFooter className="pt-3 border-t border-border/70 flex items-center justify-end gap-2">
+          </div>
+
+          {/* Footer - Fixed at Bottom */}
+          <DialogFooter className="m-0 shrink-0 px-6 py-4 border-t border-border/70 bg-muted/20 flex items-center justify-end gap-2 sm:justify-end">
             <Button
               type="button"
               variant="outline"
@@ -307,7 +314,7 @@ export function AddPaperDialog({
             <Button
               type="submit"
               size="sm"
-              className="bg-brand text-cream hover:bg-brand-600 text-xs h-8.5 px-4 cursor-pointer shadow-2xs"
+              className="bg-brand text-cream hover:bg-brand-600 text-xs h-8.5 px-4 cursor-pointer shadow-2xs font-semibold"
             >
               Add to Datesheet
             </Button>
