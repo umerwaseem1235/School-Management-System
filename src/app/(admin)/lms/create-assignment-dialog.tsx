@@ -114,7 +114,7 @@ export function CreateAssignmentDialog({
         onOpenChange(isOpen);
       }}
     >
-      <DialogContent className="max-w-lg p-0 overflow-hidden rounded-2xl border border-border shadow-2xl">
+      <DialogContent className="sm:max-w-[560px] md:max-w-[600px] w-full p-0 overflow-hidden rounded-2xl border border-border shadow-2xl">
         <DialogHeader className="px-6 pt-6 pb-4 bg-muted/30 border-b border-border/60">
           <div className="flex items-center gap-2.5">
             <div className="flex size-9 items-center justify-center rounded-lg bg-brand-soft text-brand">

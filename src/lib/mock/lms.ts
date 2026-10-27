@@ -108,6 +108,67 @@ export function sortPakistaniClasses(classes: readonly string[] | string[]): str
   });
 }
 
+/**
+ * Formats lengthy class names into standard concise Pakistani school designations:
+ * e.g. "Grade 10th (Science - Biology)" -> "Class 10 (Bio)"
+ *      "Grade 11 (FSc Pre-Medical)"     -> "Class 11 (Pre-Med)"
+ */
+export function formatCompactClass(className: string): string {
+  if (!className) return "";
+  return className
+    .replace(/(?:Grade|Class)?\s*10(?:th)?\s*\((?:Science\s*-\s*)?Bio(?:logy)?\)/i, "Class 10 (Bio)")
+    .replace(/(?:Grade|Class)?\s*10(?:th)?\s*\((?:Science\s*-\s*)?Comp(?:uter)?\)/i, "Class 10 (CS)")
+    .replace(/(?:Grade|Class)?\s*10(?:th)?\s*\(Arts\)/i, "Class 10 (Arts)")
+    .replace(/(?:Grade|Class)?\s*9(?:th)?\s*\((?:Science\s*-\s*)?Bio(?:logy)?\)/i, "Class 9 (Bio)")
+    .replace(/(?:Grade|Class)?\s*9(?:th)?\s*\((?:Science\s*-\s*)?Comp(?:uter)?\)/i, "Class 9 (CS)")
+    .replace(/(?:Grade|Class)?\s*9(?:th)?\s*\(Arts\)/i, "Class 9 (Arts)")
+    .replace(/(?:Grade|Class)?\s*11(?:th)?\s*\((?:FSc\s+)?Pre-Med(?:ical)?\)/i, "Class 11 (Pre-Med)")
+    .replace(/(?:Grade|Class)?\s*11(?:th)?\s*\((?:FSc\s+)?Pre-Eng(?:ineering)?\)/i, "Class 11 (Pre-Eng)")
+    .replace(/(?:Grade|Class)?\s*11(?:th)?\s*\(ICS\)/i, "Class 11 (ICS)")
+    .replace(/(?:Grade|Class)?\s*12(?:th)?\s*\((?:FSc\s+)?Pre-Med(?:ical)?\)/i, "Class 12 (Pre-Med)")
+    .replace(/(?:Grade|Class)?\s*12(?:th)?\s*\((?:FSc\s+)?Pre-Eng(?:ineering)?\)/i, "Class 12 (Pre-Eng)")
+    .replace(/(?:Grade|Class)?\s*12(?:th)?\s*\(I\.Com\)/i, "Class 12 (I.Com)")
+    .replace(/Grade\s+/i, "Class ");
+}
+
+/**
+ * Extracts a concise subject name from a verbose course title:
+ * e.g. "Grade 10 Mathematics (Core)" -> "Mathematics"
+ *      "Grade 9 Physics & Lab Mechanics" -> "Physics"
+ *      "Grade 6 General Science & Environment" -> "General Science"
+ *      "Grade 11 Calculus & Analytical Geometry" -> "Mathematics"
+ *      "Grade 11 Programming in C++ (ICS)" -> "Computer Science"
+ */
+export function formatCourseSubject(courseName: string): string {
+  if (!courseName) return "";
+  const lower = courseName.toLowerCase();
+  if (lower.includes("calculus") || lower.includes("math")) {
+    if (lower.includes("business math")) return "Business Mathematics";
+    if (lower.includes("general math")) return "General Mathematics";
+    return "Mathematics";
+  }
+  if (lower.includes("physics")) return "Physics";
+  if (lower.includes("chemistry")) return "Chemistry";
+  if (lower.includes("biology")) return "Biology";
+  if (lower.includes("computer") || lower.includes("programming") || lower.includes("c++")) return "Computer Science";
+  if (lower.includes("urdu")) return "Urdu";
+  if (lower.includes("english")) return "English";
+  if (lower.includes("islam") || lower.includes("islamiat")) return "Islamiat";
+  if (lower.includes("tarjuma") || lower.includes("quran")) return "Tarjuma-tul-Quran";
+  if (lower.includes("pakistan studies") || lower.includes("civics")) return "Pakistan Studies";
+  if (lower.includes("general science") || lower.includes("science")) return "General Science";
+  if (lower.includes("accounting")) return "Principles of Accounting";
+  if (lower.includes("economics")) return "Economics";
+  if (lower.includes("geography")) return "Geography";
+  if (lower.includes("social studies")) return "Social Studies";
+  if (lower.includes("education") || lower.includes("pedagogy")) return "Education";
+
+  return courseName
+    .replace(/^Grade\s+\d+(?:th)?\s*/i, "")
+    .replace(/\s*\([^\)]+\)/g, "")
+    .trim();
+}
+
 export const LMS_COURSES: LmsCourse[] = [
   {
     id: "lms-c1",
@@ -505,7 +566,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   // Primary (Grade 5)
   {
     id: "asg-1",
-    title: "Fractions & Decimal Operations Worksheet 3.1",
+    title: "Fractions & Decimals Worksheet",
     courseName: "Grade 5 Primary Mathematics",
     className: "Grade 5-A",
     teacher: "Mrs. Nida Farooq",
@@ -517,7 +578,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-2",
-    title: "Urdu Khulasa & Mazmoon: 'Mera Watan Pakistan'",
+    title: "Mazmoon: Mera Watan",
     courseName: "Grade 5 Primary Urdu",
     className: "Grade 5-A",
     teacher: "Ms. Kiran Aziz",
@@ -531,7 +592,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   // Middle School (Grades 6, 7, 8)
   {
     id: "asg-3",
-    title: "Human Digestive System Diagram & Organ Functions",
+    title: "Digestive System Diagram",
     courseName: "Grade 6 General Science & Environment",
     className: "Grade 6-A",
     teacher: "Mr. Usman Ali",
@@ -543,7 +604,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-4",
-    title: "English Story Writing: 'A Memorable Rainy Day'",
+    title: "Story: A Rainy Day",
     courseName: "Grade 6 English Comp",
     className: "Grade 6-A",
     teacher: "Mrs. Maryam Shah",
@@ -555,7 +616,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-5",
-    title: "Geography of Pakistan: Major Rivers & Dam Map Work",
+    title: "Rivers & Dams Map Work",
     courseName: "Grade 7 Social Studies & Geography",
     className: "Grade 7-A",
     teacher: "Mr. Waqas Anwar",
@@ -567,7 +628,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-6",
-    title: "Linear Equations in One Variable Exercise 5.2",
+    title: "Linear Equations Ex 5.2",
     courseName: "Grade 7 Mathematics",
     className: "Grade 7-A",
     teacher: "Mr. Bilal Saeed",
@@ -579,7 +640,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-7",
-    title: "Essay: Environmental Sustainability in South Asia",
+    title: "Essay: Sustainability",
     courseName: "Grade 8 English Language & Comp",
     className: "Grade 8-A",
     teacher: "Mrs. Maryam Shah",
@@ -591,7 +652,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-8",
-    title: "Chemical Reactions & Atomic Structure Questions",
+    title: "Chemical Reactions",
     courseName: "Grade 8 General Science",
     className: "Grade 8-A",
     teacher: "Dr. Saima Riaz",
@@ -605,7 +666,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   // 9th Class (Science Bio, Science Computer, Arts)
   {
     id: "asg-9",
-    title: "Electromagnetic Induction & Physics Practical Lab Writeup",
+    title: "Electromagnetism Lab",
     courseName: "Grade 9 Physics & Lab Mechanics",
     className: "Grade 9th (Science - Biology)",
     teacher: "Dr. Saima Riaz",
@@ -617,7 +678,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-10",
-    title: "Biology: Cell Division & Plant Tissue Diagrammatic Analysis",
+    title: "Cell Division Diagrams",
     courseName: "Grade 9 Biology",
     className: "Grade 9th (Science - Biology)",
     teacher: "Ms. Amina Tariq",
@@ -629,7 +690,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-11",
-    title: "Python Functions & Logic Gate Diagrams",
+    title: "Python Functions & Logic",
     courseName: "Grade 9 Computer Science & Python",
     className: "Grade 9th (Science - Computer)",
     teacher: "Mr. Usman Ali",
@@ -641,7 +702,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-12",
-    title: "General Science: Everyday Health, Energy & Nutrition Assignment",
+    title: "Health & Nutrition",
     courseName: "Grade 9 General Science & Arts Foundation",
     className: "Grade 9th (Arts)",
     teacher: "Mr. Usman Ali",
@@ -653,7 +714,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-13",
-    title: "Urdu Grammar: Tashbih, Istaara & Mazmoon Nigari",
+    title: "Urdu Grammar & Tashbih",
     courseName: "Grade 9 Arts Urdu",
     className: "Grade 9th (Arts)",
     teacher: "Ms. Kiran Aziz",
@@ -667,7 +728,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   // 10th Class (Science Bio, Science Computer, Arts)
   {
     id: "asg-14",
-    title: "Quadratic Equations Problem Set 4.2 & Completing Square",
+    title: "Quadratic Equations Ex 4.2",
     courseName: "Grade 10 Mathematics (Core)",
     className: "Grade 10th (Science - Biology)",
     teacher: "Mr. Adeel Hassan",
@@ -679,7 +740,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-15",
-    title: "Chemical Bonding & Organic Functional Groups Lab Report",
+    title: "Chemical Bonding Lab",
     courseName: "Grade 10 Chemistry & Reactions",
     className: "Grade 10th (Science - Biology)",
     teacher: "Mr. Fahad Mir",
@@ -691,7 +752,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-16",
-    title: "Database Design & SQL Basic Table Queries",
+    title: "SQL Database Queries",
     courseName: "Grade 10 Computer Science & Databases",
     className: "Grade 10th (Science - Computer)",
     teacher: "Mr. Usman Ali",
@@ -703,7 +764,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-17",
-    title: "Constitutional History of Pakistan (1973 Amendments)",
+    title: "1973 Constitution",
     courseName: "Grade 10 Pakistan Studies & Civics",
     className: "Grade 10th (Arts)",
     teacher: "Mr. Waqas Anwar",
@@ -715,7 +776,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-18",
-    title: "General Mathematics: Business Math, Zakat & Inheritance Problems",
+    title: "Business Math & Zakat",
     courseName: "Grade 10 General Mathematics",
     className: "Grade 10th (Arts)",
     teacher: "Mr. Bilal Saeed",
@@ -729,7 +790,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   // Intermediate / HSSC-I (Grade 11 College)
   {
     id: "asg-19",
-    title: "Cell Division & Meiosis Diagrammatic Analysis",
+    title: "Meiosis & Cell Division",
     courseName: "Grade 11 Biology (Pre-Medical)",
     className: "Grade 11 (FSc Pre-Medical)",
     teacher: "Ms. Amina Tariq",
@@ -741,7 +802,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-20",
-    title: "Conic Sections: Parabola, Ellipse & Tangent Derivations",
+    title: "Conic Sections Derivations",
     courseName: "Grade 11 Calculus & Analytical Geometry",
     className: "Grade 11 (FSc Pre-Engineering)",
     teacher: "Mr. Adeel Hassan",
@@ -753,7 +814,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-21",
-    title: "Object-Oriented Programming (OOP) in C++ Lab Task",
+    title: "C++ OOP Lab Task",
     courseName: "Grade 11 Programming in C++ (ICS)",
     className: "Grade 11 (ICS)",
     teacher: "Mr. Usman Ali",
@@ -767,7 +828,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   // Intermediate / HSSC-II (Grade 12 College)
   {
     id: "asg-22",
-    title: "Human Genetics & DNA Replication Mechanisms",
+    title: "Genetics & DNA Replication",
     courseName: "Grade 12 Biology (Pre-Medical)",
     className: "Grade 12 (FSc Pre-Medical)",
     teacher: "Ms. Amina Tariq",
@@ -779,7 +840,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-23",
-    title: "Nuclear Physics & Radioactive Half-Life Calculations",
+    title: "Nuclear Physics & Half-Life",
     courseName: "Grade 12 Physics & Nuclear Mechanics",
     className: "Grade 12 (FSc Pre-Engineering)",
     teacher: "Dr. Saima Riaz",
@@ -791,7 +852,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-24",
-    title: "Partnership Dissolution & Revaluation Balance Sheet",
+    title: "Partnership Balance Sheet",
     courseName: "Grade 12 Principles of Accounting",
     className: "Grade 12 (I.Com)",
     teacher: "Mr. Waqas Anwar",
@@ -806,7 +867,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
 export const LMS_MATERIALS: LmsMaterial[] = [
   {
     id: "mat-1",
-    title: "Ch 4: Quadratic Equations Lecture Notes & Solved Examples",
+    title: "Quadratic Equations Notes",
     subject: "Mathematics",
     className: "Grade 10th (Science - Biology)",
     fileType: "PDF",
@@ -817,7 +878,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-2",
-    title: "Physics Term 1 Formula Sheet & Derivations Summary",
+    title: "Physics Formula Sheet",
     subject: "Physics",
     className: "Grade 9th (Science - Biology)",
     fileType: "PDF",
@@ -828,7 +889,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-3",
-    title: "Chemical Reactions & Catalysis Slide Deck",
+    title: "Chemical Reactions Slides",
     subject: "Chemistry",
     className: "Grade 10th (Science - Biology)",
     fileType: "SLIDES",
@@ -839,7 +900,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-4",
-    title: "Python Basics Cheatsheet & Code Samples",
+    title: "Python Basics Cheatsheet",
     subject: "Computer Science",
     className: "Grade 9th (Science - Computer)",
     fileType: "DOCX",
@@ -850,7 +911,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-5",
-    title: "Grammar Guide: Clauses, Prepositions & Active/Passive",
+    title: "English Grammar Guide",
     subject: "English",
     className: "Grade 8-A",
     fileType: "PDF",
@@ -861,7 +922,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-6",
-    title: "Past Paper 5-Year Solved Questions (FBISE / BISE Standards)",
+    title: "5-Year Solved Past Papers",
     subject: "Mathematics",
     className: "Grade 10th (Science - Biology)",
     fileType: "PDF",
@@ -872,7 +933,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-7",
-    title: "Cell Biology & Genetics High-Yield Diagrams",
+    title: "Cell Biology Diagrams",
     subject: "Biology",
     className: "Grade 11 (FSc Pre-Medical)",
     fileType: "PDF",
@@ -883,7 +944,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-8",
-    title: "General Science & Environment Foundation Notes",
+    title: "General Science Notes",
     subject: "General Science",
     className: "Grade 9th (Arts)",
     fileType: "PDF",
@@ -894,7 +955,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-9",
-    title: "Primary Mathematics Mental Math Drills",
+    title: "Mental Math Drills",
     subject: "Mathematics",
     className: "Grade 5-A",
     fileType: "PDF",
@@ -905,7 +966,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-10",
-    title: "SQL Queries & Database Relational Schema Guide",
+    title: "SQL Queries Guide",
     subject: "Computer Science",
     className: "Grade 10th (Science - Computer)",
     fileType: "PDF",
@@ -916,7 +977,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-11",
-    title: "Urdu Grammar: Tashbih, Istaara & Asnaaf-e-Adab Complete Notes",
+    title: "Urdu Grammar Notes",
     subject: "Urdu",
     className: "Grade 10th (Science - Biology)",
     fileType: "PDF",
@@ -927,7 +988,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-12",
-    title: "Islamiat Compulsory: Selected Ahadith Translation & Tashreeh",
+    title: "Ahadith & Tashreeh Notes",
     subject: "Islamiat",
     className: "Grade 9th (Science - Biology)",
     fileType: "PDF",
@@ -938,7 +999,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-13",
-    title: "Surah Al-Anfal Word-by-Word Translation & Tafseer Guide",
+    title: "Surah Al-Anfal Tafseer",
     subject: "Tarjuma-tul-Quran",
     className: "Grade 9th (Arts)",
     fileType: "PDF",
@@ -949,7 +1010,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-14",
-    title: "Zakat, Ushr & Inheritance Formula Cheatsheet (General Math)",
+    title: "Zakat & Inheritance Formulas",
     subject: "General Mathematics",
     className: "Grade 10th (Arts)",
     fileType: "PDF",
@@ -960,7 +1021,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-15",
-    title: "1973 Constitution: Key Articles & Fundamental Rights Summary",
+    title: "1973 Constitution Summary",
     subject: "Civics",
     className: "Grade 10th (Arts)",
     fileType: "SLIDES",
@@ -971,7 +1032,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-16",
-    title: "Microeconomics: Laws of Supply, Demand & Elasticity Graphs",
+    title: "Microeconomics Notes",
     subject: "Economics",
     className: "Grade 12 (I.Com)",
     fileType: "PDF",
@@ -982,7 +1043,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-17",
-    title: "Principles of Accounting: Ledger, Trial Balance & Adjusting Entries",
+    title: "Accounting Ledger & Entries",
     subject: "Principles of Accounting",
     className: "Grade 12 (I.Com)",
     fileType: "PDF",
