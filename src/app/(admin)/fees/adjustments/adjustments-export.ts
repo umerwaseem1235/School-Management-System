@@ -1,5 +1,6 @@
 import type { FeeAdjustmentRecord } from "@/lib/mock/finance";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { printHtml } from "@/lib/print-html";
 
 function sanitizePdfText(input: string): string {
   return input
@@ -242,12 +243,6 @@ export function exportAdjustmentsPdf(records: FeeAdjustmentRecord[]): boolean {
 export function printAdjustmentsReport(records: FeeAdjustmentRecord[]): boolean {
   if (typeof window === "undefined") return false;
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    window.print();
-    return true;
-  }
-
   const generatedDate = new Date().toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
@@ -435,26 +430,11 @@ export function printAdjustmentsReport(records: FeeAdjustmentRecord[]): boolean 
 </body>
 </html>`;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
-
-  return true;
+  return printHtml(html);
 }
 
 export function printAdjustmentVoucher(record: FeeAdjustmentRecord): boolean {
   if (typeof window === "undefined") return false;
-
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    window.print();
-    return true;
-  }
 
   const generatedDate = new Date().toLocaleDateString("en-GB", {
     day: "2-digit",
@@ -658,14 +638,5 @@ export function printAdjustmentVoucher(record: FeeAdjustmentRecord): boolean {
 </body>
 </html>`;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
-
-  return true;
+  return printHtml(html);
 }

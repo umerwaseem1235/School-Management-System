@@ -315,10 +315,10 @@ export function StaffReportsClient() {
       {
         key: "employee",
         header: "Staff Member",
-        headerAlign: "center",
+        headerAlign: "left",
         align: "left",
         className: "w-[21%] pr-3",
-        headerClassName: "w-[21%] pr-3 text-center",
+        headerClassName: "w-[21%] pr-3 text-left",
         cell: (r) => (
           <PersonCell
             name={r.name}

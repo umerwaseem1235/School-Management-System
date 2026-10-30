@@ -3,6 +3,7 @@ import type {
   StaffAccountRecord,
 } from "@/lib/mock/accounts";
 import { formatDate } from "@/lib/format";
+import { printHtml } from "@/lib/print-html";
 
 function sanitizePdfText(input: string): string {
   return input
@@ -552,9 +553,6 @@ export function exportSingleStaffAccountPdf(account: StaffAccountRecord) {
 export function printStudentAccountsRegister(
   accounts: StudentAccountRecord[]
 ): boolean {
-  const win = window.open("", "_blank", "width=1100,height=800");
-  if (!win) return false;
-
   const rowsHtml = accounts
     .map(
       (a) => `
@@ -569,7 +567,7 @@ export function printStudentAccountsRegister(
     )
     .join("");
 
-  win.document.write(`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html>
     <head>
       <title>Student Portal Credentials Register - EduSphere</title>
@@ -607,19 +605,15 @@ export function printStudentAccountsRegister(
         </thead>
         <tbody>${rowsHtml}</tbody>
       </table>
-      <script>window.onload = () => { window.print(); };</script>
     </body>
-  </html>`);
-  win.document.close();
-  return true;
+  </html>`;
+
+  return printHtml(html);
 }
 
 export function printParentAccountsRegister(
   accounts: StudentAccountRecord[]
 ): boolean {
-  const win = window.open("", "_blank", "width=1100,height=800");
-  if (!win) return false;
-
   const rowsHtml = accounts
     .map(
       (a) => `
@@ -635,7 +629,7 @@ export function printParentAccountsRegister(
     )
     .join("");
 
-  win.document.write(`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html>
     <head>
       <title>Parent Portal Credentials Register - EduSphere</title>
@@ -674,19 +668,15 @@ export function printParentAccountsRegister(
         </thead>
         <tbody>${rowsHtml}</tbody>
       </table>
-      <script>window.onload = () => { window.print(); };</script>
     </body>
-  </html>`);
-  win.document.close();
-  return true;
+  </html>`;
+
+  return printHtml(html);
 }
 
 export function printStaffAccountsRegister(
   accounts: StaffAccountRecord[]
 ): boolean {
-  const win = window.open("", "_blank", "width=1100,height=800");
-  if (!win) return false;
-
   const rowsHtml = accounts
     .map(
       (a) => `
@@ -702,7 +692,7 @@ export function printStaffAccountsRegister(
     )
     .join("");
 
-  win.document.write(`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html>
     <head>
       <title>Staff Portal Credentials Register - EduSphere</title>
@@ -741,20 +731,16 @@ export function printStaffAccountsRegister(
         </thead>
         <tbody>${rowsHtml}</tbody>
       </table>
-      <script>window.onload = () => { window.print(); };</script>
     </body>
-  </html>`);
-  win.document.close();
-  return true;
+  </html>`;
+
+  return printHtml(html);
 }
 
 export function printSingleStudentAccountStatement(
   account: StudentAccountRecord
 ): boolean {
-  const win = window.open("", "_blank", "width=850,height=700");
-  if (!win) return false;
-
-  win.document.write(`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html>
     <head>
       <title>Credential Slip - ${account.studentName}</title>
@@ -790,20 +776,16 @@ export function printSingleStudentAccountStatement(
         <div class="row"><span>Assigned Password:</span><span class="mono">${account.parentPassword}</span></div>
         <div class="row"><span>Registered Phone:</span><span class="mono">${account.phone}</span></div>
       </div>
-      <script>window.onload = () => { window.print(); };</script>
     </body>
-  </html>`);
-  win.document.close();
-  return true;
+  </html>`;
+
+  return printHtml(html);
 }
 
 export function printSingleStaffAccountStatement(
   account: StaffAccountRecord
 ): boolean {
-  const win = window.open("", "_blank", "width=850,height=650");
-  if (!win) return false;
-
-  win.document.write(`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html>
     <head>
       <title>Staff Credential Slip - ${account.name}</title>
@@ -834,9 +816,8 @@ export function printSingleStaffAccountStatement(
         <div class="row"><span>Assigned Portal Role:</span><strong>${account.portalRole}</strong></div>
         <div class="row"><span>Assigned By:</span><strong>${account.assignedByAdmin}</strong></div>
       </div>
-      <script>window.onload = () => { window.print(); };</script>
     </body>
-  </html>`);
-  win.document.close();
-  return true;
+  </html>`;
+
+  return printHtml(html);
 }

@@ -3,6 +3,7 @@ import type {
   ExpenseVoucherRecord,
 } from "@/lib/mock/expenses";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { printHtml } from "@/lib/print-html";
 
 function sanitizePdfText(input: string): string {
   return input
@@ -376,9 +377,6 @@ export function exportSingleExpenseVoucherPdf(voucher: ExpenseVoucherRecord) {
 /* ───────────────────── Print Previews ───────────────────── */
 
 export function printExpensesRegister(vouchers: ExpenseVoucherRecord[]): boolean {
-  const win = window.open("", "_blank", "width=1100,height=800");
-  if (!win) return false;
-
   const rowsHtml = vouchers
     .map(
       (v) => `
@@ -395,7 +393,7 @@ export function printExpensesRegister(vouchers: ExpenseVoucherRecord[]): boolean
     )
     .join("");
 
-  win.document.write(`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html>
     <head>
       <title>Institutional Expenses Register - EduSphere</title>
@@ -423,7 +421,7 @@ export function printExpensesRegister(vouchers: ExpenseVoucherRecord[]): boolean
         <thead>
           <tr>
             <th>Voucher &amp; Date</th>
-            <th>Expense Head &amp; Category</th>
+            <th>Expense Head</th>
             <th>Vendor &amp; Channel</th>
             <th>Campus</th>
             <th>Gross Amount</th>
@@ -434,20 +432,16 @@ export function printExpensesRegister(vouchers: ExpenseVoucherRecord[]): boolean
         </thead>
         <tbody>${rowsHtml}</tbody>
       </table>
-      <script>window.onload = () => { window.print(); };</script>
     </body>
-  </html>`);
-  win.document.close();
-  return true;
+  </html>`;
+
+  return printHtml(html);
 }
 
 export function printSingleExpenseVoucher(
   voucher: ExpenseVoucherRecord
 ): boolean {
-  const win = window.open("", "_blank", "width=850,height=700");
-  if (!win) return false;
-
-  win.document.write(`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
   <html>
     <head>
       <title>Expense Voucher - ${voucher.voucherNo}</title>
@@ -484,9 +478,8 @@ export function printSingleExpenseVoucher(
         <div class="row"><span>Net Payable Amount:</span><span class="mono" style="color:#047857;font-size:15px;">${formatCurrency(voucher.netPayable)}</span></div>
         <div class="row"><span>Payment Channel &amp; Ref:</span><span class="mono">${voucher.paymentMode} (${voucher.paymentRef})</span></div>
       </div>
-      <script>window.onload = () => { window.print(); };</script>
     </body>
-  </html>`);
-  win.document.close();
-  return true;
+  </html>`;
+
+  return printHtml(html);
 }

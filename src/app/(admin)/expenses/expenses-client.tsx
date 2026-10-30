@@ -67,6 +67,14 @@ const CAMPUS_OPTIONS = [
   "Bahria Town",
 ];
 
+export function formatTitle(str: string): string {
+  if (!str) return "";
+  if (str === str.toLowerCase()) {
+    return str.replace(/\b[a-z]/g, (char) => char.toUpperCase());
+  }
+  return str;
+}
+
 export function ExpensesClient() {
   const [activeTab, setActiveTab] = React.useState<ExpensesViewTab>("vouchers");
   const [vouchers, setVouchers] = React.useState<ExpenseVoucherRecord[]>(
@@ -257,28 +265,40 @@ export function ExpensesClient() {
         key: "voucherNo",
         header: "Voucher #",
         align: "center",
+        className: "w-[13%] px-3 text-center",
+        headerClassName: "w-[13%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+          <div className="flex flex-col items-center justify-center gap-1 text-center">
+            <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/20 bg-brand-50/70 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e] shadow-2xs">
               {r.voucherNo}
             </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {formatDate(r.date)} · {r.invoiceNo}
-            </p>
+            <span
+              className="max-w-full truncate font-mono text-[10.5px] font-medium text-slate-600"
+              title={`Invoice ${r.invoiceNo}`}
+            >
+              {r.invoiceNo}
+            </span>
+            <span className="whitespace-nowrap text-[10.5px] tabular-nums text-muted-foreground">
+              {formatDate(r.date)}
+            </span>
           </div>
         ),
       },
       {
         key: "title",
-        header: "Expense Head & Category",
-        align: "center",
+        header: "Expense Head",
+        align: "left",
+        headerAlign: "left",
+        className: "w-[26%] px-4 text-left",
+        headerClassName: "w-[26%] px-4 text-left whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[230px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.title}
-            </p>
-            <p className="truncate text-[10.5px] text-muted-foreground">
-              {r.category} · {r.department}
+          <div className="flex flex-col items-start justify-center text-left min-w-0 py-0.5">
+            <p
+              className="line-clamp-2 text-[13px] font-bold text-foreground leading-snug hover:text-brand transition-colors cursor-pointer"
+              title={`${r.title} — Click to view details (${r.category})`}
+              onClick={() => openVoucher(r, "overview")}
+            >
+              {formatTitle(r.title)}
             </p>
           </div>
         ),
@@ -287,14 +307,22 @@ export function ExpensesClient() {
         key: "vendor",
         header: "Vendor / Payee",
         align: "center",
+        className: "w-[19%] px-3 text-center",
+        headerClassName: "w-[19%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.vendorName}
+          <div className="flex flex-col items-center justify-center gap-1 text-center">
+            <p
+              className="line-clamp-2 text-[12.5px] font-bold leading-snug text-foreground"
+              title={r.vendorName}
+            >
+              {formatTitle(r.vendorName)}
             </p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {r.vendorNtn} · {r.paymentMode}
-            </p>
+            <span className="whitespace-nowrap font-mono text-[10.5px] font-medium text-muted-foreground">
+              {r.vendorNtn}
+            </span>
+            <span className="inline-flex items-center whitespace-nowrap rounded bg-slate-100 px-1.5 py-0.5 text-[10.5px] font-semibold text-slate-700">
+              {r.paymentMode}
+            </span>
           </div>
         ),
       },
@@ -302,28 +330,16 @@ export function ExpensesClient() {
         key: "campus",
         header: "Campus",
         align: "center",
+        className: "w-[10%] px-3 text-center",
+        headerClassName: "w-[10%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">{r.campus}</p>
-            <p className="font-mono text-[10.5px] text-brand">
-              {r.budgetHeadCode}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "gross",
-        header: "Gross & Tax",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-semibold tabular-nums text-foreground">
-              {formatCurrency(r.grossAmount)}
+          <div className="flex flex-col items-center justify-center gap-1 text-center">
+            <span className="whitespace-nowrap text-[12.5px] font-semibold text-foreground">
+              {r.campus}
             </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              GST: +{formatCurrency(r.taxAmount)} · WHT: -
-              {formatCurrency(r.whtDeduction)}
-            </p>
+            <span className="inline-flex items-center whitespace-nowrap rounded border border-brand/15 bg-brand-50/70 px-1.5 py-0.5 font-mono text-[10px] font-bold text-brand">
+              {r.budgetHeadCode}
+            </span>
           </div>
         ),
       },
@@ -331,21 +347,40 @@ export function ExpensesClient() {
         key: "netPayable",
         header: "Net Payable",
         align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-              {formatCurrency(r.netPayable)}
-            </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {r.paymentRef}
-            </p>
-          </div>
-        ),
+        className: "w-[13%] px-3 text-center",
+        headerClassName: "w-[13%] px-3 text-center whitespace-nowrap",
+        cell: (r) => {
+          const isPending =
+            !r.paymentRef ||
+            r.paymentRef.startsWith("PENDING") ||
+            r.status === "Pending";
+          return (
+            <div className="flex flex-col items-center justify-center gap-1 text-center">
+              <span className="whitespace-nowrap font-mono text-[12.5px] font-extrabold tabular-nums text-emerald-700">
+                {formatCurrency(r.netPayable)}
+              </span>
+              {isPending ? (
+                <span className="inline-flex items-center whitespace-nowrap rounded border border-amber-200/80 bg-amber-50 px-1.5 py-px text-[10px] font-bold text-amber-800">
+                  Pending Auth
+                </span>
+              ) : (
+                <span
+                  className="max-w-full truncate font-mono text-[10.5px] font-medium text-muted-foreground"
+                  title={r.paymentRef}
+                >
+                  {r.paymentRef}
+                </span>
+              )}
+            </div>
+          );
+        },
       },
       {
         key: "status",
         header: "Status",
         align: "center",
+        className: "w-[9%] px-3 text-center",
+        headerClassName: "w-[9%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
           <div className="flex justify-center">
             <StatusBadge status={r.status} />
@@ -356,12 +391,15 @@ export function ExpensesClient() {
         key: "actions",
         header: "Actions",
         align: "center",
+        className: "w-[10%] px-4 text-center",
+        headerClassName: "w-[10%] px-4 text-center whitespace-nowrap",
         cell: (r) => (
           <div className="flex items-center justify-center">
             <ActionButton
               tone="outline"
               size="xs"
-              title="View expense voucher, vendor details & approval workflow"
+              className="mx-auto"
+              title={`View Details • Category: ${r.category}`}
               onClick={() => openVoucher(r, "overview")}
             >
               <Eye className="size-3.5" />
@@ -723,6 +761,7 @@ export function ExpensesClient() {
           <DataTable
             data={vouchers}
             columns={voucherColumns}
+            tableClassName="min-w-[980px] table-fixed"
             getRowId={(r) => r.id}
             filters={voucherFilters}
             searchPlaceholder="Search voucher #, invoice #, expense title, vendor or NTN…"

@@ -210,15 +210,15 @@ export function FinesClient() {
       {
         key: "student",
         header: "Student",
-        headerAlign: "center",
-        align: "left",
-        className: "w-[20%]",
+        align: "center",
+        className: "w-[20%] text-center",
         headerClassName: "w-[20%] text-center",
         cell: (r) => (
           <PersonCell
             name={r.student}
             subtitle={`Roll #${r.rollNo} · ${r.className}`}
             showAvatar={false}
+            className="text-center"
           />
         ),
       },

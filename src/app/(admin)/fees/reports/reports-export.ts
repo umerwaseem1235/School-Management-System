@@ -5,6 +5,7 @@ import type {
 } from "@/lib/mock/finance";
 import type { StaffSalaryRecord } from "@/lib/mock/payroll";
 import { formatCurrency, formatPercent } from "@/lib/format";
+import { printHtml } from "@/lib/print-html";
 
 export type ReportPeriodMode = "monthly" | "annual";
 export type ReportTabKey =
@@ -1050,12 +1051,6 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
     defaultersList,
   } = options;
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    window.print();
-    return true;
-  }
-
   const multiplier = periodMode === "annual" ? 12 : 1;
   const periodLabel = getPeriodLabel(periodMode, selectedMonth);
   const tabTitle = getTabTitle(activeTab);
@@ -1675,16 +1670,7 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
 </body>
 </html>`;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
-
-  return true;
+  return printHtml(html);
 }
 
 /* ───────────────────────── 3. Single Student Statement (Print & PDF) ───────────────────────── */
@@ -1695,11 +1681,6 @@ export function printSingleStudentFeeStatement(
   selectedMonth: string
 ): boolean {
   if (typeof window === "undefined") return false;
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    window.print();
-    return true;
-  }
 
   const multiplier = periodMode === "annual" ? 12 : 1;
   const periodLabel = getPeriodLabel(periodMode, selectedMonth);
@@ -2043,14 +2024,7 @@ export function printSingleStudentFeeStatement(
 </body>
 </html>`;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
-  return true;
+  return printHtml(html);
 }
 
 export function exportSingleStudentFeeStatementPdf(
@@ -2346,11 +2320,6 @@ export function printSingleStaffSalaryStatement(
   selectedMonth: string
 ): boolean {
   if (typeof window === "undefined") return false;
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    window.print();
-    return true;
-  }
 
   const multiplier = periodMode === "annual" ? 12 : 1;
   const periodLabel = getPeriodLabel(periodMode, selectedMonth);
@@ -2689,14 +2658,7 @@ export function printSingleStaffSalaryStatement(
 </body>
 </html>`;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
-  return true;
+  return printHtml(html);
 }
 
 export function exportSingleStaffSalaryStatementPdf(

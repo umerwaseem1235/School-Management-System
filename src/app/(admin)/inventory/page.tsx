@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { InventoryClient } from "./inventory-client";
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 };
 
 export default function InventoryPage() {
-  return <InventoryClient />;
+  return (
+    <Suspense fallback={null}>
+      <InventoryClient />
+    </Suspense>
+  );
 }

@@ -4,6 +4,7 @@ import type {
   PayrollBatchSummary,
 } from "@/lib/mock/payroll";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { printHtml } from "@/lib/print-html";
 
 function sanitizePdfText(input: string): string {
   return input
@@ -32,6 +33,7 @@ function buildMinimalPdf(pagesStreams: string[]): Blob {
     objects.push(content);
     return objects.length;
   };
+
 
   const catalogId = addObject("");
   const pagesId = addObject("");
@@ -223,8 +225,8 @@ export function printPayrollReport(options: {
   activeTab: string;
 }): boolean {
   if (typeof window === "undefined") return false;
-  const printWindow = window.open("", "_blank", "width=900,height=700");
-  if (!printWindow) return false;
+
+
 
   const totalGross = options.salaries.reduce((s, r) => s + r.grossSalary, 0);
   const totalNet = options.salaries.reduce((s, r) => s + r.netSalary, 0);
@@ -467,22 +469,22 @@ export function printPayrollReport(options: {
 </body>
 </html>`;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  return printHtml(html);
 
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
 
-  return true;
+
+
+
+
+
+
+
 }
 
 export function printSinglePayslip(salary: StaffSalaryRecord): boolean {
   if (typeof window === "undefined") return false;
-  const printWindow = window.open("", "_blank", "width=800,height=750");
-  if (!printWindow) return false;
+
+
 
   const totalAllowances =
     salary.medicalAllowance +
@@ -702,14 +704,14 @@ export function printSinglePayslip(salary: StaffSalaryRecord): boolean {
 </body>
 </html>`;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
+  return printHtml(html);
 
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
 
-  return true;
+
+
+
+
+
+
+
 }

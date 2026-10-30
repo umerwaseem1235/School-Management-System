@@ -1010,7 +1010,7 @@ export function AddSalaryModal({
           </div>
 
           {/* Footer — Lower Side with Live Net Disbursed Indicator */}
-          <DialogFooter className="m-0 shrink-0 flex items-center justify-between border-t border-border/80 bg-slate-50/80 px-6 py-3.5">
+          <DialogFooter className="m-0 shrink-0 flex-row items-center justify-between rounded-none border-t border-border/80 bg-slate-50/80 px-6 py-3.5 sm:justify-between">
             <div className="flex items-center gap-2 text-xs">
               <span className="size-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
               <span className="text-[11px] font-medium text-muted-foreground">

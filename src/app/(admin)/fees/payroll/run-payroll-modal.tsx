@@ -77,7 +77,11 @@ export function RunPayrollModal({
     (s) => selectedCampus === "All Campuses" || s.campus === selectedCampus
   );
 
-  const pendingSalaries = campusSalaries.filter((s) => s.status !== "Disbursed");
+  // Separate cleared pending/approved from on-hold records
+  const pendingSalaries = campusSalaries.filter(
+    (s) => s.status !== "Disbursed" && s.status !== "On Hold"
+  );
+  const onHoldSalaries = campusSalaries.filter((s) => s.status === "On Hold");
   const disbursedSalaries = campusSalaries.filter((s) => s.status === "Disbursed");
 
   const grossPayable = pendingSalaries.reduce((acc, s) => acc + s.grossSalary, 0);
@@ -88,13 +92,19 @@ export function RunPayrollModal({
   const disbursedDeductions = disbursedSalaries.reduce((acc, s) => acc + s.totalDeductions, 0);
   const disbursedNet = disbursedSalaries.reduce((acc, s) => acc + s.netSalary, 0);
 
-  const isBatchLocked = pendingSalaries.length === 0 && disbursedSalaries.length > 0;
+  const isBatchLocked = pendingSalaries.length === 0 && disbursedSalaries.length > 0 && onHoldSalaries.length === 0;
   const activeAccount = accounts.find((a) => a.id === selectedBank) || accounts[0];
 
   // Execute disbursement
   const handleExecute = () => {
     if (pendingSalaries.length === 0) {
-      toast.info("No pending salaries to disburse for this selection.");
+      if (onHoldSalaries.length > 0) {
+        toast.warning(
+          `All remaining ${onHoldSalaries.length} staff records are currently ON HOLD. Release holds to disburse them.`
+        );
+      } else {
+        toast.info("No pending salaries to disburse for this selection.");
+      }
       return;
     }
     setIsProcessing(true);
@@ -105,7 +115,10 @@ export function RunPayrollModal({
       toast.success(
         `Batch payout processed for ${pendingSalaries.length} staff members via ${activeAccount?.bankName}.`,
         {
-          description: "Batch authorization is now finalized and locked. You can unlock it anytime to make revisions.",
+          description:
+            onHoldSalaries.length > 0
+              ? `${onHoldSalaries.length} staff marked On Hold were bypassed and preserved.`
+              : "Batch authorization is now finalized and locked. You can unlock it anytime to make revisions.",
           duration: 5000,
         }
       );
@@ -142,7 +155,7 @@ export function RunPayrollModal({
         {view === "main" && (
           <>
             <DialogHeader className="shrink-0 gap-1 border-b border-border/70 px-6 py-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pr-7">
                 <DialogTitle className="text-base font-bold leading-tight text-foreground flex items-center gap-2">
                   <Banknote className="size-4.5 text-brand" />
                   <span>Process Monthly Payroll Batch</span>
@@ -223,7 +236,7 @@ export function RunPayrollModal({
                     </span>
                   ) : (
                     <span className="font-mono font-bold text-foreground">
-                      {pendingSalaries.length} Staff Pending
+                      {pendingSalaries.length} Staff Cleared for Payout
                     </span>
                   )}
                 </h5>
@@ -248,6 +261,18 @@ export function RunPayrollModal({
                     </span>
                   </div>
                 </div>
+
+                {/* On Hold Callout banner */}
+                {onHoldSalaries.length > 0 && (
+                  <div className="rounded-md border border-rose-200 bg-rose-50/90 p-2.5 text-xs text-rose-950 flex items-center justify-between">
+                    <span className="flex items-center gap-2 font-medium">
+                      <AlertTriangle className="size-4 text-rose-700 shrink-0" />
+                      <span>
+                        <strong>{onHoldSalaries.length} Staff On Hold:</strong> Automatically bypassed and protected from disbursement until cleared.
+                      </span>
+                    </span>
+                  </div>
+                )}
 
                 {/* Sub-note if salaries already disbursed */}
                 {disbursedSalaries.length > 0 && !isBatchLocked && (
@@ -311,7 +336,7 @@ export function RunPayrollModal({
               )}
             </div>
 
-            <DialogFooter className="m-0 shrink-0 flex-row items-center justify-end gap-2.5 rounded-none border-t border-border/70 bg-muted/30 px-6 py-4">
+            <DialogFooter className="m-0 shrink-0 flex-row items-center justify-between gap-2.5 rounded-none border-t border-border/70 bg-slate-50/80 px-6 py-3.5 sm:justify-between">
               <ActionButton
                 tone="outline"
                 size="sm"
@@ -321,9 +346,8 @@ export function RunPayrollModal({
                 {isBatchLocked ? "Close" : "Cancel"}
               </ActionButton>
 
-              {/* If batch is locked, show active Unlock button */}
-              {isBatchLocked ? (
-                <>
+              <div className="flex items-center gap-2.5">
+                {isBatchLocked ? (
                   <ActionButton
                     tone="warning"
                     size="sm"
@@ -333,32 +357,22 @@ export function RunPayrollModal({
                     <Unlock className="size-3.5" />
                     <span>Unlock Payroll Batch</span>
                   </ActionButton>
+                ) : (
                   <ActionButton
-                    tone="outline"
+                    tone="primary"
                     size="sm"
-                    onClick={() => setView("unlock-confirm")}
-                    title="This batch is currently locked. Click to view unlock confirmation."
-                    className="cursor-pointer border-amber-300/80 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                    onClick={() => setView("authorize-confirm")}
+                    disabled={isProcessing || pendingSalaries.length === 0}
                   >
-                    <Lock className="size-3.5 text-amber-700" />
-                    <span>Disbursed &amp; Locked (0)</span>
+                    <CheckCircle2 className="size-3.5" />
+                    <span>
+                      {isProcessing
+                        ? "Transmitting Payout..."
+                        : `Authorize & Disburse (${pendingSalaries.length})`}
+                    </span>
                   </ActionButton>
-                </>
-              ) : (
-                <ActionButton
-                  tone="primary"
-                  size="sm"
-                  onClick={() => setView("authorize-confirm")}
-                  disabled={isProcessing || pendingSalaries.length === 0}
-                >
-                  <CheckCircle2 className="size-3.5" />
-                  <span>
-                    {isProcessing
-                      ? "Transmitting Payout..."
-                      : `Authorize & Disburse (${pendingSalaries.length})`}
-                  </span>
-                </ActionButton>
-              )}
+                )}
+              </div>
             </DialogFooter>
           </>
         )}
@@ -367,7 +381,7 @@ export function RunPayrollModal({
         {view === "unlock-confirm" && (
           <>
             <DialogHeader className="shrink-0 gap-1 border-b border-border/70 px-6 py-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pr-7">
                 <div className="flex items-center gap-2.5">
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-800 border border-amber-500/30">
                     <Unlock className="size-5" />
@@ -502,7 +516,7 @@ export function RunPayrollModal({
               </label>
             </div>
 
-            <DialogFooter className="m-0 shrink-0 flex-row items-center justify-end gap-2.5 rounded-none border-t border-border/70 bg-muted/30 px-6 py-4">
+            <DialogFooter className="m-0 shrink-0 flex-row items-center justify-between gap-2.5 rounded-none border-t border-border/70 bg-slate-50/80 px-6 py-3.5 sm:justify-between">
               <ActionButton
                 tone="outline"
                 size="sm"
@@ -531,7 +545,7 @@ export function RunPayrollModal({
         {view === "authorize-confirm" && (
           <>
             <DialogHeader className="shrink-0 gap-1 border-b border-border/70 px-6 py-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pr-7">
                 <div className="flex items-center gap-2.5">
                   <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">
                     <ShieldCheck className="size-5" />
@@ -612,7 +626,7 @@ export function RunPayrollModal({
               </div>
             </div>
 
-            <DialogFooter className="m-0 shrink-0 flex-row items-center justify-end gap-2.5 rounded-none border-t border-border/70 bg-muted/30 px-6 py-4">
+            <DialogFooter className="m-0 shrink-0 flex-row items-center justify-between gap-2.5 rounded-none border-t border-border/70 bg-slate-50/80 px-6 py-3.5 sm:justify-between">
               <ActionButton
                 tone="outline"
                 size="sm"

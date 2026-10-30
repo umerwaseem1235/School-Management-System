@@ -1,103 +1,17 @@
+import { formatNumber } from "@/lib/format";
+import { printHtml } from "@/lib/print-html";
 import type {
-  FleetVehicleRecord,
-  StudentTransportAllocationRecord,
-  TransportDriverRecord,
+  TransportAssignmentRecord,
   TransportRouteRecord,
+  TransportVehicleRecord,
 } from "@/lib/mock/transport";
-import { formatCurrency, formatDate } from "@/lib/format";
 
-function sanitizePdfText(input: string): string {
-  return input
-    .replace(/[—–]/g, "-")
-    .replace(/·/g, "|")
-    .replace(/[^\x20-\x7E]/g, "")
+function escapePdf(s: string): string {
+  return s
+    .replace(/[^\x20-\x7E]/g, " ")
     .replace(/\\/g, "\\\\")
     .replace(/\(/g, "\\(")
     .replace(/\)/g, "\\)");
-}
-
-function triggerBlobDownload(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
-}
-
-function buildMinimalPdf(
-  pagesStreams: string[],
-  orientation: "portrait" | "landscape" = "portrait"
-): Blob {
-  const objects: string[] = [];
-  const addObject = (content: string): number => {
-    objects.push(content);
-    return objects.length;
-  };
-
-  const catalogId = addObject("");
-  const pagesId = addObject("");
-  const fontRegularId = addObject(
-    `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`
-  );
-  const fontBoldId = addObject(
-    `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`
-  );
-
-  const mediaBox =
-    orientation === "landscape"
-      ? "[0 0 841.89 595.28]"
-      : "[0 0 595.28 841.89]";
-
-  const pageIds: number[] = [];
-
-  for (const stream of pagesStreams) {
-    const streamBytes = new TextEncoder().encode(stream).length;
-    const contentId = addObject(
-      `<< /Length ${streamBytes} >>\nstream\n${stream}\nendstream`
-    );
-    const pageId = addObject(
-      `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox ${mediaBox} /Resources << /Font << /F1 ${fontRegularId} 0 R /F2 ${fontBoldId} 0 R >> >> /Contents ${contentId} 0 R >>`
-    );
-    pageIds.push(pageId);
-  }
-
-  objects[catalogId - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
-  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds
-    .map((id) => `${id} 0 R`)
-    .join(" ")}] /Count ${pageIds.length} >>`;
-
-  const encoder = new TextEncoder();
-  const chunks: string[] = [];
-  let byteOffset = 0;
-
-  const pushChunk = (str: string) => {
-    chunks.push(str);
-    byteOffset += encoder.encode(str).length;
-  };
-
-  pushChunk("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
-
-  const offsets: number[] = [];
-  for (let i = 0; i < objects.length; i++) {
-    offsets.push(byteOffset);
-    pushChunk(`${i + 1} 0 obj\n${objects[i]}\nendobj\n`);
-  }
-
-  const xrefOffset = byteOffset;
-  pushChunk(`xref\n0 ${objects.length + 1}\n`);
-  pushChunk("0000000000 65535 f \n");
-  for (const off of offsets) {
-    pushChunk(`${String(off).padStart(10, "0")} 00000 n \n`);
-  }
-
-  pushChunk(
-    `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`
-  );
-
-  return new Blob([chunks.join("")], { type: "application/pdf" });
 }
 
 function pdfText(
@@ -108,8 +22,7 @@ function pdfText(
   size = 9,
   rgb: [number, number, number] = [0.08, 0.12, 0.2]
 ): string {
-  const [r, g, b] = rgb;
-  return `BT /${font} ${size} Tf ${r} ${g} ${b} rg ${x} ${y} Td (${sanitizePdfText(
+  return `BT /${font} ${size} Tf ${rgb[0]} ${rgb[1]} ${rgb[2]} rg ${x} ${y} Td (${escapePdf(
     text
   )}) Tj ET\n`;
 }
@@ -119,565 +32,661 @@ function pdfRect(
   y: number,
   w: number,
   h: number,
-  fillRgb: [number, number, number]
+  rgb: [number, number, number]
 ): string {
-  const [r, g, b] = fillRgb;
-  return `${r} ${g} ${b} rg ${x} ${y} ${w} ${h} re f\n`;
+  return `${rgb[0]} ${rgb[1]} ${rgb[2]} rg ${x} ${y} ${w} ${h} re f\n`;
 }
 
-/* ───────────────────── 1. Bulk Transport Routes PDF ───────────────────── */
+function buildMultiPagePdf(streams: string[], width = 842, height = 595): Blob {
+  const objects: string[] = [];
+  const pageCount = streams.length;
+  const firstPageObj = 5;
 
-export function exportRoutesPdf(routes: TransportRouteRecord[]) {
-  const generatedDate = new Date().toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
+  objects.push("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
+
+  const kids = Array.from(
+    { length: pageCount },
+    (_, i) => `${firstPageObj + i * 2} 0 R`
+  ).join(" ");
+  objects.push(
+    `2 0 obj\n<< /Type /Pages /Kids [${kids}] /Count ${pageCount} >>\nendobj\n`
+  );
+  objects.push(
+    "3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n"
+  );
+  objects.push(
+    "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n"
+  );
+
+  streams.forEach((stream, idx) => {
+    const pageObjNum = firstPageObj + idx * 2;
+    const contentObjNum = pageObjNum + 1;
+    objects.push(
+      `${pageObjNum} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentObjNum} 0 R >>\nendobj\n`
+    );
+    objects.push(
+      `${contentObjNum} 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}\nendstream\nendobj\n`
+    );
   });
 
-  const totalRiders = routes.reduce((s, r) => s + r.allocatedStudents, 0);
-  let s = "";
-
-  s += pdfRect(28, 526, 785, 46, [0.04, 0.11, 0.24]);
-  s += pdfText(
-    40,
-    558,
-    "EDUSPHERE MULTI-CAMPUS SYSTEM",
-    "F2",
-    12.5,
-    [1, 1, 1]
-  );
-  s += pdfText(
-    40,
-    544,
-    "Institutional Transport Routes & Timed Stops Schedule",
-    "F2",
-    9,
-    [0.85, 0.9, 0.98]
-  );
-  s += pdfText(
-    40,
-    532,
-    `Generated: ${generatedDate}  |  Active Routes: ${routes.length}  |  Total Enrolled Riders: ${totalRiders} Students`,
-    "F1",
-    7.5,
-    [0.74, 0.82, 0.92]
-  );
-
-  const cols = [
-    { x: 34, label: "Route Code" },
-    { x: 115, label: "Route Corridor & Stops" },
-    { x: 320, label: "Campus & Vehicle" },
-    { x: 465, label: "Assigned Driver" },
-    { x: 590, label: "Occupancy" },
-    { x: 665, label: "Monthly Fee" },
-    { x: 745, label: "Status" },
-  ];
-
-  s += pdfRect(28, 498, 785, 20, [0.93, 0.95, 0.98]);
-  for (const c of cols) {
-    s += pdfText(c.x, 505, c.label, "F2", 8, [0.04, 0.11, 0.24]);
+  let pdf = "%PDF-1.4\n";
+  const offsets: number[] = [0];
+  for (const obj of objects) {
+    offsets.push(pdf.length);
+    pdf += obj;
   }
-
-  let y = 478;
-  routes.forEach((r, idx) => {
-    if (idx % 2 === 1) {
-      s += pdfRect(28, y - 5, 785, 22, [0.97, 0.98, 0.99]);
-    }
-    s += pdfText(34, y, r.routeCode, "F2", 8);
-    s += pdfText(
-      115,
-      y,
-      `${r.routeName.slice(0, 32)} (${r.stops.length} Stops)`,
-      "F1",
-      8
-    );
-    s += pdfText(320, y, `${r.campus} - ${r.vehicleRegNo}`, "F1", 8);
-    s += pdfText(465, y, r.driverName.slice(0, 22), "F1", 8);
-    s += pdfText(
-      590,
-      y,
-      `${r.allocatedStudents} / ${r.seatCapacity} Seats`,
-      "F2",
-      8
-    );
-    s += pdfText(
-      665,
-      y,
-      formatCurrency(r.monthlyRouteFee),
-      "F2",
-      8,
-      [0.02, 0.45, 0.3]
-    );
-    s += pdfText(745, y, r.status, "F2", 8);
-    y -= 24;
-  });
-
-  s += pdfText(
-    34,
-    24,
-    "Confidential Fleet & Transport Record - EduSphere Super Admin Operations Suite",
-    "F1",
-    7.5,
-    [0.45, 0.5, 0.58]
-  );
-
-  const blob = buildMinimalPdf([s], "landscape");
-  triggerBlobDownload(
-    blob,
-    `EduSphere-Transport-Routes-${new Date().toISOString().slice(0, 10)}.pdf`
-  );
-}
-
-/* ───────────────────── 2. Bulk Vehicle Fleet PDF ───────────────────── */
-
-export function exportFleetPdf(vehicles: FleetVehicleRecord[]) {
-  const generatedDate = new Date().toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
-  let s = "";
-  s += pdfRect(28, 526, 785, 46, [0.04, 0.11, 0.24]);
-  s += pdfText(
-    40,
-    558,
-    "EDUSPHERE MULTI-CAMPUS SYSTEM",
-    "F2",
-    12.5,
-    [1, 1, 1]
-  );
-  s += pdfText(
-    40,
-    544,
-    "Institutional Vehicle Fleet, Fitness & Monthly Fuel Register",
-    "F2",
-    9,
-    [0.85, 0.9, 0.98]
-  );
-  s += pdfText(
-    40,
-    532,
-    `Generated: ${generatedDate}  |  Total Fleet Vehicles: ${vehicles.length}  |  AY 2026-27`,
-    "F1",
-    7.5,
-    [0.74, 0.82, 0.92]
-  );
-
-  const cols = [
-    { x: 34, label: "Reg # / Code" },
-    { x: 130, label: "Make, Model & Type" },
-    { x: 325, label: "Campus & Route" },
-    { x: 465, label: "Assigned Driver" },
-    { x: 590, label: "Seats" },
-    { x: 650, label: "Fuel Spend" },
-    { x: 740, label: "Status" },
-  ];
-
-  s += pdfRect(28, 498, 785, 20, [0.93, 0.95, 0.98]);
-  for (const c of cols) {
-    s += pdfText(c.x, 505, c.label, "F2", 8, [0.04, 0.11, 0.24]);
+  const xrefStart = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (let i = 1; i <= objects.length; i++) {
+    pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
   }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
 
-  let y = 478;
-  vehicles.forEach((v, idx) => {
-    if (idx % 2 === 1) {
-      s += pdfRect(28, y - 5, 785, 22, [0.97, 0.98, 0.99]);
-    }
-    s += pdfText(34, y, `${v.registrationNo}`, "F2", 8);
-    s += pdfText(130, y, v.makeModel.slice(0, 34), "F1", 8);
-    s += pdfText(325, y, `${v.campus} (${v.assignedRouteCode})`, "F1", 8);
-    s += pdfText(465, y, v.assignedDriver.slice(0, 22), "F1", 8);
-    s += pdfText(
-      590,
-      y,
-      `${v.occupiedSeats}/${v.seatingCapacity}`,
-      "F2",
-      8
-    );
-    s += pdfText(
-      650,
-      y,
-      formatCurrency(v.monthlyFuelCost),
-      "F2",
-      8,
-      [0.02, 0.45, 0.3]
-    );
-    s += pdfText(740, y, v.status, "F2", 8);
-    y -= 24;
-  });
-
-  const blob = buildMinimalPdf([s], "landscape");
-  triggerBlobDownload(
-    blob,
-    `EduSphere-Vehicle-Fleet-${new Date().toISOString().slice(0, 10)}.pdf`
-  );
+  return new Blob([pdf], { type: "application/pdf" });
 }
 
-/* ───────────────────── 3. Bulk Drivers Roster PDF ───────────────────── */
-
-export function exportDriversPdf(drivers: TransportDriverRecord[]) {
-  const generatedDate = new Date().toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
-  let s = "";
-  s += pdfRect(28, 526, 785, 46, [0.04, 0.11, 0.24]);
-  s += pdfText(
-    40,
-    558,
-    "EDUSPHERE MULTI-CAMPUS SYSTEM",
-    "F2",
-    12.5,
-    [1, 1, 1]
-  );
-  s += pdfText(
-    40,
-    544,
-    "Licensed Institutional Drivers & Conductors Roster",
-    "F2",
-    9,
-    [0.85, 0.9, 0.98]
-  );
-  s += pdfText(
-    40,
-    532,
-    `Generated: ${generatedDate}  |  Total Drivers: ${drivers.length}  |  100% HTV & Police Verified`,
-    "F1",
-    7.5,
-    [0.74, 0.82, 0.92]
-  );
-
-  const cols = [
-    { x: 34, label: "Driver Code" },
-    { x: 115, label: "Full Name & CNIC" },
-    { x: 295, label: "HTV License #" },
-    { x: 435, label: "Campus & Vehicle" },
-    { x: 585, label: "Contact Phone" },
-    { x: 685, label: "Exp (Yrs)" },
-    { x: 745, label: "Duty Status" },
-  ];
-
-  s += pdfRect(28, 498, 785, 20, [0.93, 0.95, 0.98]);
-  for (const c of cols) {
-    s += pdfText(c.x, 505, c.label, "F2", 8, [0.04, 0.11, 0.24]);
-  }
-
-  let y = 478;
-  drivers.forEach((d, idx) => {
-    if (idx % 2 === 1) {
-      s += pdfRect(28, y - 5, 785, 22, [0.97, 0.98, 0.99]);
-    }
-    s += pdfText(34, y, d.driverCode, "F2", 8);
-    s += pdfText(115, y, `${d.fullName} (${d.cnic})`, "F1", 8);
-    s += pdfText(295, y, `${d.htvLicenseNo}`, "F2", 8);
-    s += pdfText(435, y, `${d.campus} - ${d.assignedVehicleReg}`, "F1", 8);
-    s += pdfText(585, y, d.phone, "F1", 8);
-    s += pdfText(685, y, `${d.experienceYears} Yrs`, "F2", 8);
-    s += pdfText(745, y, d.status, "F2", 8);
-    y -= 24;
-  });
-
-  const blob = buildMinimalPdf([s], "landscape");
-  triggerBlobDownload(
-    blob,
-    `EduSphere-Transport-Drivers-${new Date().toISOString().slice(0, 10)}.pdf`
-  );
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
-/* ───────────────────── 4. Bulk Student Route Allocations PDF ───────────────────── */
-
-export function exportStudentAllocationsPdf(
-  allocations: StudentTransportAllocationRecord[]
+export function exportTransportRoutesPdf(
+  routes: TransportRouteRecord[],
+  vehicles: TransportVehicleRecord[],
+  assignments: TransportAssignmentRecord[]
 ) {
-  const generatedDate = new Date().toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
   let s = "";
-  s += pdfRect(28, 526, 785, 46, [0.04, 0.11, 0.24]);
+  s += pdfRect(0, 535, 842, 60, [0.035, 0.114, 0.243]);
   s += pdfText(
-    40,
-    558,
-    "EDUSPHERE MULTI-CAMPUS SYSTEM",
-    "F2",
-    12.5,
-    [1, 1, 1]
-  );
-  s += pdfText(
-    40,
-    544,
-    "Student Transport Pass & Route Allocation Register",
-    "F2",
-    9,
-    [0.85, 0.9, 0.98]
-  );
-  s += pdfText(
-    40,
-    532,
-    `Generated: ${generatedDate}  |  Total Allocated Students: ${allocations.length}  |  AY 2026-27`,
-    "F1",
-    7.5,
-    [0.74, 0.82, 0.92]
-  );
-
-  const cols = [
-    { x: 34, label: "Pass #" },
-    { x: 115, label: "Student & Class" },
-    { x: 265, label: "Route & Vehicle" },
-    { x: 435, label: "Pickup Stop & Time" },
-    { x: 615, label: "Seat #" },
-    { x: 675, label: "Monthly Fee" },
-    { x: 745, label: "Status" },
-  ];
-
-  s += pdfRect(28, 498, 785, 20, [0.93, 0.95, 0.98]);
-  for (const c of cols) {
-    s += pdfText(c.x, 505, c.label, "F2", 8, [0.04, 0.11, 0.24]);
-  }
-
-  let y = 478;
-  allocations.forEach((a, idx) => {
-    if (idx % 2 === 1) {
-      s += pdfRect(28, y - 5, 785, 22, [0.97, 0.98, 0.99]);
-    }
-    s += pdfText(34, y, a.passNo, "F2", 8);
-    s += pdfText(
-      115,
-      y,
-      `${a.studentName} (${a.className} #${a.rollNo})`,
-      "F1",
-      8
-    );
-    s += pdfText(265, y, `${a.routeCode} (${a.vehicleRegNo})`, "F2", 8);
-    s += pdfText(
-      435,
-      y,
-      `${a.pickupStop.slice(0, 22)} (${a.pickupTime})`,
-      "F1",
-      7.5
-    );
-    s += pdfText(615, y, a.seatNo, "F2", 8);
-    s += pdfText(
-      675,
-      y,
-      formatCurrency(a.monthlyTransportFee),
-      "F2",
-      8,
-      [0.02, 0.45, 0.3]
-    );
-    s += pdfText(745, y, a.status, "F2", 8);
-    y -= 24;
-  });
-
-  const blob = buildMinimalPdf([s], "landscape");
-  triggerBlobDownload(
-    blob,
-    `EduSphere-Student-Transport-Allocations-${new Date()
-      .toISOString()
-      .slice(0, 10)}.pdf`
-  );
-}
-
-/* ───────────────────── 5. Single Route Manifest PDF ───────────────────── */
-
-export function exportSingleRouteCardPdf(route: TransportRouteRecord) {
-  let s = "";
-
-  s += pdfRect(36, 742, 523, 62, [0.04, 0.11, 0.24]);
-  s += pdfText(
-    50,
-    782,
-    "EDUSPHERE MULTI-CAMPUS SYSTEM",
+    36,
+    566,
+    "OPUS SCHOOL MANAGEMENT SYSTEM - TRANSPORT ROUTES REGISTER",
     "F2",
     13,
     [1, 1, 1]
   );
   s += pdfText(
-    50,
-    766,
-    "Official Route Corridor Manifest & Timed Stops Schedule",
-    "F2",
-    9.5,
-    [0.85, 0.9, 0.98]
-  );
-  s += pdfText(
-    50,
-    752,
-    `Route Code: ${route.routeCode}  |  Campus: ${route.campus}  |  Vehicle: ${route.vehicleRegNo}`,
+    36,
+    548,
+    `Total Routes: ${routes.length}   |   Total Fleet Vehicles: ${vehicles.length}   |   Assigned Students: ${assignments.length}`,
     "F1",
-    8,
-    [0.75, 0.82, 0.92]
-  );
-
-  s += pdfRect(36, 635, 523, 92, [0.96, 0.97, 0.99]);
-  s += pdfText(
-    48,
-    710,
-    "ROUTE & CREW ASSIGNMENT",
-    "F2",
     9,
-    [0.04, 0.11, 0.24]
-  );
-  s += pdfText(48, 692, `Corridor: ${route.routeName}`, "F2", 9.5);
-  s += pdfText(
-    48,
-    676,
-    `Vehicle: ${route.vehicleModel} (${route.vehicleRegNo})  |  GPS: ${route.gpsTrackerId}`,
-    "F1",
-    8.5
-  );
-  s += pdfText(
-    48,
-    660,
-    `Driver: ${route.driverName} (${route.driverPhone})  |  Conductor: ${route.conductorName}`,
-    "F1",
-    8.5
-  );
-  s += pdfText(
-    48,
-    644,
-    `Occupancy: ${route.allocatedStudents} / ${route.seatCapacity} Seats  |  Monthly Fee: ${formatCurrency(
-      route.monthlyRouteFee
-    )}`,
-    "F2",
-    8.5,
-    [0.02, 0.45, 0.3]
+    [0.82, 0.88, 0.96]
   );
 
-  s += pdfText(
-    48,
-    605,
-    "DESIGNATED PICKUP & DROP-OFF STOPS",
-    "F2",
-    9,
-    [0.04, 0.11, 0.24]
-  );
+  const tableTop = 500;
+  s += pdfRect(36, tableTop, 770, 22, [0.93, 0.95, 0.98]);
+  s += pdfText(46, tableTop + 7, "CODE", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(130, tableTop + 7, "ROUTE NAME", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(430, tableTop + 7, "ASSIGNED VEHICLE", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(590, tableTop + 7, "STUDENTS", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(690, tableTop + 7, "MONTHLY FARE", "F2", 8.5, [0.1, 0.18, 0.32]);
 
-  let y = 582;
-  route.stops.forEach((st) => {
-    s += pdfText(
-      48,
-      y,
-      `Stop #${st.stopOrder}: ${st.stopName} (${st.landmark})  |  Pickup: ${st.morningPickup}  |  Drop: ${st.afternoonDrop}  |  ${st.studentsCount} Students`,
-      "F1",
-      8
-    );
-    y -= 20;
+  routes.slice(0, 18).forEach((r, idx) => {
+    const y = tableTop - (idx + 1) * 22;
+    if (idx % 2 === 1) {
+      s += pdfRect(36, y, 770, 22, [0.975, 0.98, 0.99]);
+    }
+    const assignedVeh =
+      vehicles
+        .filter((v) => v.routeId === r.id || v.routeName === r.routeName)
+        .map((v) => v.vehicleNo)
+        .join(", ") || "-";
+    const studentCount = assignments.filter(
+      (a) => a.routeId === r.id || a.routeName === r.routeName
+    ).length;
+
+    s += pdfText(46, y + 7, r.routeCode, "F2", 8.5);
+    s += pdfText(130, y + 7, r.routeName.slice(0, 48), "F1", 8.5);
+    s += pdfText(430, y + 7, assignedVeh, "F1", 8.5);
+    s += pdfText(590, y + 7, `${studentCount} Students`, "F1", 8.5);
+    s += pdfText(690, y + 7, `Rs ${formatNumber(r.monthlyFare)}`, "F2", 8.5);
   });
 
-  const blob = buildMinimalPdf([s], "portrait");
-  triggerBlobDownload(blob, `Transport-Route-Manifest-${route.routeCode}.pdf`);
+  const blob = buildMultiPagePdf([s]);
+  triggerDownload(blob, "transport-routes-register.pdf");
 }
 
-/* ───────────────────── 6. Print Preview Helpers ───────────────────── */
+export function exportTransportVehiclesPdf(vehicles: TransportVehicleRecord[]) {
+  let s = "";
+  s += pdfRect(0, 535, 842, 60, [0.035, 0.114, 0.243]);
+  s += pdfText(
+    36,
+    566,
+    "OPUS SCHOOL MANAGEMENT SYSTEM - TRANSPORT VEHICLES REGISTER",
+    "F2",
+    13,
+    [1, 1, 1]
+  );
+  s += pdfText(
+    36,
+    548,
+    `Total Vehicles: ${vehicles.length}   |   Total Capacity: ${vehicles.reduce(
+      (sum, v) => sum + v.capacity,
+      0
+    )} Seats`,
+    "F1",
+    9,
+    [0.82, 0.88, 0.96]
+  );
 
-export function printTransportRoutesRegister(
-  routes: TransportRouteRecord[]
+  const tableTop = 500;
+  s += pdfRect(36, tableTop, 770, 22, [0.93, 0.95, 0.98]);
+  s += pdfText(46, tableTop + 7, "VEHICLE NO", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(155, tableTop + 7, "MODEL", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(325, tableTop + 7, "DRIVER NAME", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(490, tableTop + 7, "CAPACITY", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(575, tableTop + 7, "ASSIGNED ROUTE", "F2", 8.5, [0.1, 0.18, 0.32]);
+
+  vehicles.slice(0, 18).forEach((v, idx) => {
+    const y = tableTop - (idx + 1) * 22;
+    if (idx % 2 === 1) {
+      s += pdfRect(36, y, 770, 22, [0.975, 0.98, 0.99]);
+    }
+    const driverDisplay = v.driverPhone
+      ? `${v.driverName} (${v.driverPhone})`
+      : v.driverName || "-";
+    s += pdfText(46, y + 7, v.vehicleNo, "F2", 8.5);
+    s += pdfText(155, y + 7, v.model.slice(0, 28), "F1", 8.5);
+    s += pdfText(325, y + 7, driverDisplay.slice(0, 28), "F1", 8.5);
+    s += pdfText(490, y + 7, `${v.capacity} Seats`, "F2", 8.5);
+    s += pdfText(575, y + 7, (v.routeName || "-").slice(0, 36), "F1", 8.5);
+  });
+
+  const blob = buildMultiPagePdf([s]);
+  triggerDownload(blob, "transport-vehicles-register.pdf");
+}
+
+export function exportVehicleStudentsPdf(
+  vehicle: TransportVehicleRecord,
+  students: TransportAssignmentRecord[]
+) {
+  let s = "";
+  const printedDate = new Date().toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const totalMonthlyFare = students.reduce((sum, st) => sum + st.monthlyFare, 0);
+  const availableSeats = Math.max(0, vehicle.capacity - students.length);
+  const driverLabel = vehicle.driverPhone
+    ? `${vehicle.driverName} (${vehicle.driverPhone})`
+    : vehicle.driverName || "Not Assigned";
+
+  // Navy Header Banner
+  s += pdfRect(0, 525, 842, 70, [0.035, 0.114, 0.243]);
+  s += pdfText(
+    36,
+    566,
+    `OPUS SCHOOL MANAGEMENT SYSTEM - VEHICLE STUDENT MANIFEST`,
+    "F2",
+    13,
+    [1, 1, 1]
+  );
+  s += pdfText(
+    36,
+    548,
+    `Vehicle: ${vehicle.vehicleNo} (${vehicle.model})   |   Code: ${vehicle.vehicleCode}   |   Driver: ${driverLabel}`,
+    "F2",
+    9.5,
+    [0.9, 0.94, 1]
+  );
+  s += pdfText(
+    36,
+    533,
+    `Route: ${vehicle.routeName || "Unassigned"}   |   Occupancy: ${students.length}/${vehicle.capacity} Seats (${availableSeats} Free)   |   Date: ${printedDate}`,
+    "F1",
+    8.5,
+    [0.78, 0.85, 0.95]
+  );
+
+  // KPI Summary Strip
+  const stripY = 482;
+  s += pdfRect(36, stripY, 770, 30, [0.95, 0.97, 0.99]);
+  s += pdfText(48, stripY + 17, "VEHICLE & MODEL:", "F2", 7.5, [0.38, 0.45, 0.55]);
+  s += pdfText(48, stripY + 6, `${vehicle.vehicleNo} - ${vehicle.model}`, "F2", 9, [0.035, 0.114, 0.243]);
+
+  s += pdfText(245, stripY + 17, "ASSIGNED DRIVER:", "F2", 7.5, [0.38, 0.45, 0.55]);
+  s += pdfText(245, stripY + 6, driverLabel.slice(0, 32), "F2", 9, [0.035, 0.114, 0.243]);
+
+  s += pdfText(455, stripY + 17, "BOARDING STUDENTS:", "F2", 7.5, [0.38, 0.45, 0.55]);
+  s += pdfText(455, stripY + 6, `${students.length} of ${vehicle.capacity} Seats`, "F2", 9, [0.035, 0.114, 0.243]);
+
+  s += pdfText(635, stripY + 17, "TOTAL MONTHLY FARE:", "F2", 7.5, [0.38, 0.45, 0.55]);
+  s += pdfText(635, stripY + 6, `Rs ${formatNumber(totalMonthlyFare)}`, "F2", 9, [0.04, 0.47, 0.34]);
+
+  // Student Table Header
+  const tableTop = 444;
+  s += pdfRect(36, tableTop, 770, 22, [0.035, 0.114, 0.243]);
+  s += pdfText(46, tableTop + 7, "S.NO", "F2", 8.5, [1, 1, 1]);
+  s += pdfText(90, tableTop + 7, "ROLL NO", "F2", 8.5, [1, 1, 1]);
+  s += pdfText(175, tableTop + 7, "STUDENT NAME", "F2", 8.5, [1, 1, 1]);
+  s += pdfText(355, tableTop + 7, "CLASS / SECTION", "F2", 8.5, [1, 1, 1]);
+  s += pdfText(470, tableTop + 7, "BOARDING STOP", "F2", 8.5, [1, 1, 1]);
+  s += pdfText(690, tableTop + 7, "MONTHLY FARE", "F2", 8.5, [1, 1, 1]);
+
+  if (students.length === 0) {
+    const emptyY = tableTop - 30;
+    s += pdfRect(36, emptyY, 770, 28, [0.98, 0.98, 0.99]);
+    s += pdfText(
+      270,
+      emptyY + 10,
+      "No students are currently assigned to this vehicle's route.",
+      "F1",
+      9,
+      [0.4, 0.45, 0.52]
+    );
+  } else {
+    students.slice(0, 16).forEach((st, idx) => {
+      const y = tableTop - (idx + 1) * 22;
+      if (idx % 2 === 1) {
+        s += pdfRect(36, y, 770, 22, [0.97, 0.98, 0.995]);
+      }
+      s += pdfText(48, y + 7, String(idx + 1).padStart(2, "0"), "F2", 8.5);
+      s += pdfText(90, y + 7, st.studentRollNo, "F2", 8.5, [0.035, 0.114, 0.243]);
+      s += pdfText(175, y + 7, st.studentName.slice(0, 30), "F2", 8.5);
+      s += pdfText(355, y + 7, st.className, "F1", 8.5);
+      s += pdfText(470, y + 7, st.boardingStop.slice(0, 34), "F1", 8.5);
+      s += pdfText(690, y + 7, `Rs ${formatNumber(st.monthlyFare)}`, "F2", 8.5);
+    });
+  }
+
+  // Footer Signatures
+  s += pdfRect(36, 48, 770, 0.8, [0.82, 0.86, 0.91]);
+  s += pdfText(
+    36,
+    32,
+    `Driver Signature: ${vehicle.driverName || "____________________"}`,
+    "F1",
+    8.5,
+    [0.35, 0.42, 0.52]
+  );
+  s += pdfText(
+    330,
+    32,
+    "Transport Supervisor: ____________________",
+    "F1",
+    8.5,
+    [0.35, 0.42, 0.52]
+  );
+  s += pdfText(
+    610,
+    32,
+    "Principal / Admin Stamp: ____________________",
+    "F1",
+    8.5,
+    [0.35, 0.42, 0.52]
+  );
+
+  const blob = buildMultiPagePdf([s]);
+  const safeVehNo = vehicle.vehicleNo.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  triggerDownload(blob, `vehicle-${safeVehNo}-students-manifest.pdf`);
+}
+
+export function exportRouteStudentsPdf(
+  route: TransportRouteRecord,
+  vehicles: TransportVehicleRecord[],
+  students: TransportAssignmentRecord[]
+) {
+  let s = "";
+  const printedDate = new Date().toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const matchedVehicles = vehicles.filter(
+    (v) => v.routeId === route.id || v.routeName === route.routeName
+  );
+  const totalMonthlyFare = students.reduce((sum, st) => sum + st.monthlyFare, 0);
+  const vehiclesLabel =
+    matchedVehicles.map((v) => `${v.vehicleNo} (${v.model})`).join(", ") || "No vehicle assigned";
+  const driversLabel =
+    matchedVehicles
+      .map((v) => (v.driverPhone ? `${v.driverName} (${v.driverPhone})` : v.driverName))
+      .filter(Boolean)
+      .join(", ") || "No driver assigned";
+
+  // Navy Header Banner
+  s += pdfRect(0, 525, 842, 70, [0.035, 0.114, 0.243]);
+  s += pdfText(
+    36,
+    566,
+    "OPUS SCHOOL MANAGEMENT SYSTEM - ROUTE PASSENGER MANIFEST",
+    "F2",
+    13,
+    [1, 1, 1]
+  );
+  s += pdfText(
+    36,
+    548,
+    `Route: ${route.routeName} (${route.routeCode})   |   Fare: Rs ${formatNumber(route.monthlyFare)}/mo`,
+    "F2",
+    9.5,
+    [0.9, 0.94, 1]
+  );
+  s += pdfText(
+    36,
+    534,
+    `Assigned Vehicles: ${vehiclesLabel}   |   Driver: ${driversLabel}`,
+    "F1",
+    8.5,
+    [0.82, 0.88, 0.96]
+  );
+
+  // KPI Summary Strip
+  s += pdfRect(36, 478, 770, 36, [0.94, 0.96, 0.99]);
+  s += pdfText(48, 498, "ROUTE & CODE", "F1", 7.5, [0.38, 0.44, 0.54]);
+  s += pdfText(48, 485, `${route.routeCode} - ${route.routeName}`.slice(0, 34), "F2", 8.5, [0.035, 0.114, 0.243]);
+
+  s += pdfText(260, 498, "ASSIGNED VEHICLE & DRIVER", "F1", 7.5, [0.38, 0.44, 0.54]);
+  s += pdfText(260, 485, `${vehiclesLabel}`.slice(0, 36), "F2", 8.5, [0.035, 0.114, 0.243]);
+
+  s += pdfText(520, 498, "BOARDING STUDENTS", "F1", 7.5, [0.38, 0.44, 0.54]);
+  s += pdfText(520, 485, `${students.length} Registered Students`, "F2", 8.5, [0.1, 0.45, 0.25]);
+
+  s += pdfText(670, 498, "TOTAL MONTHLY FARE", "F1", 7.5, [0.38, 0.44, 0.54]);
+  s += pdfText(670, 485, `Rs ${formatNumber(totalMonthlyFare)}`, "F2", 8.5, [0.035, 0.114, 0.243]);
+
+  // Students Table Header
+  const tableTop = 445;
+  s += pdfRect(36, tableTop, 770, 22, [0.035, 0.114, 0.243]);
+  s += pdfText(48, tableTop + 7, "S.NO", "F2", 8, [1, 1, 1]);
+  s += pdfText(90, tableTop + 7, "ROLL NO", "F2", 8, [1, 1, 1]);
+  s += pdfText(180, tableTop + 7, "STUDENT NAME", "F2", 8, [1, 1, 1]);
+  s += pdfText(370, tableTop + 7, "CLASS / SECTION", "F2", 8, [1, 1, 1]);
+  s += pdfText(510, tableTop + 7, "BOARDING STOP", "F2", 8, [1, 1, 1]);
+  s += pdfText(690, tableTop + 7, "MONTHLY FARE", "F2", 8, [1, 1, 1]);
+
+  if (students.length === 0) {
+    s += pdfRect(36, tableTop - 24, 770, 24, [0.98, 0.98, 0.99]);
+    s += pdfText(
+      48,
+      tableTop - 15,
+      "No students are currently assigned to this transport route.",
+      "F1",
+      8.5,
+      [0.5, 0.5, 0.5]
+    );
+  } else {
+    students.slice(0, 16).forEach((st, idx) => {
+      const y = tableTop - (idx + 1) * 22;
+      if (idx % 2 === 1) {
+        s += pdfRect(36, y, 770, 22, [0.97, 0.98, 0.99]);
+      }
+      s += pdfText(48, y + 7, String(idx + 1).padStart(2, "0"), "F1", 8);
+      s += pdfText(90, y + 7, st.studentRollNo, "F2", 8);
+      s += pdfText(180, y + 7, st.studentName.slice(0, 28), "F2", 8);
+      s += pdfText(370, y + 7, st.className, "F1", 8);
+      s += pdfText(510, y + 7, st.boardingStop.slice(0, 28), "F1", 8);
+      s += pdfText(690, y + 7, `Rs ${formatNumber(st.monthlyFare)}`, "F2", 8);
+    });
+  }
+
+  // Footer Signatures
+  s += pdfText(36, 45, `System Generated Route Manifest  |  Exported: ${printedDate}`, "F1", 8, [0.45, 0.5, 0.6]);
+  s += pdfText(480, 45, "Transport Supervisor Signature: _______________________", "F1", 8, [0.35, 0.4, 0.5]);
+
+  const safeCode = route.routeCode.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const blob = buildMultiPagePdf([s]);
+  triggerDownload(blob, `route-${safeCode}-students-manifest.pdf`);
+}
+
+export function exportTransportAssignmentsPdf(
+  assignments: TransportAssignmentRecord[],
+  vehicles?: TransportVehicleRecord[]
+) {
+  let s = "";
+  s += pdfRect(0, 535, 842, 60, [0.035, 0.114, 0.243]);
+  s += pdfText(
+    36,
+    566,
+    "OPUS SCHOOL MANAGEMENT SYSTEM - STUDENT TRANSPORT ASSIGNMENTS",
+    "F2",
+    13,
+    [1, 1, 1]
+  );
+  s += pdfText(
+    36,
+    548,
+    `Total Assigned Students: ${assignments.length}   |   Generated: ${new Date().toLocaleDateString(
+      "en-GB"
+    )}`,
+    "F1",
+    9,
+    [0.82, 0.88, 0.96]
+  );
+
+  const tableTop = 500;
+  s += pdfRect(36, tableTop, 770, 22, [0.93, 0.95, 0.98]);
+  s += pdfText(46, tableTop + 7, "STUDENT NAME & ROLL", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(210, tableTop + 7, "CLASS", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(285, tableTop + 7, "ROUTE", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(435, tableTop + 7, "BUS NAME", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(560, tableTop + 7, "DRIVER", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(660, tableTop + 7, "BOARDING STOP", "F2", 8.5, [0.1, 0.18, 0.32]);
+  s += pdfText(750, tableTop + 7, "FARE", "F2", 8.5, [0.1, 0.18, 0.32]);
+
+  assignments.slice(0, 18).forEach((a, idx) => {
+    const y = tableTop - (idx + 1) * 22;
+    if (idx % 2 === 1) {
+      s += pdfRect(36, y, 770, 22, [0.975, 0.98, 0.99]);
+    }
+    const matchedVehicle = vehicles?.find(
+      (v) =>
+        (a.routeId && v.routeId === a.routeId) ||
+        (a.routeName && v.routeName === a.routeName)
+    );
+    const bus = a.busName || matchedVehicle?.model || "-";
+    const driver = a.driverName || matchedVehicle?.driverName || "-";
+
+    s += pdfText(46, y + 7, `${a.studentName} (${a.studentRollNo})`.slice(0, 26), "F2", 8.5);
+    s += pdfText(210, y + 7, a.className, "F1", 8.5);
+    s += pdfText(285, y + 7, a.routeName.slice(0, 22), "F1", 8.5);
+    s += pdfText(435, y + 7, bus.slice(0, 20), "F1", 8.5);
+    s += pdfText(560, y + 7, driver.slice(0, 16), "F1", 8.5);
+    s += pdfText(660, y + 7, a.boardingStop.slice(0, 15), "F1", 8.5);
+    s += pdfText(750, y + 7, `Rs ${formatNumber(a.monthlyFare)}`, "F2", 8.5);
+  });
+
+  const blob = buildMultiPagePdf([s]);
+  triggerDownload(blob, "transport-assignments-register.pdf");
+}
+
+export function exportStudentTransportCardPdf(
+  assignment: TransportAssignmentRecord,
+  vehicle?: TransportVehicleRecord
+) {
+  let s = "";
+  const printedDate = new Date().toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const busModel = assignment.busName || vehicle?.model || "Standard School Bus";
+  const vehicleNo = assignment.vehicleNo || vehicle?.vehicleNo || "Transport Fleet";
+  const driverName = assignment.driverName || vehicle?.driverName || "Assigned Driver";
+  const driverPhone = assignment.driverPhone || vehicle?.driverPhone || "—";
+
+  // Navy Header Banner
+  s += pdfRect(0, 525, 842, 70, [0.035, 0.114, 0.243]);
+  s += pdfText(
+    36,
+    566,
+    "OPUS SCHOOL MANAGEMENT SYSTEM - STUDENT TRANSPORT PASS",
+    "F2",
+    13,
+    [1, 1, 1]
+  );
+  s += pdfText(
+    36,
+    548,
+    `Student: ${assignment.studentName}   |   Roll No: ${assignment.studentRollNo}   |   Class: ${assignment.className}`,
+    "F2",
+    9.5,
+    [0.9, 0.94, 1]
+  );
+  s += pdfText(
+    36,
+    534,
+    "Academic Year 2026-27   |   Valid Transport Authorization Pass",
+    "F1",
+    8.5,
+    [0.82, 0.88, 0.96]
+  );
+
+  // Pass Card Box
+  s += pdfRect(36, 305, 770, 200, [0.96, 0.97, 0.99]);
+  s += pdfRect(36, 475, 770, 30, [0.1, 0.2, 0.35]);
+  s += pdfText(48, 488, "STUDENT COMMUTER IDENTIFICATION DETAILS", "F2", 9, [1, 1, 1]);
+
+  // Row 1
+  s += pdfText(52, 450, "Student Name:", "F1", 8.5, [0.38, 0.44, 0.54]);
+  s += pdfText(150, 450, assignment.studentName, "F2", 9.5, [0.035, 0.114, 0.243]);
+
+  s += pdfText(440, 450, "Roll Number:", "F1", 8.5, [0.38, 0.44, 0.54]);
+  s += pdfText(530, 450, assignment.studentRollNo, "F2", 9.5, [0.035, 0.114, 0.243]);
+
+  // Row 2
+  s += pdfText(52, 418, "Class / Grade:", "F1", 8.5, [0.38, 0.44, 0.54]);
+  s += pdfText(150, 418, assignment.className, "F2", 9, [0.035, 0.114, 0.243]);
+
+  s += pdfText(440, 418, "Transport Route:", "F1", 8.5, [0.38, 0.44, 0.54]);
+  s += pdfText(530, 418, assignment.routeName, "F2", 9, [0.035, 0.114, 0.243]);
+
+  // Row 3
+  s += pdfText(52, 386, "Boarding Stop:", "F1", 8.5, [0.38, 0.44, 0.54]);
+  s += pdfText(150, 386, assignment.boardingStop, "F2", 9, [0.035, 0.114, 0.243]);
+
+  s += pdfText(440, 386, "Monthly Fare:", "F1", 8.5, [0.38, 0.44, 0.54]);
+  s += pdfText(530, 386, `Rs ${formatNumber(assignment.monthlyFare)} / Month`, "F2", 9, [0.035, 0.114, 0.243]);
+
+  // Row 4
+  s += pdfText(52, 354, "Assigned Bus:", "F1", 8.5, [0.38, 0.44, 0.54]);
+  s += pdfText(150, 354, `${busModel} (${vehicleNo})`, "F2", 9, [0.035, 0.114, 0.243]);
+
+  s += pdfText(440, 354, "Bus Driver & Contact:", "F1", 8.5, [0.38, 0.44, 0.54]);
+  s += pdfText(530, 354, `${driverName} ${driverPhone !== "—" ? `(${driverPhone})` : ""}`, "F2", 9, [0.035, 0.114, 0.243]);
+
+  // Instructions & Terms
+  s += pdfRect(36, 155, 770, 135, [0.98, 0.98, 0.99]);
+  s += pdfText(48, 268, "IMPORTANT TRANSPORT RULES & PASS TERMS:", "F2", 8.5, [0.035, 0.114, 0.243]);
+  s += pdfText(48, 250, "1. Students must carry this transport pass while boarding the school vehicle daily.", "F1", 8, [0.3, 0.35, 0.45]);
+  s += pdfText(48, 234, "2. Boarding and drop-off is strictly allowed only at the assigned stop specified on this pass.", "F1", 8, [0.3, 0.35, 0.45]);
+  s += pdfText(48, 218, "3. In case of emergency or route delay, contact the transport desk or the assigned driver directly.", "F1", 8, [0.3, 0.35, 0.45]);
+  s += pdfText(48, 202, "4. Transport fee must be cleared along with monthly tuition fees before the 10th of every month.", "F1", 8, [0.3, 0.35, 0.45]);
+  s += pdfText(48, 186, "5. Report any changes in home address or contact details to the Administration Office promptly.", "F1", 8, [0.3, 0.35, 0.45]);
+
+  // Footer Signatures
+  s += pdfText(36, 45, `Transport ID: ${assignment.assignmentCode}  |  Printed: ${printedDate}`, "F1", 8, [0.45, 0.5, 0.6]);
+  s += pdfText(320, 45, "Student / Guardian Signature: ________________", "F1", 8, [0.35, 0.4, 0.5]);
+  s += pdfText(580, 45, "Admin Transport Seal: ________________", "F1", 8, [0.35, 0.4, 0.5]);
+
+  const safeRoll = assignment.studentRollNo.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const blob = buildMultiPagePdf([s]);
+  triggerDownload(blob, `student-transport-pass-${safeRoll}.pdf`);
+}
+
+export function printTransportOverview(
+  routes: TransportRouteRecord[],
+  vehicles: TransportVehicleRecord[],
+  assignments: TransportAssignmentRecord[]
 ): boolean {
-  const win = window.open("", "_blank", "width=1080,height=780");
-  if (!win) return false;
-
-  const totalSeats = routes.reduce((s, r) => s + r.seatCapacity, 0);
-  const totalOccupied = routes.reduce((s, r) => s + r.allocatedStudents, 0);
-
-  const rowsHtml = routes
+  const routeRows = routes
     .map(
       (r) => `
       <tr>
-        <td class="mono bold">${r.routeCode}<br/><span class="muted">${r.campus}</span></td>
-        <td><strong>${r.routeName}</strong><br/><span class="muted">${r.stops.length} Timed Stops · ${r.distanceKm} km</span></td>
-        <td class="mono">${r.vehicleRegNo}<br/><span class="muted">${r.vehicleModel}</span></td>
-        <td>${r.driverName}<br/><span class="muted mono">${r.driverPhone}</span></td>
-        <td class="mono center">${r.morningDeparture} → ${r.campusArrival}</td>
-        <td class="mono center bold">${r.allocatedStudents} / ${r.seatCapacity}</td>
-        <td class="mono right bold emerald">${formatCurrency(r.monthlyRouteFee)}</td>
-        <td class="center"><span class="badge">${r.status}</span></td>
+        <td style="text-align:center;font-family:monospace;font-weight:700;">${r.routeCode}</td>
+        <td style="font-weight:600;">${r.routeName}</td>
+        <td style="text-align:center;font-family:monospace;font-weight:700;">Rs ${formatNumber(
+          r.monthlyFare
+        )}</td>
       </tr>`
     )
     .join("");
 
-  win.document.write(`<!DOCTYPE html>
+  const vehicleRows = vehicles
+    .map(
+      (v) => `
+      <tr>
+        <td style="text-align:center;font-family:monospace;font-weight:700;">${v.vehicleNo}</td>
+        <td style="font-weight:600;">${v.model}</td>
+        <td><strong>${v.driverName || "—"}</strong>${v.driverPhone ? `<br/><span style="color:#64748b;font-size:11px;font-family:monospace;">${v.driverPhone}</span>` : ""}</td>
+        <td style="text-align:center;font-family:monospace;">${v.capacity}</td>
+        <td>${v.routeName || "—"}</td>
+      </tr>`
+    )
+    .join("");
+
+  const assignmentRows = assignments
+    .map((a) => {
+      const v = vehicles.find(
+        (veh) =>
+          (a.routeId && veh.routeId === a.routeId) ||
+          (a.routeName && veh.routeName === a.routeName)
+      );
+      const bus = a.busName || v?.model || "—";
+      const plate = a.vehicleNo || v?.vehicleNo;
+      const driver = a.driverName || v?.driverName || "—";
+      const phone = a.driverPhone || v?.driverPhone;
+
+      return `
+      <tr>
+        <td style="font-weight:600;">${a.studentName} <span style="color:#64748b;font-size:11px;">(${a.studentRollNo} &bull; ${a.className})</span></td>
+        <td>${a.routeName}</td>
+        <td><strong>${bus}</strong>${plate ? `<br/><span style="color:#64748b;font-size:11px;font-family:monospace;">${plate}</span>` : ""}</td>
+        <td><strong>${driver}</strong>${phone ? `<br/><span style="color:#64748b;font-size:11px;font-family:monospace;">${phone}</span>` : ""}</td>
+        <td>${a.boardingStop}</td>
+        <td style="text-align:center;font-family:monospace;font-weight:700;">Rs ${formatNumber(
+          a.monthlyFare
+        )}</td>
+      </tr>`;
+    })
+    .join("");
+
+  const html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>EduSphere — Institutional Transport & Fleet Register</title>
+  <title>Transport Register — Opus SMS</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; color: #0f172a; padding: 28px; background: #fff; }
-    .banner {
-      background: #091d3e;
-      color: #ffffff;
-      padding: 18px 22px;
-      border-radius: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .banner h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; }
-    .banner p { font-size: 12px; color: #cbd5e1; margin-top: 3px; font-weight: 500; }
-    .banner .meta { text-align: right; font-size: 11px; color: #e2e8f0; line-height: 1.5; }
-    .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
-    .kpi { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
-    .kpi span { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 600; }
-    .kpi strong { display: block; font-size: 15px; color: #091d3e; margin-top: 3px; font-family: monospace; }
-    table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
-    th { background: #091d3e; color: #fff; text-align: left; padding: 8px 10px; font-size: 10.5px; text-transform: uppercase; }
-    td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+    body { font-family: system-ui, -apple-system, sans-serif; color: #0f172a; margin: 28px; }
+    h1 { font-size: 18px; margin: 0 0 4px; color: #091d3e; }
+    h2 { font-size: 13px; margin: 22px 0 8px; color: #091d3e; text-transform: uppercase; letter-spacing: 0.05em; }
+    p { font-size: 12px; color: #64748b; margin: 0 0 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px; }
+    th { background: #091d3e; color: #fff; padding: 8px 10px; text-align: left; font-size: 11px; text-transform: uppercase; }
+    td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
     tr:nth-child(even) { background: #f8fafc; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
-    .bold { font-weight: 700; }
-    .emerald { color: #047857; }
-    .muted { font-size: 10px; color: #64748b; }
-    .right { text-align: right; }
-    .center { text-align: center; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 700; background: #d1fae5; color: #065f46; }
   </style>
 </head>
 <body>
-  <div class="banner">
-    <div>
-      <h1>EDUSPHERE MULTI-CAMPUS SYSTEM</h1>
-      <p>Institutional Transport Routes, Fleet & Rider Allocation Register — AY 2026–27</p>
-    </div>
-    <div class="meta">
-      <div><strong>Date:</strong> ${new Date().toLocaleDateString("en-GB")}</div>
-      <div><strong>Active Routes:</strong> ${routes.length} Corridors</div>
-      <div><strong>Authority:</strong> Operations & Fleet Control</div>
-    </div>
-  </div>
-  <div class="kpis">
-    <div class="kpi"><span>Active Bus Corridors</span><strong>${routes.length} Routes</strong></div>
-    <div class="kpi"><span>Total Fleet Capacity</span><strong>${totalSeats} Seats</strong></div>
-    <div class="kpi"><span>Allocated Student Riders</span><strong>${totalOccupied} Students</strong></div>
-    <div class="kpi"><span>Fleet Seat Utilization</span><strong>${Math.round(
-      (totalOccupied / Math.max(1, totalSeats)) * 100
-    )}% Occupied</strong></div>
-  </div>
+  <h1>School Transport Management Register</h1>
+  <p>Routes: ${routes.length} &bull; Vehicles: ${vehicles.length} &bull; Student Assignments: ${assignments.length}</p>
+
+  <h2>1. Transport Routes</h2>
   <table>
-    <thead>
-      <tr>
-        <th>Route Code</th>
-        <th>Route Corridor & Distance</th>
-        <th>Assigned Vehicle</th>
-        <th>Driver & Contact</th>
-        <th class="center">Morning Schedule</th>
-        <th class="center">Seat Load</th>
-        <th class="right">Monthly Fee</th>
-        <th class="center">Status</th>
-      </tr>
-    </thead>
-    <tbody>${rowsHtml}</tbody>
+    <thead><tr><th style="text-align:center;width:110px;">Code</th><th>Route Name</th><th style="text-align:center;width:150px;">Monthly Fare</th></tr></thead>
+    <tbody>${routeRows}</tbody>
   </table>
-  <script>window.onload = () => { window.print(); };</script>
+
+  <h2>2. Fleet Vehicles</h2>
+  <table>
+    <thead><tr><th style="text-align:center;width:120px;">Vehicle No</th><th>Model</th><th>Driver</th><th style="text-align:center;width:95px;">Capacity</th><th>Route</th></tr></thead>
+    <tbody>${vehicleRows}</tbody>
+  </table>
+
+  <h2>3. Transport Assignments</h2>
+  <table>
+    <thead><tr><th>Student Name</th><th>Route</th><th>Bus Name</th><th>Driver</th><th>Boarding Stop</th><th style="text-align:center;width:120px;">Monthly Fare</th></tr></thead>
+    <tbody>${assignmentRows}</tbody>
+  </table>
 </body>
-</html>`);
-  win.document.close();
-  return true;
+</html>`;
+
+  return printHtml(html);
 }

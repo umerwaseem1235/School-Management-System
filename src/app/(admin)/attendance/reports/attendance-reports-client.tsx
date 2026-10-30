@@ -296,10 +296,10 @@ export function AttendanceReportsClient() {
       {
         key: "student",
         header: "Student",
-        headerAlign: "center",
+        headerAlign: "left",
         align: "left",
         className: "w-[22%]",
-        headerClassName: "w-[22%] text-center",
+        headerClassName: "w-[22%] text-left",
         cell: (r) => (
           <PersonCell
             name={r.name}

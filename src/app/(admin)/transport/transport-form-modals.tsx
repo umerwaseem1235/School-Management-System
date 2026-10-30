@@ -1,1030 +1,1092 @@
 "use client";
 
 import * as React from "react";
-import { Bus, Check, GraduationCap, Navigation, UserPlus } from "lucide-react";
+import {
+  AlertTriangle,
+  Bus,
+  Check,
+  ChevronDown,
+  Edit,
+  Edit3,
+  GraduationCap,
+  List,
+  MapPin,
+  Navigation,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ActionButton } from "@/components/shared/action-button";
-import { formatCurrency } from "@/lib/format";
-import type {
-  FleetVehicleRecord,
-  StudentTransportAllocationRecord,
-  TransportDriverRecord,
-  TransportRouteRecord,
+import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/format";
+import {
+  COMMON_BOARDING_STOPS,
+  COMMON_DRIVER_NAMES,
+  COMMON_VEHICLE_MODELS,
+  TRANSPORT_STUDENT_DIRECTORY,
+  type TransportAssignmentRecord,
+  type TransportRouteRecord,
+  type TransportVehicleRecord,
 } from "@/lib/mock/transport";
 
-const CAMPUSES = [
-  "Gulberg",
-  "DHA Phase 5",
-  "F-8 Islamabad",
-  "Clifton",
-  "Bahria Town",
+const fieldClass =
+  "h-10 w-full rounded-lg border border-border/90 bg-white px-3.5 text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15";
+
+const ROUTE_SUGGESTIONS = [
+  "Route A — DHA & Cantt",
+  "Route B — Gulberg & Johar",
+  "Route C — Model Town & Faisal Town",
+  "Route D — Bahria Town & Canal Bank",
+  "Route E — Wapda Town & Valencia",
+  "Route F — Allama Iqbal Town & Samanabad",
+  "Route G — Askari & Mall Road",
+  "Route H — Garden Town & Shadman",
 ];
 
-const fieldClass =
-  "h-9 w-full rounded-[4px] border border-border/80 bg-white px-3 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/15";
+const QUICK_FARES = [1500, 1800, 2000, 2200, 2500, 3000];
 
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-foreground">
-        {label}
-        {required && <span className="text-danger"> *</span>}
-      </label>
-      {children}
-    </div>
-  );
-}
+/* ────────────────────────────────────────────────────────────────────────── */
+/* 1. Add / Edit Route Modal                                                  */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   1. ADD / EDIT TRANSPORT ROUTE MODAL
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-interface TransportRouteFormModalProps {
+interface RouteFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialData?: TransportRouteRecord | null;
   totalCount: number;
-  onSave: (route: TransportRouteRecord) => void;
+  initialData?: TransportRouteRecord | null;
+  onSave: (record: TransportRouteRecord) => void;
 }
 
-export function TransportRouteFormModal({
+export function RouteFormModal({
   open,
   onOpenChange,
-  initialData,
   totalCount,
+  initialData,
   onSave,
-}: TransportRouteFormModalProps) {
-  const [routeCode, setRouteCode] = React.useState("");
+}: RouteFormModalProps) {
+  const isEditing = Boolean(initialData);
+
   const [routeName, setRouteName] = React.useState("");
-  const [campus, setCampus] = React.useState("Gulberg");
-  const [vehicleRegNo, setVehicleRegNo] = React.useState("");
-  const [vehicleModel, setVehicleModel] = React.useState("");
-  const [driverName, setDriverName] = React.useState("");
-  const [driverPhone, setDriverPhone] = React.useState("");
-  const [conductorName, setConductorName] = React.useState("");
-  const [distanceKm, setDistanceKm] = React.useState("");
-  const [morningDeparture, setMorningDeparture] = React.useState("06:40 AM");
-  const [campusArrival, setCampusArrival] = React.useState("07:35 AM");
-  const [seatCapacity, setSeatCapacity] = React.useState("29");
-  const [monthlyRouteFee, setMonthlyRouteFee] = React.useState("");
-  const [primaryStopName, setPrimaryStopName] = React.useState("");
+  const [monthlyFare, setMonthlyFare] = React.useState("2000");
 
   React.useEffect(() => {
     if (open) {
       if (initialData) {
-        setRouteCode(initialData.routeCode);
         setRouteName(initialData.routeName);
-        setCampus(initialData.campus);
-        setVehicleRegNo(initialData.vehicleRegNo);
-        setVehicleModel(initialData.vehicleModel);
-        setDriverName(initialData.driverName);
-        setDriverPhone(initialData.driverPhone);
-        setConductorName(initialData.conductorName);
-        setDistanceKm(String(initialData.distanceKm));
-        setMorningDeparture(initialData.morningDeparture);
-        setCampusArrival(initialData.campusArrival);
-        setSeatCapacity(String(initialData.seatCapacity));
-        setMonthlyRouteFee(String(initialData.monthlyRouteFee));
-        setPrimaryStopName(initialData.stops[0]?.stopName || "");
+        setMonthlyFare(String(initialData.monthlyFare));
       } else {
-        setRouteCode(
-          `RTE-LHR-${String(totalCount + 1).padStart(2, "0")}`
-        );
         setRouteName("");
-        setCampus("Gulberg");
-        setVehicleRegNo("");
-        setVehicleModel("");
-        setDriverName("");
-        setDriverPhone("");
-        setConductorName("");
-        setDistanceKm("");
-        setMorningDeparture("06:40 AM");
-        setCampusArrival("07:35 AM");
-        setSeatCapacity("29");
-        setMonthlyRouteFee("");
-        setPrimaryStopName("");
+        setMonthlyFare("2000");
       }
     }
-  }, [open, initialData, totalCount]);
+  }, [open, initialData]);
+
+  const numericFare = Math.max(0, Math.trunc(Number(monthlyFare) || 0));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!routeName.trim()) {
-      toast.error("Please enter the route corridor name.");
+      toast.error("Please enter a route name.");
+      return;
+    }
+    if (numericFare <= 0) {
+      toast.error("Please enter a valid monthly fare.");
       return;
     }
 
-    const record: TransportRouteRecord = {
-      id: initialData ? initialData.id : `rte-${Date.now()}`,
-      routeCode:
-        routeCode.trim() ||
-        `RTE-LHR-${String(totalCount + 1).padStart(2, "0")}`,
-      routeName: routeName.trim(),
-      campus,
-      vehicleRegNo: vehicleRegNo.trim() || "LES-26-4910",
-      vehicleModel:
-        vehicleModel.trim() || "Toyota Coaster 29-Seater Euro-II AC",
-      driverName: driverName.trim() || "Subedar (R) Muhammad Akram",
-      driverPhone: driverPhone.trim() || "+92 300 4182901",
-      conductorName: conductorName.trim() || "Muhammad Irfan",
-      distanceKm: Math.max(1, Number(distanceKm) || 18),
-      morningDeparture: morningDeparture.trim() || "06:40 AM",
-      campusArrival: campusArrival.trim() || "07:35 AM",
-      afternoonDeparture: "02:10 PM",
-      seatCapacity: Math.max(8, Number(seatCapacity) || 29),
-      allocatedStudents: initialData ? initialData.allocatedStudents : 12,
-      monthlyRouteFee: Math.max(1000, Number(monthlyRouteFee) || 9500),
-      gpsTrackerId: initialData
-        ? initialData.gpsTrackerId
-        : `GPS-TRK-${901 + totalCount}`,
-      status: initialData ? initialData.status : "Active",
-      stops: initialData
-        ? initialData.stops
-        : [
-            {
-              stopOrder: 1,
-              stopName:
-                primaryStopName.trim() || "Main Boulevard Commercial Gate",
-              landmark: "Service Road Bus Bay",
-              morningPickup: morningDeparture.trim() || "06:40 AM",
-              afternoonDrop: "02:45 PM",
-              studentsCount: 12,
-            },
-          ],
-    };
+    const record: TransportRouteRecord = initialData
+      ? {
+          ...initialData,
+          routeName: routeName.trim(),
+          monthlyFare: numericFare,
+        }
+      : {
+          id: `rte-${totalCount + 1}-${ routeName.trim().slice(0, 3).toLowerCase() }`,
+          routeCode: `RTE-${String(totalCount + 1).padStart(2, "0")}`,
+          routeName: routeName.trim(),
+          monthlyFare: numericFare,
+        };
 
     onSave(record);
     onOpenChange(false);
     toast.success(
-      initialData
-        ? `Transport route ${record.routeCode} updated.`
-        : `New transport route ${record.routeCode} commissioned.`
+      isEditing
+        ? `Route "${record.routeName}" updated successfully.`
+        : `Route "${record.routeName}" added with Monthly Fare Rs ${formatNumber(numericFare)}.`
     );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex flex-col max-h-[calc(100vh-3rem)] sm:max-w-2xl gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
-        <DialogHeader className="shrink-0 gap-1 border-b border-border/70 px-6 py-4">
-          <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
-            <Navigation className="size-4.5 text-brand" />
-            <span>
-              {initialData
-                ? `Edit Transport Route — ${initialData.routeCode}`
-                : "Create Institutional Transport Route"}
+      <DialogContent className="flex flex-col sm:max-w-lg gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
+        <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-slate-50/90 via-white to-white px-6 py-4.5">
+          <div className="flex items-center gap-3.5 pr-6">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e3a66] text-white shadow-xs ring-1 ring-[#091d3e]/20">
+              {isEditing ? (
+                <Edit className="size-5" />
+              ) : (
+                <Navigation className="size-5" />
+              )}
             </span>
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Configure route corridor, assigned vehicle, crew, timing schedule,
-            and monthly route fee.
-          </DialogDescription>
+            <div className="min-w-0">
+              <DialogTitle className="text-base font-bold leading-tight text-foreground">
+                {isEditing
+                  ? `Edit Route — ${initialData?.routeCode}`
+                  : "Add Routes"}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                {isEditing
+                  ? "Update the transport route name and monthly student fare."
+                  : "Define a school transport route and its standard monthly fare."}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex-1 overflow-y-auto px-6 py-4 space-y-3.5"
-        >
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Field label="Route Code" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. RTE-LHR-09"
-                value={routeCode}
-                onChange={(e) => setRouteCode(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Campus" required>
-              <select
-                value={campus}
-                onChange={(e) => setCampus(e.target.value)}
-                className={fieldClass}
-              >
-                {CAMPUSES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="One-Way Distance (km)" required>
-              <input
-                type="number"
-                step="0.1"
-                min={1}
-                required
-                placeholder="e.g. 18.5"
-                value={distanceKm}
-                onChange={(e) => setDistanceKm(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div className="space-y-4 px-6 py-5">
+            {/* Two-column layout matching screenshot + executive polish */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-foreground">
+                  Route Name <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  list="route-name-suggestions"
+                  placeholder="e.g. Gulberg – School"
+                  value={routeName}
+                  onChange={(e) => setRouteName(e.target.value)}
+                  className={fieldClass}
+                />
+                <datalist id="route-name-suggestions">
+                  {ROUTE_SUGGESTIONS.map((item) => (
+                    <option key={item} value={item} />
+                  ))}
+                </datalist>
+              </div>
 
-          <Field label="Route Corridor Title" required>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Gulberg Main Blvd — Model Town — Canal Bank Corridor"
-              value={routeName}
-              onChange={(e) => setRouteName(e.target.value)}
-              className={fieldClass}
-            />
-          </Field>
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-foreground">
+                  Monthly Fare <span className="text-danger">*</span>
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 font-mono text-xs font-bold text-muted-foreground">
+                    Rs
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    required
+                    placeholder="2000"
+                    value={monthlyFare}
+                    onChange={(e) => setMonthlyFare(e.target.value)}
+                    className={cn(fieldClass, "pl-9 font-mono text-sm font-bold")}
+                  />
+                </div>
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Assigned Vehicle Registration #" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. LES-24-8801"
-                value={vehicleRegNo}
-                onChange={(e) => setVehicleRegNo(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Vehicle Make & Model" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Toyota Coaster 29-Seater Euro-II AC"
-                value={vehicleModel}
-                onChange={(e) => setVehicleModel(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Field label="Primary HTV Driver Name" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Subedar (R) Muhammad Akram"
-                value={driverName}
-                onChange={(e) => setDriverName(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Driver Mobile Number" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. +92 300 4182901"
-                value={driverPhone}
-                onChange={(e) => setDriverPhone(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Route Conductor Name">
-              <input
-                type="text"
-                placeholder="e.g. Muhammad Irfan"
-                value={conductorName}
-                onChange={(e) => setConductorName(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Field label="Morning Start Time">
-              <input
-                type="text"
-                placeholder="e.g. 06:40 AM"
-                value={morningDeparture}
-                onChange={(e) => setMorningDeparture(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Campus Arrival Time">
-              <input
-                type="text"
-                placeholder="e.g. 07:35 AM"
-                value={campusArrival}
-                onChange={(e) => setCampusArrival(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Seating Capacity" required>
-              <input
-                type="number"
-                min={8}
-                required
-                placeholder="e.g. 29"
-                value={seatCapacity}
-                onChange={(e) => setSeatCapacity(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Monthly Fee (PKR)" required>
-              <input
-                type="number"
-                min={1000}
-                required
-                placeholder="e.g. 9500"
-                value={monthlyRouteFee}
-                onChange={(e) => setMonthlyRouteFee(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          {!initialData && (
-            <Field label="Origin / First Pickup Stop Name">
-              <input
-                type="text"
-                placeholder="e.g. Model Town Link Road Gate (Near Amanah Mall)"
-                value={primaryStopName}
-                onChange={(e) => setPrimaryStopName(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          )}
-
-          <DialogFooter className="pt-2 flex items-center justify-end gap-2">
-            <ActionButton
-              type="button"
-              tone="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </ActionButton>
-            <ActionButton type="submit" tone="primary">
-              <Check className="size-3.5" />
-              <span>{initialData ? "Save Route" : "Commission Route"}</span>
-            </ActionButton>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   2. ADD FLEET VEHICLE MODAL
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-interface FleetVehicleFormModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  totalCount: number;
-  onSave: (vehicle: FleetVehicleRecord) => void;
-}
-
-export function FleetVehicleFormModal({
-  open,
-  onOpenChange,
-  totalCount,
-  onSave,
-}: FleetVehicleFormModalProps) {
-  const [registrationNo, setRegistrationNo] = React.useState("");
-  const [makeModel, setMakeModel] = React.useState("");
-  const [vehicleType, setVehicleType] = React.useState<
-    FleetVehicleRecord["vehicleType"]
-  >("Coaster (29-Seater)");
-  const [campus, setCampus] = React.useState("Gulberg");
-  const [assignedRouteCode, setAssignedRouteCode] = React.useState("");
-  const [assignedDriver, setAssignedDriver] = React.useState("");
-  const [seatingCapacity, setSeatingCapacity] = React.useState("29");
-  const [monthlyFuelCost, setMonthlyFuelCost] = React.useState("");
-  const [fitnessExpiry, setFitnessExpiry] = React.useState("2027-06-30");
-
-  React.useEffect(() => {
-    if (open) {
-      setRegistrationNo("");
-      setMakeModel("");
-      setVehicleType("Coaster (29-Seater)");
-      setCampus("Gulberg");
-      setAssignedRouteCode("");
-      setAssignedDriver("");
-      setSeatingCapacity("29");
-      setMonthlyFuelCost("");
-      setFitnessExpiry("2027-06-30");
-    }
-  }, [open]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!registrationNo.trim() || !makeModel.trim()) {
-      toast.error("Please enter registration number and vehicle make/model.");
-      return;
-    }
-
-    const today = new Date().toISOString().slice(0, 10);
-    const newVehicle: FleetVehicleRecord = {
-      id: `flt-${Date.now()}`,
-      vehicleCode: `FLT-BUS-${101 + totalCount}`,
-      registrationNo: registrationNo.trim().toUpperCase(),
-      makeModel: makeModel.trim(),
-      vehicleType,
-      campus,
-      assignedRouteCode: assignedRouteCode.trim() || "RTE-LHR-01",
-      assignedDriver:
-        assignedDriver.trim() || "Subedar (R) Muhammad Akram",
-      seatingCapacity: Math.max(8, Number(seatingCapacity) || 29),
-      occupiedSeats: 20,
-      fuelType: "High-Speed Diesel (HSD)",
-      monthlyFuelLitres: 380,
-      monthlyFuelCost: Math.max(10000, Number(monthlyFuelCost) || 110000),
-      odometerKm: 12400,
-      fitnessExpiry,
-      lastServiceDate: today,
-      gpsDeviceCode: `GPS-TRK-${901 + totalCount}`,
-      status: "Operational",
-    };
-
-    onSave(newVehicle);
-    onOpenChange(false);
-    toast.success(
-      `Fleet vehicle ${newVehicle.registrationNo} registered in campus pool.`
-    );
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg rounded-2xl border border-border/80 bg-white p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="border-b border-border/70 px-6 py-4">
-          <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
-            <Bus className="size-4.5 text-brand" />
-            <span>Register Campus Fleet Vehicle</span>
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Add a new bus, coaster, or van to the institutional transport fleet.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-3.5">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Excise Registration #" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. LES-25-8804"
-                value={registrationNo}
-                onChange={(e) => setRegistrationNo(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Vehicle Classification" required>
-              <select
-                value={vehicleType}
-                onChange={(e) =>
-                  setVehicleType(
-                    e.target.value as FleetVehicleRecord["vehicleType"]
-                  )
-                }
-                className={fieldClass}
-              >
-                <option value="Coaster (29-Seater)">Coaster (29-Seater)</option>
-                <option value="Heavy Bus (52-Seater)">
-                  Heavy Bus (52-Seater)
-                </option>
-                <option value="Mini Coach (28-Seater)">
-                  Mini Coach (28-Seater)
-                </option>
-                <option value="Executive Van (15-Seater)">
-                  Executive Van (15-Seater)
-                </option>
-              </select>
-            </Field>
-          </div>
-
-          <Field label="Make, Model & Engine Specification" required>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Toyota Coaster 29-Seater Euro-II AC"
-              value={makeModel}
-              onChange={(e) => setMakeModel(e.target.value)}
-              className={fieldClass}
-            />
-          </Field>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Assigned Campus" required>
-              <select
-                value={campus}
-                onChange={(e) => setCampus(e.target.value)}
-                className={fieldClass}
-              >
-                {CAMPUSES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Assigned Route Code">
-              <input
-                type="text"
-                placeholder="e.g. RTE-LHR-01"
-                value={assignedRouteCode}
-                onChange={(e) => setAssignedRouteCode(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Field label="Assigned Driver">
-              <input
-                type="text"
-                placeholder="e.g. M. Akram"
-                value={assignedDriver}
-                onChange={(e) => setAssignedDriver(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Seating Capacity" required>
-              <input
-                type="number"
-                min={8}
-                required
-                placeholder="e.g. 29"
-                value={seatingCapacity}
-                onChange={(e) => setSeatingCapacity(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Monthly Fuel (PKR)">
-              <input
-                type="number"
-                min={0}
-                placeholder="e.g. 115000"
-                value={monthlyFuelCost}
-                onChange={(e) => setMonthlyFuelCost(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          <DialogFooter className="pt-2 flex items-center justify-end gap-2">
-            <ActionButton
-              type="button"
-              tone="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </ActionButton>
-            <ActionButton type="submit" tone="primary">
-              <Check className="size-3.5" />
-              <span>Register Vehicle</span>
-            </ActionButton>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   3. REGISTER LICENSED DRIVER MODAL
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-interface DriverFormModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  totalCount: number;
-  onSave: (driver: TransportDriverRecord) => void;
-}
-
-export function DriverFormModal({
-  open,
-  onOpenChange,
-  totalCount,
-  onSave,
-}: DriverFormModalProps) {
-  const [fullName, setFullName] = React.useState("");
-  const [cnic, setCnic] = React.useState("");
-  const [phone, setPhone] = React.useState("");
-  const [htvLicenseNo, setHtvLicenseNo] = React.useState("");
-  const [campus, setCampus] = React.useState("Gulberg");
-  const [assignedVehicleReg, setAssignedVehicleReg] = React.useState("");
-  const [assignedRouteCode, setAssignedRouteCode] = React.useState("");
-  const [conductorName, setConductorName] = React.useState("");
-  const [experienceYears, setExperienceYears] = React.useState("");
-
-  React.useEffect(() => {
-    if (open) {
-      setFullName("");
-      setCnic("");
-      setPhone("");
-      setHtvLicenseNo("");
-      setCampus("Gulberg");
-      setAssignedVehicleReg("");
-      setAssignedRouteCode("");
-      setConductorName("");
-      setExperienceYears("");
-    }
-  }, [open]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName.trim() || !htvLicenseNo.trim()) {
-      toast.error("Please enter driver full name and HTV license number.");
-      return;
-    }
-
-    const newDriver: TransportDriverRecord = {
-      id: `drv-${Date.now()}`,
-      driverCode: `DRV-2026-${String(totalCount + 1).padStart(2, "0")}`,
-      fullName: fullName.trim(),
-      cnic: cnic.trim() || "35202-4182910-9",
-      phone: phone.trim() || "+92 300 4182901",
-      emergencyPhone: "+92 321 4182999",
-      htvLicenseNo: htvLicenseNo.trim().toUpperCase(),
-      licenseCategory: "HTV + PSV Certified",
-      licenseExpiry: "2029-12-31",
-      campus,
-      assignedVehicleReg: assignedVehicleReg.trim() || "LES-24-8801",
-      assignedRouteCode: assignedRouteCode.trim() || "RTE-LHR-01",
-      conductorName: conductorName.trim() || "Muhammad Irfan",
-      experienceYears: Math.max(1, Number(experienceYears) || 10),
-      shiftTiming: "06:15 AM – 03:15 PM",
-      policeVerification: "Verified",
-      medicalFitness: "Cleared",
-      status: "On Duty",
-    };
-
-    onSave(newDriver);
-    onOpenChange(false);
-    toast.success(`Driver ${newDriver.fullName} added to fleet roster.`);
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg rounded-2xl border border-border/80 bg-white p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="border-b border-border/70 px-6 py-4">
-          <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
-            <UserPlus className="size-4.5 text-brand" />
-            <span>Assign Licensed Transport Driver</span>
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Register an HTV/PSV certified driver and assign to a campus route.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-3.5">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Driver Full Name" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Subedar (R) Muhammad Akram"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="NADRA CNIC Number" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. 35202-4182910-1"
-                value={cnic}
-                onChange={(e) => setCnic(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="HTV / PSV Driving License #" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. LHR-HTV-884920"
-                value={htvLicenseNo}
-                onChange={(e) => setHtvLicenseNo(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Primary Mobile Number" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. +92 300 4182901"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Field label="Campus" required>
-              <select
-                value={campus}
-                onChange={(e) => setCampus(e.target.value)}
-                className={fieldClass}
-              >
-                {CAMPUSES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Vehicle Reg #">
-              <input
-                type="text"
-                placeholder="e.g. LES-24-8801"
-                value={assignedVehicleReg}
-                onChange={(e) => setAssignedVehicleReg(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Route Code">
-              <input
-                type="text"
-                placeholder="e.g. RTE-LHR-01"
-                value={assignedRouteCode}
-                onChange={(e) => setAssignedRouteCode(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Exp (Years)">
-              <input
-                type="number"
-                min={1}
-                placeholder="e.g. 15"
-                value={experienceYears}
-                onChange={(e) => setExperienceYears(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          <Field label="Assigned Bus Conductor Name">
-            <input
-              type="text"
-              placeholder="e.g. Muhammad Irfan"
-              value={conductorName}
-              onChange={(e) => setConductorName(e.target.value)}
-              className={fieldClass}
-            />
-          </Field>
-
-          <DialogFooter className="pt-2 flex items-center justify-end gap-2">
-            <ActionButton
-              type="button"
-              tone="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </ActionButton>
-            <ActionButton type="submit" tone="primary">
-              <Check className="size-3.5" />
-              <span>Assign Driver</span>
-            </ActionButton>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   4. STUDENT ROUTE ALLOCATION MODAL
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-interface StudentAllocationFormModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  routes: TransportRouteRecord[];
-  totalCount: number;
-  onSave: (allocation: StudentTransportAllocationRecord) => void;
-}
-
-export function StudentAllocationFormModal({
-  open,
-  onOpenChange,
-  routes,
-  totalCount,
-  onSave,
-}: StudentAllocationFormModalProps) {
-  const [studentName, setStudentName] = React.useState("");
-  const [rollNo, setRollNo] = React.useState("");
-  const [className, setClassName] = React.useState("Grade 9-A");
-  const [guardianName, setGuardianName] = React.useState("");
-  const [guardianPhone, setGuardianPhone] = React.useState("");
-  const [selectedRouteCode, setSelectedRouteCode] = React.useState(
-    routes[0]?.routeCode || "RTE-LHR-01"
-  );
-  const [pickupStop, setPickupStop] = React.useState("");
-  const [seatNo, setSeatNo] = React.useState("");
-
-  const activeRoute =
-    routes.find((r) => r.routeCode === selectedRouteCode) || routes[0] || null;
-
-  React.useEffect(() => {
-    if (open) {
-      setStudentName("");
-      setRollNo("");
-      setClassName("Grade 9-A");
-      setGuardianName("");
-      setGuardianPhone("");
-      setSelectedRouteCode(routes[0]?.routeCode || "RTE-LHR-01");
-      setPickupStop("");
-      setSeatNo("");
-    }
-  }, [open, routes]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!studentName.trim() || !activeRoute) {
-      toast.error("Please enter the student name and select a route.");
-      return;
-    }
-
-    const newAlloc: StudentTransportAllocationRecord = {
-      id: `trp-${Date.now()}`,
-      passNo: `TRP-2610-${401 + totalCount}`,
-      studentName: studentName.trim(),
-      rollNo: rollNo.trim() || "128",
-      className,
-      campus: activeRoute.campus,
-      guardianName: guardianName.trim() || "Mr. Tariq Mehmood",
-      guardianPhone: guardianPhone.trim() || "+92 300 4129834",
-      routeCode: activeRoute.routeCode,
-      routeName: activeRoute.routeName,
-      pickupStop:
-        pickupStop.trim() ||
-        activeRoute.stops[0]?.stopName ||
-        "Main Boulevard Gate",
-      pickupTime: activeRoute.stops[0]?.morningPickup || "06:45 AM",
-      dropTime: activeRoute.stops[0]?.afternoonDrop || "02:45 PM",
-      vehicleRegNo: activeRoute.vehicleRegNo,
-      seatNo: seatNo.trim() || `Seat ${activeRoute.allocatedStudents + 1}-A`,
-      monthlyTransportFee: activeRoute.monthlyRouteFee,
-      feeStatus: "Paid",
-      status: "Allocated",
-    };
-
-    onSave(newAlloc);
-    onOpenChange(false);
-    toast.success(
-      `Transport Pass ${newAlloc.passNo} issued to ${newAlloc.studentName}.`
-    );
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg rounded-2xl border border-border/80 bg-white p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="border-b border-border/70 px-6 py-4">
-          <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
-            <GraduationCap className="size-4.5 text-brand" />
-            <span>Allocate Student Transport Pass</span>
-          </DialogTitle>
-          <DialogDescription className="text-xs text-muted-foreground">
-            Assign a student to a campus bus corridor, boarding stop, and
-            reserved seat.
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-3.5">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Field label="Student Full Name" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Ahmed Raza"
-                value={studentName}
-                onChange={(e) => setStudentName(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Roll Number" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. 101 or STU-2024-0101"
-                value={rollNo}
-                onChange={(e) => setRollNo(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Class / Section" required>
-              <select
-                value={className}
-                onChange={(e) => setClassName(e.target.value)}
-                className={fieldClass}
-              >
-                <option>Grade 6-A</option>
-                <option>Grade 7-A</option>
-                <option>Grade 8-A</option>
-                <option>Grade 9-A</option>
-                <option>Grade 10-A</option>
-                <option>Grade 11-A</option>
-                <option>Grade 12-A</option>
-              </select>
-            </Field>
-          </div>
-
-          <Field label="Select Transport Route Corridor" required>
-            <select
-              value={selectedRouteCode}
-              onChange={(e) => setSelectedRouteCode(e.target.value)}
-              className={fieldClass}
-            >
-              {routes.map((r) => (
-                <option key={r.id} value={r.routeCode}>
-                  {r.routeCode} — {r.routeName} ({r.allocatedStudents}/
-                  {r.seatCapacity} Seats · {r.campus})
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Designated Boarding Stop" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Model Town Link Road Gate"
-                value={pickupStop}
-                onChange={(e) => setPickupStop(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Assigned Seat Number" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Seat 14-A"
-                value={seatNo}
-                onChange={(e) => setSeatNo(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Parent / Guardian Name" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Mr. Tariq Raza (Father)"
-                value={guardianName}
-                onChange={(e) => setGuardianName(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-            <Field label="Emergency Guardian Mobile" required>
-              <input
-                type="text"
-                required
-                placeholder="e.g. +92 300 4129834"
-                value={guardianPhone}
-                onChange={(e) => setGuardianPhone(e.target.value)}
-                className={fieldClass}
-              />
-            </Field>
-          </div>
-
-          {activeRoute && (
-            <div className="rounded-xl border border-brand/20 bg-brand-50/50 px-4 py-2.5 flex items-center justify-between text-xs">
-              <span className="text-muted-foreground font-medium">
-                Vehicle {activeRoute.vehicleRegNo} · Monthly Route Fee:
+            {/* Quick Fare Preset Pills */}
+            <div>
+              <span className="mb-1.5 block text-[11px] font-semibold text-muted-foreground">
+                Quick Select Monthly Fare:
               </span>
-              <span className="font-mono text-sm font-extrabold text-emerald-700">
-                {formatCurrency(activeRoute.monthlyRouteFee)} / Month
+              <div className="flex flex-wrap gap-1.5">
+                {QUICK_FARES.map((preset) => {
+                  const active = numericFare === preset;
+                  return (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setMonthlyFare(String(preset))}
+                      className={cn(
+                        "rounded-lg border px-2.5 py-1 font-mono text-[11px] font-bold transition-all cursor-pointer",
+                        active
+                          ? "border-[#091d3e] bg-[#091d3e] text-white shadow-2xs"
+                          : "border-border/80 bg-slate-50/80 text-slate-700 hover:border-slate-300 hover:bg-slate-100"
+                      )}
+                    >
+                      Rs {formatNumber(preset)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Live Preview Strip */}
+            <div className="flex items-center justify-between rounded-xl border border-slate-200/90 bg-slate-50/70 px-4 py-3 text-xs">
+              <div className="truncate pr-3">
+                <span className="font-medium text-muted-foreground">Route: </span>
+                <strong className="font-bold text-foreground">
+                  {routeName.trim() || "New Transport Route"}
+                </strong>
+              </div>
+              <span className="shrink-0 rounded-md bg-[#091d3e]/10 px-2.5 py-1 font-mono text-xs font-extrabold text-[#091d3e]">
+                Rs {formatNumber(numericFare)} / mo
               </span>
             </div>
-          )}
+          </div>
 
-          <DialogFooter className="pt-2 flex items-center justify-end gap-2">
+          {/* Footer with Symmetrical Spacing & Equal Margins */}
+          <div className="shrink-0 flex items-center justify-end gap-2.5 border-t border-border/70 bg-slate-50/60 px-6 py-4">
             <ActionButton
               type="button"
               tone="outline"
+              size="sm"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              <span>Cancel</span>
             </ActionButton>
-            <ActionButton type="submit" tone="primary">
+            <ActionButton type="submit" tone="primary" size="sm">
               <Check className="size-3.5" />
-              <span>Issue Transport Pass</span>
+              <span>{isEditing ? "Save Changes" : "Save"}</span>
             </ActionButton>
-          </DialogFooter>
+          </div>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* 2. Add / Edit Vehicle Modal                                                */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+interface VehicleFormModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  totalCount: number;
+  routes: TransportRouteRecord[];
+  initialData?: TransportVehicleRecord | null;
+  onSave: (record: TransportVehicleRecord) => void;
+}
+
+export function VehicleFormModal({
+  open,
+  onOpenChange,
+  totalCount,
+  routes,
+  initialData,
+  onSave,
+}: VehicleFormModalProps) {
+  const isEditing = Boolean(initialData);
+
+  const [vehicleNo, setVehicleNo] = React.useState("");
+  const [selectedModel, setSelectedModel] = React.useState(
+    COMMON_VEHICLE_MODELS[0] ?? "Toyota Coaster 2023"
+  );
+  const [isManualModel, setIsManualModel] = React.useState(false);
+  const [manualModelInput, setManualModelInput] = React.useState("");
+  const [capacity, setCapacity] = React.useState("30");
+  const [driverName, setDriverName] = React.useState("");
+  const [driverPhone, setDriverPhone] = React.useState("");
+  const [selectedRouteId, setSelectedRouteId] = React.useState("");
+
+  React.useEffect(() => {
+    if (open) {
+      if (initialData) {
+        setVehicleNo(initialData.vehicleNo);
+        setCapacity(String(initialData.capacity));
+        setDriverName(initialData.driverName || "");
+        setDriverPhone(initialData.driverPhone || "");
+        setSelectedRouteId(initialData.routeId || "");
+        if (COMMON_VEHICLE_MODELS.includes(initialData.model)) {
+          setSelectedModel(initialData.model);
+          setIsManualModel(false);
+          setManualModelInput("");
+        } else {
+          setIsManualModel(true);
+          setManualModelInput(initialData.model);
+          setSelectedModel("__custom__");
+        }
+      } else {
+        setVehicleNo("");
+        setSelectedModel(COMMON_VEHICLE_MODELS[0] ?? "Toyota Coaster 2023");
+        setIsManualModel(false);
+        setManualModelInput("");
+        setCapacity("30");
+        setDriverName("");
+        setDriverPhone("");
+        setSelectedRouteId("");
+      }
+    }
+  }, [open, initialData]);
+
+  const resolvedModel = isManualModel
+    ? manualModelInput.trim() || "Toyota Coaster"
+    : selectedModel;
+  const numericCapacity = Math.max(1, Math.trunc(Number(capacity) || 30));
+  const matchedRoute = routes.find((r) => r.id === selectedRouteId);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vehicleNo.trim()) {
+      toast.error("Please enter the vehicle registration number.");
+      return;
+    }
+    if (isManualModel && !manualModelInput.trim()) {
+      toast.error("Please enter the vehicle model name.");
+      return;
+    }
+    if (!driverName.trim()) {
+      toast.error("Please enter the assigned driver's name.");
+      return;
+    }
+
+    const record: TransportVehicleRecord = initialData
+      ? {
+          ...initialData,
+          vehicleNo: vehicleNo.trim().toUpperCase(),
+          model: resolvedModel,
+          capacity: numericCapacity,
+          driverName: driverName.trim(),
+          driverPhone: driverPhone.trim() || undefined,
+          routeId: matchedRoute ? matchedRoute.id : "",
+          routeName: matchedRoute ? matchedRoute.routeName : "",
+        }
+      : {
+          id: `veh-${totalCount + 1}-${vehicleNo.trim().toLowerCase()}`,
+          vehicleCode: `VEH-${101 + totalCount}`,
+          vehicleNo: vehicleNo.trim().toUpperCase(),
+          model: resolvedModel,
+          capacity: numericCapacity,
+          driverName: driverName.trim(),
+          driverPhone: driverPhone.trim() || undefined,
+          routeId: matchedRoute ? matchedRoute.id : "",
+          routeName: matchedRoute ? matchedRoute.routeName : "",
+        };
+
+    onSave(record);
+    onOpenChange(false);
+    toast.success(
+      isEditing
+        ? `Vehicle "${record.vehicleNo}" updated successfully.`
+        : `Vehicle "${record.vehicleNo}" (${record.model}) added to fleet.`
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col sm:max-w-lg gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
+        <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-slate-50/90 via-white to-white px-6 py-4.5">
+          <div className="flex items-center gap-3.5 pr-6">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e3a66] text-white shadow-xs ring-1 ring-[#091d3e]/20">
+              {isEditing ? (
+                <Edit className="size-5" />
+              ) : (
+                <Bus className="size-5" />
+              )}
+            </span>
+            <div className="min-w-0">
+              <DialogTitle className="text-base font-bold leading-tight text-foreground">
+                {isEditing
+                  ? `Edit Vehicle — ${initialData?.vehicleNo}`
+                  : "Add Vehicles"}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                {isEditing
+                  ? "Update vehicle registration number, model, seating capacity, or route."
+                  : "Register a fleet vehicle with seating capacity and optional route assignment."}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div className="space-y-4 px-6 py-5">
+            {/* 2x2 Grid matching Screenshot 4 */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {/* 1. Vehicle No */}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-foreground">
+                  Vehicle No <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="LHR-001"
+                  value={vehicleNo}
+                  onChange={(e) => setVehicleNo(e.target.value.toUpperCase())}
+                  className={cn(fieldClass, "font-mono uppercase")}
+                />
+              </div>
+
+              {/* 2. Model (Dropdown + Manual Input Toggle) */}
+              <div>
+                <div className="mb-1.5 flex items-center justify-between">
+                  <label className="block text-xs font-bold text-foreground">
+                    Model <span className="text-danger">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!isManualModel) {
+                        setIsManualModel(true);
+                        setSelectedModel("__custom__");
+                      } else {
+                        setIsManualModel(false);
+                        setSelectedModel(
+                          COMMON_VEHICLE_MODELS[0] ?? "Toyota Coaster 2023"
+                        );
+                      }
+                    }}
+                    className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[#091d3e] hover:underline cursor-pointer"
+                  >
+                    {isManualModel ? (
+                      <>
+                        <List className="size-3" />
+                        <span>Dropdown</span>
+                      </>
+                    ) : (
+                      <>
+                        <Edit3 className="size-3" />
+                        <span>Manual input</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {!isManualModel ? (
+                  <div className="relative">
+                    <select
+                      value={selectedModel}
+                      onChange={(e) => {
+                        if (e.target.value === "__custom__") {
+                          setIsManualModel(true);
+                          setSelectedModel("__custom__");
+                        } else {
+                          setSelectedModel(e.target.value);
+                        }
+                      }}
+                      className={cn(fieldClass, "appearance-none pr-9 cursor-pointer")}
+                    >
+                      {COMMON_VEHICLE_MODELS.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                      <option value="__custom__">
+                        ✏️ Other Model (Manual Input)...
+                      </option>
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    required
+                    placeholder="Toyota Coaster"
+                    value={manualModelInput}
+                    onChange={(e) => setManualModelInput(e.target.value)}
+                    className={fieldClass}
+                  />
+                )}
+              </div>
+
+              {/* 3. Driver Name */}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-foreground">
+                  Driver Name <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  list="driver-name-suggestions"
+                  placeholder="e.g. Muhammad Aslam"
+                  value={driverName}
+                  onChange={(e) => setDriverName(e.target.value)}
+                  className={fieldClass}
+                />
+                <datalist id="driver-name-suggestions">
+                  {COMMON_DRIVER_NAMES.map((name) => (
+                    <option key={name} value={name} />
+                  ))}
+                </datalist>
+              </div>
+
+              {/* 4. Driver Contact */}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-foreground">
+                  Driver Contact
+                </label>
+                <input
+                  type="text"
+                  placeholder="0300-4451920"
+                  value={driverPhone}
+                  onChange={(e) => setDriverPhone(e.target.value)}
+                  className={cn(fieldClass, "font-mono")}
+                />
+              </div>
+
+              {/* 5. Capacity */}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-foreground">
+                  Capacity <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  required
+                  placeholder="30"
+                  value={capacity}
+                  onChange={(e) => setCapacity(e.target.value)}
+                  className={cn(fieldClass, "font-mono text-sm font-bold")}
+                />
+              </div>
+
+              {/* 6. Route Dropdown */}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-foreground">
+                  Route
+                </label>
+                <div className="relative">
+                  <select
+                    value={selectedRouteId}
+                    onChange={(e) => setSelectedRouteId(e.target.value)}
+                    className={cn(fieldClass, "appearance-none pr-9 cursor-pointer")}
+                  >
+                    <option value="">Select... (Unassigned)</option>
+                    {routes.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.routeName}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
+              </div>
+            </div>
+
+            {/* Live Vehicle Summary Strip */}
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/70 px-4 py-3 text-xs">
+              <div>
+                <strong className="font-mono font-bold text-[#091d3e]">
+                  {vehicleNo.trim() || "LHR-XXX"}
+                </strong>
+                <span className="mx-2 text-slate-300">|</span>
+                <span className="font-semibold text-slate-700">
+                  {resolvedModel}
+                </span>
+                {driverName.trim() && (
+                  <>
+                    <span className="mx-2 text-slate-300">|</span>
+                    <span className="font-medium text-slate-600">
+                      {driverName.trim()}
+                    </span>
+                  </>
+                )}
+                <span className="mx-2 text-slate-300">|</span>
+                <span className="font-mono font-bold text-foreground">
+                  {numericCapacity} Seats
+                </span>
+              </div>
+              <span className="rounded-md bg-white px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 ring-1 ring-slate-200">
+                {matchedRoute ? matchedRoute.routeName : "Unassigned"}
+              </span>
+            </div>
+          </div>
+
+          {/* Footer with Symmetrical Spacing & Equal Margins */}
+          <div className="shrink-0 flex items-center justify-end gap-2.5 border-t border-border/70 bg-slate-50/60 px-6 py-4">
+            <ActionButton
+              type="button"
+              tone="outline"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+            >
+              <span>Cancel</span>
+            </ActionButton>
+            <ActionButton type="submit" tone="primary" size="sm">
+              <Check className="size-3.5" />
+              <span>{isEditing ? "Save Changes" : "Save"}</span>
+            </ActionButton>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* 3. Assign Student / Edit Assignment Modal                                  */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+interface AssignmentFormModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  totalCount: number;
+  routes: TransportRouteRecord[];
+  vehicles?: TransportVehicleRecord[];
+  initialData?: TransportAssignmentRecord | null;
+  onSave: (record: TransportAssignmentRecord) => void;
+}
+
+export function AssignmentFormModal({
+  open,
+  onOpenChange,
+  totalCount,
+  routes,
+  vehicles = [],
+  initialData,
+  onSave,
+}: AssignmentFormModalProps) {
+  const isEditing = Boolean(initialData);
+
+  const [isManualStudent, setIsManualStudent] = React.useState(false);
+  const [selectedStudentId, setSelectedStudentId] = React.useState(
+    TRANSPORT_STUDENT_DIRECTORY[0]?.id ?? ""
+  );
+  const [manualStudentName, setManualStudentName] = React.useState("");
+  const [manualStudentClass, setManualStudentClass] =
+    React.useState("Grade 8-A");
+
+  const [selectedRouteId, setSelectedRouteId] = React.useState("");
+
+  const [isManualStop, setIsManualStop] = React.useState(false);
+  const [selectedStop, setSelectedStop] = React.useState("");
+  const [manualStopInput, setManualStopInput] = React.useState("");
+
+  React.useEffect(() => {
+    if (open) {
+      if (initialData) {
+        const matchedDir = TRANSPORT_STUDENT_DIRECTORY.find(
+          (s) => s.name.toLowerCase() === initialData.studentName.toLowerCase()
+        );
+        if (matchedDir) {
+          setIsManualStudent(false);
+          setSelectedStudentId(matchedDir.id);
+          setManualStudentName("");
+        } else {
+          setIsManualStudent(true);
+          setManualStudentName(initialData.studentName);
+          setManualStudentClass(initialData.className || "Grade 8-A");
+        }
+        setSelectedRouteId(initialData.routeId || routes[0]?.id || "");
+        if (COMMON_BOARDING_STOPS.includes(initialData.boardingStop)) {
+          setIsManualStop(false);
+          setSelectedStop(initialData.boardingStop);
+          setManualStopInput("");
+        } else {
+          setIsManualStop(true);
+          setManualStopInput(initialData.boardingStop);
+        }
+      } else {
+        setIsManualStudent(false);
+        setSelectedStudentId(TRANSPORT_STUDENT_DIRECTORY[0]?.id ?? "");
+        setManualStudentName("");
+        setManualStudentClass("Grade 8-A");
+        setSelectedRouteId(routes[0]?.id ?? "");
+        setIsManualStop(false);
+        setSelectedStop("");
+        setManualStopInput("");
+      }
+    }
+  }, [open, initialData, routes]);
+
+  const directoryStudent = TRANSPORT_STUDENT_DIRECTORY.find(
+    (s) => s.id === selectedStudentId
+  );
+  const resolvedStudentName = isManualStudent
+    ? manualStudentName.trim()
+    : directoryStudent?.name ?? "";
+  const resolvedRollNo = isManualStudent
+    ? initialData?.studentRollNo || `STD-${1300 + totalCount}`
+    : directoryStudent?.rollNo ?? `STD-${1300 + totalCount}`;
+  const resolvedClass = isManualStudent
+    ? manualStudentClass.trim() || "Grade 8-A"
+    : directoryStudent?.className ?? "Grade 8-A";
+
+  const matchedRoute =
+    routes.find((r) => r.id === selectedRouteId) ?? routes[0] ?? null;
+
+  const assignedVehicle = vehicles.find(
+    (v) =>
+      (matchedRoute?.id && v.routeId === matchedRoute.id) ||
+      (matchedRoute?.routeName && v.routeName === matchedRoute.routeName)
+  );
+
+  const resolvedStop = isManualStop
+    ? manualStopInput.trim()
+    : selectedStop.trim();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resolvedStudentName) {
+      toast.error("Please select or enter a student name.");
+      return;
+    }
+    if (!matchedRoute) {
+      toast.error("Please select a transport route.");
+      return;
+    }
+    if (!resolvedStop) {
+      toast.error("Please enter or select a boarding stop.");
+      return;
+    }
+
+    const record: TransportAssignmentRecord = initialData
+      ? {
+          ...initialData,
+          studentName: resolvedStudentName,
+          studentRollNo: resolvedRollNo,
+          className: resolvedClass,
+          routeId: matchedRoute.id,
+          routeName: matchedRoute.routeName,
+          boardingStop: resolvedStop,
+          monthlyFare: matchedRoute.monthlyFare,
+          busName: assignedVehicle?.model || initialData.busName,
+          vehicleNo: assignedVehicle?.vehicleNo || initialData.vehicleNo,
+          driverName: assignedVehicle?.driverName || initialData.driverName,
+          driverPhone: assignedVehicle?.driverPhone || initialData.driverPhone,
+        }
+      : {
+          id: `asn-${totalCount + 1}-${resolvedRollNo.toLowerCase()}`,
+          assignmentCode: `ASN-${201 + totalCount}`,
+          studentName: resolvedStudentName,
+          studentRollNo: resolvedRollNo,
+          className: resolvedClass,
+          routeId: matchedRoute.id,
+          routeName: matchedRoute.routeName,
+          boardingStop: resolvedStop,
+          monthlyFare: matchedRoute.monthlyFare,
+          busName: assignedVehicle?.model,
+          vehicleNo: assignedVehicle?.vehicleNo,
+          driverName: assignedVehicle?.driverName,
+          driverPhone: assignedVehicle?.driverPhone,
+        };
+
+    onSave(record);
+    onOpenChange(false);
+    toast.success(
+      isEditing
+        ? `Transport assignment for "${record.studentName}" updated.`
+        : `"${record.studentName}" assigned to ${record.routeName} (${record.boardingStop}).`
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col sm:max-w-lg gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
+        <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-slate-50/90 via-white to-white px-6 py-4.5">
+          <div className="flex items-center gap-3.5 pr-6">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e3a66] text-white shadow-xs ring-1 ring-[#091d3e]/20">
+              {isEditing ? (
+                <Edit className="size-5" />
+              ) : (
+                <GraduationCap className="size-5" />
+              )}
+            </span>
+            <div className="min-w-0">
+              <DialogTitle className="text-base font-bold leading-tight text-foreground">
+                {isEditing ? "Edit Student Assignment" : "Assign Student"}
+              </DialogTitle>
+              <DialogDescription className="sr-only">
+                {isEditing
+                  ? "Update the student's assigned transport route or boarding stop."
+                  : "Assign a student to a transport route and specify their boarding stop."}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div className="space-y-4 px-6 py-5">
+            {/* 1. Student Name (Directory Dropdown + Manual Input Toggle) */}
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="block text-xs font-bold text-foreground">
+                  Name <span className="text-danger">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsManualStudent((prev) => !prev)}
+                  className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-[#091d3e] transition-colors hover:bg-slate-200/80 cursor-pointer"
+                >
+                  {isManualStudent ? (
+                    <>
+                      <List className="size-3" />
+                      <span>Select from student directory</span>
+                    </>
+                  ) : (
+                    <>
+                      <Edit3 className="size-3" />
+                      <span>Manual student input</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {!isManualStudent ? (
+                <div className="relative">
+                  <select
+                    value={selectedStudentId}
+                    onChange={(e) => {
+                      if (e.target.value === "__manual__") {
+                        setIsManualStudent(true);
+                      } else {
+                        setSelectedStudentId(e.target.value);
+                      }
+                    }}
+                    className={cn(fieldClass, "appearance-none pr-9 cursor-pointer")}
+                  >
+                    {TRANSPORT_STUDENT_DIRECTORY.map((std) => (
+                      <option key={std.id} value={std.id}>
+                        {std.name} — {std.className} ({std.rollNo})
+                      </option>
+                    ))}
+                    <option value="__manual__">
+                      ✏️ Enter Student Name Manually...
+                    </option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="sm:col-span-2">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter full student name..."
+                      value={manualStudentName}
+                      onChange={(e) => setManualStudentName(e.target.value)}
+                      className={fieldClass}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Class (e.g. Grade 8-A)"
+                      value={manualStudentClass}
+                      onChange={(e) => setManualStudentClass(e.target.value)}
+                      className={fieldClass}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Route */}
+            <div>
+              <label className="mb-1.5 block text-xs font-bold text-foreground">
+                Route <span className="text-danger">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  required
+                  value={selectedRouteId}
+                  onChange={(e) => setSelectedRouteId(e.target.value)}
+                  className={cn(fieldClass, "appearance-none pr-9 cursor-pointer")}
+                >
+                  <option value="" disabled>
+                    Select route...
+                  </option>
+                  {routes.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.routeName} — Rs {formatNumber(r.monthlyFare)}/mo
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+              </div>
+
+              {assignedVehicle ? (
+                <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/80 px-3.5 py-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Bus className="size-3.5 text-[#091d3e]" />
+                    <span className="font-bold text-slate-800">
+                      {assignedVehicle.model}
+                    </span>
+                    <span className="font-mono text-[11px] font-bold text-[#091d3e]">
+                      ({assignedVehicle.vehicleNo})
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[11px] text-muted-foreground">Driver: </span>
+                    <strong className="font-bold text-[#091d3e]">
+                      {assignedVehicle.driverName}
+                    </strong>
+                    {assignedVehicle.driverPhone && (
+                      <span className="ml-1.5 font-mono text-[10.5px] text-muted-foreground">
+                        ({assignedVehicle.driverPhone})
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            {/* 3. Boarding Stop (Dropdown + Manual Input) */}
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="block text-xs font-bold text-foreground">
+                  Boarding Stop <span className="text-danger">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsManualStop((prev) => !prev)}
+                  className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-[#091d3e] transition-colors hover:bg-slate-200/80 cursor-pointer"
+                >
+                  {isManualStop ? (
+                    <>
+                      <List className="size-3" />
+                      <span>Select from common stops</span>
+                    </>
+                  ) : (
+                    <>
+                      <Edit3 className="size-3" />
+                      <span>Manual stop input</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {!isManualStop ? (
+                <div className="relative">
+                  <select
+                    value={selectedStop}
+                    onChange={(e) => {
+                      if (e.target.value === "__manual_stop__") {
+                        setIsManualStop(true);
+                      } else {
+                        setSelectedStop(e.target.value);
+                      }
+                    }}
+                    className={cn(fieldClass, "appearance-none pr-9 cursor-pointer")}
+                  >
+                    <option value="">e.g. Main Chowk (Select Stop...)</option>
+                    {COMMON_BOARDING_STOPS.map((stop) => (
+                      <option key={stop} value={stop}>
+                        {stop}
+                      </option>
+                    ))}
+                    <option value="__manual_stop__">
+                      ✏️ Type Custom Boarding Stop...
+                    </option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Main Chowk"
+                  value={manualStopInput}
+                  onChange={(e) => setManualStopInput(e.target.value)}
+                  className={fieldClass}
+                />
+              )}
+            </div>
+
+            {/* Live Assignment Summary Strip */}
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/70 px-4 py-3 text-xs">
+              <div className="flex items-center gap-2 truncate">
+                <MapPin className="size-3.5 shrink-0 text-[#091d3e]" />
+                <span className="font-bold text-foreground">
+                  {resolvedStudentName || "Select Student"}
+                </span>
+                <span className="text-slate-300">•</span>
+                <span className="font-medium text-muted-foreground">
+                  {resolvedStop || "Boarding Stop"}
+                </span>
+              </div>
+              {matchedRoute && (
+                <span className="shrink-0 rounded-md bg-[#091d3e]/10 px-2.5 py-0.5 font-mono text-xs font-extrabold text-[#091d3e]">
+                  Rs {formatNumber(matchedRoute.monthlyFare)} / mo
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Footer with Symmetrical Spacing & Equal Margins */}
+          <div className="shrink-0 flex items-center justify-end gap-2.5 border-t border-border/70 bg-slate-50/60 px-6 py-4">
+            <ActionButton
+              type="button"
+              tone="outline"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+            >
+              <span>Cancel</span>
+            </ActionButton>
+            <ActionButton type="submit" tone="primary" size="sm">
+              <Check className="size-3.5" />
+              <span>{isEditing ? "Save Changes" : "Assign Student"}</span>
+            </ActionButton>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* 4. Delete Confirmation Modal                                               */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+interface DeleteConfirmModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  onConfirm: () => void;
+}
+
+export function DeleteConfirmModal({
+  open,
+  onOpenChange,
+  title,
+  description,
+  onConfirm,
+}: DeleteConfirmModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="flex flex-col sm:max-w-md gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
+        <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-rose-50/50 px-6 py-4.5">
+          <div className="flex items-center gap-3.5 pr-6">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-rose-600 text-white shadow-xs">
+              <AlertTriangle className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <DialogTitle className="text-base font-bold leading-tight text-foreground">
+                {title}
+              </DialogTitle>
+              <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+                {description}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        {/* Footer with Symmetrical Spacing & Equal Margins */}
+        <div className="shrink-0 flex items-center justify-end gap-2.5 border-t border-border/70 bg-slate-50/60 px-6 py-4">
+          <ActionButton
+            type="button"
+            tone="outline"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+          >
+            <span>Cancel</span>
+          </ActionButton>
+          <ActionButton
+            type="button"
+            tone="danger"
+            size="sm"
+            onClick={() => {
+              onConfirm();
+              onOpenChange(false);
+            }}
+          >
+            <Trash2 className="size-3.5" />
+            <span>Delete</span>
+          </ActionButton>
+        </div>
       </DialogContent>
     </Dialog>
   );

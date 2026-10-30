@@ -146,10 +146,10 @@ export function StudentAttendanceClient() {
       {
         key: "student",
         header: "Student",
-        headerAlign: "center",
+        headerAlign: "left",
         align: "left",
         className: "w-[24%]",
-        headerClassName: "w-[24%] text-center",
+        headerClassName: "w-[24%] text-left",
         cell: (r) => (
           <PersonCell
             name={r.name}

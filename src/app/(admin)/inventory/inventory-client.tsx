@@ -3,24 +3,33 @@
 import * as React from "react";
 import {
   AlertTriangle,
+  ArrowUpDown,
   Boxes,
+  CalendarClock,
   Check,
   ChevronDown,
+  ClipboardList,
   Download,
+  Edit,
   Eye,
-  Landmark,
   Layers,
   Package,
+  PackageMinus,
   Plus,
   Printer,
-  Send,
+  RotateCcw,
   ShieldCheck,
-  ShoppingCart,
-  TrendingUp,
-  Truck,
-  Wallet,
+  Undo2,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
@@ -31,270 +40,156 @@ import {
 } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import {
-  formatCurrency,
-  formatCurrencyCompact,
-  formatDate,
-} from "@/lib/format";
+import { formatDate, formatNumber } from "@/lib/format";
 import {
   computeStockStatus,
   INITIAL_INVENTORY_ITEMS,
-  INITIAL_ISSUANCE_RECORDS,
-  INITIAL_PURCHASE_ORDERS,
-  INITIAL_SUPPLIERS,
-  type DepartmentalIssuanceRecord,
+  INITIAL_STOCK_ISSUANCES,
   type InventoryItemRecord,
-  type InventorySupplierRecord,
-  type IssuanceStatus,
-  type PurchaseOrderRecord,
-  type PurchaseOrderStatus,
+  type StockIssuanceRecord,
 } from "@/lib/mock/inventory";
 import {
   exportInventoryStockPdf,
-  exportIssuancePdf,
-  exportPurchaseOrdersPdf,
-  exportSuppliersPdf,
+  exportIssuanceRegisterPdf,
   printInventoryRegister,
+  printIssuanceRegister,
 } from "./inventory-export";
+import { InventoryItemModal } from "./inventory-item-modal";
+import { InventoryFormModal } from "./inventory-form-modal";
 import {
-  InventoryItemModal,
+  ISSUANCE_TODAY,
+  IssuanceStatusPill,
   IssuanceViewModal,
-  PurchaseOrderViewModal,
-  SupplierViewModal,
-} from "./inventory-item-modal";
-import {
-  InventoryFormModal,
-  IssuanceFormModal,
-  PurchaseOrderFormModal,
-} from "./inventory-form-modal";
+  IssueStockModal,
+  ReturnStockModal,
+  isIssuanceOverdue,
+} from "./inventory-issue-modal";
 
-type InventoryViewTab = "stock" | "orders" | "issuance" | "suppliers";
-
-const CAMPUS_OPTIONS = [
-  "Gulberg",
-  "DHA Phase 5",
-  "F-8 Islamabad",
-  "Clifton",
-  "Bahria Town",
-];
+type InventoryTab = "stock" | "issuance";
 
 export function InventoryClient() {
-  const [activeTab, setActiveTab] = React.useState<InventoryViewTab>("stock");
+  const [activeTab, setActiveTab] = React.useState<InventoryTab>("stock");
 
   const [items, setItems] = React.useState<InventoryItemRecord[]>(
     INITIAL_INVENTORY_ITEMS
   );
-  const [orders, setOrders] = React.useState<PurchaseOrderRecord[]>(
-    INITIAL_PURCHASE_ORDERS
+  const [issuances, setIssuances] = React.useState<StockIssuanceRecord[]>(
+    INITIAL_STOCK_ISSUANCES
   );
-  const [issuances, setIssuances] = React.useState<
-    DepartmentalIssuanceRecord[]
-  >(INITIAL_ISSUANCE_RECORDS);
-  const [suppliers] =
-    React.useState<InventorySupplierRecord[]>(INITIAL_SUPPLIERS);
 
-  // Stock Item View & Edit Modals
+  // Adjust Stock Modal State
   const [selectedItemId, setSelectedItemId] = React.useState<string | null>(
     null
   );
-  const [itemModalOpen, setItemModalOpen] = React.useState(false);
-  const [itemModalTab, setItemModalTab] = React.useState<
-    "overview" | "adjust" | "ledger"
-  >("overview");
+  const [adjustModalOpen, setAdjustModalOpen] = React.useState(false);
 
-  const [itemFormOpen, setItemFormOpen] = React.useState(false);
+  // Add / Edit Stock Item Modal State
   const [editingItem, setEditingItem] =
     React.useState<InventoryItemRecord | null>(null);
+  const [addFormOpen, setAddFormOpen] = React.useState(false);
 
-  // Purchase Order View & Create Modals
-  const [selectedPoId, setSelectedPoId] = React.useState<string | null>(null);
-  const [poViewOpen, setPoViewOpen] = React.useState(false);
-  const [poFormOpen, setPoFormOpen] = React.useState(false);
-
-  // Departmental Issuance View & Create Modals
-  const [selectedIssuanceId, setSelectedIssuanceId] = React.useState<
+  // Issue Stock Modal State
+  const [issueModalOpen, setIssueModalOpen] = React.useState(false);
+  const [issuePreselectId, setIssuePreselectId] = React.useState<
     string | null
   >(null);
-  const [issuanceViewOpen, setIssuanceViewOpen] = React.useState(false);
-  const [issuanceFormOpen, setIssuanceFormOpen] = React.useState(false);
 
-  // Supplier View Modal
-  const [selectedSupplierId, setSelectedSupplierId] = React.useState<
+  // Issue Slip (View) & Return Modal State
+  const [viewIssuanceId, setViewIssuanceId] = React.useState<string | null>(
+    null
+  );
+  const [returnIssuanceId, setReturnIssuanceId] = React.useState<
     string | null
   >(null);
-  const [supplierViewOpen, setSupplierViewOpen] = React.useState(false);
 
   const selectedItem = React.useMemo(
     () => items.find((i) => i.id === selectedItemId) ?? null,
     [items, selectedItemId]
   );
-
-  const selectedPo = React.useMemo(
-    () => orders.find((o) => o.id === selectedPoId) ?? null,
-    [orders, selectedPoId]
+  const viewIssuance = React.useMemo(
+    () => issuances.find((r) => r.id === viewIssuanceId) ?? null,
+    [issuances, viewIssuanceId]
+  );
+  const returnIssuance = React.useMemo(
+    () => issuances.find((r) => r.id === returnIssuanceId) ?? null,
+    [issuances, returnIssuanceId]
+  );
+  const returnItemStock = React.useMemo(
+    () =>
+      returnIssuance
+        ? items.find((i) => i.id === returnIssuance.itemId)?.quantity ?? 0
+        : 0,
+    [items, returnIssuance]
   );
 
-  const selectedIssuance = React.useMemo(
-    () => issuances.find((r) => r.id === selectedIssuanceId) ?? null,
-    [issuances, selectedIssuanceId]
-  );
-
-  const selectedSupplier = React.useMemo(
-    () => suppliers.find((s) => s.id === selectedSupplierId) ?? null,
-    [suppliers, selectedSupplierId]
-  );
+  const nextIssueNumber = React.useMemo(() => {
+    const nums = issuances
+      .map((r) => Number(r.issueNo.replace(/\D/g, "")))
+      .filter((n) => Number.isFinite(n));
+    return (nums.length ? Math.max(...nums) : 1000) + 1;
+  }, [issuances]);
 
   /* ───────────────────────── Dynamic KPI Aggregates ───────────────────────── */
 
   const stockKpis = React.useMemo(() => {
-    const totalValuation = items.reduce((s, i) => s + i.totalValue, 0);
+    const totalItems = items.length;
+    const totalUnits = items.reduce((s, i) => s + i.quantity, 0);
     const inStockCount = items.filter((i) => i.status === "In Stock").length;
     const lowStockCount = items.filter((i) => i.status === "Low Stock").length;
     const outOfStockCount = items.filter(
       (i) => i.status === "Out of Stock"
     ).length;
+    const alertTotal = lowStockCount + outOfStockCount;
+
     return {
-      totalValuation,
-      totalSkus: items.length,
+      totalItems,
+      totalUnits,
       inStockCount,
       lowStockCount,
       outOfStockCount,
-      alertTotal: lowStockCount + outOfStockCount,
+      alertTotal,
     };
   }, [items]);
 
-  const poKpis = React.useMemo(() => {
-    const activeOrders = orders.filter((o) => o.status !== "Cancelled");
-    const totalNet = activeOrders.reduce((s, o) => s + o.netPayable, 0);
-    const receivedOrders = orders.filter((o) => o.status === "Received");
-    const receivedVal = receivedOrders.reduce((s, o) => s + o.netPayable, 0);
-    const openOrders = orders.filter(
-      (o) => o.status === "Ordered" || o.status === "Pending"
-    );
-    const openVal = openOrders.reduce((s, o) => s + o.netPayable, 0);
-    const totalWht = activeOrders.reduce((s, o) => s + o.whtDeduction, 0);
-    return {
-      totalNet,
-      totalCount: orders.length,
-      receivedVal,
-      receivedCount: receivedOrders.length,
-      openVal,
-      openCount: openOrders.length,
-      totalWht,
-    };
-  }, [orders]);
-
   const issuanceKpis = React.useMemo(() => {
-    const totalValuation = issuances.reduce((s, r) => s + r.totalValuation, 0);
-    const issuedCount = issuances.filter((r) => r.status === "Issued").length;
-    const returnableCount = issuances.filter((r) => r.returnable).length;
-    const pendingCount = issuances.filter((r) => r.status === "Pending").length;
-    return {
-      totalValuation,
-      totalCount: issuances.length,
-      issuedCount,
-      returnableCount,
-      pendingCount,
-    };
-  }, [issuances]);
-
-  const supplierKpis = React.useMemo(() => {
-    const totalProcurement = suppliers.reduce(
-      (s, v) => s + v.totalProcurementValue,
-      0
-    );
-    const totalOrders = suppliers.reduce((s, v) => s + v.totalOrdersCount, 0);
-    const totalPayable = suppliers.reduce(
-      (s, v) => s + v.outstandingPayable,
-      0
-    );
-    const verifiedCount = suppliers.filter(
-      (v) => v.status === "Verified"
+    const totalIssuances = issuances.length;
+    const unitsIssued = issuances.reduce((s, r) => s + r.quantity, 0);
+    const pendingReturns = issuances.filter((r) => r.status === "Issued").length;
+    const overdue = issuances.filter(isIssuanceOverdue).length;
+    const issuedToday = issuances.filter(
+      (r) => r.issueDate === ISSUANCE_TODAY
     ).length;
-    return {
-      totalProcurement,
-      totalOrders,
-      totalPayable,
-      verifiedCount,
-    };
-  }, [suppliers]);
+    return { totalIssuances, unitsIssued, pendingReturns, overdue, issuedToday };
+  }, [issuances]);
 
   /* ───────────────────────── Interactive Handlers ───────────────────────── */
 
   const handleAdjustStock = React.useCallback(
-    (
-      itemId: string,
-      payload: {
-        mode: "restock" | "issue" | "audit";
-        quantityInput: number;
-        voucherRef: string;
-        departmentOrVendor: string;
-        actor: string;
-        remarks: string;
-      }
-    ) => {
-      const today = new Date().toISOString().slice(0, 10);
-      let skuCode = "";
+    (itemId: string, delta: number) => {
+      let itemName = "";
+      let previousQty = 0;
+      let updatedQty = 0;
 
       setItems((prev) =>
         prev.map((item) => {
           if (item.id !== itemId) return item;
-          skuCode = item.sku;
-
-          const newQty =
-            payload.mode === "restock"
-              ? item.quantity + payload.quantityInput
-              : payload.mode === "issue"
-              ? Math.max(0, item.quantity - payload.quantityInput)
-              : payload.quantityInput;
-
-          const newStatus = computeStockStatus(newQty, item.reorderLevel);
-          const qtyChangeLabel =
-            payload.mode === "restock"
-              ? `+${payload.quantityInput} ${item.unit}`
-              : payload.mode === "issue"
-              ? `-${payload.quantityInput} ${item.unit}`
-              : `Verified (${newQty} ${item.unit})`;
+          itemName = item.name;
+          previousQty = item.quantity;
+          updatedQty = Math.max(0, item.quantity + delta);
 
           return {
             ...item,
-            quantity: newQty,
-            totalValue: newQty * item.unitCost,
-            status: newStatus,
-            lastRestocked:
-              payload.mode === "restock" ? today : item.lastRestocked,
-            movementLogs: [
-              {
-                id: `${item.id}-mov-${Date.now()}`,
-                timestamp: `${today} 04:15 PM`,
-                voucherRef: payload.voucherRef,
-                type:
-                  payload.mode === "restock"
-                    ? "GRN Received"
-                    : payload.mode === "issue"
-                    ? "Dept Issuance"
-                    : "Audit Check",
-                qtyChange: qtyChangeLabel,
-                balanceAfter: newQty,
-                departmentOrVendor: payload.departmentOrVendor,
-                actor: payload.actor,
-                remarks: payload.remarks,
-              },
-              ...item.movementLogs,
-            ],
+            quantity: updatedQty,
+            lastUpdated: ISSUANCE_TODAY,
+            status: computeStockStatus(updatedQty, item.reorderLevel),
           };
         })
       );
 
+      const sign = delta > 0 ? `+${delta}` : `${delta}`;
       toast.success(
-        `Store stock balance for ${skuCode} updated and posted to ledger.`
+        `${itemName} stock adjusted (${sign}): ${previousQty} → ${updatedQty}`
       );
     },
     []
@@ -312,165 +207,185 @@ export function InventoryClient() {
     []
   );
 
-  const handleUpdatePoStatus = React.useCallback(
-    (
-      poId: string,
-      status: PurchaseOrderStatus,
-      grnNumber: string,
-      approvedBy: string
-    ) => {
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === poId ? { ...o, status, grnNumber, approvedBy } : o
+  /** Issue → automatically deducts the issued quantity from store stock. */
+  const handleIssueStock = React.useCallback(
+    (record: StockIssuanceRecord) => {
+      const item = items.find((i) => i.id === record.itemId);
+      if (!item) return;
+      if (record.quantity > item.quantity) {
+        toast.error(`Only ${item.quantity} ${item.unit} available.`);
+        return;
+      }
+      const updatedQty = item.quantity - record.quantity;
+      const newStatus = computeStockStatus(updatedQty, item.reorderLevel);
+
+      setItems((prev) =>
+        prev.map((i) =>
+          i.id === record.itemId
+            ? {
+                ...i,
+                quantity: updatedQty,
+                lastUpdated: record.issueDate,
+                status: newStatus,
+              }
+            : i
         )
       );
-      toast.success(`Purchase Order status updated to ${status}.`);
+      setIssuances((prev) => [record, ...prev]);
+
+      toast.success(
+        `${record.issueNo}: ${record.quantity} ${item.unit} of "${item.name}" issued to ${record.issuedTo}. Stock ${item.quantity} → ${updatedQty}`
+      );
+      if (newStatus !== "In Stock") {
+        toast.warning(
+          `"${item.name}" is now ${newStatus} (${updatedQty} left, reorder at ${item.reorderLevel}).`
+        );
+      }
     },
-    []
+    [items]
   );
 
-  const handleCreatePo = React.useCallback((newPo: PurchaseOrderRecord) => {
-    setOrders((prev) => [newPo, ...prev]);
-  }, []);
+  /** Return → adds the quantity back into store stock. */
+  const handleConfirmReturn = React.useCallback(
+    (record: StockIssuanceRecord, returnDate: string) => {
+      const item = items.find((i) => i.id === record.itemId);
+      const previousQty = item?.quantity ?? 0;
+      const updatedQty = previousQty + record.quantity;
 
-  const handleCreateIssuance = React.useCallback(
-    (newIssuance: DepartmentalIssuanceRecord) => {
-      setIssuances((prev) => [newIssuance, ...prev]);
-      // Also deduct from matching stock item
       setItems((prev) =>
-        prev.map((item) => {
-          if (item.sku !== newIssuance.sku) return item;
-          const nextQty = Math.max(
-            0,
-            item.quantity - newIssuance.quantityIssued
-          );
-          return {
-            ...item,
-            quantity: nextQty,
-            totalValue: nextQty * item.unitCost,
-            status: computeStockStatus(nextQty, item.reorderLevel),
-          };
-        })
+        prev.map((i) =>
+          i.id === record.itemId
+            ? {
+                ...i,
+                quantity: updatedQty,
+                lastUpdated: returnDate,
+                status: computeStockStatus(updatedQty, i.reorderLevel),
+              }
+            : i
+        )
       );
-    },
-    []
-  );
-
-  const handleUpdateIssuanceStatus = React.useCallback(
-    (id: string, status: IssuanceStatus) => {
       setIssuances((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status } : r))
+        prev.map((r) =>
+          r.id === record.id
+            ? { ...r, status: "Returned", returnedDate: returnDate }
+            : r
+        )
       );
-      toast.success(`Departmental issuance status updated to ${status}.`);
+      setViewIssuanceId(null);
+      toast.success(
+        `${record.quantity} ${record.unit} of "${record.itemName}" returned by ${record.issuedTo}. Stock ${previousQty} → ${updatedQty}`
+      );
     },
-    []
+    [items]
   );
 
-  /* ───────────────────────── 1. Store Stock Register Columns ───────────────────────── */
+  const openIssueModal = (itemId: string | null = null) => {
+    setIssuePreselectId(itemId);
+    setIssueModalOpen(true);
+  };
+
+  const handlePrint = () => {
+    const ok =
+      activeTab === "stock"
+        ? printInventoryRegister(items)
+        : printIssuanceRegister(issuances);
+    if (ok)
+      toast.info(
+        activeTab === "stock"
+          ? "Opening print preview for store stock items…"
+          : "Opening print preview for issuance register…"
+      );
+    else toast.error("Pop-up blocked. Please allow pop-ups to print.");
+  };
+
+  const handleExportPdf = () => {
+    if (activeTab === "stock") {
+      exportInventoryStockPdf(items);
+      toast.success(
+        `Store inventory register (${items.length} items) downloaded as PDF.`
+      );
+    } else {
+      exportIssuanceRegisterPdf(issuances);
+      toast.success(
+        `Issuance register (${issuances.length} records) downloaded as PDF.`
+      );
+    }
+  };
+
+  /* ───────────────────────── Stock Items Columns ───────────────────────── */
 
   const stockColumns = React.useMemo<Column<InventoryItemRecord>[]>(
     () => [
       {
-        key: "sku",
-        header: "SKU #",
+        key: "name",
+        header: "Name",
         align: "center",
+        className: "w-[23%] px-4 text-center",
+        headerClassName: "w-[23%] px-4 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
+            <p className="text-[13px] font-bold text-foreground">{r.name}</p>
+            <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
               {r.sku}
             </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              Restocked {formatDate(r.lastRestocked)}
-            </p>
           </div>
         ),
       },
       {
-        key: "name",
-        header: "Store Item & Category",
+        key: "category",
+        header: "Category",
         align: "center",
+        className: "w-[14%] px-3 text-center",
+        headerClassName: "w-[14%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[240px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.name}
-            </p>
-            <p className="truncate text-[10.5px] text-muted-foreground">
-              {r.category} · Custodian: {r.custodian}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "campus",
-        header: "Campus & Bin Location",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[190px] mx-auto">
-            <p className="text-xs font-semibold text-foreground">{r.campus}</p>
-            <p className="truncate text-[10.5px] text-muted-foreground">
-              {r.storeLocation}
-            </p>
+          <div className="flex justify-center">
+            <span className="inline-flex items-center rounded-md border border-slate-200/90 bg-slate-100/80 px-2.5 py-0.5 text-xs font-semibold capitalize text-slate-700">
+              {r.category}
+            </span>
           </div>
         ),
       },
       {
         key: "quantity",
-        header: "On-Hand Stock",
+        header: "Qty",
         align: "center",
+        className: "w-[10%] px-3 text-center",
+        headerClassName: "w-[10%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
+          <div className="flex flex-col items-center justify-center text-center">
             <span
               className={cn(
-                "font-mono text-xs font-bold tabular-nums",
+                "font-mono text-sm font-extrabold tabular-nums",
                 r.status === "Out of Stock"
                   ? "text-danger"
                   : r.status === "Low Stock"
                   ? "text-amber-700"
-                  : "text-foreground"
+                  : "text-[#091d3e]"
               )}
             >
-              {r.quantity.toLocaleString()} {r.unit}
+              {formatNumber(r.quantity)}
             </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              Reorder @ {r.reorderLevel} {r.unit}
-            </p>
           </div>
         ),
       },
       {
-        key: "valuation",
-        header: "Unit Cost & Valuation",
+        key: "reorderLevel",
+        header: "Reorder At",
         align: "center",
+        className: "w-[10%] px-3 text-center",
+        headerClassName: "w-[10%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-              {formatCurrency(r.totalValue)}
-            </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {formatCurrency(r.unitCost)} / {r.unit}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "supplier",
-        header: "Approved Supplier",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[180px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.supplierName}
-            </p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              NTN: {r.supplierNtn}
-            </p>
-          </div>
+          <span className="font-mono text-xs font-semibold tabular-nums text-muted-foreground">
+            {formatNumber(r.reorderLevel)}
+          </span>
         ),
       },
       {
         key: "status",
-        header: "Stock Status",
+        header: "Status",
         align: "center",
+        className: "w-[12%] px-3 text-center",
+        headerClassName: "w-[12%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
           <div className="flex justify-center">
             <StatusBadge status={r.status} />
@@ -481,20 +396,47 @@ export function InventoryClient() {
         key: "actions",
         header: "Actions",
         align: "center",
+        className: "w-[31%] px-3 text-center",
+        headerClassName: "w-[31%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-1.5">
+            <ActionButton
+              tone="primary"
+              size="xs"
+              disabled={r.quantity <= 0}
+              title={
+                r.quantity <= 0
+                  ? `${r.name} is out of stock`
+                  : `Issue ${r.name} to a teacher / staff member`
+              }
+              onClick={() => openIssueModal(r.id)}
+            >
+              <PackageMinus className="size-3.5" />
+              <span>Issue</span>
+            </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
-              title="View stock bin card, adjust stock & movement ledger"
+              title={`Adjust stock quantity for ${r.name}`}
               onClick={() => {
                 setSelectedItemId(r.id);
-                setItemModalTab("overview");
-                setItemModalOpen(true);
+                setAdjustModalOpen(true);
               }}
             >
-              <Eye className="size-3.5" />
-              <span>View</span>
+              <ArrowUpDown className="size-3.5" />
+              <span>Adjust</span>
+            </ActionButton>
+            <ActionButton
+              tone="outline"
+              size="xs"
+              title={`Edit details for ${r.name}`}
+              onClick={() => {
+                setEditingItem(r);
+                setAddFormOpen(true);
+              }}
+            >
+              <Edit className="size-3.5" />
+              <span>Edit</span>
             </ActionButton>
           </div>
         ),
@@ -506,13 +448,6 @@ export function InventoryClient() {
   const stockFilters = React.useMemo<FilterDef<InventoryItemRecord>[]>(
     () => [
       {
-        key: "campus",
-        label: "Campus",
-        allLabel: "All Campuses",
-        options: CAMPUS_OPTIONS,
-        getValue: (r) => r.campus,
-      },
-      {
         key: "category",
         label: "Category",
         allLabel: "All Categories",
@@ -521,7 +456,7 @@ export function InventoryClient() {
       },
       {
         key: "status",
-        label: "Stock Status",
+        label: "Status",
         allLabel: "All Statuses",
         options: ["In Stock", "Low Stock", "Out of Stock"],
         getValue: (r) => r.status,
@@ -530,218 +465,79 @@ export function InventoryClient() {
     [items]
   );
 
-  /* ───────────────────────── 2. Purchase Orders Columns ───────────────────────── */
+  /* ───────────────────────── Issuance Register Columns ───────────────────────── */
 
-  const poColumns = React.useMemo<Column<PurchaseOrderRecord>[]>(
+  const issuanceColumns = React.useMemo<Column<StockIssuanceRecord>[]>(
     () => [
       {
-        key: "poNumber",
-        header: "PO # / GRN #",
+        key: "issueNo",
+        header: "Issue # / Date",
         align: "center",
+        className: "w-[15%] px-3 text-center",
+        headerClassName: "w-[15%] px-3 text-center whitespace-nowrap",
+        sortValue: (r) => r.issueDate + r.issueNo,
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.poNumber}
+          <div className="flex flex-col items-center justify-center gap-0.5">
+            <span className="font-mono text-xs font-extrabold text-[#091d3e]">
+              {r.issueNo}
             </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {formatDate(r.orderDate)} · {r.grnNumber}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "title",
-        header: "Procurement Order & Items",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[240px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.title}
-            </p>
-            <p className="truncate text-[10.5px] text-muted-foreground">
-              {r.category} · {r.orderedQty} {r.unit}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "supplier",
-        header: "Supplier & NTN",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.supplierName}
-            </p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              NTN: {r.supplierNtn} · {r.supplierBank}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "campus",
-        header: "Campus & Delivery",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">{r.campus}</p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              ETA: {formatDate(r.expectedDelivery)}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "gross",
-        header: "Gross & Tax",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-semibold tabular-nums text-foreground">
-              {formatCurrency(r.grossAmount)}
+            <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
+              {formatDate(r.issueDate)}
             </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              GST: +{formatCurrency(r.gstAmount)} · WHT: -
-              {formatCurrency(r.whtDeduction)}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "netPayable",
-        header: "Net Payable",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-              {formatCurrency(r.netPayable)}
-            </span>
-            <p className="text-[10px] text-muted-foreground">
-              {r.paymentTerms}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "status",
-        header: "PO Status",
-        align: "center",
-        cell: (r) => (
-          <div className="flex justify-center">
-            <StatusBadge status={r.status} />
-          </div>
-        ),
-      },
-      {
-        key: "actions",
-        header: "Actions",
-        align: "center",
-        cell: (r) => (
-          <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              title="View Purchase Order, verify GRN & download PO PDF"
-              onClick={() => {
-                setSelectedPoId(r.id);
-                setPoViewOpen(true);
-              }}
-            >
-              <Eye className="size-3.5" />
-              <span>View</span>
-            </ActionButton>
-          </div>
-        ),
-      },
-    ],
-    []
-  );
-
-  /* ───────────────────────── 3. Departmental Issuance Columns ───────────────────────── */
-
-  const issuanceColumns = React.useMemo<Column<DepartmentalIssuanceRecord>[]>(
-    () => [
-      {
-        key: "issueVoucherNo",
-        header: "Issue Voucher #",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.issueVoucherNo}
-            </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {formatDate(r.issueDate)} · {r.requisitionNo}
-            </p>
           </div>
         ),
       },
       {
         key: "itemName",
-        header: "Issued Store Item & SKU",
+        header: "Item",
         align: "center",
+        className: "w-[25%] px-3 text-center",
+        headerClassName: "w-[25%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[230px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.itemName}
-            </p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {r.sku} · {r.category}
-            </p>
-          </div>
+          <p className="text-[13px] font-bold text-foreground truncate">
+            {r.itemName}
+          </p>
         ),
       },
       {
-        key: "department",
-        header: "Receiving Department & Custodian",
+        key: "quantity",
+        header: "Qty Issued",
         align: "center",
+        className: "w-[12%] px-3 text-center",
+        headerClassName: "w-[12%] px-3 text-center whitespace-nowrap",
+        sortValue: (r) => r.quantity,
         cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[220px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.department}
-            </p>
-            <p className="truncate text-[10.5px] text-muted-foreground">
-              {r.issuedTo}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "campus",
-        header: "Campus",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">{r.campus}</p>
-            <p className="text-[10.5px] text-muted-foreground">
-              {r.returnable ? "Returnable Asset" : "Consumable"}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "quantityIssued",
-        header: "Qty & Valuation",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-              {formatCurrency(r.totalValuation)}
+          <div className="flex flex-col items-center">
+            <span className="font-mono text-sm font-extrabold tabular-nums text-rose-600">
+              −{formatNumber(r.quantity)}
             </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {r.quantityIssued} {r.unit} × {formatCurrency(r.unitCost)}
-            </p>
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {r.unit}
+            </span>
           </div>
+        ),
+      },
+      {
+        key: "issuedTo",
+        header: "Issued To",
+        align: "center",
+        className: "w-[18%] px-3 text-center",
+        headerClassName: "w-[18%] px-3 text-center whitespace-nowrap",
+        cell: (r) => (
+          <p className="text-[12.5px] font-bold text-foreground truncate">
+            {r.issuedTo}
+          </p>
         ),
       },
       {
         key: "status",
         header: "Status",
         align: "center",
+        className: "w-[14%] px-3 text-center",
+        headerClassName: "w-[14%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex justify-center">
-            <StatusBadge status={r.status} />
+          <div className="flex items-center justify-center">
+            <IssuanceStatusPill status={r.status} overdue={isIssuanceOverdue(r)} />
           </div>
         ),
       },
@@ -749,20 +545,36 @@ export function InventoryClient() {
         key: "actions",
         header: "Actions",
         align: "center",
+        className: "w-[16%] px-3 text-center",
+        headerClassName: "w-[16%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              title="View departmental issuance slip & update return status"
-              onClick={() => {
-                setSelectedIssuanceId(r.id);
-                setIssuanceViewOpen(true);
-              }}
-            >
-              <Eye className="size-3.5" />
-              <span>View</span>
-            </ActionButton>
+          <div className="flex items-center justify-center gap-1.5">
+            <div className="w-[68px] shrink-0">
+              <ActionButton
+                tone="outline"
+                size="xs"
+                className="w-full justify-center"
+                title={`View issue slip ${r.issueNo}`}
+                onClick={() => setViewIssuanceId(r.id)}
+              >
+                <Eye className="size-3.5" />
+                <span>View</span>
+              </ActionButton>
+            </div>
+            <div className="w-[74px] shrink-0">
+              {r.status === "Issued" ? (
+                <ActionButton
+                  tone="success"
+                  size="xs"
+                  className="w-full justify-center"
+                  title={`Receive ${r.itemName} back from ${r.issuedTo}`}
+                  onClick={() => setReturnIssuanceId(r.id)}
+                >
+                  <Undo2 className="size-3.5" />
+                  <span>Return</span>
+                </ActionButton>
+              ) : null}
+            </div>
           </div>
         ),
       },
@@ -770,422 +582,218 @@ export function InventoryClient() {
     []
   );
 
-  /* ───────────────────────── 4. Approved Suppliers Columns ───────────────────────── */
-
-  const supplierColumns = React.useMemo<Column<InventorySupplierRecord>[]>(
+  const issuanceFilters = React.useMemo<FilterDef<StockIssuanceRecord>[]>(
     () => [
       {
-        key: "supplierCode",
-        header: "Vendor Code",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.supplierCode}
-            </span>
-            <p className="text-[10.5px] text-muted-foreground">{r.city}</p>
-          </div>
-        ),
-      },
-      {
-        key: "companyName",
-        header: "Supplier & Supply Category",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.companyName}
-            </p>
-            <p className="text-[10.5px] text-muted-foreground">
-              {r.category} · Rating: {r.rating}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "ntn",
-        header: "FBR NTN & STRN",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-semibold text-foreground">
-              NTN: {r.ntn}
-            </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              STRN: {r.strn}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "contact",
-        header: "Contact Person & Phone",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.contactPerson}
-            </p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {r.phone}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "volume",
-        header: "Procurement Volume",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-              {formatCurrency(r.totalProcurementValue)}
-            </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {r.totalOrdersCount} POs · Due:{" "}
-              {formatCurrency(r.outstandingPayable)}
-            </p>
-          </div>
-        ),
-      },
-      {
         key: "status",
-        header: "Vendor Status",
-        align: "center",
-        cell: (r) => (
-          <div className="flex justify-center">
-            <StatusBadge status={r.status} />
-          </div>
-        ),
+        label: "Status",
+        allLabel: "All Statuses",
+        options: ["Pending Return", "Returned", "Consumed"],
+        getValue: (r) => (r.status === "Issued" ? "Pending Return" : r.status),
       },
       {
-        key: "actions",
-        header: "Actions",
-        align: "center",
-        cell: (r) => (
-          <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              title="View vendor tax profile, banking IBAN & contract terms"
-              onClick={() => {
-                setSelectedSupplierId(r.id);
-                setSupplierViewOpen(true);
-              }}
-            >
-              <Eye className="size-3.5" />
-              <span>View</span>
-            </ActionButton>
-          </div>
-        ),
+        key: "type",
+        label: "Type",
+        allLabel: "All Types",
+        options: ["Consumable", "Returnable"],
+        getValue: (r) => r.issuanceType,
+      },
+      {
+        key: "department",
+        label: "Department",
+        allLabel: "All Departments",
+        options: [...new Set(issuances.map((r) => r.department))],
+        getValue: (r) => r.department,
       },
     ],
-    []
+    [issuances]
   );
-
-  /* ───────────────────────── Header Export & Primary Action ───────────────────────── */
-
-  const handlePrint = () => {
-    const ok = printInventoryRegister(items);
-    if (ok)
-      toast.info("Opening print preview for institutional store inventory…");
-    else toast.error("Pop-up blocked. Please allow pop-ups to print.");
-  };
-
-  const handleExportPdf = () => {
-    if (activeTab === "stock") {
-      exportInventoryStockPdf(items);
-      toast.success(
-        `Store stock & valuation register (${items.length} SKUs) downloaded as PDF.`
-      );
-    } else if (activeTab === "orders") {
-      exportPurchaseOrdersPdf(orders);
-      toast.success(
-        `Purchase orders register (${orders.length} POs) downloaded as PDF.`
-      );
-    } else if (activeTab === "issuance") {
-      exportIssuancePdf(issuances);
-      toast.success(
-        `Departmental issuance register (${issuances.length} vouchers) downloaded as PDF.`
-      );
-    } else {
-      exportSuppliersPdf(suppliers);
-      toast.success(
-        `Approved suppliers directory (${suppliers.length} vendors) downloaded as PDF.`
-      );
-    }
-  };
-
-  const handlePrimaryAction = () => {
-    if (activeTab === "orders") {
-      setPoFormOpen(true);
-    } else if (activeTab === "issuance") {
-      setIssuanceFormOpen(true);
-    } else {
-      setEditingItem(null);
-      setItemFormOpen(true);
-    }
-  };
-
-  const primaryActionLabel =
-    activeTab === "orders"
-      ? "Create Purchase Order"
-      : activeTab === "issuance"
-      ? "Issue Store Stock"
-      : "Add Stock Item";
-
-  const activeTabMeta = {
-    stock: {
-      label: "Store Stock Register",
-      count: items.length,
-      icon: Package,
-      subtitle: `Central Store Valuation Ledger · ${stockKpis.inStockCount} SKUs Healthy · ${stockKpis.alertTotal} Reorder Alerts`,
-    },
-    orders: {
-      label: "Purchase Orders (POs)",
-      count: orders.length,
-      icon: ShoppingCart,
-      subtitle: `Vendor Procurement Orders · ${poKpis.receivedCount} GRNs Verified`,
-    },
-    issuance: {
-      label: "Departmental Issuance",
-      count: issuances.length,
-      icon: Send,
-      subtitle: `Campus Requisition Releases · ${issuanceKpis.issuedCount} Active Issuances`,
-    },
-    suppliers: {
-      label: "Approved Suppliers",
-      count: suppliers.length,
-      icon: Truck,
-      subtitle: `FBR Verified Institutional Vendors · ${supplierKpis.verifiedCount} Active Contracts`,
-    },
-  }[activeTab];
-
-  const ActiveTabIcon = activeTabMeta.icon;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Inventory"
+        title="Store Inventory"
         className="mb-0 lg:mb-0"
         actions={
           <>
             <ActionButton tone="outline" size="md" onClick={handlePrint}>
               <Printer />
-              <span>Print Register</span>
+              <span>Print</span>
             </ActionButton>
             <ActionButton tone="pdf" size="md" onClick={handleExportPdf}>
               <Download />
               <span>Export PDF</span>
             </ActionButton>
-            <ActionButton tone="primary" size="md" onClick={handlePrimaryAction}>
+            <ActionButton
+              tone="outline"
+              size="md"
+              onClick={() => openIssueModal(null)}
+            >
+              <PackageMinus />
+              <span>Issue Stock</span>
+            </ActionButton>
+            <ActionButton
+              tone="primary"
+              size="md"
+              onClick={() => {
+                setEditingItem(null);
+                setAddFormOpen(true);
+              }}
+            >
               <Plus />
-              <span>{primaryActionLabel}</span>
+              <span>Add Stock Item</span>
             </ActionButton>
           </>
         }
       />
 
-      {/* Dynamic 4-Card KPI Strip */}
-      {activeTab === "stock" && (
+      {/* Executive KPI Cards (context-aware per tab) */}
+      {activeTab === "stock" ? (
         <StatGrid>
           <StatCard
-            label="Total Stock Valuation"
-            value={`${formatCurrencyCompact(stockKpis.totalValuation)} (${stockKpis.totalSkus} SKUs)`}
-            icon={Wallet}
+            label="Total Items"
+            value={formatNumber(stockKpis.totalItems)}
+            title={`${stockKpis.totalItems} distinct items in store catalog`}
+            icon={Package}
           />
           <StatCard
-            label="Healthy Store Stock"
-            value={`${stockKpis.inStockCount} SKUs In Stock`}
-            icon={ShieldCheck}
-          />
-          <StatCard
-            label="Low / Out of Stock Alerts"
-            value={`${stockKpis.lowStockCount} Low · ${stockKpis.outOfStockCount} Out`}
-            icon={AlertTriangle}
-          />
-          <StatCard
-            label="Approved Vendors"
-            value={`${suppliers.length} FBR Verified`}
-            icon={Truck}
-          />
-        </StatGrid>
-      )}
-
-      {activeTab === "orders" && (
-        <StatGrid>
-          <StatCard
-            label="Active PO Volume"
-            value={`${formatCurrencyCompact(poKpis.totalNet)} (${poKpis.totalCount})`}
-            icon={ShoppingCart}
-          />
-          <StatCard
-            label="GRN Verified & Received"
-            value={`${formatCurrencyCompact(poKpis.receivedVal)} (${poKpis.receivedCount})`}
-            icon={ShieldCheck}
-          />
-          <StatCard
-            label="Open / In-Transit POs"
-            value={`${formatCurrencyCompact(poKpis.openVal)} (${poKpis.openCount})`}
-            icon={Truck}
-          />
-          <StatCard
-            label="WHT Tax Deducted"
-            value={formatCurrencyCompact(poKpis.totalWht)}
-            icon={Wallet}
-          />
-        </StatGrid>
-      )}
-
-      {activeTab === "issuance" && (
-        <StatGrid>
-          <StatCard
-            label="Issued Stock Valuation"
-            value={`${formatCurrencyCompact(issuanceKpis.totalValuation)} (${issuanceKpis.totalCount})`}
-            icon={Send}
-          />
-          <StatCard
-            label="Released to Departments"
-            value={`${issuanceKpis.issuedCount} Active Vouchers`}
+            label="Total Units"
+            value={formatNumber(stockKpis.totalUnits)}
+            title={`${formatNumber(stockKpis.totalUnits)} total units available in store`}
             icon={Boxes}
           />
           <StatCard
-            label="Returnable Lab/IT Assets"
-            value={`${issuanceKpis.returnableCount} Asset Lots`}
-            icon={Layers}
-          />
-          <StatCard
-            label="Pending Store Release"
-            value={`${issuanceKpis.pendingCount} Requisition`}
-            icon={AlertTriangle}
-          />
-        </StatGrid>
-      )}
-
-      {activeTab === "suppliers" && (
-        <StatGrid>
-          <StatCard
-            label="Total Procurement Volume"
-            value={`${formatCurrencyCompact(supplierKpis.totalProcurement)} (${supplierKpis.totalOrders} POs)`}
-            icon={Landmark}
-          />
-          <StatCard
-            label="FBR Verified Vendors"
-            value={`${supplierKpis.verifiedCount} Active Panel`}
+            label="In Stock (OK)"
+            value={formatNumber(stockKpis.inStockCount)}
+            title={`${stockKpis.inStockCount} items above reorder threshold`}
             icon={ShieldCheck}
           />
           <StatCard
-            label="Outstanding Payables"
-            value={formatCurrencyCompact(supplierKpis.totalPayable)}
-            icon={Wallet}
+            label="Low Stock Alerts"
+            value={formatNumber(stockKpis.alertTotal)}
+            className={
+              stockKpis.alertTotal > 0
+                ? "border-amber-300/80 bg-amber-50/30 ring-1 ring-amber-200"
+                : undefined
+            }
+            title={`${stockKpis.lowStockCount} Low Stock · ${stockKpis.outOfStockCount} Out of Stock`}
+            icon={AlertTriangle}
+          />
+        </StatGrid>
+      ) : (
+        <StatGrid>
+          <StatCard
+            label="Total Issuances"
+            value={formatNumber(issuanceKpis.totalIssuances)}
+            title={`${issuanceKpis.issuedToday} issued today`}
+            icon={ClipboardList}
           />
           <StatCard
-            label="Vendor SLA Rating"
-            value="4.8 / 5.0 Avg"
-            icon={TrendingUp}
+            label="Units Issued"
+            value={formatNumber(issuanceKpis.unitsIssued)}
+            title="Total units handed out from store"
+            icon={PackageMinus}
+          />
+          <StatCard
+            label="Pending Returns"
+            value={formatNumber(issuanceKpis.pendingReturns)}
+            title="Returnable items still with staff"
+            icon={RotateCcw}
+          />
+          <StatCard
+            label="Overdue Returns"
+            value={formatNumber(issuanceKpis.overdue)}
+            className={
+              issuanceKpis.overdue > 0
+                ? "border-rose-300/80 bg-rose-50/30 ring-1 ring-rose-200"
+                : undefined
+            }
+            title="Returnable items past their expected return date"
+            icon={CalendarClock}
           />
         </StatGrid>
       )}
 
-      {/* Executive Register Selector Dropdown & Quick Action Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Executive Register Dropdown Selector Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-2xs">
+        {/* Clean & Professional Register Dropdown Menu */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="group inline-flex h-9 cursor-pointer items-center gap-2.5 rounded-[4px] border border-brand/20 bg-white px-3 text-xs font-semibold text-[#091d3e] shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-colors hover:border-brand/35 hover:bg-brand-50/40 focus:outline-none focus:ring-2 focus:ring-brand/15">
-            <ActiveTabIcon className="size-3.5 shrink-0 text-brand" />
-            <span className="font-semibold text-[#091d3e]">
-              {activeTabMeta.label}
+          <DropdownMenuTrigger
+            aria-label="Select Inventory Register"
+            className="group inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 px-3 text-xs font-semibold text-foreground shadow-2xs hover:border-slate-300 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer select-none"
+          >
+            {activeTab === "stock" ? (
+              <Boxes className="size-4 text-[#091d3e]" />
+            ) : (
+              <ClipboardList className="size-4 text-[#091d3e]" />
+            )}
+            <span>
+              {activeTab === "stock" ? "Stock Register" : "Issuance Register"}
             </span>
-            <span className="rounded-[3px] border border-brand/15 bg-brand-50/80 px-1.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-brand">
-              {activeTabMeta.count}
-            </span>
-            <ChevronDown className="ml-0.5 size-3.5 shrink-0 text-muted-foreground transition-transform duration-150 group-data-open:rotate-180" />
+            <ChevronDown className="size-3.5 text-muted-foreground transition-transform duration-200 group-data-[popup-open]:rotate-180" />
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
             align="start"
-            sideOffset={6}
-            className="w-[255px] rounded-[6px] border border-brand/15 bg-white p-1 shadow-[0_10px_28px_-6px_rgb(9_29_62/0.18),0_2px_6px_rgb(9_29_62/0.06)] ring-0"
+            className="w-48 p-1 rounded-xl shadow-lg border border-slate-200 bg-white text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
           >
-            {(
-              [
-                {
-                  key: "stock" as const,
-                  label: "Store Stock Register",
-                  count: items.length,
-                  icon: Package,
-                },
-                {
-                  key: "orders" as const,
-                  label: "Purchase Orders (POs)",
-                  count: orders.length,
-                  icon: ShoppingCart,
-                },
-                {
-                  key: "issuance" as const,
-                  label: "Departmental Issuance",
-                  count: issuances.length,
-                  icon: Send,
-                },
-                {
-                  key: "suppliers" as const,
-                  label: "Approved Suppliers",
-                  count: suppliers.length,
-                  icon: Truck,
-                },
-              ] as const
-            ).map((item) => {
-              const Icon = item.icon;
-              const isSelected = activeTab === item.key;
-              return (
-                <DropdownMenuItem
-                  key={item.key}
-                  onClick={() => setActiveTab(item.key)}
-                  className={cn(
-                    "flex items-center justify-between gap-2 rounded-[4px] px-2.5 py-2 text-xs cursor-pointer transition-colors",
-                    isSelected
-                      ? "bg-brand-50/80 font-semibold text-[#091d3e] focus:bg-brand-50"
-                      : "font-medium text-foreground/85 hover:bg-slate-50 focus:bg-slate-100/80"
-                  )}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Icon
-                      className={cn(
-                        "size-3.5 shrink-0",
-                        isSelected ? "text-[#091d3e]" : "text-muted-foreground"
-                      )}
-                    />
-                    <span className="whitespace-nowrap">{item.label}</span>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={cn(
-                        "min-w-[26px] rounded-[3px] px-1.5 py-0.5 text-center font-mono text-[10.5px] font-bold tabular-nums",
-                        isSelected
-                          ? "bg-[#091d3e] text-white"
-                          : "bg-slate-100 text-muted-foreground"
-                      )}
-                    >
-                      {item.count}
-                    </span>
-                    <span className="grid size-3.5 shrink-0 place-items-center">
-                      {isSelected && (
-                        <Check className="size-3.5 text-[#091d3e] stroke-[2.5]" />
-                      )}
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-              );
-            })}
+            <DropdownMenuItem
+              onClick={() => setActiveTab("stock")}
+              className={cn(
+                "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
+                activeTab === "stock"
+                  ? "bg-slate-100 font-semibold text-foreground"
+                  : "hover:bg-slate-50 text-slate-700 font-medium"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Boxes className="size-4 text-slate-500" />
+                <span>Stock Register</span>
+              </div>
+              {activeTab === "stock" && (
+                <Check className="size-3.5 text-foreground" />
+              )}
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => setActiveTab("issuance")}
+              className={cn(
+                "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
+                activeTab === "issuance"
+                  ? "bg-slate-100 font-semibold text-foreground"
+                  : "hover:bg-slate-50 text-slate-700 font-medium"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <ClipboardList className="size-4 text-slate-500" />
+                <span>Issuance Register</span>
+              </div>
+              {activeTab === "issuance" && (
+                <Check className="size-3.5 text-foreground" />
+              )}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="size-2 rounded-full bg-emerald-500" />
-          <span className="font-medium">{activeTabMeta.subtitle}</span>
+        {/* Dynamic Context & Health Indicator */}
+        <div className="flex items-center gap-2 pr-1">
+          {activeTab === "stock" && (
+            stockKpis.alertTotal > 0 ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/90 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800 shadow-2xs">
+                <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+                {stockKpis.alertTotal} Item{stockKpis.alertTotal > 1 ? "s" : ""} Need Reorder
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 shadow-2xs">
+                <ShieldCheck className="size-3.5 text-emerald-600" />
+                All Stock Levels Healthy
+              </span>
+            )
+          )}
         </div>
       </div>
 
-      {/* Main Register DataTable */}
+      {/* Tab 1: Stock Register */}
       {activeTab === "stock" && (
         <SectionCard flush contentClassName="pt-5">
           <DataTable
@@ -1193,138 +801,95 @@ export function InventoryClient() {
             columns={stockColumns}
             getRowId={(r) => r.id}
             filters={stockFilters}
-            searchPlaceholder="Search SKU #, item name, store rack, custodian or supplier…"
+            tableClassName="min-w-[980px] table-fixed"
+            searchPlaceholder="Search item name, SKU or category…"
             searchFn={(r, q) =>
-              r.sku.toLowerCase().includes(q) ||
               r.name.toLowerCase().includes(q) ||
               r.category.toLowerCase().includes(q) ||
-              r.storeLocation.toLowerCase().includes(q) ||
-              r.supplierName.toLowerCase().includes(q) ||
-              r.custodian.toLowerCase().includes(q)
+              r.sku.toLowerCase().includes(q)
             }
             pageSize={8}
-            emptyMessage="No store inventory items match the selected filters."
+            emptyMessage="No stock items match your search."
           />
         </SectionCard>
       )}
 
-      {activeTab === "orders" && (
-        <SectionCard flush contentClassName="pt-5">
-          <DataTable
-            data={orders}
-            columns={poColumns}
-            getRowId={(r) => r.id}
-            searchPlaceholder="Search PO #, GRN #, order title, supplier or NTN…"
-            searchFn={(r, q) =>
-              r.poNumber.toLowerCase().includes(q) ||
-              r.grnNumber.toLowerCase().includes(q) ||
-              r.title.toLowerCase().includes(q) ||
-              r.supplierName.toLowerCase().includes(q) ||
-              r.supplierNtn.toLowerCase().includes(q) ||
-              r.campus.toLowerCase().includes(q)
-            }
-            pageSize={8}
-            emptyMessage="No purchase orders match the search query."
-          />
-        </SectionCard>
-      )}
-
+      {/* Tab 2: Issuance Register */}
       {activeTab === "issuance" && (
         <SectionCard flush contentClassName="pt-5">
           <DataTable
             data={issuances}
             columns={issuanceColumns}
             getRowId={(r) => r.id}
-            searchPlaceholder="Search issue voucher #, requisition #, item, department or custodian…"
+            filters={issuanceFilters}
+            tableClassName="min-w-[1020px] table-fixed"
+            searchPlaceholder="Search issue #, item, person or department…"
             searchFn={(r, q) =>
-              r.issueVoucherNo.toLowerCase().includes(q) ||
-              r.requisitionNo.toLowerCase().includes(q) ||
+              r.issueNo.toLowerCase().includes(q) ||
               r.itemName.toLowerCase().includes(q) ||
-              r.sku.toLowerCase().includes(q) ||
+              r.itemSku.toLowerCase().includes(q) ||
+              r.issuedTo.toLowerCase().includes(q) ||
               r.department.toLowerCase().includes(q) ||
-              r.issuedTo.toLowerCase().includes(q)
+              r.purpose.toLowerCase().includes(q)
             }
             pageSize={8}
-            emptyMessage="No departmental issuance records match the search query."
+            emptyMessage="No issuance records found. Click “Issue Stock” to hand out items."
           />
         </SectionCard>
       )}
 
-      {activeTab === "suppliers" && (
-        <SectionCard flush contentClassName="pt-5">
-          <DataTable
-            data={suppliers}
-            columns={supplierColumns}
-            getRowId={(r) => r.id}
-            searchPlaceholder="Search vendor code, company name, NTN, contact person or city…"
-            searchFn={(r, q) =>
-              r.supplierCode.toLowerCase().includes(q) ||
-              r.companyName.toLowerCase().includes(q) ||
-              r.ntn.toLowerCase().includes(q) ||
-              r.contactPerson.toLowerCase().includes(q) ||
-              r.city.toLowerCase().includes(q) ||
-              r.category.toLowerCase().includes(q)
-            }
-            pageSize={8}
-            emptyMessage="No approved suppliers match the search query."
-          />
-        </SectionCard>
-      )}
-
-      {/* Interactive Modals */}
+      {/* Adjust Stock Modal (+5 / -5) */}
       <InventoryItemModal
         item={selectedItem}
-        open={itemModalOpen}
-        onOpenChange={setItemModalOpen}
-        initialTab={itemModalTab}
+        open={adjustModalOpen}
+        onOpenChange={setAdjustModalOpen}
         onAdjustStock={handleAdjustStock}
-        onEditItem={(it) => {
-          setEditingItem(it);
-          setItemFormOpen(true);
-        }}
       />
 
+      {/* Add / Edit Stock Item Modal */}
       <InventoryFormModal
-        open={itemFormOpen}
-        onOpenChange={setItemFormOpen}
-        initialData={editingItem}
+        open={addFormOpen}
+        onOpenChange={(open) => {
+          setAddFormOpen(open);
+          if (!open) setEditingItem(null);
+        }}
         totalCount={items.length}
+        initialData={editingItem}
         onSave={handleSaveStockItem}
       />
 
-      <PurchaseOrderViewModal
-        po={selectedPo}
-        open={poViewOpen}
-        onOpenChange={setPoViewOpen}
-        onUpdatePoStatus={handleUpdatePoStatus}
-      />
-
-      <PurchaseOrderFormModal
-        open={poFormOpen}
-        onOpenChange={setPoFormOpen}
-        totalCount={orders.length}
-        onSave={handleCreatePo}
-      />
-
-      <IssuanceViewModal
-        issuance={selectedIssuance}
-        open={issuanceViewOpen}
-        onOpenChange={setIssuanceViewOpen}
-        onUpdateIssuanceStatus={handleUpdateIssuanceStatus}
-      />
-
-      <IssuanceFormModal
-        open={issuanceFormOpen}
-        onOpenChange={setIssuanceFormOpen}
+      {/* Issue Stock Modal (auto-deducts quantity) */}
+      <IssueStockModal
+        open={issueModalOpen}
+        onOpenChange={(open) => {
+          setIssueModalOpen(open);
+          if (!open) setIssuePreselectId(null);
+        }}
         items={items}
-        totalCount={issuances.length}
-        onSave={handleCreateIssuance}
+        preselectedItemId={issuePreselectId}
+        nextIssueNumber={nextIssueNumber}
+        onIssue={handleIssueStock}
       />
 
-      <SupplierViewModal
-        supplier={selectedSupplier}
-        open={supplierViewOpen}
-        onOpenChange={setSupplierViewOpen}
+      {/* Issue Slip Viewer */}
+      <IssuanceViewModal
+        record={viewIssuance}
+        open={Boolean(viewIssuance)}
+        onOpenChange={(open) => {
+          if (!open) setViewIssuanceId(null);
+        }}
+        onReturn={(r) => setReturnIssuanceId(r.id)}
+      />
+
+      {/* Return Stock Modal (adds quantity back) */}
+      <ReturnStockModal
+        record={returnIssuance}
+        currentStock={returnItemStock}
+        open={Boolean(returnIssuance)}
+        onOpenChange={(open) => {
+          if (!open) setReturnIssuanceId(null);
+        }}
+        onConfirmReturn={handleConfirmReturn}
       />
     </div>
   );

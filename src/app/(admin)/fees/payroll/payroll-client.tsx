@@ -93,58 +93,72 @@ export function PayrollClient() {
     setPage(0);
   }, [search, selectedCampus, selectedDept, selectedStatus, selectedMode]);
 
-  // Single disburse
-  const handleDisburseSingle = (id: string) => {
+  // Status transition handler (Pending, Approved, On Hold, Disbursed)
+  const handleStatusChange = (
+    id: string,
+    newStatus: "Disbursed" | "Pending" | "Approved" | "On Hold",
+    reason?: string
+  ) => {
     setSalaries((prev) =>
       prev.map((s) => {
         if (s.id === id) {
-          return {
-            ...s,
-            status: "Disbursed",
-            disbursedDate: new Date().toISOString().slice(0, 10),
-            transactionRef: `FT${Math.floor(2600000000 + Math.random() * 99999999)}`,
-          };
+          const updated: StaffSalaryRecord =
+            newStatus === "Disbursed"
+              ? {
+                  ...s,
+                  status: "Disbursed",
+                  disbursedDate: new Date().toISOString().slice(0, 10),
+                  transactionRef: `FT${Math.floor(2600000000 + Math.random() * 99999999)}`,
+                }
+              : {
+                  ...s,
+                  status: newStatus,
+                  disbursedDate: undefined,
+                  transactionRef: undefined,
+                };
+          return updated;
         }
         return s;
       })
     );
+
     const item = salaries.find((s) => s.id === id);
-    toast.success(
-      `Salary disbursed for ${item?.name || "staff"} (${formatCurrency(
-        item?.netSalary || 0
-      )}) to ${item?.bankName}.`
-    );
+    const staffName = item?.name || "Staff member";
+
+    if (newStatus === "Approved") {
+      toast.success(`Salary approved for ${staffName}. Cleared for bank disbursement.`);
+    } else if (newStatus === "On Hold") {
+      toast.warning(
+        `Salary for ${staffName} placed On Hold.${reason ? ` Reason: ${reason}` : " Excluded from batch payout until released."}`
+      );
+    } else if (newStatus === "Pending") {
+      toast.info(`Salary for ${staffName} set to Pending Authorization.`);
+    } else if (newStatus === "Disbursed") {
+      toast.success(
+        `Salary disbursed for ${staffName} (${formatCurrency(item?.netSalary || 0)}) to ${item?.bankName}.`
+      );
+    }
+  };
+
+  // Single disburse
+  const handleDisburseSingle = (id: string) => {
+    handleStatusChange(id, "Disbursed");
   };
 
   // Single unlock
   const handleUnlockSingle = (id: string) => {
-    setSalaries((prev) =>
-      prev.map((s) => {
-        if (s.id === id) {
-          return {
-            ...s,
-            status: "Pending",
-            disbursedDate: undefined,
-            transactionRef: undefined,
-          };
-        }
-        return s;
-      })
-    );
-    const item = salaries.find((s) => s.id === id);
-    toast.success(
-      `Disbursement lock released for ${item?.name || "staff"}. Record reverted to Pending Authorization.`
-    );
+    handleStatusChange(id, "Pending");
   };
 
-  // Batch disburse
+  // Batch disburse (safely bypassing On Hold records)
   const handleBatchDisburse = (campus: string, bankId: string) => {
     const clearingBank = accounts.find((a) => a.id === bankId);
     setSalaries((prev) =>
       prev.map((s) => {
         if (
           (campus === "All Campuses" || s.campus === campus) &&
-          s.status !== "Disbursed"
+          s.status !== "Disbursed" &&
+          s.status !== "On Hold"
         ) {
           return {
             ...s,
@@ -166,27 +180,31 @@ export function PayrollClient() {
         staffCount: salaries.filter(
           (s) =>
             (campus === "All Campuses" || s.campus === campus) &&
-            s.status !== "Disbursed"
+            s.status !== "Disbursed" &&
+            s.status !== "On Hold"
         ).length,
         grossAmount: salaries
           .filter(
             (s) =>
               (campus === "All Campuses" || s.campus === campus) &&
-              s.status !== "Disbursed"
+              s.status !== "Disbursed" &&
+              s.status !== "On Hold"
           )
           .reduce((a, b) => a + b.grossSalary, 0),
         deductionsAmount: salaries
           .filter(
             (s) =>
               (campus === "All Campuses" || s.campus === campus) &&
-              s.status !== "Disbursed"
+              s.status !== "Disbursed" &&
+              s.status !== "On Hold"
           )
           .reduce((a, b) => a + b.totalDeductions, 0),
         netAmount: salaries
           .filter(
             (s) =>
               (campus === "All Campuses" || s.campus === campus) &&
-              s.status !== "Disbursed"
+              s.status !== "Disbursed" &&
+              s.status !== "On Hold"
           )
           .reduce((a, b) => a + b.netSalary, 0),
         processedDate: new Date().toISOString().slice(0, 10),
@@ -489,13 +507,13 @@ export function PayrollClient() {
                           </span>
                         </td>
                         <td className="px-5 py-3 text-center align-middle">
-                          <div className="min-w-0 text-center">
+                          <div className="flex flex-col items-center justify-center min-w-0">
                             <p className="truncate font-semibold text-foreground">
                               {s.name}
                             </p>
                             {s.designation && (
                               <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                {s.designation}
+                                {s.designation.replace(/Senior (Lecturer|Teacher)\s*/i, "").trim()}
                               </p>
                             )}
                           </div>
@@ -612,6 +630,7 @@ export function PayrollClient() {
           setEditingSalary(s);
           setAddSalaryOpen(true);
         }}
+        onStatusChange={handleStatusChange}
       />
 
       <AddSalaryModal

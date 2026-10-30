@@ -6,19 +6,24 @@ import {
   Check,
   ChevronDown,
   Download,
-  Eye,
-  Fuel,
+  Edit,
+  FileDown,
   GraduationCap,
   MapPin,
   Navigation,
   Plus,
   Printer,
-  ShieldCheck,
-  UserCheck,
+  Trash2,
   Users,
   Wallet,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
@@ -27,245 +32,89 @@ import {
   type Column,
   type FilterDef,
 } from "@/components/shared/data-table";
-import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/format";
 import {
-  formatCurrency,
-  formatCurrencyCompact,
-  formatDate,
-} from "@/lib/format";
-import {
-  INITIAL_FLEET_VEHICLES,
-  INITIAL_STUDENT_ALLOCATIONS,
-  INITIAL_TRANSPORT_DRIVERS,
+  INITIAL_TRANSPORT_ASSIGNMENTS,
   INITIAL_TRANSPORT_ROUTES,
-  type AllocationStatus,
-  type DriverDutyStatus,
-  type FleetVehicleRecord,
-  type FleetVehicleStatus,
-  type RouteStatus,
-  type RouteStopEntry,
-  type StudentTransportAllocationRecord,
-  type TransportDriverRecord,
+  INITIAL_TRANSPORT_VEHICLES,
+  type TransportAssignmentRecord,
   type TransportRouteRecord,
+  type TransportVehicleRecord,
 } from "@/lib/mock/transport";
 import {
-  exportDriversPdf,
-  exportFleetPdf,
-  exportRoutesPdf,
-  exportStudentAllocationsPdf,
-  printTransportRoutesRegister,
+  exportRouteStudentsPdf,
+  exportStudentTransportCardPdf,
+  exportTransportAssignmentsPdf,
+  exportTransportRoutesPdf,
+  exportTransportVehiclesPdf,
+  exportVehicleStudentsPdf,
+  printTransportOverview,
 } from "./transport-export";
 import {
-  DriverViewModal,
-  FleetVehicleViewModal,
-  StudentAllocationViewModal,
-  TransportRouteViewModal,
-} from "./transport-view-modals";
-import {
-  DriverFormModal,
-  FleetVehicleFormModal,
-  StudentAllocationFormModal,
-  TransportRouteFormModal,
+  AssignmentFormModal,
+  DeleteConfirmModal,
+  RouteFormModal,
+  VehicleFormModal,
 } from "./transport-form-modals";
 
-type TransportViewTab = "routes" | "fleet" | "drivers" | "allocations";
-
-const CAMPUS_OPTIONS = [
-  "Gulberg",
-  "DHA Phase 5",
-  "F-8 Islamabad",
-  "Clifton",
-  "Bahria Town",
-];
+type TransportTab = "routes" | "vehicles" | "assignments";
 
 export function TransportClient() {
-  const [activeTab, setActiveTab] =
-    React.useState<TransportViewTab>("routes");
+  const [activeTab, setActiveTab] = React.useState<TransportTab>("routes");
 
   const [routes, setRoutes] = React.useState<TransportRouteRecord[]>(
     INITIAL_TRANSPORT_ROUTES
   );
-  const [vehicles, setVehicles] = React.useState<FleetVehicleRecord[]>(
-    INITIAL_FLEET_VEHICLES
+  const [vehicles, setVehicles] = React.useState<TransportVehicleRecord[]>(
+    INITIAL_TRANSPORT_VEHICLES
   );
-  const [drivers, setDrivers] = React.useState<TransportDriverRecord[]>(
-    INITIAL_TRANSPORT_DRIVERS
-  );
-  const [allocations, setAllocations] = React.useState<
-    StudentTransportAllocationRecord[]
-  >(INITIAL_STUDENT_ALLOCATIONS);
+  const [assignments, setAssignments] = React.useState<
+    TransportAssignmentRecord[]
+  >(INITIAL_TRANSPORT_ASSIGNMENTS);
 
-  // Route View & Create/Edit Modals
-  const [selectedRouteId, setSelectedRouteId] = React.useState<string | null>(
-    null
-  );
-  const [routeViewOpen, setRouteViewOpen] = React.useState(false);
-  const [routeFormOpen, setRouteFormOpen] = React.useState(false);
+  // Route Form Modal State
+  const [routeModalOpen, setRouteModalOpen] = React.useState(false);
   const [editingRoute, setEditingRoute] =
     React.useState<TransportRouteRecord | null>(null);
 
-  // Vehicle View & Create Modals
-  const [selectedVehicleId, setSelectedVehicleId] = React.useState<
-    string | null
-  >(null);
-  const [vehicleViewOpen, setVehicleViewOpen] = React.useState(false);
-  const [vehicleFormOpen, setVehicleFormOpen] = React.useState(false);
+  // Vehicle Form Modal State
+  const [vehicleModalOpen, setVehicleModalOpen] = React.useState(false);
+  const [editingVehicle, setEditingVehicle] =
+    React.useState<TransportVehicleRecord | null>(null);
 
-  // Driver View & Create Modals
-  const [selectedDriverId, setSelectedDriverId] = React.useState<
-    string | null
-  >(null);
-  const [driverViewOpen, setDriverViewOpen] = React.useState(false);
-  const [driverFormOpen, setDriverFormOpen] = React.useState(false);
+  // Student Assignment Form Modal State
+  const [assignmentModalOpen, setAssignmentModalOpen] = React.useState(false);
+  const [editingAssignment, setEditingAssignment] =
+    React.useState<TransportAssignmentRecord | null>(null);
 
-  // Student Allocation View & Create Modals
-  const [selectedAllocationId, setSelectedAllocationId] = React.useState<
-    string | null
-  >(null);
-  const [allocationViewOpen, setAllocationViewOpen] = React.useState(false);
-  const [allocationFormOpen, setAllocationFormOpen] = React.useState(false);
-
-  const selectedRoute = React.useMemo(
-    () => routes.find((r) => r.id === selectedRouteId) ?? null,
-    [routes, selectedRouteId]
-  );
-
-  const selectedVehicle = React.useMemo(
-    () => vehicles.find((v) => v.id === selectedVehicleId) ?? null,
-    [vehicles, selectedVehicleId]
-  );
-
-  const selectedDriver = React.useMemo(
-    () => drivers.find((d) => d.id === selectedDriverId) ?? null,
-    [drivers, selectedDriverId]
-  );
-
-  const selectedAllocation = React.useMemo(
-    () => allocations.find((a) => a.id === selectedAllocationId) ?? null,
-    [allocations, selectedAllocationId]
-  );
+  // Delete Confirmation Modal State
+  const [deleteTarget, setDeleteTarget] = React.useState<{
+    type: TransportTab;
+    id: string;
+    label: string;
+  } | null>(null);
 
   /* ───────────────────────── Dynamic KPI Aggregates ───────────────────────── */
 
-  const routeKpis = React.useMemo(() => {
-    const totalStops = routes.reduce((s, r) => s + r.stops.length, 0);
-    const totalSeats = routes.reduce((s, r) => s + r.seatCapacity, 0);
-    const totalRiders = routes.reduce((s, r) => s + r.allocatedStudents, 0);
-    const monthlyRevenue = routes.reduce(
-      (s, r) => s + r.allocatedStudents * r.monthlyRouteFee,
-      0
-    );
-    const utilPct = Math.round(
-      (totalRiders / Math.max(1, totalSeats)) * 100
-    );
-    return {
-      totalRoutes: routes.length,
-      totalStops,
-      totalSeats,
-      totalRiders,
-      monthlyRevenue,
-      utilPct,
-    };
-  }, [routes]);
+  const kpis = React.useMemo(() => {
+    const totalRoutes = routes.length;
+    const totalVehicles = vehicles.length;
+    const totalCapacity = vehicles.reduce((s, v) => s + v.capacity, 0);
+    const totalAssignedStudents = assignments.length;
+    const monthlyRevenue = assignments.reduce((s, a) => s + a.monthlyFare, 0);
 
-  const fleetKpis = React.useMemo(() => {
-    const activeCount = vehicles.filter(
-      (v) => v.status === "Operational" || v.status === "On Route"
-    ).length;
-    const maintCount = vehicles.filter(
-      (v) => v.status === "In Maintenance"
-    ).length;
-    const totalCapacity = vehicles.reduce((s, v) => s + v.seatingCapacity, 0);
-    const totalFuelCost = vehicles.reduce((s, v) => s + v.monthlyFuelCost, 0);
     return {
-      totalVehicles: vehicles.length,
-      activeCount,
-      maintCount,
+      totalRoutes,
+      totalVehicles,
       totalCapacity,
-      totalFuelCost,
+      totalAssignedStudents,
+      monthlyRevenue,
     };
-  }, [vehicles]);
+  }, [routes, vehicles, assignments]);
 
-  const driverKpis = React.useMemo(() => {
-    const onDutyCount = drivers.filter(
-      (d) => d.status === "On Duty" || d.status === "Active"
-    ).length;
-    const avgExp = Math.round(
-      drivers.reduce((s, d) => s + d.experienceYears, 0) /
-        Math.max(1, drivers.length)
-    );
-    return {
-      totalDrivers: drivers.length,
-      onDutyCount,
-      avgExp,
-    };
-  }, [drivers]);
-
-  const allocationKpis = React.useMemo(() => {
-    const allocatedCount = allocations.filter(
-      (a) => a.status === "Allocated"
-    ).length;
-    const waitlistCount = allocations.filter(
-      (a) => a.status === "Waitlisted"
-    ).length;
-    const paidPassRevenue = allocations
-      .filter((a) => a.feeStatus === "Paid")
-      .reduce((s, a) => s + a.monthlyTransportFee, 0);
-    return {
-      totalPasses: allocations.length,
-      allocatedCount,
-      waitlistCount,
-      paidPassRevenue,
-    };
-  }, [allocations]);
-
-  /* ───────────────────────── Interactive Handlers ───────────────────────── */
-
-  const handleUpdateRoute = React.useCallback(
-    (
-      routeId: string,
-      payload: {
-        status: RouteStatus;
-        vehicleRegNo: string;
-        driverName: string;
-      }
-    ) => {
-      setRoutes((prev) =>
-        prev.map((r) => (r.id === routeId ? { ...r, ...payload } : r))
-      );
-      toast.success("Route dispatch & operational status updated.");
-    },
-    []
-  );
-
-  const handleAddStop = React.useCallback(
-    (routeId: string, newStop: RouteStopEntry) => {
-      setRoutes((prev) =>
-        prev.map((r) =>
-          r.id === routeId
-            ? {
-                ...r,
-                stops: [...r.stops, newStop],
-                allocatedStudents: Math.min(
-                  r.seatCapacity,
-                  r.allocatedStudents + newStop.studentsCount
-                ),
-              }
-            : r
-        )
-      );
-      toast.success(`Stop "${newStop.stopName}" added to route schedule.`);
-    },
-    []
-  );
+  /* ───────────────────────── CRUD Handlers ───────────────────────── */
 
   const handleSaveRoute = React.useCallback((record: TransportRouteRecord) => {
     setRoutes((prev) => {
@@ -274,686 +123,673 @@ export function TransportClient() {
         ? prev.map((r) => (r.id === record.id ? record : r))
         : [record, ...prev];
     });
+
+    // Keep linked vehicles and assignments synchronized with updated route name & fare
+    setVehicles((prev) =>
+      prev.map((v) =>
+        v.routeId === record.id ? { ...v, routeName: record.routeName } : v
+      )
+    );
+    setAssignments((prev) =>
+      prev.map((a) =>
+        a.routeId === record.id
+          ? {
+              ...a,
+              routeName: record.routeName,
+              monthlyFare: record.monthlyFare,
+            }
+          : a
+      )
+    );
   }, []);
 
-  const handleUpdateVehicleStatus = React.useCallback(
-    (
-      vehicleId: string,
-      status: FleetVehicleStatus,
-      lastServiceDate: string
-    ) => {
+  const handleSaveVehicle = React.useCallback(
+    (record: TransportVehicleRecord) => {
+      setVehicles((prev) => {
+        const exists = prev.some((v) => v.id === record.id);
+        return exists
+          ? prev.map((v) => (v.id === record.id ? record : v))
+          : [record, ...prev];
+      });
+    },
+    []
+  );
+
+  const handleSaveAssignment = React.useCallback(
+    (record: TransportAssignmentRecord) => {
+      setAssignments((prev) => {
+        const exists = prev.some((a) => a.id === record.id);
+        return exists
+          ? prev.map((a) => (a.id === record.id ? record : a))
+          : [record, ...prev];
+      });
+    },
+    []
+  );
+
+  const handleConfirmDelete = React.useCallback(() => {
+    if (!deleteTarget) return;
+
+    if (deleteTarget.type === "routes") {
+      setRoutes((prev) => prev.filter((r) => r.id !== deleteTarget.id));
       setVehicles((prev) =>
         prev.map((v) =>
-          v.id === vehicleId ? { ...v, status, lastServiceDate } : v
+          v.routeId === deleteTarget.id
+            ? { ...v, routeId: "", routeName: "" }
+            : v
         )
       );
-      toast.success(`Fleet vehicle status updated to ${status}.`);
-    },
-    []
-  );
-
-  const handleCreateVehicle = React.useCallback(
-    (newVehicle: FleetVehicleRecord) => {
-      setVehicles((prev) => [newVehicle, ...prev]);
-    },
-    []
-  );
-
-  const handleUpdateDriverStatus = React.useCallback(
-    (id: string, status: DriverDutyStatus) => {
-      setDrivers((prev) =>
-        prev.map((d) => (d.id === id ? { ...d, status } : d))
+      toast.success(`Route "${deleteTarget.label}" deleted.`);
+    } else if (deleteTarget.type === "vehicles") {
+      setVehicles((prev) => prev.filter((v) => v.id !== deleteTarget.id));
+      toast.success(`Vehicle "${deleteTarget.label}" removed from fleet.`);
+    } else {
+      setAssignments((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+      toast.success(
+        `Student assignment for "${deleteTarget.label}" removed.`
       );
-      toast.success(`Driver roster status updated to ${status}.`);
-    },
-    []
-  );
+    }
+    setDeleteTarget(null);
+  }, [deleteTarget]);
 
-  const handleCreateDriver = React.useCallback(
-    (newDriver: TransportDriverRecord) => {
-      setDrivers((prev) => [newDriver, ...prev]);
-    },
-    []
-  );
+  const handleOpenPrimaryAdd = () => {
+    if (activeTab === "routes") {
+      setEditingRoute(null);
+      setRouteModalOpen(true);
+    } else if (activeTab === "vehicles") {
+      setEditingVehicle(null);
+      setVehicleModalOpen(true);
+    } else {
+      setEditingAssignment(null);
+      setAssignmentModalOpen(true);
+    }
+  };
 
-  const handleUpdateAllocation = React.useCallback(
-    (
-      id: string,
-      status: AllocationStatus,
-      feeStatus: "Paid" | "Pending"
-    ) => {
-      setAllocations((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, status, feeStatus } : a))
+  const handlePrint = () => {
+    printTransportOverview(routes, vehicles, assignments);
+    toast.info("Opening print preview for transport register…");
+  };
+
+  const handleExportPdf = () => {
+    if (activeTab === "routes") {
+      exportTransportRoutesPdf(routes, vehicles, assignments);
+      toast.success(`Routes register (${routes.length} routes) exported as PDF.`);
+    } else if (activeTab === "vehicles") {
+      exportTransportVehiclesPdf(vehicles);
+      toast.success(
+        `Vehicles register (${vehicles.length} vehicles) exported as PDF.`
       );
-      toast.success("Student transport pass updated.");
-    },
-    []
-  );
+    } else {
+      exportTransportAssignmentsPdf(assignments, vehicles);
+      toast.success(
+        `Transport assignments (${assignments.length} students) exported as PDF.`
+      );
+    }
+  };
 
-  const handleCreateAllocation = React.useCallback(
-    (newAlloc: StudentTransportAllocationRecord) => {
-      setAllocations((prev) => [newAlloc, ...prev]);
-      setRoutes((prev) =>
-        prev.map((r) =>
-          r.routeCode === newAlloc.routeCode
-            ? {
-                ...r,
-                allocatedStudents: Math.min(
-                  r.seatCapacity,
-                  r.allocatedStudents + 1
-                ),
-              }
-            : r
-        )
+  const handleDownloadRouteStudentsPdf = React.useCallback(
+    (route: TransportRouteRecord) => {
+      const matchedStudents = assignments.filter(
+        (a) => a.routeId === route.id || a.routeName === route.routeName
+      );
+      exportRouteStudentsPdf(route, vehicles, matchedStudents);
+      toast.success(
+        `Downloaded route manifest PDF for ${route.routeName} — ${matchedStudents.length} students.`
       );
     },
-    []
+    [vehicles, assignments]
   );
 
-  /* ───────────────────────── 1. Routes & Stops Columns ───────────────────────── */
+  const handleDownloadVehicleStudentsPdf = React.useCallback(
+    (vehicle: TransportVehicleRecord) => {
+      const matchedStudents = assignments.filter(
+        (a) =>
+          (vehicle.routeId && a.routeId === vehicle.routeId) ||
+          (vehicle.routeName && a.routeName === vehicle.routeName)
+      );
+      exportVehicleStudentsPdf(vehicle, matchedStudents);
+      toast.success(
+        `Downloaded student manifest PDF for ${vehicle.vehicleNo} (${vehicle.model}) — ${matchedStudents.length} students.`
+      );
+    },
+    [assignments]
+  );
+
+  const handleDownloadStudentPassPdf = React.useCallback(
+    (assignment: TransportAssignmentRecord) => {
+      const matchedVehicle = vehicles.find(
+        (v) =>
+          (assignment.routeId && v.routeId === assignment.routeId) ||
+          (assignment.routeName && v.routeName === assignment.routeName)
+      );
+      exportStudentTransportCardPdf(assignment, matchedVehicle);
+      toast.success(
+        `Downloaded transport pass PDF for ${assignment.studentName} (${assignment.studentRollNo}).`
+      );
+    },
+    [vehicles]
+  );
+
+  /* ───────────────────────── 1. Routes Table Columns ───────────────────────── */
 
   const routeColumns = React.useMemo<Column<TransportRouteRecord>[]>(
     () => [
       {
-        key: "routeCode",
-        header: "Route Code",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.routeCode}
-            </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {r.distanceKm} km · {r.stops.length} Stops
-            </p>
-          </div>
-        ),
-      },
-      {
         key: "routeName",
-        header: "Route Corridor & Stops",
+        header: "Route Name",
         align: "center",
+        className: "w-[32%] px-4 text-center",
+        headerClassName: "w-[32%] px-4 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[245px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
+          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
+            <p className="text-[13px] font-bold text-foreground">
               {r.routeName}
             </p>
-            <p className="truncate text-[10.5px] text-muted-foreground">
-              Origin: {r.stops[0]?.stopName} ({r.morningDeparture})
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "campus",
-        header: "Campus & Vehicle",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">{r.campus}</p>
-            <p className="font-mono text-[10.5px] text-brand font-semibold">
-              {r.vehicleRegNo}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "driver",
-        header: "Assigned Driver",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[190px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.driverName}
-            </p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {r.driverPhone}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "occupancy",
-        header: "Seat Occupancy",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-[#091d3e]">
-              {r.allocatedStudents} / {r.seatCapacity} Seats
+            <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
+              {r.routeCode}
             </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {Math.round(
-                (r.allocatedStudents / Math.max(1, r.seatCapacity)) * 100
-              )}
-              % Occupied
-            </p>
           </div>
         ),
       },
       {
-        key: "fee",
-        header: "Monthly Pass Fee",
+        key: "vehicle",
+        header: "Vehicle",
         align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-              {formatCurrency(r.monthlyRouteFee)}
+        className: "w-[22%] px-3 text-center",
+        headerClassName: "w-[22%] px-3 text-center whitespace-nowrap",
+        cell: (r) => {
+          const assignedVehicles = vehicles.filter(
+            (v) => v.routeId === r.id || v.routeName === r.routeName
+          );
+          if (assignedVehicles.length === 0) {
+            return (
+              <span className="text-xs font-medium text-muted-foreground">
+                —
+              </span>
+            );
+          }
+          return (
+            <div className="flex flex-wrap items-center justify-center gap-1">
+              {assignedVehicles.map((v) => (
+                <span
+                  key={v.id}
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200/90 bg-slate-100/80 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]"
+                >
+                  <Bus className="size-3 text-slate-500" />
+                  {v.vehicleNo}
+                </span>
+              ))}
+            </div>
+          );
+        },
+      },
+      {
+        key: "students",
+        header: "Students",
+        align: "center",
+        className: "w-[14%] px-3 text-center",
+        headerClassName: "w-[14%] px-3 text-center whitespace-nowrap",
+        cell: (r) => {
+          const count = assignments.filter(
+            (a) => a.routeId === r.id || a.routeName === r.routeName
+          ).length;
+          return (
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-xs font-bold text-slate-700">
+              {count}
             </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              GPS: {r.gpsTrackerId}
-            </p>
-          </div>
-        ),
+          );
+        },
       },
       {
-        key: "status",
-        header: "Status",
+        key: "monthlyFare",
+        header: "Monthly Fare",
         align: "center",
+        className: "w-[16%] px-3 text-center",
+        headerClassName: "w-[16%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex justify-center">
-            <StatusBadge status={r.status} />
-          </div>
+          <span className="font-mono text-sm font-extrabold tabular-nums text-[#091d3e]">
+            Rs {formatNumber(r.monthlyFare)}
+          </span>
         ),
       },
       {
         key: "actions",
         header: "Actions",
         align: "center",
+        className: "w-[16%] px-3 text-center",
+        headerClassName: "w-[16%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-1.5">
             <ActionButton
               tone="outline"
               size="xs"
-              title="View timed stops schedule, crew & dispatch status"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-slate-50/80 text-[#091d3e] hover:border-[#091d3e] hover:bg-[#091d3e] hover:text-white transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Download route manifest PDF for ${r.routeName}`}
+              aria-label={`Download route manifest PDF for ${r.routeName}`}
+              onClick={() => handleDownloadRouteStudentsPdf(r)}
+            >
+              <FileDown className="size-3.5" />
+            </ActionButton>
+            <ActionButton
+              tone="outline"
+              size="xs"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Edit ${r.routeName}`}
+              aria-label={`Edit ${r.routeName}`}
               onClick={() => {
-                setSelectedRouteId(r.id);
-                setRouteViewOpen(true);
+                setEditingRoute(r);
+                setRouteModalOpen(true);
               }}
             >
-              <Eye className="size-3.5" />
-              <span>View</span>
+              <Edit className="size-3.5" />
+            </ActionButton>
+            <ActionButton
+              tone="outline"
+              size="xs"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Delete ${r.routeName}`}
+              aria-label={`Delete ${r.routeName}`}
+              onClick={() =>
+                setDeleteTarget({
+                  type: "routes",
+                  id: r.id,
+                  label: r.routeName,
+                })
+              }
+            >
+              <Trash2 className="size-3.5" />
             </ActionButton>
           </div>
         ),
       },
     ],
-    []
+    [vehicles, assignments, handleDownloadRouteStudentsPdf]
   );
 
-  const routeFilters = React.useMemo<FilterDef<TransportRouteRecord>[]>(
+  /* ───────────────────────── 2. Vehicles Table Columns ───────────────────────── */
+
+  const vehicleColumns = React.useMemo<Column<TransportVehicleRecord>[]>(
     () => [
       {
-        key: "campus",
-        label: "Campus",
-        allLabel: "All Campuses",
-        options: CAMPUS_OPTIONS,
-        getValue: (r) => r.campus,
-      },
-      {
-        key: "status",
-        label: "Status",
-        allLabel: "All Statuses",
-        options: ["On Route", "Active", "Standby"],
-        getValue: (r) => r.status,
-      },
-    ],
-    []
-  );
-
-  /* ───────────────────────── 2. Vehicle Fleet Columns ───────────────────────── */
-
-  const fleetColumns = React.useMemo<Column<FleetVehicleRecord>[]>(
-    () => [
-      {
-        key: "registrationNo",
-        header: "Reg # / Fleet ID",
+        key: "vehicleNo",
+        header: "Vehicle No",
         align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.registrationNo}
+        className: "w-[14%] px-3 text-center",
+        headerClassName: "w-[14%] px-3 text-center whitespace-nowrap",
+        cell: (v) => (
+          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
+            <span className="inline-flex items-center rounded-md border border-slate-300/90 bg-slate-100/90 px-2.5 py-0.5 font-mono text-xs font-extrabold tracking-wide text-[#091d3e]">
+              {v.vehicleNo}
             </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {r.vehicleCode} · {r.gpsDeviceCode}
-            </p>
+            <span className="font-mono text-[10px] font-medium text-muted-foreground">
+              {v.vehicleCode}
+            </span>
           </div>
         ),
       },
       {
-        key: "makeModel",
-        header: "Make, Model & Classification",
+        key: "model",
+        header: "Model",
         align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[235px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.makeModel}
-            </p>
-            <p className="text-[10.5px] text-muted-foreground">
-              {r.vehicleType} · {r.fuelType}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "campus",
-        header: "Campus & Route",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">{r.campus}</p>
-            <p className="font-mono text-[10.5px] text-brand">
-              {r.assignedRouteCode}
-            </p>
-          </div>
+        className: "w-[20%] px-3 text-center",
+        headerClassName: "w-[20%] px-3 text-center whitespace-nowrap",
+        cell: (v) => (
+          <span className="text-[13px] font-bold text-foreground">
+            {v.model}
+          </span>
         ),
       },
       {
         key: "driver",
-        header: "Assigned Driver",
+        header: "Driver",
         align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.assignedDriver}
-            </p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              Odometer: {r.odometerKm.toLocaleString()} km
-            </p>
+        className: "w-[22%] px-3 text-center",
+        headerClassName: "w-[22%] px-3 text-center whitespace-nowrap",
+        cell: (v) => (
+          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
+            <span className="text-[13px] font-bold text-[#091d3e]">
+              {v.driverName || "—"}
+            </span>
+            {v.driverPhone ? (
+              <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
+                {v.driverPhone}
+              </span>
+            ) : null}
           </div>
         ),
       },
       {
         key: "capacity",
-        header: "Seat Load",
+        header: "Capacity",
         align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold text-[#091d3e]">
-              {r.occupiedSeats} / {r.seatingCapacity} Seats
-            </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              Fitness: {formatDate(r.fitnessExpiry)}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "fuel",
-        header: "Monthly Fuel",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-              {formatCurrency(r.monthlyFuelCost)}
-            </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {r.monthlyFuelLitres} Litres / Mo
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "status",
-        header: "Fleet Status",
-        align: "center",
-        cell: (r) => (
-          <div className="flex justify-center">
-            <StatusBadge status={r.status} />
-          </div>
-        ),
-      },
-      {
-        key: "actions",
-        header: "Actions",
-        align: "center",
-        cell: (r) => (
-          <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              title="View vehicle telemetry, fitness certificate & workshop log"
-              onClick={() => {
-                setSelectedVehicleId(r.id);
-                setVehicleViewOpen(true);
-              }}
-            >
-              <Eye className="size-3.5" />
-              <span>View</span>
-            </ActionButton>
-          </div>
-        ),
-      },
-    ],
-    []
-  );
-
-  /* ───────────────────────── 3. Driver Assignments Columns ───────────────────────── */
-
-  const driverColumns = React.useMemo<Column<TransportDriverRecord>[]>(
-    () => [
-      {
-        key: "driverCode",
-        header: "Driver ID",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.driverCode}
-            </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {r.experienceYears} Yrs Exp
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "fullName",
-        header: "Driver Name & CNIC",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.fullName}
-            </p>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              CNIC: {r.cnic}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "license",
-        header: "HTV / PSV License",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold text-[#091d3e]">
-              {r.htvLicenseNo}
-            </span>
-            <p className="text-[10px] text-muted-foreground">
-              {r.licenseCategory} · Exp {formatDate(r.licenseExpiry)}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "assignment",
-        header: "Campus, Bus & Route",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.campus} · {r.assignedVehicleReg}
-            </p>
-            <p className="font-mono text-[10.5px] text-brand">
-              {r.assignedRouteCode} · Conductor: {r.conductorName}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "contact",
-        header: "Contact & Shift",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-semibold text-foreground">
-              {r.phone}
-            </span>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              {r.shiftTiming}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "status",
-        header: "Duty Status",
-        align: "center",
-        cell: (r) => (
-          <div className="flex justify-center">
-            <StatusBadge status={r.status} />
-          </div>
-        ),
-      },
-      {
-        key: "actions",
-        header: "Actions",
-        align: "center",
-        cell: (r) => (
-          <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              title="View driver HTV license, police vetting & duty status"
-              onClick={() => {
-                setSelectedDriverId(r.id);
-                setDriverViewOpen(true);
-              }}
-            >
-              <Eye className="size-3.5" />
-              <span>View</span>
-            </ActionButton>
-          </div>
-        ),
-      },
-    ],
-    []
-  );
-
-  /* ───────────────────────── 4. Student Route Allocation Columns ───────────────────────── */
-
-  const allocationColumns = React.useMemo<
-    Column<StudentTransportAllocationRecord>[]
-  >(
-    () => [
-      {
-        key: "passNo",
-        header: "Pass #",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.passNo}
-            </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              {r.seatNo}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "studentName",
-        header: "Student & Guardian",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.studentName}{" "}
-              <span className="font-mono text-[10.5px] text-muted-foreground">
-                (#{r.rollNo} · {r.className})
-              </span>
-            </p>
-            <p className="text-[10.5px] text-muted-foreground">
-              {r.guardianName} · {r.guardianPhone}
-            </p>
-          </div>
+        className: "w-[10%] px-2 text-center",
+        headerClassName: "w-[10%] px-2 text-center whitespace-nowrap",
+        cell: (v) => (
+          <span className="font-mono text-sm font-extrabold tabular-nums text-[#091d3e]">
+            {formatNumber(v.capacity)}
+          </span>
         ),
       },
       {
         key: "route",
-        header: "Assigned Route & Bus",
+        header: "Route",
         align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[215px] mx-auto">
-            <p className="font-mono text-xs font-bold text-[#091d3e]">
-              {r.routeCode} · {r.vehicleRegNo}
-            </p>
-            <p className="truncate text-[10.5px] text-muted-foreground">
-              {r.campus} · {r.routeName}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "pickupStop",
-        header: "Boarding Stop & Schedule",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center max-w-[205px] mx-auto">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.pickupStop}
-            </p>
-            <p className="font-mono text-[10px] text-muted-foreground">
-              Pickup: {r.pickupTime} · Drop: {r.dropTime}
-            </p>
-          </div>
-        ),
-      },
-      {
-        key: "fee",
-        header: "Monthly Fee",
-        align: "center",
-        cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-              {formatCurrency(r.monthlyTransportFee)}
+        className: "w-[22%] px-3 text-center",
+        headerClassName: "w-[22%] px-3 text-center whitespace-nowrap",
+        cell: (v) =>
+          v.routeName ? (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200/90 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+              <Navigation className="size-3 shrink-0 text-[#091d3e]" />
+              <span className="truncate">{v.routeName}</span>
             </span>
-            <p className="text-[10px] text-muted-foreground">
-              Challan: {r.feeStatus}
+          ) : (
+            <span className="text-xs font-medium text-muted-foreground">—</span>
+          ),
+      },
+      {
+        key: "actions",
+        header: "Actions",
+        align: "center",
+        className: "w-[12%] px-3 text-center",
+        headerClassName: "w-[12%] px-3 text-center whitespace-nowrap",
+        cell: (v) => (
+          <div className="flex items-center justify-center gap-1.5">
+            <ActionButton
+              tone="outline"
+              size="xs"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-slate-50/80 text-[#091d3e] hover:border-[#091d3e] hover:bg-[#091d3e] hover:text-white transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Download student manifest PDF for ${v.vehicleNo} (${v.model})`}
+              aria-label={`Download student manifest PDF for ${v.vehicleNo}`}
+              onClick={() => handleDownloadVehicleStudentsPdf(v)}
+            >
+              <FileDown className="size-3.5" />
+            </ActionButton>
+            <ActionButton
+              tone="outline"
+              size="xs"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Edit vehicle ${v.vehicleNo}`}
+              aria-label={`Edit vehicle ${v.vehicleNo}`}
+              onClick={() => {
+                setEditingVehicle(v);
+                setVehicleModalOpen(true);
+              }}
+            >
+              <Edit className="size-3.5" />
+            </ActionButton>
+            <ActionButton
+              tone="outline"
+              size="xs"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Delete vehicle ${v.vehicleNo}`}
+              aria-label={`Delete vehicle ${v.vehicleNo}`}
+              onClick={() =>
+                setDeleteTarget({
+                  type: "vehicles",
+                  id: v.id,
+                  label: v.vehicleNo,
+                })
+              }
+            >
+              <Trash2 className="size-3.5" />
+            </ActionButton>
+          </div>
+        ),
+      },
+    ],
+    [handleDownloadVehicleStudentsPdf]
+  );
+
+  const vehicleFilters = React.useMemo<FilterDef<TransportVehicleRecord>[]>(
+    () => [
+      {
+        key: "route",
+        label: "Route",
+        allLabel: "All Routes",
+        options: [
+          ...routes.map((r) => r.routeName),
+          "Unassigned",
+        ],
+        getValue: (v) => v.routeName || "Unassigned",
+      },
+    ],
+    [routes]
+  );
+
+  /* ───────────────────────── 3. Transport Assignments Columns ───────────────────────── */
+
+  const assignmentColumns = React.useMemo<Column<TransportAssignmentRecord>[]>(
+    () => [
+      {
+        key: "studentName",
+        header: "Name",
+        align: "center",
+        className: "w-[18%] px-3 text-center",
+        headerClassName: "w-[18%] px-3 text-center whitespace-nowrap",
+        cell: (a) => (
+          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
+            <p className="text-[13px] font-bold text-foreground">
+              {a.studentName}
             </p>
+            <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
+              {a.studentRollNo} · {a.className}
+            </span>
           </div>
         ),
       },
       {
-        key: "status",
-        header: "Pass Status",
+        key: "routeName",
+        header: "Route",
         align: "center",
-        cell: (r) => (
-          <div className="flex justify-center">
-            <StatusBadge status={r.status} />
+        className: "w-[18%] px-3 text-center",
+        headerClassName: "w-[18%] px-3 text-center whitespace-nowrap",
+        cell: (a) => (
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200/90 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+            <Navigation className="size-3 shrink-0 text-[#091d3e]" />
+            <span className="truncate">{a.routeName}</span>
+          </span>
+        ),
+      },
+      {
+        key: "busName",
+        header: "Bus Name",
+        align: "center",
+        className: "w-[16%] px-3 text-center",
+        headerClassName: "w-[16%] px-3 text-center whitespace-nowrap",
+        cell: (a) => {
+          const v = vehicles.find(
+            (veh) =>
+              (a.routeId && veh.routeId === a.routeId) ||
+              (a.routeName && veh.routeName === a.routeName)
+          );
+          const busModel = a.busName || v?.model || "—";
+          const plate = a.vehicleNo || v?.vehicleNo;
+
+          if (!busModel || busModel === "—") {
+            return (
+              <span className="text-xs font-medium text-muted-foreground">—</span>
+            );
+          }
+
+          return (
+            <div className="flex flex-col items-center justify-center gap-0.5 text-center">
+              <span className="text-[12.5px] font-bold text-foreground">
+                {busModel}
+              </span>
+              {plate && (
+                <span className="inline-flex items-center gap-1 font-mono text-[10.5px] font-bold text-[#091d3e]">
+                  <Bus className="size-3 text-slate-400" />
+                  {plate}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        key: "driverName",
+        header: "Driver Name",
+        align: "center",
+        className: "w-[15%] px-3 text-center",
+        headerClassName: "w-[15%] px-3 text-center whitespace-nowrap",
+        cell: (a) => {
+          const v = vehicles.find(
+            (veh) =>
+              (a.routeId && veh.routeId === a.routeId) ||
+              (a.routeName && veh.routeName === a.routeName)
+          );
+          const driver = a.driverName || v?.driverName || "—";
+          const phone = a.driverPhone || v?.driverPhone;
+
+          if (!driver || driver === "—") {
+            return (
+              <span className="text-xs font-medium text-muted-foreground">—</span>
+            );
+          }
+
+          return (
+            <div className="flex flex-col items-center justify-center gap-0.5 text-center">
+              <span className="text-[12.5px] font-bold text-[#091d3e]">
+                {driver}
+              </span>
+              {phone && (
+                <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
+                  {phone}
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        key: "boardingStop",
+        header: "Boarding Stop",
+        align: "center",
+        className: "w-[13%] px-3 text-center",
+        headerClassName: "w-[13%] px-3 text-center whitespace-nowrap",
+        cell: (a) => (
+          <div className="flex items-center justify-center gap-1 text-xs font-semibold text-foreground">
+            <MapPin className="size-3.5 shrink-0 text-slate-500" />
+            <span className="truncate">{a.boardingStop}</span>
           </div>
+        ),
+      },
+      {
+        key: "monthlyFare",
+        header: "Monthly Fare",
+        align: "center",
+        className: "w-[9%] px-2 text-center",
+        headerClassName: "w-[9%] px-2 text-center whitespace-nowrap",
+        cell: (a) => (
+          <span className="font-mono text-sm font-extrabold tabular-nums text-[#091d3e]">
+            Rs {formatNumber(a.monthlyFare)}
+          </span>
         ),
       },
       {
         key: "actions",
         header: "Actions",
         align: "center",
-        cell: (r) => (
-          <div className="flex items-center justify-center">
+        className: "w-[11%] px-2 text-center",
+        headerClassName: "w-[11%] px-2 text-center whitespace-nowrap",
+        cell: (a) => (
+          <div className="flex items-center justify-center gap-1.5">
             <ActionButton
               tone="outline"
               size="xs"
-              title="View student transport pass, boarding stop & fee status"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-slate-50/80 text-[#091d3e] hover:border-[#091d3e] hover:bg-[#091d3e] hover:text-white transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Download transport pass PDF for ${a.studentName}`}
+              aria-label={`Download transport pass PDF for ${a.studentName}`}
+              onClick={() => handleDownloadStudentPassPdf(a)}
+            >
+              <FileDown className="size-3.5" />
+            </ActionButton>
+            <ActionButton
+              tone="outline"
+              size="xs"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Edit assignment for ${a.studentName}`}
+              aria-label={`Edit assignment for ${a.studentName}`}
               onClick={() => {
-                setSelectedAllocationId(r.id);
-                setAllocationViewOpen(true);
+                setEditingAssignment(a);
+                setAssignmentModalOpen(true);
               }}
             >
-              <Eye className="size-3.5" />
-              <span>View</span>
+              <Edit className="size-3.5" />
+            </ActionButton>
+            <ActionButton
+              tone="outline"
+              size="xs"
+              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 transition-colors shadow-2xs [&_svg]:size-3.5"
+              title={`Remove ${a.studentName} from route`}
+              aria-label={`Remove ${a.studentName} from route`}
+              onClick={() =>
+                setDeleteTarget({
+                  type: "assignments",
+                  id: a.id,
+                  label: a.studentName,
+                })
+              }
+            >
+              <Trash2 className="size-3.5" />
             </ActionButton>
           </div>
         ),
       },
     ],
-    []
+    [vehicles, handleDownloadStudentPassPdf]
   );
 
-  /* ───────────────────────── Header Export & Primary Action ───────────────────────── */
+  const assignmentFilters = React.useMemo<
+    FilterDef<TransportAssignmentRecord>[]
+  >(
+    () => [
+      {
+        key: "route",
+        label: "Route",
+        allLabel: "All Routes",
+        options: routes.map((r) => r.routeName),
+        getValue: (a) => a.routeName,
+      },
+      {
+        key: "bus",
+        label: "Bus",
+        allLabel: "All Buses",
+        options: Array.from(
+          new Set(
+            vehicles.map((v) => v.model).filter(Boolean)
+          )
+        ),
+        getValue: (a) => {
+          const v = vehicles.find(
+            (veh) =>
+              (a.routeId && veh.routeId === a.routeId) ||
+              (a.routeName && veh.routeName === a.routeName)
+          );
+          return a.busName || v?.model || "Unassigned";
+        },
+      },
+    ],
+    [routes, vehicles]
+  );
 
-  const handlePrint = () => {
-    const ok = printTransportRoutesRegister(routes);
-    if (ok)
-      toast.info("Opening print preview for institutional transport routes…");
-    else toast.error("Pop-up blocked. Please allow pop-ups to print.");
-  };
-
-  const handleExportPdf = () => {
-    if (activeTab === "routes") {
-      exportRoutesPdf(routes);
-      toast.success(
-        `Transport routes & stops schedule (${routes.length} routes) downloaded as PDF.`
-      );
-    } else if (activeTab === "fleet") {
-      exportFleetPdf(vehicles);
-      toast.success(
-        `Campus vehicle fleet register (${vehicles.length} vehicles) downloaded as PDF.`
-      );
-    } else if (activeTab === "drivers") {
-      exportDriversPdf(drivers);
-      toast.success(
-        `Licensed drivers & conductors roster (${drivers.length} staff) downloaded as PDF.`
-      );
-    } else {
-      exportStudentAllocationsPdf(allocations);
-      toast.success(
-        `Student transport allocations (${allocations.length} passes) downloaded as PDF.`
-      );
-    }
-  };
-
-  const handlePrimaryAction = () => {
-    if (activeTab === "fleet") {
-      setVehicleFormOpen(true);
-    } else if (activeTab === "drivers") {
-      setDriverFormOpen(true);
-    } else if (activeTab === "allocations") {
-      setAllocationFormOpen(true);
-    } else {
-      setEditingRoute(null);
-      setRouteFormOpen(true);
-    }
-  };
-
-  const primaryActionLabel =
-    activeTab === "fleet"
-      ? "Register Vehicle"
-      : activeTab === "drivers"
-      ? "Assign Driver"
-      : activeTab === "allocations"
-      ? "Allocate Student Pass"
-      : "Create Route";
-
-  const activeTabMeta = {
-    routes: {
-      label: "Routes & Stops",
-      count: routes.length,
-      icon: Navigation,
-      subtitle: `GPS Tracked Corridors · ${routeKpis.totalStops} Timed Stops · ${routeKpis.utilPct}% Seat Occupancy`,
-    },
-    fleet: {
-      label: "Vehicle Fleet",
-      count: vehicles.length,
-      icon: Bus,
-      subtitle: `Institutional Buses & Coasters · ${fleetKpis.activeCount} Operational · 100% Fitness Certified`,
-    },
-    drivers: {
-      label: "Driver Assignments",
-      count: drivers.length,
-      icon: UserCheck,
-      subtitle: `HTV & PSV Certified Crew · ${driverKpis.onDutyCount} Active On Duty · Police Verified`,
-    },
-    allocations: {
-      label: "Student Route Allocation",
-      count: allocations.length,
-      icon: GraduationCap,
-      subtitle: `Enrolled Student Riders · ${allocationKpis.allocatedCount} Reserved Seats Allocated`,
-    },
-  }[activeTab];
-
-  const ActiveTabIcon = activeTabMeta.icon;
+  const primaryButtonLabel =
+    activeTab === "routes"
+      ? "Add Route"
+      : activeTab === "vehicles"
+      ? "Add Vehicle"
+      : "Assign Student";
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Transport"
+        title="Transport Management"
         className="mb-0 lg:mb-0"
         actions={
           <>
             <ActionButton tone="outline" size="md" onClick={handlePrint}>
               <Printer />
-              <span>Print Register</span>
+              <span>Print</span>
             </ActionButton>
             <ActionButton tone="pdf" size="md" onClick={handleExportPdf}>
               <Download />
@@ -962,362 +798,287 @@ export function TransportClient() {
             <ActionButton
               tone="primary"
               size="md"
-              onClick={handlePrimaryAction}
+              onClick={handleOpenPrimaryAdd}
             >
               <Plus />
-              <span>{primaryActionLabel}</span>
+              <span>{primaryButtonLabel}</span>
             </ActionButton>
           </>
         }
       />
 
-      {/* Dynamic 4-Card KPI Strip */}
-      {activeTab === "routes" && (
-        <StatGrid>
-          <StatCard
-            label="Active Bus Corridors"
-            value={`${routeKpis.totalRoutes} Routes (${routeKpis.totalStops} Stops)`}
-            icon={Navigation}
-          />
-          <StatCard
-            label="Enrolled Route Riders"
-            value={`${routeKpis.totalRiders} / ${routeKpis.totalSeats} Seats (${routeKpis.utilPct}%)`}
-            icon={Users}
-          />
-          <StatCard
-            label="Monthly Route Revenue"
-            value={formatCurrencyCompact(routeKpis.monthlyRevenue)}
-            icon={Wallet}
-          />
-          <StatCard
-            label="GPS Fleet Telemetry"
-            value="100% Live Tracked"
-            icon={MapPin}
-          />
-        </StatGrid>
-      )}
+      {/* Executive KPI Cards */}
+      <StatGrid>
+        <StatCard
+          label="Routes"
+          value={formatNumber(kpis.totalRoutes)}
+          title={`${kpis.totalRoutes} active school transport routes`}
+          icon={Navigation}
+        />
+        <StatCard
+          label="Vehicles"
+          value={formatNumber(kpis.totalVehicles)}
+          title={`${kpis.totalVehicles} vehicles · ${formatNumber(
+            kpis.totalCapacity
+          )} total seats`}
+          icon={Bus}
+        />
+        <StatCard
+          label="Transport Assignments"
+          value={formatNumber(kpis.totalAssignedStudents)}
+          title={`${kpis.totalAssignedStudents} students assigned to transport routes`}
+          icon={Users}
+        />
+        <StatCard
+          label="Monthly Transport Fee"
+          value={`Rs ${formatNumber(kpis.monthlyRevenue)}`}
+          title={`Monthly recurring fare across ${kpis.totalAssignedStudents} assigned students`}
+          icon={Wallet}
+        />
+      </StatGrid>
 
-      {activeTab === "fleet" && (
-        <StatGrid>
-          <StatCard
-            label="Campus Vehicle Fleet"
-            value={`${fleetKpis.totalVehicles} Vehicles (${fleetKpis.totalCapacity} Seats)`}
-            icon={Bus}
-          />
-          <StatCard
-            label="Operational & On Route"
-            value={`${fleetKpis.activeCount} Active · ${fleetKpis.maintCount} Workshop`}
-            icon={ShieldCheck}
-          />
-          <StatCard
-            label="Monthly Fuel Spend (Oct)"
-            value={formatCurrencyCompact(fleetKpis.totalFuelCost)}
-            icon={Fuel}
-          />
-          <StatCard
-            label="Excise & Fitness Status"
-            value="100% Certified"
-            icon={Navigation}
-          />
-        </StatGrid>
-      )}
-
-      {activeTab === "drivers" && (
-        <StatGrid>
-          <StatCard
-            label="Licensed HTV Drivers"
-            value={`${driverKpis.totalDrivers} Drivers & Crew`}
-            icon={UserCheck}
-          />
-          <StatCard
-            label="Active On-Duty Crew"
-            value={`${driverKpis.onDutyCount} Dispatched`}
-            icon={Bus}
-          />
-          <StatCard
-            label="Average Driving Experience"
-            value={`${driverKpis.avgExp} Years HTV`}
-            icon={ShieldCheck}
-          />
-          <StatCard
-            label="Police & Medical Vetting"
-            value="100% Cleared"
-            icon={Users}
-          />
-        </StatGrid>
-      )}
-
-      {activeTab === "allocations" && (
-        <StatGrid>
-          <StatCard
-            label="Issued Transport Passes"
-            value={`${allocationKpis.totalPasses} Student Passes`}
-            icon={GraduationCap}
-          />
-          <StatCard
-            label="Confirmed Seat Holders"
-            value={`${allocationKpis.allocatedCount} Allocated`}
-            icon={UserCheck}
-          />
-          <StatCard
-            label="Waitlisted Requests"
-            value={`${allocationKpis.waitlistCount} Waitlisted`}
-            icon={MapPin}
-          />
-          <StatCard
-            label="Cleared Pass Fee (Oct)"
-            value={formatCurrencyCompact(allocationKpis.paidPassRevenue)}
-            icon={Wallet}
-          />
-        </StatGrid>
-      )}
-
-      {/* Executive Register Selector Dropdown */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* Executive Register Dropdown Selector Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 bg-white p-2.5 shadow-2xs">
+        {/* Clean & Professional Register Dropdown Menu */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="group inline-flex h-9 cursor-pointer items-center gap-2.5 rounded-[4px] border border-brand/20 bg-white px-3 text-xs font-semibold text-[#091d3e] shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-colors hover:border-brand/35 hover:bg-brand-50/40 focus:outline-none focus:ring-2 focus:ring-brand/15">
-            <ActiveTabIcon className="size-3.5 shrink-0 text-brand" />
-            <span className="font-semibold text-[#091d3e]">
-              {activeTabMeta.label}
+          <DropdownMenuTrigger
+            aria-label="Select Transport Register"
+            className="group inline-flex h-9 items-center gap-2.5 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 px-3.5 text-xs font-semibold text-foreground shadow-2xs hover:border-slate-300 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer select-none"
+          >
+            {activeTab === "routes" ? (
+              <Navigation className="size-4 text-[#091d3e]" />
+            ) : activeTab === "vehicles" ? (
+              <Bus className="size-4 text-[#091d3e]" />
+            ) : (
+              <GraduationCap className="size-4 text-[#091d3e]" />
+            )}
+            <span>
+              {activeTab === "routes"
+                ? "Routes Register"
+                : activeTab === "vehicles"
+                ? "Vehicles Register"
+                : "Transport Assignments"}
             </span>
-            <span className="rounded-[3px] border border-brand/15 bg-brand-50/80 px-1.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-brand">
-              {activeTabMeta.count}
-            </span>
-            <ChevronDown className="ml-0.5 size-3.5 shrink-0 text-muted-foreground transition-transform duration-150 group-data-open:rotate-180" />
+            <ChevronDown className="size-3.5 text-muted-foreground transition-transform duration-200 group-data-[popup-open]:rotate-180" />
           </DropdownMenuTrigger>
 
           <DropdownMenuContent
             align="start"
-            sideOffset={6}
-            className="w-[260px] rounded-[6px] border border-brand/15 bg-white p-1 shadow-[0_10px_28px_-6px_rgb(9_29_62/0.18),0_2px_6px_rgb(9_29_62/0.06)] ring-0"
+            className="w-56 p-1 rounded-xl shadow-lg border border-slate-200 bg-white text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
           >
-            {(
-              [
-                {
-                  key: "routes" as const,
-                  label: "Routes & Stops",
-                  count: routes.length,
-                  icon: Navigation,
-                },
-                {
-                  key: "fleet" as const,
-                  label: "Vehicle Fleet",
-                  count: vehicles.length,
-                  icon: Bus,
-                },
-                {
-                  key: "drivers" as const,
-                  label: "Driver Assignments",
-                  count: drivers.length,
-                  icon: UserCheck,
-                },
-                {
-                  key: "allocations" as const,
-                  label: "Student Route Allocation",
-                  count: allocations.length,
-                  icon: GraduationCap,
-                },
-              ] as const
-            ).map((item) => {
-              const Icon = item.icon;
-              const isSelected = activeTab === item.key;
-              return (
-                <DropdownMenuItem
-                  key={item.key}
-                  onClick={() => setActiveTab(item.key)}
-                  className={cn(
-                    "flex items-center justify-between gap-2 rounded-[4px] px-2.5 py-2 text-xs cursor-pointer transition-colors",
-                    isSelected
-                      ? "bg-brand-50/80 font-semibold text-[#091d3e] focus:bg-brand-50"
-                      : "font-medium text-foreground/85 hover:bg-slate-50 focus:bg-slate-100/80"
-                  )}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Icon
-                      className={cn(
-                        "size-3.5 shrink-0",
-                        isSelected ? "text-[#091d3e]" : "text-muted-foreground"
-                      )}
-                    />
-                    <span className="whitespace-nowrap">{item.label}</span>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span
-                      className={cn(
-                        "min-w-[26px] rounded-[3px] px-1.5 py-0.5 text-center font-mono text-[10.5px] font-bold tabular-nums",
-                        isSelected
-                          ? "bg-[#091d3e] text-white"
-                          : "bg-slate-100 text-muted-foreground"
-                      )}
-                    >
-                      {item.count}
-                    </span>
-                    <span className="grid size-3.5 shrink-0 place-items-center">
-                      {isSelected && (
-                        <Check className="size-3.5 text-[#091d3e] stroke-[2.5]" />
-                      )}
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-              );
-            })}
+            <DropdownMenuItem
+              onClick={() => setActiveTab("routes")}
+              className={cn(
+                "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
+                activeTab === "routes"
+                  ? "bg-slate-100 font-semibold text-foreground"
+                  : "hover:bg-slate-50 text-slate-700 font-medium"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Navigation className="size-4 text-slate-500" />
+                <span>Routes</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[10.5px] font-bold rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                  {routes.length}
+                </span>
+                {activeTab === "routes" && (
+                  <Check className="size-3.5 text-foreground" />
+                )}
+              </div>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => setActiveTab("vehicles")}
+              className={cn(
+                "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
+                activeTab === "vehicles"
+                  ? "bg-slate-100 font-semibold text-foreground"
+                  : "hover:bg-slate-50 text-slate-700 font-medium"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Bus className="size-4 text-slate-500" />
+                <span>Vehicles</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[10.5px] font-bold rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                  {vehicles.length}
+                </span>
+                {activeTab === "vehicles" && (
+                  <Check className="size-3.5 text-foreground" />
+                )}
+              </div>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => setActiveTab("assignments")}
+              className={cn(
+                "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
+                activeTab === "assignments"
+                  ? "bg-slate-100 font-semibold text-foreground"
+                  : "hover:bg-slate-50 text-slate-700 font-medium"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <GraduationCap className="size-4 text-slate-500" />
+                <span>Transport Assignments</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-[10.5px] font-bold rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                  {assignments.length}
+                </span>
+                {activeTab === "assignments" && (
+                  <Check className="size-3.5 text-foreground" />
+                )}
+              </div>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="size-2 rounded-full bg-emerald-500" />
-          <span className="font-medium">{activeTabMeta.subtitle}</span>
-        </div>
       </div>
 
-      {/* Main Register DataTable */}
+      {/* Tab 1: Routes Table */}
       {activeTab === "routes" && (
         <SectionCard flush contentClassName="pt-5">
           <DataTable
             data={routes}
             columns={routeColumns}
             getRowId={(r) => r.id}
-            filters={routeFilters}
-            searchPlaceholder="Search route code, corridor name, stop, vehicle reg # or driver…"
+            tableClassName="min-w-[820px] table-fixed"
+            searchPlaceholder="Search route name, code or monthly fare…"
             searchFn={(r, q) =>
-              r.routeCode.toLowerCase().includes(q) ||
               r.routeName.toLowerCase().includes(q) ||
-              r.vehicleRegNo.toLowerCase().includes(q) ||
-              r.driverName.toLowerCase().includes(q) ||
-              r.campus.toLowerCase().includes(q) ||
-              r.stops.some((s) => s.stopName.toLowerCase().includes(q))
+              r.routeCode.toLowerCase().includes(q) ||
+              String(r.monthlyFare).includes(q)
             }
             pageSize={8}
-            emptyMessage="No transport routes match the selected filters."
+            emptyMessage="No transport routes found."
           />
         </SectionCard>
       )}
 
-      {activeTab === "fleet" && (
+      {/* Tab 2: Vehicles Table */}
+      {activeTab === "vehicles" && (
         <SectionCard flush contentClassName="pt-5">
           <DataTable
             data={vehicles}
-            columns={fleetColumns}
-            getRowId={(r) => r.id}
-            searchPlaceholder="Search vehicle reg #, fleet code, make/model, route or driver…"
-            searchFn={(r, q) =>
-              r.registrationNo.toLowerCase().includes(q) ||
-              r.vehicleCode.toLowerCase().includes(q) ||
-              r.makeModel.toLowerCase().includes(q) ||
-              r.assignedRouteCode.toLowerCase().includes(q) ||
-              r.assignedDriver.toLowerCase().includes(q) ||
-              r.campus.toLowerCase().includes(q)
+            columns={vehicleColumns}
+            getRowId={(v) => v.id}
+            filters={vehicleFilters}
+            tableClassName="min-w-[840px] table-fixed"
+            searchPlaceholder="Search vehicle number, model, driver or assigned route…"
+            searchFn={(v, q) =>
+              v.vehicleNo.toLowerCase().includes(q) ||
+              v.model.toLowerCase().includes(q) ||
+              v.driverName.toLowerCase().includes(q) ||
+              (v.driverPhone?.toLowerCase().includes(q) ?? false) ||
+              v.routeName.toLowerCase().includes(q) ||
+              v.vehicleCode.toLowerCase().includes(q)
             }
             pageSize={8}
-            emptyMessage="No fleet vehicles match the search query."
+            emptyMessage="No fleet vehicles match your search."
           />
         </SectionCard>
       )}
 
-      {activeTab === "drivers" && (
+      {/* Tab 3: Transport Assignments Table */}
+      {activeTab === "assignments" && (
         <SectionCard flush contentClassName="pt-5">
           <DataTable
-            data={drivers}
-            columns={driverColumns}
-            getRowId={(r) => r.id}
-            searchPlaceholder="Search driver name, CNIC, HTV license #, vehicle reg # or phone…"
-            searchFn={(r, q) =>
-              r.driverCode.toLowerCase().includes(q) ||
-              r.fullName.toLowerCase().includes(q) ||
-              r.cnic.toLowerCase().includes(q) ||
-              r.htvLicenseNo.toLowerCase().includes(q) ||
-              r.assignedVehicleReg.toLowerCase().includes(q) ||
-              r.campus.toLowerCase().includes(q)
-            }
+            data={assignments}
+            columns={assignmentColumns}
+            getRowId={(a) => a.id}
+            filters={assignmentFilters}
+            tableClassName="min-w-[980px] table-fixed"
+            searchPlaceholder="Search student, roll no, bus name, driver, route or stop…"
+            searchFn={(a, q) => {
+              const v = vehicles.find(
+                (veh) =>
+                  (a.routeId && veh.routeId === a.routeId) ||
+                  (a.routeName && veh.routeName === a.routeName)
+              );
+              const bus = (a.busName || v?.model || "").toLowerCase();
+              const vehNo = (a.vehicleNo || v?.vehicleNo || "").toLowerCase();
+              const driver = (a.driverName || v?.driverName || "").toLowerCase();
+              const phone = (a.driverPhone || v?.driverPhone || "").toLowerCase();
+
+              return (
+                a.studentName.toLowerCase().includes(q) ||
+                a.studentRollNo.toLowerCase().includes(q) ||
+                a.className.toLowerCase().includes(q) ||
+                a.routeName.toLowerCase().includes(q) ||
+                a.boardingStop.toLowerCase().includes(q) ||
+                bus.includes(q) ||
+                vehNo.includes(q) ||
+                driver.includes(q) ||
+                phone.includes(q)
+              );
+            }}
             pageSize={8}
-            emptyMessage="No transport drivers match the search query."
+            emptyMessage="No student transport assignments found."
           />
         </SectionCard>
       )}
 
-      {activeTab === "allocations" && (
-        <SectionCard flush contentClassName="pt-5">
-          <DataTable
-            data={allocations}
-            columns={allocationColumns}
-            getRowId={(r) => r.id}
-            searchPlaceholder="Search pass #, student name, roll #, route code, pickup stop or seat #…"
-            searchFn={(r, q) =>
-              r.passNo.toLowerCase().includes(q) ||
-              r.studentName.toLowerCase().includes(q) ||
-              r.rollNo.toLowerCase().includes(q) ||
-              r.routeCode.toLowerCase().includes(q) ||
-              r.pickupStop.toLowerCase().includes(q) ||
-              r.seatNo.toLowerCase().includes(q)
-            }
-            pageSize={8}
-            emptyMessage="No student transport passes match the search query."
-          />
-        </SectionCard>
-      )}
-
-      {/* Interactive Modals */}
-      <TransportRouteViewModal
-        route={selectedRoute}
-        open={routeViewOpen}
-        onOpenChange={setRouteViewOpen}
-        onUpdateRoute={handleUpdateRoute}
-        onAddStop={handleAddStop}
-        onEditRoute={(rt) => {
-          setEditingRoute(rt);
-          setRouteFormOpen(true);
+      {/* 1. Add / Edit Route Modal */}
+      <RouteFormModal
+        open={routeModalOpen}
+        onOpenChange={(open) => {
+          setRouteModalOpen(open);
+          if (!open) setEditingRoute(null);
         }}
-      />
-
-      <TransportRouteFormModal
-        open={routeFormOpen}
-        onOpenChange={setRouteFormOpen}
-        initialData={editingRoute}
         totalCount={routes.length}
+        initialData={editingRoute}
         onSave={handleSaveRoute}
       />
 
-      <FleetVehicleViewModal
-        vehicle={selectedVehicle}
-        open={vehicleViewOpen}
-        onOpenChange={setVehicleViewOpen}
-        onUpdateVehicleStatus={handleUpdateVehicleStatus}
-      />
-
-      <FleetVehicleFormModal
-        open={vehicleFormOpen}
-        onOpenChange={setVehicleFormOpen}
+      {/* 2. Add / Edit Vehicle Modal */}
+      <VehicleFormModal
+        open={vehicleModalOpen}
+        onOpenChange={(open) => {
+          setVehicleModalOpen(open);
+          if (!open) setEditingVehicle(null);
+        }}
         totalCount={vehicles.length}
-        onSave={handleCreateVehicle}
-      />
-
-      <DriverViewModal
-        driver={selectedDriver}
-        open={driverViewOpen}
-        onOpenChange={setDriverViewOpen}
-        onUpdateDriverStatus={handleUpdateDriverStatus}
-      />
-
-      <DriverFormModal
-        open={driverFormOpen}
-        onOpenChange={setDriverFormOpen}
-        totalCount={drivers.length}
-        onSave={handleCreateDriver}
-      />
-
-      <StudentAllocationViewModal
-        allocation={selectedAllocation}
-        open={allocationViewOpen}
-        onOpenChange={setAllocationViewOpen}
-        onUpdateAllocation={handleUpdateAllocation}
-      />
-
-      <StudentAllocationFormModal
-        open={allocationFormOpen}
-        onOpenChange={setAllocationFormOpen}
         routes={routes}
-        totalCount={allocations.length}
-        onSave={handleCreateAllocation}
+        initialData={editingVehicle}
+        onSave={handleSaveVehicle}
+      />
+
+      {/* 3. Assign Student / Edit Assignment Modal */}
+      <AssignmentFormModal
+        open={assignmentModalOpen}
+        onOpenChange={(open) => {
+          setAssignmentModalOpen(open);
+          if (!open) setEditingAssignment(null);
+        }}
+        totalCount={assignments.length}
+        routes={routes}
+        vehicles={vehicles}
+        initialData={editingAssignment}
+        onSave={handleSaveAssignment}
+      />
+
+      {/* 4. Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title={
+          deleteTarget?.type === "routes"
+            ? "Delete Transport Route"
+            : deleteTarget?.type === "vehicles"
+            ? "Delete Fleet Vehicle"
+            : "Remove Student Assignment"
+        }
+        description={
+          deleteTarget
+            ? `Are you sure you want to remove "${deleteTarget.label}"? This action will immediately update the transport register.`
+            : ""
+        }
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

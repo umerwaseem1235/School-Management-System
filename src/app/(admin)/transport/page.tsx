@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { TransportClient } from "./transport-client";
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 };
 
 export default function TransportPage() {
-  return <TransportClient />;
+  return (
+    <Suspense fallback={null}>
+      <TransportClient />
+    </Suspense>
+  );
 }

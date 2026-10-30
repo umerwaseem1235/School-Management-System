@@ -1,5 +1,6 @@
 import type { FeeRevisionRecord } from "@/lib/mock/finance";
 import { formatCurrency, formatPercent } from "@/lib/format";
+import { printHtml } from "@/lib/print-html";
 
 function sanitizePdfText(input: string): string {
   return input
@@ -228,12 +229,6 @@ export function exportFeeRevisionsPdf(records: FeeRevisionRecord[]): boolean {
 export function printFeeRevisionsReport(records: FeeRevisionRecord[]): boolean {
   if (typeof window === "undefined") return false;
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    window.print();
-    return true;
-  }
-
   const generatedDate = new Date().toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",
@@ -418,14 +413,5 @@ export function printFeeRevisionsReport(records: FeeRevisionRecord[]): boolean {
 </body>
 </html>`;
 
-  printWindow.document.open();
-  printWindow.document.write(html);
-  printWindow.document.close();
-
-  printWindow.onload = () => {
-    printWindow.focus();
-    printWindow.print();
-  };
-
-  return true;
+  return printHtml(html);
 }
