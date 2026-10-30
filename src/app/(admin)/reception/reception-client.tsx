@@ -394,10 +394,11 @@ export function ReceptionClient({
   );
 
   return (
-    <div className="flex flex-col gap-6 pb-8">
+    <div className="flex flex-col gap-6 lg:gap-8 pb-8">
       {/* Header */}
       <PageHeader
         title="Reception"
+        className="mb-0 lg:mb-0"
         actions={
           <Button
             onClick={() => {
