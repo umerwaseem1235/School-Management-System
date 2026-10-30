@@ -24,6 +24,20 @@ export function PrintAwardListDialog({
   test,
   marks,
 }: PrintAwardListDialogProps) {
+  const [currentDate, setCurrentDate] = React.useState("27 Oct 2026");
+
+  React.useEffect(() => {
+    if (open) {
+      setCurrentDate(
+        new Date().toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      );
+    }
+  }, [open]);
+
   if (!test) return null;
 
   // Compute summary stats
@@ -45,20 +59,6 @@ export function PrintAwardListDialog({
           appearedCount
         ).toFixed(1)
       : "0";
-
-  const [currentDate, setCurrentDate] = React.useState("27 Oct 2026");
-
-  React.useEffect(() => {
-    if (open) {
-      setCurrentDate(
-        new Date().toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      );
-    }
-  }, [open]);
 
   const handlePrint = () => {
     try {

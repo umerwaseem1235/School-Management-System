@@ -40,6 +40,9 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   "Marks Entry": "gold",
   Moderation: "warning",
   Published: "success",
+  Passed: "success",
+  Fail: "danger",
+  Compartment: "warning",
   // payroll & refunds
   Draft: "neutral",
   Processing: "warning",

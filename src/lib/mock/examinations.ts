@@ -953,7 +953,7 @@ export const PAKISTANI_DATESHEET: DatesheetEntry[] = [
  */
 export const PAKISTANI_BOARD_GRADING_SCALE: PakistaniGradeBand[] = [
   {
-    grade: "A-1",
+    grade: "A+",
     minMarks: 80,
     maxMarks: 100,
     percentageRange: "80% – 100%",

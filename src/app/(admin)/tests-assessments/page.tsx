@@ -8,25 +8,24 @@ import {
   Search,
   Plus,
   Printer,
-  BookOpen,
   GraduationCap,
-  Award,
-  CheckCircle2,
-  AlertCircle,
   FileText,
-  Clock,
   ShieldCheck,
   Edit3,
   Trash2,
   Save,
-  RotateCcw,
+  Eye,
+  ChevronDown,
   Check,
-  UserCheck,
-  UserX,
-  ChevronRight,
-  Filter,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +46,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { formatDate } from "@/lib/format";
 import { toast } from "sonner";
 import {
@@ -58,11 +58,10 @@ import {
   generateMockMarksForTest,
   type ClassTest,
   type StudentTestMark,
-  type TestType,
-  type TestStatus,
 } from "@/lib/mock/tests-assessments";
 import { ScheduleTestDialog } from "./schedule-test-dialog";
 import { PrintAwardListDialog } from "./print-award-list-dialog";
+import { ViewTestDialog } from "./view-test-dialog";
 
 export default function TestsAssessmentsPage() {
   const [activeTab, setActiveTab] = React.useState<string>("tests");
@@ -96,6 +95,10 @@ export default function TestsAssessmentsPage() {
 
   // Dialog states
   const [isScheduleOpen, setIsScheduleOpen] = React.useState(false);
+  const [isViewTestOpen, setIsViewTestOpen] = React.useState(false);
+  const [viewTargetTest, setViewTargetTest] = React.useState<ClassTest | null>(
+    null
+  );
   const [isPrintAwardListOpen, setIsPrintAwardListOpen] = React.useState(false);
   const [printTargetTest, setPrintTargetTest] = React.useState<ClassTest | null>(
     null
@@ -162,6 +165,31 @@ export default function TestsAssessmentsPage() {
       );
     });
   }, [activeMarks, studentSearch]);
+
+  // Module portions for dropdown selector
+  const sections = React.useMemo(
+    () => [
+      {
+        id: "tests",
+        label: "Test Records",
+        icon: FileText,
+      },
+      {
+        id: "marks",
+        label: "Marks Entry & Award List",
+        icon: Edit3,
+      },
+      {
+        id: "routine",
+        label: "Weekly Test Routine",
+        icon: CalendarDays,
+      },
+    ],
+    []
+  );
+
+  const activeSectionObj =
+    sections.find((s) => s.id === activeTab) || sections[0];
 
   // Overall statistics for Top KPI Cards
   const stats = React.useMemo(() => {
@@ -285,6 +313,12 @@ export default function TestsAssessmentsPage() {
     toast.success("Marks saved and award list updated successfully!");
   };
 
+  // Open test details view dialog
+  const handleViewTest = (test: ClassTest) => {
+    setViewTargetTest(test);
+    setIsViewTestOpen(true);
+  };
+
   // Open award list print dialog for a specific test
   const handleOpenAwardList = (test: ClassTest) => {
     setPrintTargetTest(test);
@@ -401,20 +435,57 @@ export default function TestsAssessmentsPage() {
 
       {/* Main Tabbed Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="bg-muted/70 p-1 rounded-xl h-auto border border-border/60">
-          <TabsTrigger value="tests" className="rounded-lg text-xs font-medium px-4">
-            <FileText className="size-3.5 mr-2" />
-            Test Records ({tests.length})
-          </TabsTrigger>
-          <TabsTrigger value="marks" className="rounded-lg text-xs font-medium px-4">
-            <Edit3 className="size-3.5 mr-2" />
-            Marks Entry & Award List
-          </TabsTrigger>
-          <TabsTrigger value="routine" className="rounded-lg text-xs font-medium px-4">
-            <CalendarDays className="size-3.5 mr-2" />
-            Weekly Test Routine
-          </TabsTrigger>
-        </TabsList>
+        {/* Module Dropdown Selector Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3 h-9 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[210px] sm:min-w-[230px]">
+                <div className="flex items-center gap-2 min-w-0">
+                  <activeSectionObj.icon className="size-4 text-brand shrink-0" />
+                  <span className="text-xs font-semibold text-foreground truncate">
+                    {activeSectionObj.label}
+                  </span>
+                </div>
+                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="start"
+                className="w-60 p-1 rounded-xl shadow-lg border-border/80"
+              >
+                {sections.map((sec) => {
+                  const Icon = sec.icon;
+                  const isSelected = activeTab === sec.id;
+                  return (
+                    <DropdownMenuItem
+                      key={sec.id}
+                      onClick={() => setActiveTab(sec.id)}
+                      className={cn(
+                        "flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs transition-colors",
+                        isSelected
+                          ? "bg-brand-soft text-brand font-semibold"
+                          : "hover:bg-muted/70 text-foreground"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Icon
+                          className={cn(
+                            "size-3.5 shrink-0",
+                            isSelected ? "text-brand" : "text-muted-foreground"
+                          )}
+                        />
+                        <span className="truncate">{sec.label}</span>
+                      </div>
+                      {isSelected && (
+                        <Check className="size-3.5 text-brand shrink-0 ml-2" />
+                      )}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
 
         {/* ================= TAB 1: Test Records & Schedule ================= */}
         <TabsContent value="tests" className="space-y-4 outline-none">
@@ -425,9 +496,14 @@ export default function TestsAssessmentsPage() {
                 <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
                   <FileText className="size-4" />
                 </div>
-                <h2 className="text-sm font-semibold text-foreground">
-                  Class Assessment Register
-                </h2>
+                <div>
+                  <h2 className="text-sm font-semibold text-foreground">
+                    Class Assessment Register
+                  </h2>
+                  <p className="text-xs text-muted-foreground">
+                    Scheduled and graded classroom assessments
+                  </p>
+                </div>
               </div>
 
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand font-mono self-start sm:self-auto">
@@ -436,21 +512,21 @@ export default function TestsAssessmentsPage() {
             </div>
 
             {/* Filter Toolbar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 px-5 py-3.5 border-b border-border/60 bg-muted/10">
+            <div className="flex flex-col md:flex-row md:items-center gap-3 px-5 py-3.5 border-b border-border/60">
               {/* Search */}
               <div className="relative w-full md:w-72 shrink-0">
                 <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Search subject, title, chapter..."
+                  placeholder="Search test title or subject…"
                   value={testSearch}
                   onChange={(e) => setTestSearch(e.target.value)}
-                  className="pl-9 h-9 text-xs"
+                  className="pl-9 h-9 text-xs bg-background/60"
                 />
               </div>
 
               {/* Dropdown Filters */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 md:ml-auto">
                 {/* Class Filter */}
                 <Select
                   value={selectedClassFilter}
@@ -458,7 +534,7 @@ export default function TestsAssessmentsPage() {
                     if (val) setSelectedClassFilter(val);
                   }}
                 >
-                  <SelectTrigger className="w-[160px] h-9 text-xs">
+                  <SelectTrigger className="w-[175px] h-9 text-xs font-medium">
                     <SelectValue placeholder="All Classes" />
                   </SelectTrigger>
                   <SelectContent>
@@ -480,7 +556,7 @@ export default function TestsAssessmentsPage() {
                     if (val) setSelectedTypeFilter(val);
                   }}
                 >
-                  <SelectTrigger className="w-[150px] h-9 text-xs">
+                  <SelectTrigger className="w-[155px] h-9 text-xs font-medium">
                     <SelectValue placeholder="All Types" />
                   </SelectTrigger>
                   <SelectContent>
@@ -509,7 +585,7 @@ export default function TestsAssessmentsPage() {
                     if (val) setSelectedStatusFilter(val);
                   }}
                 >
-                  <SelectTrigger className="w-[130px] h-9 text-xs">
+                  <SelectTrigger className="w-[130px] h-9 text-xs font-medium">
                     <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -524,39 +600,52 @@ export default function TestsAssessmentsPage() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
+
+                {(testSearch ||
+                  selectedClassFilter !== "ALL" ||
+                  selectedTypeFilter !== "ALL" ||
+                  selectedStatusFilter !== "ALL") && (
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => {
+                      setTestSearch("");
+                      setSelectedClassFilter("ALL");
+                      setSelectedTypeFilter("ALL");
+                      setSelectedStatusFilter("ALL");
+                    }}
+                    className="h-9 px-2 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+                  >
+                    Reset
+                  </Button>
+                )}
               </div>
             </div>
 
-            {/* Table */}
+            {/* Clean Assessment Register Table */}
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="w-full text-sm">
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent bg-muted/30">
-                    <TableHead className="w-12 text-center text-xs font-semibold">
-                      #
+                  <TableRow className="bg-muted/60 border-b border-border/70 hover:bg-muted/60">
+                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-left">
+                      Assessment
                     </TableHead>
-                    <TableHead className="w-28 text-xs font-semibold">
-                      Date
+                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-left">
+                      Class
                     </TableHead>
-                    <TableHead className="w-44 text-xs font-semibold">
-                      Class & Sec
-                    </TableHead>
-                    <TableHead className="w-36 text-xs font-semibold">
+                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-left">
                       Subject
                     </TableHead>
-                    <TableHead className="text-xs font-semibold">
-                      Test Title & Syllabus
+                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center">
+                      Date
                     </TableHead>
-                    <TableHead className="w-28 text-center text-xs font-semibold">
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
                       Marks
                     </TableHead>
-                    <TableHead className="w-36 text-xs font-semibold">
-                      Teacher
-                    </TableHead>
-                    <TableHead className="w-24 text-center text-xs font-semibold">
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
                       Status
                     </TableHead>
-                    <TableHead className="w-32 text-right text-xs font-semibold">
+                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-right">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -565,111 +654,88 @@ export default function TestsAssessmentsPage() {
                   {filteredTests.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={9}
+                        colSpan={7}
                         className="py-12 text-center text-xs text-muted-foreground"
                       >
-                        No class tests found matching the selected filters.
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <FileText className="size-8 text-muted-foreground/50" />
+                          <p className="font-medium text-sm text-foreground">
+                            No class tests found
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Try adjusting your filters or schedule a new class test.
+                          </p>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredTests.map((t, idx) => (
-                      <TableRow key={t.id} className="text-xs hover:bg-muted/30">
-                        <TableCell className="text-center font-mono font-medium text-muted-foreground">
-                          {idx + 1}
-                        </TableCell>
-                        <TableCell className="font-mono text-muted-foreground whitespace-nowrap">
-                          {formatDate(t.testDate)}
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-semibold text-foreground block">
-                            {t.className}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground">
-                            Sec: {t.section}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="font-semibold text-foreground block">
-                            {t.subject}
-                          </span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-muted text-muted-foreground">
-                            {t.subjectCode}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-1.5">
-                              <Badge
-                                variant="outline"
-                                className={`text-[10px] px-1.5 py-0 rounded font-medium ${
-                                  t.testType === "Monthly Assessment"
-                                    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30"
-                                    : "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30"
-                                }`}
-                              >
-                                {t.testType}
-                              </Badge>
-                              <span className="font-semibold text-foreground">
-                                {t.title}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground line-clamp-1">
-                              {t.chapterOrTopic}
-                            </p>
+                    filteredTests.map((t) => (
+                      <TableRow
+                        key={t.id}
+                        className="hover:bg-muted/30 transition-colors border-b border-border/60"
+                      >
+                        {/* Assessment Title & Type */}
+                        <TableCell className="px-5 py-3.5 text-left max-w-[300px] lg:max-w-[360px]">
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-foreground text-[13px] leading-snug truncate">
+                              {t.title}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                              {t.testType}
+                            </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center font-mono">
-                          <span className="font-bold text-foreground">
-                            {t.totalMarks}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground block">
-                            Pass: {t.passingMarks}
-                          </span>
+
+                        {/* Class */}
+                        <TableCell className="text-xs px-4 py-3.5 text-left font-medium text-foreground whitespace-nowrap">
+                          {t.className}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {t.teacherName}
+
+                        {/* Subject */}
+                        <TableCell className="text-xs px-4 py-3.5 text-left font-medium text-foreground whitespace-nowrap">
+                          {t.subject}
                         </TableCell>
-                        <TableCell className="text-center">
-                          <Badge
-                            variant="outline"
-                            className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                              t.status === "Graded"
-                                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30"
-                                : "bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/30"
-                            }`}
-                          >
-                            {t.status}
-                          </Badge>
+
+                        {/* Date */}
+                        <TableCell className="text-xs px-4 py-3.5 text-center text-muted-foreground whitespace-nowrap font-medium">
+                          {formatDate(t.testDate)}
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
+
+                        {/* Total Marks */}
+                        <TableCell className="text-xs px-3 py-3.5 text-center font-mono font-semibold text-foreground">
+                          {t.totalMarks}
+                        </TableCell>
+
+                        {/* Status */}
+                        <TableCell className="text-xs px-3 py-3.5 text-center whitespace-nowrap">
+                          <StatusBadge
+                            status={t.status}
+                            tone={t.status === "Graded" ? "success" : "info"}
+                            dot={false}
+                          />
+                        </TableCell>
+
+                        {/* Actions */}
+                        <TableCell className="px-5 py-3.5 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1.5">
                             <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleNavigateToMarks(t.id)}
-                              className="h-7 px-2 text-[11px] text-brand hover:text-brand hover:bg-brand-soft"
-                              title="Enter / View Marks"
+                              variant="outline"
+                              size="xs"
+                              onClick={() => handleViewTest(t)}
+                              className="h-7.5 px-2.5 text-xs font-semibold text-foreground hover:text-brand hover:bg-brand-soft/50 hover:border-brand/30 border-border/80 cursor-pointer shadow-2xs gap-1.5"
+                              title="View full test details"
                             >
-                              <Edit3 className="size-3 mr-1" />
-                              Marks
+                              <Eye className="size-3.5" />
+                              <span>View</span>
                             </Button>
                             <Button
                               variant="ghost"
-                              size="sm"
-                              onClick={() => handleOpenAwardList(t)}
-                              className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
-                              title="Print Award List"
-                            >
-                              <Printer className="size-3" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                              size="xs"
                               onClick={() => handleDeleteTest(t.id)}
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                              className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-danger hover:bg-danger-soft/60 cursor-pointer"
                               title="Delete Test"
                             >
-                              <Trash2 className="size-3" />
+                              <Trash2 className="size-3.5" />
                             </Button>
                           </div>
                         </TableCell>
@@ -687,43 +753,64 @@ export default function TestsAssessmentsPage() {
           <Card className="rounded-2xl border border-border/80 overflow-hidden bg-card shadow-xs">
             {/* Header & Test Selector */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-border/70 bg-muted/20">
-              <div className="flex items-center gap-2.5">
-                <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
-                  <Edit3 className="size-4" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-semibold text-foreground">
-                    Class Marks Evaluation & Award List
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
-                    Enter student scores and generate official Pakistani BISE format award list
-                  </p>
-                </div>
-              </div>
+              <h2 className="text-sm font-semibold text-foreground">
+                Class Marks Evaluation & Award List
+              </h2>
 
-              {/* Test Selector Dropdown */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                  Selected Test:
-                </span>
-                <Select
-                  value={selectedTestId}
-                  onValueChange={(val) => {
-                    if (val) setSelectedTestId(val);
-                  }}
+              {/* Clean Test Selector Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-2.5 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3.5 h-9 text-xs font-medium shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer w-full sm:w-[290px] md:w-[330px]">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="size-3.5 text-brand shrink-0" />
+                    <span className="truncate font-semibold text-foreground">
+                      {currentTest
+                        ? `${currentTest.subject} — ${currentTest.title}`
+                        : "Select Test"}
+                    </span>
+                  </div>
+                  <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[300px] sm:w-[350px] max-h-80 p-1.5 rounded-xl shadow-xl border-border/80 space-y-0.5"
                 >
-                  <SelectTrigger className="w-[280px] sm:w-[320px] h-9 text-xs">
-                    <SelectValue placeholder="Select test to grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tests.map((t) => (
-                      <SelectItem key={t.id} value={t.id} className="text-xs">
-                        {t.subject} ({t.className}) — {t.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  {tests.map((t) => {
+                    const isSelected = currentTest?.id === t.id;
+                    return (
+                      <DropdownMenuItem
+                        key={t.id}
+                        onClick={() => setSelectedTestId(t.id)}
+                        className={cn(
+                          "flex items-center justify-between gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors",
+                          isSelected
+                            ? "bg-brand-soft text-brand"
+                            : "hover:bg-muted/70 text-foreground"
+                        )}
+                      >
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span
+                            className={cn(
+                              "text-xs truncate leading-snug",
+                              isSelected
+                                ? "font-semibold text-brand"
+                                : "font-medium text-foreground"
+                            )}
+                          >
+                            {t.title}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground truncate mt-0.5">
+                            {t.subject} • {t.className}
+                          </span>
+                        </div>
+                        {isSelected && (
+                          <Check className="size-3.5 text-brand shrink-0" />
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {currentTest && (
@@ -818,15 +905,15 @@ export default function TestsAssessmentsPage() {
                 )}
 
                 {/* Student Search & Action Toolbar */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 border-b border-border/60">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-border/60">
                   <div className="relative w-full sm:w-72">
                     <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                     <Input
                       type="text"
-                      placeholder="Search student by roll# or name..."
+                      placeholder="Search students…"
                       value={studentSearch}
                       onChange={(e) => setStudentSearch(e.target.value)}
-                      className="pl-9 h-8 text-xs"
+                      className="pl-9 h-9 text-xs bg-background/60"
                     />
                   </div>
 
@@ -835,7 +922,7 @@ export default function TestsAssessmentsPage() {
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenAwardList(currentTest)}
-                      className="text-xs h-8 gap-1.5 shadow-xs"
+                      className="text-xs h-9 gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Printer className="size-3.5" />
                       <span>Print Award List</span>
@@ -843,7 +930,7 @@ export default function TestsAssessmentsPage() {
                     <Button
                       size="sm"
                       onClick={handleSaveMarks}
-                      className="bg-brand text-brand-foreground hover:bg-brand/90 text-xs h-8 gap-1.5 shadow-xs"
+                      className="bg-brand text-brand-foreground hover:bg-brand/90 text-xs h-9 gap-1.5 shadow-xs cursor-pointer"
                     >
                       <Save className="size-3.5" />
                       <span>Save Marks</span>
@@ -1080,28 +1167,6 @@ export default function TestsAssessmentsPage() {
                   </div>
                 ))}
               </div>
-
-              {/* Assessment Guidelines Notice */}
-              <div className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-2">
-                <h4 className="text-xs font-bold text-foreground uppercase tracking-wide flex items-center gap-1.5">
-                  <ShieldCheck className="size-3.5 text-brand" />
-                  Pakistani Academic Assessment Regulations
-                </h4>
-                <ul className="text-xs text-muted-foreground space-y-1 list-disc pl-5">
-                  <li>
-                    <strong>Evaluation Deadline:</strong> Subject teachers must mark tests and upload marks within <strong>48 hours</strong> of conduction.
-                  </li>
-                  <li>
-                    <strong>Passing Benchmark:</strong> Minimum passing mark is <strong>33%</strong> as per Federal and Punjab Board regulations.
-                  </li>
-                  <li>
-                    <strong>Remedial Policy:</strong> Students scoring Grade F (under 33%) are required to attend zero period revision and sit for re-evaluation on Saturday.
-                  </li>
-                  <li>
-                    <strong>Terminal Weightage:</strong> Monthly assessments and weekly tests contribute <strong>20% continuous evaluation marks</strong> toward terminal and mid-term examination report cards.
-                  </li>
-                </ul>
-              </div>
             </div>
           </Card>
         </TabsContent>
@@ -1112,6 +1177,20 @@ export default function TestsAssessmentsPage() {
         open={isScheduleOpen}
         onOpenChange={setIsScheduleOpen}
         onAddTest={handleAddTest}
+      />
+
+      {/* View Test Details Dialog */}
+      <ViewTestDialog
+        open={isViewTestOpen}
+        onOpenChange={setIsViewTestOpen}
+        test={
+          viewTargetTest
+            ? tests.find((t) => t.id === viewTargetTest.id) || viewTargetTest
+            : null
+        }
+        marks={viewTargetTest ? testMarksMap[viewTargetTest.id] || [] : []}
+        onOpenMarks={handleNavigateToMarks}
+        onPrintAwardList={handleOpenAwardList}
       />
 
       {/* Print Award List Dialog */}

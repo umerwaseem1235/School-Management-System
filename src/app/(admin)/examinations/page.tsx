@@ -129,29 +129,26 @@ export default function ExaminationsPage() {
     });
   }, [datesheet, datesheetSearch, selectedTermFilter, selectedClassFilter]);
 
-  // Examination module portions for dropdown selector (matching LMS standard)
+  // Examination module portions for dropdown selector
   const sections = React.useMemo(
     () => [
       {
         id: "terms",
         label: "Exam Terms",
         icon: CalendarClock,
-        count: examTerms.length,
       },
       {
         id: "datesheet",
         label: "Datesheet",
         icon: CalendarDays,
-        count: datesheet.length,
       },
       {
         id: "grading",
         label: "Grading & Passing Rules",
         icon: GraduationCap,
-        count: PAKISTANI_BOARD_GRADING_SCALE.length,
       },
     ],
-    [examTerms.length, datesheet.length]
+    []
   );
 
   const activeSectionObj =
@@ -313,28 +310,18 @@ export default function ExaminationsPage() {
 
       {/* Main Tabbed Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        {/* Module Dropdown Selector Bar (Matching LMS standard) */}
+        {/* Module Dropdown Selector Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
           <div className="flex items-center gap-3">
             <DropdownMenu>
-              <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3 h-9 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[210px] sm:min-w-[240px]">
+              <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3 h-9 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[200px] sm:min-w-[220px]">
                 <div className="flex items-center gap-2 min-w-0">
                   <activeSectionObj.icon className="size-4 text-brand shrink-0" />
                   <span className="text-xs font-semibold text-foreground truncate">
                     {activeSectionObj.label}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {activeSectionObj.count !== undefined && (
-                    <Badge
-                      variant="secondary"
-                      className="text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-4 flex items-center justify-center tabular-nums"
-                    >
-                      {activeSectionObj.count}
-                    </Badge>
-                  )}
-                  <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </div>
+                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
               </DropdownMenuTrigger>
 
               <DropdownMenuContent
@@ -364,20 +351,7 @@ export default function ExaminationsPage() {
                         />
                         <span className="truncate">{sec.label}</span>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                        {sec.count !== undefined && (
-                          <Badge
-                            variant={isSelected ? "default" : "secondary"}
-                            className={cn(
-                              "text-[10px] font-semibold px-1.5 py-0 h-4 tabular-nums",
-                              isSelected ? "bg-brand text-cream" : ""
-                            )}
-                          >
-                            {sec.count}
-                          </Badge>
-                        )}
-                        {isSelected && <Check className="size-3 text-brand" />}
-                      </div>
+                      {isSelected && <Check className="size-3.5 text-brand shrink-0 ml-2" />}
                     </DropdownMenuItem>
                   );
                 })}
