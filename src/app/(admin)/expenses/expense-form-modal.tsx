@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ActionButton } from "@/components/shared/action-button";
+import { useBranches } from "@/context/branches-context";
 import { formatCurrency } from "@/lib/format";
 import type {
   ExpenseBudgetRecord,
@@ -72,6 +73,8 @@ export function ExpenseFormModal({
   const [description, setDescription] = React.useState("");
   const [category, setCategory] =
     React.useState<ExpenseCategory>("Utilities & Power");
+  const { activeBranches } = useBranches();
+  const campusList = React.useMemo(() => activeBranches.map((b) => b.campusName.split("—")[0].trim()), [activeBranches]);
   const [department, setDepartment] = React.useState("Facilities & Estate");
   const [campus, setCampus] = React.useState("Gulberg");
   const [invoiceNo, setInvoiceNo] = React.useState("");
@@ -312,7 +315,7 @@ export function ExpenseFormModal({
                   onChange={(e) => setCampus(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-2.5 text-xs text-foreground"
                 >
-                  {CAMPUS_OPTIONS.map((c) => (
+                  {(campusList.length > 0 ? campusList : CAMPUS_OPTIONS).map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>

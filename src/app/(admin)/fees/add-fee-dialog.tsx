@@ -15,6 +15,7 @@ import {
 import { Field, fieldClass } from "../attendance/_components/attendance-kit";
 import { StatusBadge } from "@/components/shared/status-badge";
 import type { FeeChallan, FeeStatus } from "@/types";
+import { useBranches } from "@/context/branches-context";
 
 const CAMPUS_OPTIONS = [
   "Gulberg",
@@ -105,6 +106,8 @@ export function AddFeeDialog({
   existing: FeeChallan[];
   onCreate: (challan: FeeChallan) => void;
 }) {
+  const { activeBranches } = useBranches();
+  const campusList = React.useMemo(() => activeBranches.map((b) => b.campusName.split("—")[0].trim()), [activeBranches]);
   const [form, setForm] = React.useState<FormState>(INITIAL_FORM);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -201,7 +204,7 @@ export function AddFeeDialog({
                 value={form.campus}
                 onChange={(e) => set("campus", e.target.value)}
               >
-                {CAMPUS_OPTIONS.map((c) => (
+                {(campusList.length > 0 ? campusList : CAMPUS_OPTIONS).map((c) => (
                   <option key={c}>{c}</option>
                 ))}
               </select>

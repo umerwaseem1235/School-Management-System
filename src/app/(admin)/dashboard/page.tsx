@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Banknote,
   Briefcase,
@@ -31,6 +32,7 @@ import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import { Meter } from "@/components/shared/meter";
 import { AreaTrendChart, BarSeriesChart, LineTrendChart } from "@/components/charts";
+import { DashboardBranchesCard } from "./dashboard-branches-card";
 
 const totalStudents = CAMPUSES.reduce((s, c) => s + c.students, 0);
 const totalStaff = CAMPUSES.reduce((s, c) => s + c.staff, 0);
@@ -76,21 +78,25 @@ export default function DashboardPage() {
             label="Total Students"
             value={formatNumber(totalStudents)}
             icon={GraduationCap}
+            href="/students"
           />
           <StatCard
             label="Total Staff"
             value={formatNumber(totalStaff)}
             icon={Users}
+            href="/staff"
           />
           <StatCard
             label="Total Families"
             value={formatNumber(snap.totalFamilies)}
             icon={Home}
+            href="/students"
           />
           <StatCard
             label="New Admissions (Oct)"
             value="24"
             icon={UserPlus}
+            href="/admissions"
           />
         </StatGrid>
       </div>
@@ -106,21 +112,25 @@ export default function DashboardPage() {
             label={`Receivable (${snap.activeMonthLabel})`}
             value={formatCurrencyCompact(snap.receivableOct)}
             icon={FileText}
+            href="/fees"
           />
           <StatCard
             label={`Received (${snap.activeMonthLabel})`}
             value={formatCurrencyCompact(snap.receivedOct)}
             icon={Wallet}
+            href="/fees/reports"
           />
           <StatCard
             label={`Balances (${snap.activeMonthLabel})`}
             value={formatCurrencyCompact(snap.balancesOct)}
             icon={Scale}
+            href="/fees/adjustments"
           />
           <StatCard
             label="Today's Collection"
             value={formatCurrency(snap.todayCollection)}
             icon={Banknote}
+            href="/fees/reports"
           />
         </StatGrid>
       </div>
@@ -136,21 +146,25 @@ export default function DashboardPage() {
             label={`Salary Payable (${snap.activeMonthLabel})`}
             value={formatCurrencyCompact(snap.salaryPayableOct)}
             icon={CalendarClock}
+            href="/hr-payroll"
           />
           <StatCard
             label={`Salary Paid (${snap.activeMonthLabel})`}
             value={formatCurrencyCompact(snap.salaryPaidOct)}
             icon={CircleDollarSign}
+            href="/fees/payroll"
           />
           <StatCard
             label="Total Salary Payable"
             value={formatCurrencyCompact(snap.totalSalaryPayable)}
             icon={Briefcase}
+            href="/hr-payroll"
           />
           <StatCard
             label="Today's Attendance"
             value="93.8%"
             icon={ClipboardCheck}
+            href="/attendance"
           />
         </StatGrid>
       </div>
@@ -163,6 +177,7 @@ export default function DashboardPage() {
             label="Student Birthdays"
             value={formatNumber(snap.studentBirthdaysMonth)}
             icon={Cake}
+            href="/students"
             split={[
               {
                 label: "Today",
@@ -178,6 +193,7 @@ export default function DashboardPage() {
             label="Staff Birthdays"
             value={formatNumber(snap.staffBirthdaysMonth)}
             icon={Cake}
+            href="/staff"
             split={[
               {
                 label: "Today",
@@ -273,46 +289,8 @@ export default function DashboardPage() {
 
       {/* Campus Cards + Activity + Events */}
       <div className="mb-6 grid gap-6 lg:grid-cols-3">
-        {/* Campus summary cards */}
-        <SectionCard
-          title="Campuses"
-          description={`${CAMPUSES.length} total campuses`}
-          action={
-            <a
-              href="/campuses"
-              className="text-xs font-medium text-brand hover:underline"
-            >
-              View all →
-            </a>
-          }
-        >
-          <div className="space-y-3">
-            {CAMPUSES.slice(0, 3).map((c) => (
-              <div
-                key={c.id}
-                className="flex items-center gap-3 rounded-xl border border-border/60 bg-cream/40 p-3"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand">
-                  <Building2 className="size-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-semibold text-foreground">
-                    {c.campusName}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    {formatNumber(c.students)} students · {c.staff} staff
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-semibold tabular-nums text-foreground">
-                    {formatPercent(c.feeCollectionRate, 1)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">fee rate</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SectionCard>
+        {/* Dynamic Campus Summary Card */}
+        <DashboardBranchesCard />
 
         {/* Recent activity */}
         <SectionCard

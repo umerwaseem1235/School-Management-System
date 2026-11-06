@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCampusDisplay } from "@/lib/format";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import type { FeeStatus, Student, StudentStatus } from "@/types";
 import { ChevronDown, GraduationCap, Sparkles, UserPlus } from "lucide-react";
 import { toast } from "sonner";
@@ -45,8 +45,9 @@ export function NewAdmissionDialog({
   const [name, setName] = React.useState("");
   const [gender, setGender] = React.useState<"Male" | "Female">("Male");
   const [className, setClassName] = React.useState("Grade 5");
+  const { activeBranches } = useBranches();
   const [section, setSection] = React.useState("A");
-  const [campus, setCampus] = React.useState(CAMPUSES[0].campusName);
+  const [campus, setCampus] = React.useState(activeBranches[0]?.campusName || "Main Campus — Gulberg");
   const [guardian, setGuardian] = React.useState("");
   const [phone, setPhone] = React.useState("");
   const [rollNo, setRollNo] = React.useState("");
@@ -60,7 +61,7 @@ export function NewAdmissionDialog({
       setGender("Male");
       setClassName("Grade 5");
       setSection("A");
-      setCampus(CAMPUSES[0].campusName);
+      setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
       setGuardian("");
       setPhone("");
       setRollNo(String(Math.floor(10 + Math.random() * 40)));
@@ -203,8 +204,8 @@ export function NewAdmissionDialog({
                       onChange={(e) => setCampus(e.target.value)}
                       className="h-9 w-full appearance-none rounded-lg border border-input bg-background/80 px-3 py-1.5 pr-8 text-sm outline-none transition-colors focus:border-ring focus:bg-white focus:ring-3 focus:ring-ring/20"
                     >
-                      {CAMPUSES.map((c) => (
-                        <option key={c.campusName} value={c.campusName}>
+                      {activeBranches.map((c) => (
+                        <option key={c.id} value={c.campusName}>
                           {formatCampusDisplay(c.campusName).label}
                         </option>
                       ))}

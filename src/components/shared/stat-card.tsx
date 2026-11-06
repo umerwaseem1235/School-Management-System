@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface SplitMetric {
@@ -14,6 +15,9 @@ interface StatCardProps {
   title?: string;
   /** Optional split footer (e.g. Today | Month for birthday cards). */
   split?: [SplitMetric, SplitMetric];
+  /** Optional destination route when the card is clicked. */
+  href?: string;
+  onClick?: () => void;
 }
 
 export function StatCard({
@@ -23,14 +27,13 @@ export function StatCard({
   className,
   title,
   split,
+  href,
+  onClick,
 }: StatCardProps) {
-  return (
-    <div
-      className={cn(
-        "group relative flex min-w-0 flex-col items-center overflow-hidden rounded-xl border border-brand/10 bg-white p-3 pt-4 text-center shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_1px_2px_rgb(53_57_85/0.08),0_16px_40px_-24px_rgb(53_57_85/0.35)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_2px_6px_rgb(53_57_85/0.08),0_28px_56px_-20px_rgb(53_57_85/0.4)] dark:bg-card dark:border-border/80 dark:shadow-none",
-        className
-      )}
-    >
+  const isClickable = Boolean(href || onClick);
+
+  const cardContent = (
+    <>
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_55%_at_50%_0%,rgb(30_66_117/0.12),transparent_70%)] opacity-70 transition-opacity duration-300 group-hover:opacity-100 dark:opacity-30"
@@ -39,6 +42,7 @@ export function StatCard({
         aria-hidden
         className="absolute inset-x-10 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-primary/70 to-transparent"
       />
+
       <span className="relative grid size-9 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand shadow-[0_6px_16px_-6px_rgb(53_57_85/0.4)] ring-1 ring-brand/10 transition-transform duration-300 group-hover:scale-105 dark:bg-brand-soft">
         <Icon className="size-4" />
       </span>
@@ -69,8 +73,32 @@ export function StatCard({
           ))}
         </div>
       )}
-    </div>
+    </>
   );
+
+  const sharedClassName = cn(
+    "group relative flex min-w-0 flex-col items-center overflow-hidden rounded-xl border border-brand/10 bg-white p-3 pt-4 text-center shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_1px_2px_rgb(53_57_85/0.08),0_16px_40px_-24px_rgb(53_57_85/0.35)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_2px_6px_rgb(53_57_85/0.08),0_28px_56px_-20px_rgb(53_57_85/0.4)] dark:bg-card dark:border-border/80 dark:shadow-none",
+    isClickable && "cursor-pointer hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 select-none",
+    className
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={sharedClassName}>
+        {cardContent}
+      </Link>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={sharedClassName}>
+        {cardContent}
+      </button>
+    );
+  }
+
+  return <div className={sharedClassName}>{cardContent}</div>;
 }
 
 export function StatGrid({

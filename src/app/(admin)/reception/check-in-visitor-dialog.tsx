@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { formatCampusDisplay } from "@/lib/format";
 import type { VisitorPass } from "@/types";
 import { UserPlus } from "lucide-react";
@@ -47,15 +47,16 @@ export function CheckInVisitorDialog({
   const [visitorName, setVisitorName] = React.useState("");
   const [phone, setPhone] = React.useState("");
   const [hostPerson, setHostPerson] = React.useState("");
+  const { activeBranches } = useBranches();
   const [purpose, setPurpose] = React.useState<VisitorPass["purpose"]>("Parent Meeting");
-  const [campus, setCampus] = React.useState(CAMPUSES[0].campusName);
+  const [campus, setCampus] = React.useState(activeBranches[0]?.campusName || "Main Campus — Gulberg");
 
   const resetForm = () => {
     setVisitorName("");
     setPhone("");
     setHostPerson("");
     setPurpose("Parent Meeting");
-    setCampus(CAMPUSES[0].campusName);
+    setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -200,7 +201,7 @@ export function CheckInVisitorDialog({
                   <SelectValue placeholder="Select campus" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CAMPUSES.map((c) => (
+                  {activeBranches.map((c) => (
                     <SelectItem key={c.id} value={c.campusName} className="text-xs">
                       {formatCampusDisplay(c.campusName).primary}
                     </SelectItem>

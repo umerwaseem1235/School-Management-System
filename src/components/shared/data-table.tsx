@@ -138,6 +138,7 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   className?: string;
   tableClassName?: string;
+  showFillerRows?: boolean;
 }
 
 const ALL = "__all__";
@@ -161,6 +162,7 @@ export function DataTable<T>({
   emptyMessage = "No records found.",
   className,
   tableClassName,
+  showFillerRows = false,
 }: DataTableProps<T>) {
   const [query, setQuery] = React.useState("");
   const [filterState, setFilterState] = React.useState<Record<string, string>>({});
@@ -548,7 +550,8 @@ export function DataTable<T>({
               );
             })}
             {/* Filler rows so card height and column widths remain 100% constant on partial pages */}
-            {pageRows.length > 0 &&
+            {showFillerRows &&
+              pageRows.length > 0 &&
               pageRows.length < pageSize &&
               Array.from({ length: pageSize - pageRows.length }).map((_, idx) => (
                 <tr

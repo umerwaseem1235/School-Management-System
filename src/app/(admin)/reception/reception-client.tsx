@@ -8,10 +8,15 @@ import { DataTable, type Column, type FilterDef } from "@/components/shared/data
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import {
   Tabs,
   TabsContent,
-  TabsList,
-  TabsTrigger,
 } from "@/components/ui/tabs";
 import { formatCampusDisplay, formatNumber } from "@/lib/format";
 import type { FrontDeskInquiry, VisitorPass } from "@/types";
@@ -23,6 +28,8 @@ import {
   UserCheck,
   Users,
   CheckCircle2,
+  ChevronDown,
+  Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CheckInVisitorDialog } from "./check-in-visitor-dialog";
@@ -393,6 +400,24 @@ export function ReceptionClient({
     [inquiryCampusOptions]
   );
 
+  const receptionSections = [
+    {
+      id: "visitors",
+      label: "Visitor Register",
+      icon: Users,
+      count: visitorPasses.length,
+    },
+    {
+      id: "inquiries",
+      label: "Inquiries & Calls",
+      icon: PhoneCall,
+      count: inquiries.length,
+    },
+  ];
+
+  const activeSectionObj =
+    receptionSections.find((s) => s.id === activeTab) || receptionSections[0];
+
   return (
     <div className="flex flex-col gap-6 lg:gap-8 pb-8">
       {/* Header */}
@@ -400,19 +425,25 @@ export function ReceptionClient({
         title="Reception"
         className="mb-0 lg:mb-0"
         actions={
-          <Button
-            onClick={() => {
-              if (activeTab === "visitors") {
-                setIsCheckInOpen(true);
-              } else {
-                setIsLogInquiryOpen(true);
-              }
-            }}
-            className="gap-2 bg-brand text-cream hover:bg-brand-600 cursor-pointer shadow-sm text-xs font-semibold px-4"
-          >
-            <Plus className="size-4" data-icon="inline-start" />
-            <span>{activeTab === "visitors" ? "Add Visitor" : "Log Inquiry"}</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsLogInquiryOpen(true)}
+              className="gap-1.5 text-xs font-medium cursor-pointer shadow-2xs h-9 px-3.5"
+            >
+              <PhoneCall className="size-3.5 text-brand" />
+              <span>Log Inquiry</span>
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setIsCheckInOpen(true)}
+              className="gap-1.5 bg-brand text-cream hover:bg-brand-600 cursor-pointer shadow-sm text-xs font-semibold h-9 px-3.5"
+            >
+              <Plus className="size-4" />
+              <span>Add Visitor</span>
+            </Button>
+          </div>
         }
       />
 
@@ -442,30 +473,69 @@ export function ReceptionClient({
 
       {/* Clean 2 Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-4">
-        <div className="flex items-center justify-between border-b border-border/70 pb-1">
-          <TabsList className="bg-muted/50 p-1 rounded-xl">
-            <TabsTrigger
-              value="visitors"
-              className="gap-2 text-xs font-semibold rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-2xs cursor-pointer px-3.5 py-1.5"
-            >
-              <Users className="size-3.5 text-brand" />
-              <span>Visitor Register</span>
-              <span className="ml-1 text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-brand-50 text-brand">
-                {visitorPasses.length}
-              </span>
-            </TabsTrigger>
+        {/* Dropdown Section Selector Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3 h-9 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[210px] sm:min-w-[230px]">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <activeSectionObj.icon className="size-4 text-brand shrink-0" />
+                  <span className="text-xs font-semibold text-foreground truncate">
+                    {activeSectionObj.label}
+                  </span>
+                </div>
+                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" />
+              </DropdownMenuTrigger>
 
-            <TabsTrigger
-              value="inquiries"
-              className="gap-2 text-xs font-semibold rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-2xs cursor-pointer px-3.5 py-1.5"
-            >
-              <PhoneCall className="size-3.5 text-brand" />
-              <span>Inquiries & Calls</span>
-              <span className="ml-1 text-[11px] font-mono px-1.5 py-0.2 rounded-full bg-muted text-muted-foreground">
-                {inquiries.length}
-              </span>
-            </TabsTrigger>
-          </TabsList>
+              <DropdownMenuContent
+                align="start"
+                className="w-60 p-1 rounded-xl shadow-lg border-border/80"
+              >
+                {receptionSections.map((sec) => {
+                  const Icon = sec.icon;
+                  const isSelected = activeTab === sec.id;
+                  return (
+                    <DropdownMenuItem
+                      key={sec.id}
+                      onClick={() => setActiveTab(sec.id)}
+                      className={cn(
+                        "flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs transition-colors",
+                        isSelected
+                          ? "bg-brand-soft text-brand font-semibold"
+                          : "hover:bg-muted/70 text-foreground"
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <Icon
+                          className={cn(
+                            "size-3.5 shrink-0",
+                            isSelected ? "text-brand" : "text-muted-foreground"
+                          )}
+                        />
+                        <span className="truncate">{sec.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-2">
+                        <span
+                          className={cn(
+                            "px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold",
+                            isSelected
+                              ? "bg-brand/15 text-brand"
+                              : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          {sec.count}
+                        </span>
+                        {isSelected && (
+                          <Check className="size-3.5 text-brand shrink-0" />
+                        )}
+                      </div>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+          </div>
         </div>
 
         {/* Tab 1: Visitor Register */}

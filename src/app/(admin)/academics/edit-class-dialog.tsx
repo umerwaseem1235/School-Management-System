@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AcademicClass } from "@/types";
+import { useBranches } from "@/context/branches-context";
 import {
   School,
   User,
@@ -66,8 +67,9 @@ export function EditClassDialog({
   onUpdateClass,
 }: EditClassDialogProps) {
   const [className, setClassName] = React.useState("");
+  const { branches } = useBranches();
   const [gradeLevel, setGradeLevel] = React.useState(9);
-  const [campus, setCampus] = React.useState(CAMPUS_OPTIONS[0]);
+  const [campus, setCampus] = React.useState(branches[0]?.campusName || "Main Campus — Gulberg");
   const [classTeacher, setClassTeacher] = React.useState(TEACHER_OPTIONS[0]);
   const [sections, setSections] = React.useState("2");
   const [students, setStudents] = React.useState("50");
@@ -77,7 +79,7 @@ export function EditClassDialog({
     if (classItem) {
       setClassName(classItem.className);
       setGradeLevel(classItem.gradeLevel || 9);
-      setCampus(classItem.campus || CAMPUS_OPTIONS[0]);
+      setCampus(classItem.campus || branches[0]?.campusName || "Main Campus — Gulberg");
       setClassTeacher(classItem.classTeacher || TEACHER_OPTIONS[0]);
       setSections(String((classItem as any).sectionsCount || classItem.sections || 2));
       setStudents(String((classItem as any).studentsCount || classItem.students || 50));
@@ -164,9 +166,10 @@ export function EditClassDialog({
                     <SelectValue placeholder="Select campus" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CAMPUS_OPTIONS.map((c) => (
-                      <SelectItem key={c} value={c} className="text-xs">
-                        {c}
+                    {branches.map((c) => (
+                      <SelectItem key={c.id} value={c.campusName} className="text-xs">
+                        {c.campusName}
+                        {c.status !== "Active" ? " (Inactive)" : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

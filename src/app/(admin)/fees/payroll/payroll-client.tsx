@@ -35,6 +35,7 @@ import { exportPayrollPdf, printPayrollReport } from "./payroll-export";
 import { PayslipModal } from "./payslip-modal";
 import { AddSalaryModal } from "./add-salary-modal";
 import { RunPayrollModal } from "./run-payroll-modal";
+import { useBranches } from "@/context/branches-context";
 
 const CAMPUS_OPTIONS = [
   "All Campuses",
@@ -66,6 +67,11 @@ const TABLE_HEAD_CELL_CLASS =
   "relative whitespace-nowrap px-5 py-3.5 text-center align-middle text-[12.5px] font-bold tracking-[-0.01em] text-[#1e293b] select-none not-last:after:pointer-events-none not-last:after:absolute not-last:after:right-0 not-last:after:top-1/2 not-last:after:h-4 not-last:after:w-px not-last:after:-translate-y-1/2 not-last:after:bg-[#d8e2f0]";
 
 export function PayrollClient() {
+  const { branches } = useBranches();
+  const dynamicCampusOptions = React.useMemo(() => {
+    const dynamic = branches.map((b) => b.campusName.split("—")[0].trim());
+    return ["All Campuses", ...Array.from(new Set(dynamic))];
+  }, [branches]);
   const [salaries, setSalaries] = React.useState<StaffSalaryRecord[]>(STAFF_SALARIES);
   const [accounts] = React.useState<DisbursementAccountRecord[]>(DISBURSEMENT_ACCOUNTS);
   const [batches, setBatches] = React.useState<PayrollBatchSummary[]>(PAYROLL_BATCH_SUMMARIES);
@@ -433,7 +439,7 @@ export function PayrollClient() {
                 onChange={(e) => setSelectedCampus(e.target.value)}
                 className="h-8.5 w-full rounded-[4px] border border-border/80 bg-white px-2.5 text-xs text-foreground focus:border-brand focus:outline-none"
               >
-                {CAMPUS_OPTIONS.map((c) => (
+                {dynamicCampusOptions.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>

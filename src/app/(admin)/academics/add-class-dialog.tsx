@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import type { AcademicClass } from "@/types";
 import { PAKISTANI_SCHOOL_CLASSES } from "@/lib/mock/lms";
+import { useBranches } from "@/context/branches-context";
 import {
   GraduationCap,
   School,
@@ -75,8 +76,9 @@ export function AddClassDialog({
   const [customName, setCustomName] = React.useState("");
   const [isCustom, setIsCustom] = React.useState(false);
   const [gradeLevel, setGradeLevel] = React.useState("9");
+  const { activeBranches } = useBranches();
   const [stream, setStream] = React.useState<AcademicClass["stream"]>("Science");
-  const [campus, setCampus] = React.useState(CAMPUS_OPTIONS[0]);
+  const [campus, setCampus] = React.useState(activeBranches[0]?.campusName || "Main Campus — Gulberg");
   const [classTeacher, setClassTeacher] = React.useState(TEACHER_OPTIONS[0]);
   const [sections, setSections] = React.useState("2");
   const [students, setStudents] = React.useState("60");
@@ -130,7 +132,7 @@ export function AddClassDialog({
     setIsCustom(false);
     setGradeLevel("9");
     setStream("Science");
-    setCampus(CAMPUS_OPTIONS[0]);
+    setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
     setClassTeacher(TEACHER_OPTIONS[0]);
     setSections("2");
     setStudents("60");
@@ -301,9 +303,9 @@ export function AddClassDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {CAMPUS_OPTIONS.map((cmp) => (
-                    <SelectItem key={cmp} value={cmp}>
-                      {cmp}
+                  {activeBranches.map((c) => (
+                    <SelectItem key={c.id} value={c.campusName}>
+                      {c.campusName}
                     </SelectItem>
                   ))}
                 </SelectContent>

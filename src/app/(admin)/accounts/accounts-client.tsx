@@ -56,6 +56,7 @@ import {
   StaffAccountFormModal,
   StudentAccountFormModal,
 } from "./account-form-modals";
+import { useBranches } from "@/context/branches-context";
 
 type AccountsTab = "students" | "parents" | "staff";
 
@@ -74,6 +75,11 @@ function sortClasses(values: string[]): string[] {
 }
 
 export function AccountsClient() {
+  const { branches } = useBranches();
+  const dynamicCampusOptions = React.useMemo(() => {
+    const dynamic = branches.map((b) => b.campusName.split("—")[0].trim());
+    return Array.from(new Set([...dynamic, ...CAMPUS_OPTIONS]));
+  }, [branches]);
   const [activeTab, setActiveTab] = React.useState<AccountsTab>("students");
   const [studentAccounts, setStudentAccounts] = React.useState<
     StudentAccountRecord[]
@@ -520,7 +526,7 @@ export function AccountsClient() {
         key: "campus",
         label: "Campus",
         allLabel: "All Campuses",
-        options: CAMPUS_OPTIONS,
+        options: dynamicCampusOptions,
         getValue: (r) => r.campus,
       },
       {
@@ -645,7 +651,7 @@ export function AccountsClient() {
         key: "campus",
         label: "Campus",
         allLabel: "All Campuses",
-        options: CAMPUS_OPTIONS,
+        options: dynamicCampusOptions,
         getValue: (r) => r.campus,
       },
       {

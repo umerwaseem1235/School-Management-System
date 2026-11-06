@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import type { LmsCourse } from "@/types";
 import { PAKISTANI_SCHOOL_CLASSES, PAKISTANI_SCHOOL_SUBJECTS } from "@/lib/mock/lms";
+import { useBranches } from "@/context/branches-context";
 import { BookOpen, GraduationCap, MapPin, Layers } from "lucide-react";
 import { toast } from "sonner";
 
@@ -48,8 +49,9 @@ export function CreateCourseDialog({
   const [courseCode, setCourseCode] = React.useState("");
   const [className, setClassName] = React.useState<string>(PAKISTANI_SCHOOL_CLASSES[7]);
   const [subject, setSubject] = React.useState("Mathematics");
+  const { activeBranches } = useBranches();
   const [teacher, setTeacher] = React.useState("Mr. Adeel Hassan");
-  const [campus, setCampus] = React.useState(CAMPUS_OPTIONS[0]);
+  const [campus, setCampus] = React.useState(activeBranches[0]?.campusName || "Main Campus — Gulberg");
   const [totalLessons, setTotalLessons] = React.useState("30");
   const [enrolledStudents, setEnrolledStudents] = React.useState("32");
 
@@ -59,7 +61,7 @@ export function CreateCourseDialog({
     setClassName(PAKISTANI_SCHOOL_CLASSES[7]);
     setSubject("Mathematics");
     setTeacher("Mr. Adeel Hassan");
-    setCampus(CAMPUS_OPTIONS[0]);
+    setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
     setTotalLessons("30");
     setEnrolledStudents("32");
   };
@@ -230,9 +232,9 @@ export function CreateCourseDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {CAMPUS_OPTIONS.map((camp) => (
-                  <SelectItem key={camp} value={camp}>
-                    {camp}
+                {activeBranches.map((c) => (
+                  <SelectItem key={c.id} value={c.campusName}>
+                    {c.campusName}
                   </SelectItem>
                 ))}
               </SelectContent>

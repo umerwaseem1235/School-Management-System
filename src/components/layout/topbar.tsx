@@ -23,7 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { useSidebar } from "./sidebar-context";
 import { Breadcrumbs } from "./breadcrumbs";
 import { QuickActions } from "./quick-actions";
@@ -40,14 +40,22 @@ const YEAR_OPTIONS = [
 
 export function Topbar() {
   const { setMobileOpen } = useSidebar();
+  const { branches } = useBranches();
   const [selectedCampus, setSelectedCampus] = React.useState<string>("all");
   const [selectedYear, setSelectedYear] = React.useState<string>("2026-27");
   const [shortcutsOpen, setShortcutsOpen] = React.useState<boolean>(false);
 
+  // Auto-sync if selected campus is removed
+  React.useEffect(() => {
+    if (selectedCampus !== "all" && !branches.some((c) => c.id === selectedCampus)) {
+      setSelectedCampus("all");
+    }
+  }, [branches, selectedCampus]);
+
   const activeCampusObj = React.useMemo(() => {
     if (selectedCampus === "all") return null;
-    return CAMPUSES.find((c) => c.id === selectedCampus);
-  }, [selectedCampus]);
+    return branches.find((c) => c.id === selectedCampus);
+  }, [branches, selectedCampus]);
 
   const activeYearObj = React.useMemo(() => {
     return YEAR_OPTIONS.find((y) => y.id === selectedYear) || YEAR_OPTIONS[0];
@@ -96,6 +104,16 @@ export function Topbar() {
               <span className="max-w-[130px] truncate">
                 {activeCampusObj ? activeCampusObj.campusName.split("—")[0].trim() : "All Campuses"}
               </span>
+              {activeCampusObj && activeCampusObj.status !== "Active" && (
+                <span className={cn(
+                  "rounded px-1 py-0.2 text-[9.5px] font-semibold",
+                  activeCampusObj.status === "Pending"
+                    ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                    : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                )}>
+                  {activeCampusObj.status}
+                </span>
+              )}
               <ChevronDown className="size-3 text-muted-foreground transition-transform group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
@@ -118,19 +136,40 @@ export function Topbar() {
               <DropdownMenuSeparator className="my-1 border-border" />
 
               <div className="space-y-0.5">
-                {CAMPUSES.map((c) => {
+                {branches.map((c) => {
                   const isSelected = selectedCampus === c.id;
+                  const isInactive = c.status !== "Active";
                   return (
                     <DropdownMenuItem
                       key={c.id}
                       onClick={() => handleCampusChange(c.id, c.campusName)}
                       className={cn(
                         "flex items-center justify-between rounded-lg px-2 py-1.5 cursor-pointer text-xs",
-                        isSelected ? "bg-brand text-white" : "hover:bg-muted"
+                        isSelected
+                          ? "bg-brand text-white"
+                          : isInactive
+                          ? "opacity-75 hover:bg-muted"
+                          : "hover:bg-muted"
                       )}
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate">{c.campusName}</p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-medium truncate">{c.campusName}</p>
+                          {isInactive && (
+                            <span
+                              className={cn(
+                                "rounded px-1 text-[9.5px] font-semibold uppercase tracking-wider",
+                                isSelected
+                                  ? "bg-white/20 text-white"
+                                  : c.status === "Pending"
+                                  ? "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400"
+                                  : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                              )}
+                            >
+                              {c.status}
+                            </span>
+                          )}
+                        </div>
                         <p
                           className={cn(
                             "text-[10.5px]",
@@ -171,11 +210,11 @@ export function Topbar() {
                     onClick={() => handleYearChange(y.id, y.label)}
                     className={cn(
                       "flex items-center justify-between rounded-lg px-2 py-1.5 cursor-pointer text-xs",
-                        isSelected ? "bg-brand text-white" : "hover:bg-muted"
-                      )}
-                    >
-                      <span>{y.label}</span>
-                      {isSelected && <Check className="size-3.5 text-white" />}
+                      isSelected ? "bg-brand text-white" : "hover:bg-muted"
+                    )}
+                  >
+                    <span>{y.label}</span>
+                    {isSelected && <Check className="size-3.5 text-white" />}
                   </DropdownMenuItem>
                 );
               })}
