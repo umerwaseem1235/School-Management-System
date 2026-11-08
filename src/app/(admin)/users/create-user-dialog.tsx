@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { formatCampusDisplay } from "@/lib/format";
 import type { Role, Status, User } from "@/types";
 import {
@@ -212,8 +212,9 @@ export function CreateUserDialog({
   // Common Identity State
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
+  const { branches, activeBranches } = useBranches();
   const [phone, setPhone] = React.useState("");
-  const [campus, setCampus] = React.useState<string>(CAMPUSES[0].campusName);
+  const [campus, setCampus] = React.useState<string>("Main Campus — Gulberg");
   const [status, setStatus] = React.useState<Status>("Active");
 
   // Credentials & Security
@@ -323,7 +324,7 @@ export function CreateUserDialog({
     setPhone("");
     setCategory("teacher");
     setRole("Teacher");
-    setCampus(CAMPUSES[0].campusName);
+    setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
     setStatus("Active");
     setPassword("");
     setShowPassword(false);
@@ -679,9 +680,15 @@ export function CreateUserDialog({
                     <SelectItem value="All Campuses" className="text-xs font-semibold text-brand">
                       All Campuses (Central Access)
                     </SelectItem>
-                    {CAMPUSES.map((c) => (
-                      <SelectItem key={c.id} value={c.campusName} className="text-xs">
+                    {branches.map((c) => (
+                      <SelectItem
+                        key={c.id}
+                        value={c.campusName}
+                        disabled={c.status !== "Active"}
+                        className="text-xs"
+                      >
                         {formatCampusDisplay(c.campusName).primary}
+                        {c.status !== "Active" ? " (Inactive)" : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>

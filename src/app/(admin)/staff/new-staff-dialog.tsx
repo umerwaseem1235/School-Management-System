@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { formatCampusDisplay } from "@/lib/format";
 import type { StaffMember } from "@/types";
 import {
@@ -250,8 +250,9 @@ export function NewStaffDialog({
   // Employment Info
   const [designation, setDesignation] = React.useState("");
   const [department, setDepartment] = React.useState<string>(DEPARTMENTS[0]);
+  const { activeBranches } = useBranches();
   const [type, setType] = React.useState<"Teaching" | "Non-Teaching">("Teaching");
-  const [campus, setCampus] = React.useState<string>(CAMPUSES[0].campusName);
+  const [campus, setCampus] = React.useState<string>(activeBranches[0]?.campusName || "Main Campus — Gulberg");
   const [qualification, setQualification] = React.useState("");
   const [experience, setExperience] = React.useState("");
   const [joiningDate, setJoiningDate] = React.useState("");
@@ -279,7 +280,7 @@ export function NewStaffDialog({
     setDesignation("");
     setDepartment(DEPARTMENTS[0]);
     setType("Teaching");
-    setCampus(CAMPUSES[0].campusName);
+    setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
     setQualification("");
     setExperience("");
     setJoiningDate("");
@@ -595,7 +596,7 @@ export function NewStaffDialog({
                     <SelectValue placeholder="Select Campus" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CAMPUSES.map((c) => (
+                    {activeBranches.map((c) => (
                       <SelectItem key={c.id} value={c.campusName} className="text-xs">
                         {formatCampusDisplay(c.campusName).primary}
                       </SelectItem>

@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ActionButton } from "@/components/shared/action-button";
+import { useBranches } from "@/context/branches-context";
 import { formatCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { StaffSalaryRecord } from "@/lib/mock/payroll";
@@ -179,6 +180,8 @@ export function AddSalaryModal({
   const [paymentStatus, setPaymentStatus] = React.useState<"Pending" | "Paid" | "Disbursed" | "Approved" | "On Hold">("Pending");
   const [designation, setDesignation] = React.useState("");
   const [isCustom, setIsCustom] = React.useState(false);
+  const { activeBranches } = useBranches();
+  const campusList = React.useMemo(() => activeBranches.map((b) => b.campusName.split("—")[0].trim()), [activeBranches]);
   const [department, setDepartment] = React.useState("Sciences");
   const [campus, setCampus] = React.useState("Gulberg");
   const [type, setType] = React.useState<"Teaching" | "Non-Teaching">("Teaching");
@@ -646,7 +649,7 @@ export function AddSalaryModal({
                     onChange={(e) => setCampus(e.target.value)}
                     className={inputClass}
                   >
-                    {CAMPUSES.map((c) => (
+                    {(campusList.length > 0 ? campusList : CAMPUSES).map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>

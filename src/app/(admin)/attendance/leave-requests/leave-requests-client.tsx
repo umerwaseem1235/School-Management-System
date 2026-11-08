@@ -52,6 +52,7 @@ import {
   type ExtendedLeaveRequest,
 } from "@/lib/mock/attendance";
 import { formatDate, formatNumber } from "@/lib/format";
+import { useBranches } from "@/context/branches-context";
 
 type Status = ExtendedLeaveRequest["status"];
 
@@ -130,6 +131,11 @@ const tableFilters: FilterDef<ExtendedLeaveRequest>[] = [
 const DECIDER = "Hamza Tariq (Super Admin)";
 
 export function LeaveRequestsClient() {
+  const { branches } = useBranches();
+  const dynamicCampusOptions = React.useMemo(() => {
+    const fromBranches = branches.map((b) => b.campusName.split("—")[0].trim());
+    return Array.from(new Set([...fromBranches, ...CAMPUS_OPTIONS]));
+  }, [branches]);
   const [requests, setRequests] = React.useState<ExtendedLeaveRequest[]>(
     EXTENDED_LEAVE_REQUESTS
   );
@@ -530,7 +536,7 @@ export function LeaveRequestsClient() {
                   value={campus}
                   onChange={(e) => setCampus(e.target.value)}
                 >
-                  {CAMPUS_OPTIONS.map((c) => (
+                  {dynamicCampusOptions.map((c) => (
                     <option key={c} value={c}>
                       {shortCampus(c)}
                     </option>

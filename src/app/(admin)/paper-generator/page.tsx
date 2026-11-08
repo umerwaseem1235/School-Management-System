@@ -46,7 +46,7 @@ import {
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/format";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { toast } from "sonner";
 import {
   INITIAL_QUESTION_BANK,
@@ -94,8 +94,9 @@ export default function PaperGeneratorPage() {
   const [composerClass, setComposerClass] = React.useState("Class 9");
   const [composerSubject, setComposerSubject] = React.useState("Physics");
   const [composerDuration, setComposerDuration] = React.useState("2 Hours");
+  const { activeBranches } = useBranches();
   const [composerCampus, setComposerCampus] = React.useState(
-    CAMPUSES[0]?.campusName || "Main Campus — Gulberg"
+    activeBranches[0]?.campusName || "Main Campus — Gulberg"
   );
   const [composerTeacher, setComposerTeacher] = React.useState(
     PAPER_TEACHERS[0]
@@ -887,7 +888,7 @@ export default function PaperGeneratorPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {CAMPUSES.map((c) => (
+                      {activeBranches.map((c) => (
                         <SelectItem
                           key={c.id}
                           value={c.campusName}

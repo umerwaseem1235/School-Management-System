@@ -14,7 +14,7 @@ import {
   Compass,
 } from "lucide-react";
 import { NAV_GROUPS, ALL_NAV_ITEMS, type NavItem } from "@/config/navigation";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,7 @@ interface SearchAction {
 
 export function CommandSearch() {
   const router = useRouter();
+  const { branches } = useBranches();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [cursor, setCursor] = React.useState(0);
@@ -107,20 +108,20 @@ export function CommandSearch() {
     );
 
     // Campuses
-    CAMPUSES.forEach((c) => {
+    branches.forEach((c) => {
       items.push({
         id: `camp-${c.id}`,
         title: c.campusName,
         category: "Campuses",
         icon: Building2,
-        href: "/campuses",
-        subtitle: `${c.city} · ${c.campusCode} · ${c.students} students`,
-        badge: c.campusCode,
+        href: "/branches",
+        subtitle: `${c.city} · ${c.campusCode} · ${c.status}`,
+        badge: c.status === "Active" ? c.campusCode : `${c.campusCode} (Inactive)`,
       });
     });
 
     return items;
-  }, []);
+  }, [branches]);
 
   const results = React.useMemo(() => {
     const q = query.trim().toLowerCase();

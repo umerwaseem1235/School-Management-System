@@ -146,6 +146,7 @@ interface DataTableProps<T> {
   tableClassName?: string;
   theadRowClassName?: string;
   hideSortArrows?: boolean;
+  showFillerRows?: boolean;
 }
 
 export const ALL = "__all__";
@@ -174,6 +175,7 @@ export function DataTable<T>({
   tableClassName,
   theadRowClassName = DEFAULT_THEAD_ROW_CLASSNAME,
   hideSortArrows = false,
+  showFillerRows = false,
 }: DataTableProps<T>) {
   const [query, setQuery] = React.useState("");
   const [filterState, setFilterState] = React.useState<Record<string, string>>({});
@@ -601,7 +603,8 @@ export function DataTable<T>({
               );
             })}
             {/* Filler rows so card height and column widths remain 100% constant on partial pages */}
-            {pageRows.length > 0 &&
+            {showFillerRows &&
+              pageRows.length > 0 &&
               pageRows.length < pageSize &&
               Array.from({ length: pageSize - pageRows.length }).map((_, idx) => (
                 <tr

@@ -17,6 +17,7 @@ interface PrintBroadsheetDialogProps {
   results: StudentTermResult[];
   classNameLabel: string;
   termLabel: string;
+  campusLabel?: string;
 }
 
 export function PrintBroadsheetDialog({
@@ -25,6 +26,7 @@ export function PrintBroadsheetDialog({
   results,
   classNameLabel,
   termLabel,
+  campusLabel,
 }: PrintBroadsheetDialogProps) {
   const [issueDate, setIssueDate] = React.useState("29 Oct 2026");
 
@@ -105,7 +107,7 @@ export function PrintBroadsheetDialog({
 <body>
   <div class="header">
     <div class="school">EduSphere Grammar High School</div>
-    <div class="campus">Class Result Gazette &amp; Broadsheet</div>
+    <div class="campus">Class Result Gazette &amp; Broadsheet${campusLabel ? ` &bull; ${escapeHtml(campusLabel)}` : ""}</div>
     <div class="title">${escapeHtml(termLabel)}</div>
   </div>
   <div class="meta-row">

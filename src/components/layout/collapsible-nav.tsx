@@ -90,6 +90,7 @@ function TreeSubItem({
     <Link
       href={item.href}
       onClick={onNavigate}
+      suppressHydrationWarning
       aria-current={active ? "page" : undefined}
       className={cn(
         "group relative flex h-8.5 items-center gap-2.5 rounded-lg px-2 text-[13px] font-medium transition-colors duration-150 motion-reduce:transition-none",
@@ -141,6 +142,7 @@ export function CollapsibleNavGroup({
   onNavigate,
 }: CollapsibleNavGroupProps) {
   const pathname = usePathname();
+
   const hasActiveItem = group.items.some((item) =>
     isNavActive(pathname, item.href, item.exact)
   );
@@ -164,7 +166,7 @@ export function CollapsibleNavGroup({
         : true;
 
   // Single-item groups (e.g. Dashboard) render as a direct navigation link
-  if (group.items.length === 1) {
+  if (group.items.length === 1 && !group.collapsible) {
     const item = group.items[0];
     const active = isNavActive(pathname, item.href, item.exact);
     const Icon = item.icon;
@@ -179,6 +181,7 @@ export function CollapsibleNavGroup({
           <Link
             href={item.href}
             onClick={onNavigate}
+            suppressHydrationWarning
             aria-current={active ? "page" : undefined}
             className={cn(
               "group relative flex h-10 w-full items-center rounded-xl text-[13.5px] font-medium transition-colors duration-150 motion-reduce:transition-none",
@@ -189,13 +192,14 @@ export function CollapsibleNavGroup({
                 : "text-white/75 hover:bg-white/[0.08] hover:text-white"
             )}
           >
-            {/* Sliding active indicator bar */}
-            {active && (
-              <span
-                aria-hidden
-                className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-              />
-            )}
+            {/* Sliding active indicator bar — always rendered to guarantee stable DOM structure across SSR & client */}
+            <span
+              aria-hidden="true"
+              className={cn(
+                "absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-opacity duration-150",
+                active ? "opacity-100" : "opacity-0 pointer-events-none"
+              )}
+            />
             <div className="grid size-5 shrink-0 place-items-center">
               <Icon
                 className={cn(
@@ -249,6 +253,7 @@ export function CollapsibleNavGroup({
               setIsExpanded((v) => !v);
             }
           }}
+          suppressHydrationWarning
           aria-expanded={isExpanded}
           className={cn(
             "group relative flex h-10 w-full items-center rounded-xl text-[13.5px] font-medium transition-colors duration-150 motion-reduce:transition-none",
@@ -259,13 +264,14 @@ export function CollapsibleNavGroup({
               : "text-white/75 hover:bg-white/[0.08] hover:text-white"
           )}
         >
-          {/* Active indicator bar when group contains the active route */}
-          {hasActiveItem && (
-            <span
-              aria-hidden
-              className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-            />
-          )}
+          {/* Active indicator bar — always rendered to guarantee stable DOM structure across SSR & client */}
+          <span
+            aria-hidden="true"
+            className={cn(
+              "absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-opacity duration-150",
+              hasActiveItem ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}
+          />
           <div className="grid size-5 shrink-0 place-items-center">
             <GroupIcon
               className={cn(
@@ -305,7 +311,10 @@ export function CollapsibleNavGroup({
         )}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="relative ml-[22px] space-y-0.5 border-l border-white/20 pl-3">
+          <div
+            className="relative ml-[22px] space-y-0.5 border-l border-white/20 pl-3"
+            suppressHydrationWarning
+          >
             {group.items.map((item, index) => (
               <TreeSubItem
                 key={item.href}

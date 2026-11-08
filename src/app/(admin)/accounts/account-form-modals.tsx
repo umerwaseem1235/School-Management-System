@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ActionButton } from "@/components/shared/action-button";
+import { useBranches } from "@/context/branches-context";
 import type {
   StaffAccountRecord,
   StaffPortalRole,
@@ -86,6 +87,8 @@ export function StudentAccountFormModal({
   const [rollNo, setRollNo] = React.useState("");
   const [admissionNumber, setAdmissionNumber] = React.useState("");
   const [className, setClassName] = React.useState("Grade 9");
+  const { activeBranches: studentActiveBranches } = useBranches();
+  const studentCampusList = React.useMemo(() => studentActiveBranches.map((b) => b.campusName.split("—")[0].trim()), [studentActiveBranches]);
   const [section, setSection] = React.useState("A");
   const [campus, setCampus] = React.useState("Gulberg");
   const [studentEmail, setStudentEmail] = React.useState("");
@@ -315,7 +318,7 @@ export function StudentAccountFormModal({
                   onChange={(e) => setCampus(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-2.5 text-xs text-foreground"
                 >
-                  {CAMPUS_OPTIONS.map((c) => (
+                  {(studentCampusList.length > 0 ? studentCampusList : CAMPUS_OPTIONS).map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
@@ -536,6 +539,8 @@ export function StaffAccountFormModal({
   const [empCode, setEmpCode] = React.useState("");
   const [designation, setDesignation] = React.useState("Senior Lecturer");
   const [department, setDepartment] = React.useState("Mathematics");
+  const { activeBranches } = useBranches();
+  const campusList = React.useMemo(() => activeBranches.map((b) => b.campusName.split("—")[0].trim()), [activeBranches]);
   const [category, setCategory] =
     React.useState<StaffAccountRecord["category"]>("Teaching");
   const [campus, setCampus] = React.useState("Gulberg");
@@ -738,7 +743,7 @@ export function StaffAccountFormModal({
                   onChange={(e) => setCampus(e.target.value)}
                   className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-2.5 text-xs text-foreground"
                 >
-                  {CAMPUS_OPTIONS.map((c) => (
+                  {(campusList.length > 0 ? campusList : CAMPUS_OPTIONS).map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>

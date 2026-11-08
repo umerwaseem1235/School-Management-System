@@ -27,6 +27,7 @@ export interface Campus {
   campusName: string;
   campusCode: string;
   city: string;
+  province?: string;
   address: string;
   contactEmail: string;
   phone: string;

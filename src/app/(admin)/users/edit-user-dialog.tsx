@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { formatCampusDisplay, formatDateTime, initials } from "@/lib/format";
 import type { Role, Status, User } from "@/types";
 import {
@@ -116,8 +116,9 @@ export function EditUserDialog({
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [phone, setPhone] = React.useState("");
+  const { branches } = useBranches();
   const [role, setRole] = React.useState<Role>("Teacher");
-  const [campus, setCampus] = React.useState<string>(CAMPUSES[0].campusName);
+  const [campus, setCampus] = React.useState<string>("Main Campus — Gulberg");
   const [status, setStatus] = React.useState<Status>("Active");
 
   // Extended Contextual Fields
@@ -145,7 +146,7 @@ export function EditUserDialog({
       setEmail(user.email);
       setPhone(user.phone || "");
       setRole(user.role);
-      setCampus(user.campus || CAMPUSES[0].campusName);
+      setCampus(user.campus || branches[0]?.campusName || "Main Campus — Gulberg");
       setStatus(user.status);
       setDepartment(user.department || "");
       setDesignation(user.designation || "");
@@ -449,9 +450,10 @@ export function EditUserDialog({
                       <SelectItem value="All Campuses" className="text-xs font-semibold text-brand">
                         All Campuses (Central Access)
                       </SelectItem>
-                      {CAMPUSES.map((c) => (
+                      {branches.map((c) => (
                         <SelectItem key={c.id} value={c.campusName} className="text-xs">
                           {formatCampusDisplay(c.campusName).primary}
+                          {c.status !== "Active" ? " (Inactive)" : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>

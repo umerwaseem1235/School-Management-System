@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { formatCampusDisplay } from "@/lib/format";
 import type { FrontDeskInquiry } from "@/types";
 import { PhoneCall } from "lucide-react";
@@ -45,15 +45,16 @@ export function LogInquiryDialog({
 }: LogInquiryDialogProps) {
   const [callerName, setCallerName] = React.useState("");
   const [phone, setPhone] = React.useState("");
+  const { activeBranches } = useBranches();
   const [inquiryType, setInquiryType] = React.useState<FrontDeskInquiry["inquiryType"]>("Admission");
-  const [campus, setCampus] = React.useState(CAMPUSES[0].campusName);
+  const [campus, setCampus] = React.useState(activeBranches[0]?.campusName || "Main Campus — Gulberg");
   const [notes, setNotes] = React.useState("");
 
   const resetForm = () => {
     setCallerName("");
     setPhone("");
     setInquiryType("Admission");
-    setCampus(CAMPUSES[0].campusName);
+    setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
     setNotes("");
   };
 
@@ -176,7 +177,7 @@ export function LogInquiryDialog({
                   <SelectValue placeholder="Select campus" />
                 </SelectTrigger>
                 <SelectContent>
-                  {CAMPUSES.map((c) => (
+                  {activeBranches.map((c) => (
                     <SelectItem key={c.id} value={c.campusName} className="text-xs">
                       {formatCampusDisplay(c.campusName).primary}
                     </SelectItem>

@@ -21,6 +21,7 @@ function SidebarBody({
   return (
     <nav
       aria-label="Main navigation"
+      suppressHydrationWarning
       className={cn(
         "flex-1 px-3 py-4 space-y-1.5",
         collapsed
@@ -28,7 +29,7 @@ function SidebarBody({
           : "scrollbar-thin overflow-y-auto overflow-x-hidden"
       )}
     >
-      <div className="space-y-1.5">
+      <div className="space-y-1.5" suppressHydrationWarning>
         {NAV_GROUPS.map((group) => (
           <CollapsibleNavGroup
             key={group.label}

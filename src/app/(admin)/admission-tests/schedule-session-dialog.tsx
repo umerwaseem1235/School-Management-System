@@ -25,7 +25,7 @@ import {
   ADMISSION_SUPERVISORS,
   type AdmissionTestSession,
 } from "@/lib/mock/admission-tests";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { CalendarPlus, Check } from "lucide-react";
 import { toast } from "sonner";
 
@@ -63,9 +63,10 @@ export function ScheduleSessionDialog({
   const [roomHall, setRoomHall] = React.useState(ADMISSION_HALLS[0]);
   const [totalMarks, setTotalMarks] = React.useState<number>(100);
   const [qualifyingMarks, setQualifyingMarks] = React.useState<number>(50);
+  const { activeBranches } = useBranches();
   const [supervisor, setSupervisor] = React.useState(ADMISSION_SUPERVISORS[0]);
   const [campus, setCampus] = React.useState(
-    CAMPUSES[0]?.campusName || "Main Campus — Gulberg"
+    activeBranches[0]?.campusName || "Main Campus — Gulberg"
   );
 
   const startHourRef = React.useRef<HTMLInputElement>(null);
@@ -488,7 +489,7 @@ export function ScheduleSessionDialog({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {CAMPUSES.map((c) => (
+                    {activeBranches.map((c) => (
                       <SelectItem
                         key={c.id}
                         value={c.campusName}

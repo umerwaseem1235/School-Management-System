@@ -48,6 +48,7 @@ export interface NavGroup {
   icon: LucideIcon;
   items: NavItem[];
   defaultExpanded?: boolean;
+  collapsible?: boolean;
 }
 
 export const NAV_GROUPS: NavGroup[] = [
@@ -61,12 +62,37 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Administration",
+    icon: ShieldCheck,
+    items: [
+      { title: "Users & Roles", href: "/users", icon: UserCog },
+      { title: "Accounts", href: "/accounts", icon: Calculator },
+      { title: "Branches", href: "/branches", icon: Building2 },
+      { title: "Academic Management", href: "/academics", icon: BookOpen },
+    ],
+    defaultExpanded: true,
+    collapsible: true,
+  },
+  {
+    label: "Students",
+    icon: GraduationCap,
+    items: [
+      { title: "Students", href: "/students", icon: GraduationCap },
+    ],
+    defaultExpanded: false,
+  },
+  {
+    label: "Staff",
     icon: Users,
     items: [
-      { title: "Reception", href: "/reception", icon: Phone },
-      { title: "Students", href: "/students", icon: GraduationCap },
       { title: "Staff", href: "/staff", icon: Users },
-      { title: "Users & Roles", href: "/users", icon: UserCog },
+    ],
+    defaultExpanded: false,
+  },
+  {
+    label: "Reception",
+    icon: Phone,
+    items: [
+      { title: "Reception", href: "/reception", icon: Phone },
     ],
     defaultExpanded: false,
   },
@@ -74,10 +100,11 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Academics",
     icon: BookOpen,
     items: [
-      { title: "Academic Management", href: "/academics", icon: BookOpen },
+      { title: "Examinations", href: "/examinations", icon: ClipboardCheck },
       { title: "LMS", href: "/lms", icon: MonitorPlay },
     ],
-    defaultExpanded: false,
+    defaultExpanded: true,
+    collapsible: true,
   },
   {
     label: "Attendance",
@@ -95,7 +122,6 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Examinations",
     icon: ClipboardCheck,
     items: [
-      { title: "Examinations", href: "/examinations", icon: ClipboardCheck },
       { title: "Tests & Assessments", href: "/tests-assessments", icon: FileQuestion },
       { title: "Admission Tests", href: "/admission-tests", icon: FileText },
       { title: "Paper Generator", href: "/paper-generator", icon: FileText },
@@ -125,7 +151,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Fines", href: "/fees/fines", icon: AlertCircle },
       { title: "Scholarship", href: "/fees/scholarships", icon: Award },
       { title: "Adjustment", href: "/fees/adjustments", icon: Scale },
-      { title: "Accounts", href: "/accounts", icon: Calculator },
+      { title: "Reports", href: "/fees/reports", icon: BarChart3 },
       { title: "Expenses", href: "/expenses", icon: CreditCard },
     ],
     defaultExpanded: false,

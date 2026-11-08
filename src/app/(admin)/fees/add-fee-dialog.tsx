@@ -26,6 +26,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import type { FeeChallan, FeeStatus } from "@/types";
 import type { FeeRevisionRecord } from "@/lib/mock/finance";
 import { resolveMatchingTier, calculatePreviousMonthDues, readFeeScholarships } from "@/lib/mock/finance-storage";
+import { useBranches } from "@/context/branches-context";
 
 const CAMPUS_OPTIONS = [
   "Gulberg",
@@ -158,6 +159,8 @@ export function AddFeeDialog({
   onCreate: (challan: FeeChallan) => void;
   feeTiers?: FeeRevisionRecord[];
 }) {
+  const { activeBranches } = useBranches();
+  const campusList = React.useMemo(() => activeBranches.map((b) => b.campusName.split("—")[0].trim()), [activeBranches]);
   const [form, setForm] = React.useState<FormState>(INITIAL_FORM);
   const [charges, setCharges] = React.useState<FeeChargeItem[]>(() =>
     getInitialCharges(INITIAL_FORM.grade, feeTiers)
@@ -442,7 +445,7 @@ export function AddFeeDialog({
                   value={form.campus}
                   onChange={(e) => set("campus", e.target.value)}
                 >
-                  {CAMPUS_OPTIONS.map((c) => (
+                  {(campusList.length > 0 ? campusList : CAMPUS_OPTIONS).map((c) => (
                     <option key={c}>{c}</option>
                   ))}
                 </select>

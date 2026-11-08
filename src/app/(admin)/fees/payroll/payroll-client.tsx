@@ -37,6 +37,7 @@ import { AddSalaryModal } from "./add-salary-modal";
 import { RunPayrollModal } from "./run-payroll-modal";
 import { PayrollCalendarDropdown } from "./payroll-calendar";
 import { GenerateSlipModal } from "./generate-slip-modal";
+import { useBranches } from "@/context/branches-context";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -96,6 +97,11 @@ function formatSlipNo(s: StaffSalaryRecord, index: number): string {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function PayrollClient() {
+  const { branches } = useBranches();
+  const dynamicCampusOptions = React.useMemo(() => {
+    const dynamic = branches.map((b) => b.campusName.split("—")[0].trim());
+    return ["All Campuses", ...Array.from(new Set(dynamic))];
+  }, [branches]);
   const [salaries, setSalaries] = React.useState<StaffSalaryRecord[]>(STAFF_SALARIES);
   const [accounts] = React.useState<DisbursementAccountRecord[]>(DISBURSEMENT_ACCOUNTS);
   const [batches, setBatches] = React.useState<PayrollBatchSummary[]>(PAYROLL_BATCH_SUMMARIES);
@@ -516,10 +522,8 @@ export function PayrollClient() {
                 onChange={(e) => setSelectedCampus(e.target.value)}
                 className="h-9 rounded-[4px] border border-brand/18 bg-white px-3 text-xs font-medium text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] outline-none hover:border-brand/30 focus:border-brand cursor-pointer"
               >
-                {CAMPUS_OPTIONS.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
+                {dynamicCampusOptions.map((c) => (
+                  <option key={c} value={c}>{c}</option>
                 ))}
               </select>
               <select

@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CAMPUSES } from "@/lib/mock/institution";
+import { useBranches } from "@/context/branches-context";
 import { useSidebar } from "./sidebar-context";
 import { Breadcrumbs } from "./breadcrumbs";
 import { QuickActions } from "./quick-actions";
@@ -55,14 +55,22 @@ const YEAR_OPTIONS: AcademicYearOption[] = [
 
 export function Topbar() {
   const { setMobileOpen } = useSidebar();
+  const { branches } = useBranches();
   const [selectedCampus, setSelectedCampus] = React.useState<string>("all");
   const [selectedYear, setSelectedYear] = React.useState<string>("2026-27");
   const [shortcutsOpen, setShortcutsOpen] = React.useState<boolean>(false);
 
+  // Auto-sync if selected campus is removed
+  React.useEffect(() => {
+    if (selectedCampus !== "all" && !branches.some((c) => c.id === selectedCampus)) {
+      setSelectedCampus("all");
+    }
+  }, [branches, selectedCampus]);
+
   const activeCampusObj = React.useMemo(() => {
     if (selectedCampus === "all") return null;
-    return CAMPUSES.find((c) => c.id === selectedCampus);
-  }, [selectedCampus]);
+    return branches.find((c) => c.id === selectedCampus);
+  }, [branches, selectedCampus]);
 
   const activeYearObj = React.useMemo(() => {
     return (
@@ -159,6 +167,16 @@ export function Topbar() {
               <span className="max-w-[140px] truncate">
                 {activeCampusObj ? activeCampusObj.campusName.split("—")[0].trim() : "All Campuses"}
               </span>
+              {activeCampusObj && activeCampusObj.status !== "Active" && (
+                <span className={cn(
+                  "rounded px-1 py-0.2 text-[9.5px] font-semibold",
+                  activeCampusObj.status === "Pending"
+                    ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                    : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                )}>
+                  {activeCampusObj.status}
+                </span>
+              )}
               <ChevronDown className="size-3 text-muted-foreground transition-transform group-hover:text-brand group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
@@ -186,25 +204,56 @@ export function Topbar() {
 
                 <DropdownMenuSeparator className="my-1 border-border/70" />
 
-                {CAMPUSES.map((c) => {
-                  const isSelected = selectedCampus === c.id;
-                  const cleanName = c.campusName.split("—")[0].trim();
-                  return (
-                    <DropdownMenuItem
-                      key={c.id}
-                      onClick={() => handleCampusChange(c.id, cleanName)}
-                      className={cn(
-                        "flex items-center justify-between rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs font-medium transition-colors",
-                        isSelected
-                          ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] focus:bg-[#091d3e] focus:text-white"
-                          : "text-foreground hover:bg-[#eef3fc]"
-                      )}
-                    >
-                      <span className="truncate">{cleanName}</span>
-                      {isSelected && <Check className="size-3.5 text-white shrink-0 ml-2" />}
-                    </DropdownMenuItem>
-                  );
-                })}
+<div className="max-h-64 overflow-y-auto scrollbar-thin-light space-y-0.5 pr-0.5">
+                  {branches.map((c) => {
+                    const isSelected = selectedCampus === c.id;
+                    const isInactive = c.status !== "Active";
+                    const cleanName = c.campusName.split("—")[0].trim();
+                    return (
+                      <DropdownMenuItem
+                        key={c.id}
+                        onClick={() => handleCampusChange(c.id, cleanName)}
+                        className={cn(
+                          "flex items-center justify-between rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs font-medium transition-colors",
+                          isSelected
+                            ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] focus:bg-[#091d3e] focus:text-white"
+                            : isInactive
+                            ? "opacity-75 hover:bg-[#eef3fc]"
+                            : "text-foreground hover:bg-[#eef3fc]"
+                        )}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-medium truncate">{cleanName}</span>
+                            {isInactive && (
+                              <span
+                                className={cn(
+                                  "rounded px-1 text-[9.5px] font-semibold uppercase tracking-wider",
+                                  isSelected
+                                    ? "bg-white/20 text-white"
+                                    : c.status === "Pending"
+                                    ? "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400"
+                                    : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                )}
+                              >
+                                {c.status}
+                              </span>
+                            )}
+                          </div>
+                          <p
+                            className={cn(
+                              "text-[10.5px]",
+                              isSelected ? "text-white/80" : "text-muted-foreground"
+                            )}
+                          >
+                            {c.city} · {c.campusCode}
+                          </p>
+                        </div>
+                        {isSelected && <Check className="size-3.5 text-white shrink-0 ml-1.5" />}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </div>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -284,6 +333,7 @@ export function Topbar() {
                   );
                 })}
               </div>
+
             </DropdownMenuContent>
           </DropdownMenu>
 
