@@ -88,7 +88,7 @@ function buildMinimalPdf(pagesStreams: string[]): Blob {
   return new Blob([chunks.join("")], { type: "application/pdf" });
 }
 
-export function exportFeeRevisionsPdf(records: FeeRevisionRecord[]): boolean {
+export function exportFeeConfigurationPdf(records: FeeRevisionRecord[]): boolean {
   if (!records || records.length === 0) return false;
 
   const generatedDate = new Date().toLocaleDateString("en-GB", {
@@ -111,7 +111,7 @@ export function exportFeeRevisionsPdf(records: FeeRevisionRecord[]): boolean {
   cmds.push("BT /F2 14 Tf 40 796 Td (EDUSPHERE MULTI-CAMPUS SYSTEM) Tj ET");
   cmds.push("0.85 0.90 0.98 rg");
   cmds.push(
-    "BT /F1 9 Tf 40 782 Td (Class-Wise Fee Structure & Master Revisions Schedule | AY 2026-27) Tj ET"
+    "BT /F1 9 Tf 40 782 Td (Class-Wise Fee Structure & Annual Increase Schedule | AY 2026-27) Tj ET"
   );
   cmds.push(
     `BT /F1 8 Tf 40 769 Td (Generated on: ${sanitizePdfText(
@@ -145,7 +145,7 @@ export function exportFeeRevisionsPdf(records: FeeRevisionRecord[]): boolean {
     { title: "Lab Charges", x: 330 },
     { title: "Utilities & Sports", x: 395 },
     { title: "Monthly Total", x: 470 },
-    { title: "Revision %", x: 535 },
+    { title: "Annual Increase %", x: 505, font: 7 },
   ];
 
   const drawTableHeader = (target: string[], y: number) => {
@@ -153,7 +153,8 @@ export function exportFeeRevisionsPdf(records: FeeRevisionRecord[]): boolean {
     target.push(`28 ${y} 539.28 20 re f`);
     target.push("1 1 1 rg");
     for (const col of cols) {
-      target.push(`BT /F2 7.5 Tf ${col.x} ${y + 6} Td (${col.title}) Tj ET`);
+      const size = "font" in col && col.font ? col.font : 7.5;
+      target.push(`BT /F2 ${size} Tf ${col.x} ${y + 6} Td (${col.title}) Tj ET`);
     }
   };
 
@@ -226,7 +227,7 @@ export function exportFeeRevisionsPdf(records: FeeRevisionRecord[]): boolean {
   return true;
 }
 
-export function printFeeRevisionsReport(records: FeeRevisionRecord[]): boolean {
+export function printFeeConfigurationReport(records: FeeRevisionRecord[]): boolean {
   if (typeof window === "undefined") return false;
 
   const generatedDate = new Date().toLocaleDateString("en-GB", {
@@ -261,7 +262,7 @@ export function printFeeRevisionsReport(records: FeeRevisionRecord[]): boolean {
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Fee Structure & Master Revisions Schedule - EduSphere</title>
+  <title>Fee Structure &amp; Annual Increase Schedule - EduSphere</title>
   <style>
     @page { size: A4 landscape; margin: 12mm; }
     body {
@@ -362,7 +363,7 @@ export function printFeeRevisionsReport(records: FeeRevisionRecord[]): boolean {
   <div class="header">
     <div>
       <h1 class="title">EduSphere Multi-Campus School System</h1>
-      <p class="subtitle">Class-Wise Fee Structure & Master Revisions Schedule</p>
+      <p class="subtitle">Class-Wise Fee Structure &amp; Annual Increase Schedule</p>
     </div>
     <div class="meta-box">
       <div>Report Date: <strong>${generatedDate}</strong></div>
@@ -396,7 +397,7 @@ export function printFeeRevisionsReport(records: FeeRevisionRecord[]): boolean {
         <th class="text-right">Library</th>
         <th class="text-right">Utilities</th>
         <th class="text-right">Monthly Total</th>
-        <th class="text-center">Revision %</th>
+        <th class="text-center">Annual Increase %</th>
         <th class="text-center">Status</th>
       </tr>
     </thead>

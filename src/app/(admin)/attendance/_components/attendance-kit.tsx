@@ -62,7 +62,7 @@ export function DashboardFeatureCard({
   return (
     <div
       className={cn(
-        "group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-2xl border border-brand/12 bg-white shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06),0_18px_42px_-24px_rgb(9_29_62/0.32)] transition-all duration-300 hover:-translate-y-1 hover:border-brand/25 hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_4px_12px_rgb(9_29_62/0.08),0_28px_56px_-20px_rgb(9_29_62/0.38)]",
+        "group relative flex min-w-0 flex-col justify-between overflow-hidden rounded-xl border border-border bg-white shadow-sm transition-colors duration-200 hover:border-brand/25 hover:shadow-md",
         className
       )}
     >
@@ -72,13 +72,13 @@ export function DashboardFeatureCard({
       />
       <span
         aria-hidden
-        className="absolute inset-x-8 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#1e4275] to-transparent"
+        className="absolute inset-x-8 top-0 h-px rounded-full bg-border"
       />
 
       <div className="relative z-10 space-y-3.5 p-4 pb-3.5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e4275] text-white shadow-[0_8px_18px_-6px_rgb(9_29_62/0.5)] ring-1 ring-white/15 transition-transform duration-300 group-hover:scale-105">
+            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand ring-1 ring-brand/10">
               {monogram ? (
                 <span className="text-[11px] font-bold tracking-tight tabular-nums">
                   {monogram}
@@ -105,7 +105,7 @@ export function DashboardFeatureCard({
       </div>
 
       {footer && (
-        <div className="relative z-10 border-t border-brand/10 bg-brand-50/40 px-4 py-2.5">
+        <div className="relative z-10 border-t border-border bg-muted/20 px-4 py-2.5">
           {footer}
         </div>
       )}

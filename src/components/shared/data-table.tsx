@@ -42,6 +42,7 @@ export interface Column<T> {
   sortValue?: (row: T) => string | number;
   className?: string;
   headerClassName?: string;
+  hideSortArrow?: boolean;
 }
 
 function resolveHeaderIcon(key: string, header: React.ReactNode): LucideIcon {
@@ -114,10 +115,15 @@ export interface FilterDef<T> {
   key: string;
   label: string;
   allLabel?: string;
+  icon?: LucideIcon;
   options?: FilterOption[];
   getValue: (row: T) => string;
+  matches?: (row: T, filterValue: string) => boolean;
   className?: string;
   triggerClassName?: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  renderCustom?: (props: { value: string; onChange: (value: string) => void }) => React.ReactNode;
   dependsOn?: {
     key: string;
     getOptions?: (parentValue: string) => string[];
@@ -138,9 +144,14 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   className?: string;
   tableClassName?: string;
+  theadRowClassName?: string;
+  hideSortArrows?: boolean;
 }
 
-const ALL = "__all__";
+export const ALL = "__all__";
+
+export const DEFAULT_THEAD_ROW_CLASSNAME =
+  "border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm";
 
 /**
  * Generic, typed client-side data table.
@@ -161,6 +172,8 @@ export function DataTable<T>({
   emptyMessage = "No records found.",
   className,
   tableClassName,
+  theadRowClassName = DEFAULT_THEAD_ROW_CLASSNAME,
+  hideSortArrows = false,
 }: DataTableProps<T>) {
   const [query, setQuery] = React.useState("");
   const [filterState, setFilterState] = React.useState<Record<string, string>>({});
@@ -179,8 +192,8 @@ export function DataTable<T>({
             return true;
           }
         }
-        const v = filterState[f.key];
-        return !v || v === ALL || f.getValue(row) === v;
+        const v = f.value !== undefined ? (f.value === "all" ? ALL : f.value) : filterState[f.key];
+        return !v || v === ALL || (f.matches ? f.matches(row, v) : f.getValue(row) === v);
       });
     });
     if (sort) {
@@ -252,6 +265,22 @@ export function DataTable<T>({
         )}
         <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
           {filters.map((f) => {
+            if (f.renderCustom) {
+              const currentVal = (f.value !== undefined ? (f.value === "all" ? ALL : f.value) : filterState[f.key]) ?? ALL;
+              const handleValChange = (v: string) => {
+                const strVal = String(v);
+                if (f.onChange) {
+                  f.onChange(strVal);
+                }
+                setFilterState((s) => ({ ...s, [f.key]: strVal }));
+                setPage(0);
+              };
+              return (
+                <div key={f.key} className="shrink-0">
+                  {f.renderCustom({ value: currentVal, onChange: handleValChange })}
+                </div>
+              );
+            }
             if (f.dependsOn) {
               const parentVal = filterState[f.dependsOn.key];
               if (!parentVal || parentVal === ALL) {
@@ -307,8 +336,12 @@ export function DataTable<T>({
               <Select
                 key={f.key}
                 items={items}
-                value={filterState[f.key] ?? ALL}
+                value={(f.value !== undefined ? (f.value === "all" ? ALL : f.value) : filterState[f.key]) ?? ALL}
                 onValueChange={(v) => {
+                  const strVal = String(v);
+                  if (f.onChange) {
+                    f.onChange(strVal);
+                  }
                   setFilterState((s) => {
                     const next = { ...s, [f.key]: String(v) };
                     filters.forEach((other) => {
@@ -328,6 +361,7 @@ export function DataTable<T>({
                     f.triggerClassName
                   )}
                 >
+                  {f.icon ? <f.icon className="size-3.5 text-brand/70 shrink-0 mr-1" /> : (f.key.toLowerCase().includes("month") || f.key.toLowerCase().includes("date")) ? <CalendarDays className="size-3.5 text-brand/70 shrink-0 mr-1" /> : null}
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="min-w-[var(--anchor-width)] w-auto max-w-[220px]">
@@ -367,13 +401,28 @@ export function DataTable<T>({
       <div className="overflow-x-auto scrollbar-thin-light">
         <table className={cn("w-full text-sm", tableClassName ?? "min-w-[720px] table-fixed")}>
           <thead>
-            <tr className="border-y border-[#dbe4f0] bg-gradient-to-b from-[#f8fafd] via-[#f4f7fc] to-[#eef3fa] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95)]">
+            <tr
+              className={cn(
+                theadRowClassName ??
+                  "border-y border-[#dbe4f0] bg-gradient-to-b from-[#f8fafd] via-[#f4f7fc] to-[#eef3fa] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95)]"
+              )}
+            >
               {selectable && (
-                <th className="relative w-11 py-3.5 pl-5 pr-2 after:pointer-events-none after:absolute after:right-0 after:top-1/2 after:h-4 after:w-px after:-translate-y-1/2 after:bg-[#d8e2f0]">
+                <th
+                  className={cn(
+                    "relative w-11 py-3.5 pl-5 pr-2 after:pointer-events-none after:absolute after:right-0 after:top-1/2 after:h-4 after:w-px after:-translate-y-1/2",
+                    theadRowClassName ? "after:bg-white/20" : "after:bg-[#d8e2f0]"
+                  )}
+                >
                   <Checkbox
                     checked={allOnPageSelected}
                     onCheckedChange={toggleAllOnPage}
                     aria-label="Select all rows on page"
+                    className={
+                      theadRowClassName
+                        ? "border-white/60 data-[state=checked]:bg-white data-[state=checked]:text-[#091d3e]"
+                        : undefined
+                    }
                   />
                 </th>
               )}
@@ -400,7 +449,9 @@ export function DataTable<T>({
                   <th
                     key={col.key}
                     className={cn(
-                      "relative whitespace-nowrap px-5 py-3.5 align-middle select-none not-last:after:pointer-events-none not-last:after:absolute not-last:after:right-0 not-last:after:top-1/2 not-last:after:h-4 not-last:after:w-px not-last:after:-translate-y-1/2 not-last:after:bg-[#d8e2f0]",
+                      theadRowClassName
+                        ? "relative whitespace-nowrap px-5 py-3.5 align-middle select-none text-white not-last:after:pointer-events-none not-last:after:absolute not-last:after:right-0 not-last:after:top-1/2 not-last:after:h-4 not-last:after:w-px not-last:after:-translate-y-1/2 not-last:after:bg-white/20"
+                        : "relative whitespace-nowrap px-5 py-3.5 align-middle select-none not-last:after:pointer-events-none not-last:after:absolute not-last:after:right-0 not-last:after:top-1/2 not-last:after:h-4 not-last:after:w-px not-last:after:-translate-y-1/2 not-last:after:bg-[#d8e2f0]",
                       isCenter ? "text-center" : isRight ? "text-right" : "text-left",
                       active &&
                         "bg-[#e8f0fe]/45 before:pointer-events-none before:absolute before:inset-x-3 before:bottom-0 before:h-[2px] before:rounded-full before:bg-[#1d4ed8]",
@@ -419,8 +470,8 @@ export function DataTable<T>({
                             ? "w-full justify-end text-right"
                             : "text-left",
                           active
-                            ? "text-[#091d3e]"
-                            : "text-[#1e293b] hover:text-[#091d3e]"
+                            ? (theadRowClassName ? "text-white font-extrabold" : "text-[#091d3e]")
+                            : (theadRowClassName ? "text-white/90 hover:text-white" : "text-[#1e293b] hover:text-[#091d3e]")
                         )}
                       >
                         {col.icon && (
@@ -428,8 +479,8 @@ export function DataTable<T>({
                             className={cn(
                               "size-3.5 shrink-0 transition-colors",
                               active
-                                ? "text-[#1d4ed8]"
-                                : "text-[#091d3e]/55 group-hover/th:text-[#091d3e]"
+                                ? (theadRowClassName ? "text-white" : "text-[#1d4ed8]")
+                                : (theadRowClassName ? "text-white/80 group-hover/th:text-white" : "text-[#091d3e]/55 group-hover/th:text-[#091d3e]")
                             )}
                           />
                         )}
@@ -438,13 +489,14 @@ export function DataTable<T>({
                         </span>
                         <span
                           className={cn(
+                            (hideSortArrows || col.hideSortArrow) && "hidden",
                             "grid size-4 shrink-0 place-items-center rounded transition-all duration-150",
                             active
-                              ? "text-[#1d4ed8]"
-                              : "text-[#94a3b8] group-hover/th:text-[#091d3e]"
+                              ? (theadRowClassName ? "text-white" : "text-[#1d4ed8]")
+                              : (theadRowClassName ? "text-white/60 group-hover/th:text-white" : "text-[#94a3b8] group-hover/th:text-[#091d3e]")
                           )}
                         >
-                          {!active ? (
+                          {hideSortArrows || col.hideSortArrow ? null : !active ? (
                             <ChevronsUpDown className="size-3.5" strokeWidth={2} />
                           ) : sort?.dir === "asc" ? (
                             <ArrowUp className="size-3" strokeWidth={2.4} />
@@ -456,7 +508,8 @@ export function DataTable<T>({
                     ) : (
                       <div
                         className={cn(
-                          "inline-flex items-center gap-1.5 py-0.5 text-[#1e293b]",
+                          "inline-flex items-center gap-1.5 py-0.5",
+                          theadRowClassName ? "text-white" : "text-[#1e293b]",
                           isCenter
                             ? "w-full justify-center text-center"
                             : isRight
@@ -467,7 +520,7 @@ export function DataTable<T>({
                         {typeof col.header === "string" ? (
                           <>
                             {col.icon && (
-                              <col.icon className="size-3.5 text-[#091d3e]/60 shrink-0" />
+                              <col.icon className={cn("size-3.5 shrink-0", theadRowClassName ? "text-white/80" : "text-[#091d3e]/60")} />
                             )}
                             <span className="text-[12.5px] font-bold tracking-[-0.01em]">
                               {col.header}
@@ -494,12 +547,12 @@ export function DataTable<T>({
                 </td>
               </tr>
             )}
-            {pageRows.map((row) => {
+            {pageRows.map((row, index) => {
               const id = getRowId(row);
               const isSel = selected.has(id);
               return (
                 <tr
-                  key={id}
+                  key={`${id}-${index}`}
                   className={cn(
                     "h-[61px] transition-colors hover:bg-cream/60",
                     isSel && "bg-brand-50/60"

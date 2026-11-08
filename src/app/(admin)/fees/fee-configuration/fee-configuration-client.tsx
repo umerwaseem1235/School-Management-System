@@ -11,6 +11,7 @@ import {
   Plus,
   Check,
   Edit,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
@@ -19,6 +20,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -30,9 +32,10 @@ import {
 import { Field, fieldClass } from "../../attendance/_components/attendance-kit";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { FEE_REVISIONS, type FeeRevisionRecord } from "@/lib/mock/finance";
-import { exportFeeRevisionsPdf, printFeeRevisionsReport } from "./update-fee-export";
+import { exportFeeConfigurationPdf, printFeeConfigurationReport } from "./fee-configuration-export";
+import { readFeeConfiguration, writeFeeConfiguration } from "@/lib/mock/finance-storage";
 
-export function UpdateFeeClient() {
+export function FeeConfigurationClient() {
   const [records, setRecords] = React.useState<FeeRevisionRecord[]>(FEE_REVISIONS);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingRecord, setEditingRecord] = React.useState<FeeRevisionRecord | null>(null);
@@ -45,13 +48,34 @@ export function UpdateFeeClient() {
   const [sportsCharges, setSportsCharges] = React.useState("1000");
   const [libraryFund, setLibraryFund] = React.useState("800");
   const [utilitySurcharge, setUtilitySurcharge] = React.useState("2000");
+  const [otherCharges, setOtherCharges] = React.useState("0");
+  const [annualIncreasePercent, setAnnualIncreasePercent] = React.useState("8.8");
+  const [customHeads, setCustomHeads] = React.useState<Array<{ id: string; name: string; amount: string }>>([]);
 
+  React.useEffect(() => {
+    setRecords(readFeeConfiguration());
+  }, []);
+
+  const updateRecords = (next: FeeRevisionRecord[] | ((current: FeeRevisionRecord[]) => FeeRevisionRecord[])) => {
+    setRecords((current) => {
+      const updated = typeof next === "function" ? next(current) : next;
+      writeFeeConfiguration(updated);
+      return updated;
+    });
+  };
+
+  const customHeadsTotal = customHeads.reduce(
+    (acc, h) => acc + (Number(h.amount) || 0),
+    0
+  );
   const totalCalculated =
     (Number(tuitionFee) || 0) +
     (Number(labCharges) || 0) +
     (Number(sportsCharges) || 0) +
     (Number(libraryFund) || 0) +
-    (Number(utilitySurcharge) || 0);
+    (Number(utilitySurcharge) || 0) +
+    (Number(otherCharges) || 0) +
+    customHeadsTotal;
 
   const openEditor = (rec?: FeeRevisionRecord) => {
     if (rec) {
@@ -63,6 +87,11 @@ export function UpdateFeeClient() {
       setSportsCharges(String(rec.sportsCharges));
       setLibraryFund(String(rec.libraryFund));
       setUtilitySurcharge(String(rec.utilitySurcharge));
+      setOtherCharges(String(rec.otherCharges ?? 0));
+      setAnnualIncreasePercent(rec.percentageChange != null ? String(rec.percentageChange) : "0");
+      setCustomHeads(
+        rec.customHeads?.map((h) => ({ id: h.id, name: h.name, amount: String(h.amount) })) || []
+      );
     } else {
       setEditingRecord(null);
       setClassName("Grade 10 Matriculation");
@@ -72,6 +101,9 @@ export function UpdateFeeClient() {
       setSportsCharges("1000");
       setLibraryFund("1000");
       setUtilitySurcharge("2200");
+      setOtherCharges("0");
+      setAnnualIncreasePercent("8.8");
+      setCustomHeads([]);
     }
     setDialogOpen(true);
   };
@@ -88,10 +120,19 @@ export function UpdateFeeClient() {
       return;
     }
 
+    const cleanedCustomHeads = customHeads
+      .filter((h) => h.name.trim() !== "")
+      .map((h) => ({
+        id: h.id || `head-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        name: h.name.trim(),
+        amount: Number(h.amount) || 0,
+      }));
+    const numOtherCharges = Number(otherCharges) || 0;
+
+    const parsedPercent = Number(annualIncreasePercent) || 0;
+
     if (editingRecord) {
-      const prev = editingRecord.previousMonthly || editingRecord.totalMonthly;
-      const pct = prev > 0 ? ((totalCalculated - prev) / prev) * 100 : 0;
-      setRecords((list) =>
+      updateRecords((list) =>
         list.map((item) =>
           item.id === editingRecord.id
             ? {
@@ -103,14 +144,16 @@ export function UpdateFeeClient() {
                 sportsCharges: Number(sportsCharges) || 0,
                 libraryFund: Number(libraryFund) || 0,
                 utilitySurcharge: Number(utilitySurcharge) || 0,
+                otherCharges: numOtherCharges,
+                customHeads: cleanedCustomHeads,
                 totalMonthly: totalCalculated,
-                percentageChange: Number(pct.toFixed(1)),
+                percentageChange: Number(parsedPercent.toFixed(1)),
                 status: "Active",
               }
             : item
         )
       );
-      toast.success(`Fee structure for ${className} updated successfully.`);
+      toast.success(`Fee structure for ${className} updated and synced with Fee Collection.`);
     } else {
       const newRec: FeeRevisionRecord = {
         id: `rev-${Date.now()}`,
@@ -121,14 +164,16 @@ export function UpdateFeeClient() {
         sportsCharges: Number(sportsCharges) || 0,
         libraryFund: Number(libraryFund) || 0,
         utilitySurcharge: Number(utilitySurcharge) || 0,
+        otherCharges: numOtherCharges,
+        customHeads: cleanedCustomHeads,
         totalMonthly: totalCalculated,
         previousMonthly: totalCalculated,
-        percentageChange: 0,
+        percentageChange: Number(parsedPercent.toFixed(1)),
         effectiveDate: "2026-08-01",
         status: "Active",
       };
-      setRecords([newRec, ...records]);
-      toast.success(`New fee tier for ${className} created.`);
+      updateRecords([newRec, ...records]);
+      toast.success(`New fee tier for ${className} created and synced with Fee Collection.`);
     }
     setDialogOpen(false);
   };
@@ -136,16 +181,13 @@ export function UpdateFeeClient() {
   const columns: Column<FeeRevisionRecord>[] = [
     {
       key: "class",
-      header: "Class / Tier",
+      header: "Class",
       headerAlign: "center",
-      align: "left",
-      className: "w-[24%]",
+      align: "center",
+      className: "w-[24%] text-center",
       headerClassName: "w-[24%] text-center",
       cell: (r) => (
-        <div className="space-y-0.5">
-          <p className="font-semibold text-foreground text-xs">{r.className}</p>
-          <p className="text-[11px] text-muted-foreground">Session: {r.academicYear}</p>
-        </div>
+        <span className="font-semibold text-foreground text-[13px]">{r.className}</span>
       ),
     },
     {
@@ -198,15 +240,15 @@ export function UpdateFeeClient() {
     },
     {
       key: "percentageChange",
-      header: "Revision %",
+      header: "Annual Increase %",
       align: "center",
       cell: (r) => (
         <span className="font-mono text-xs font-semibold text-brand tabular-nums">
-          +{formatPercent(r.percentageChange)}
+          {r.percentageChange > 0 ? `+${formatPercent(r.percentageChange)}` : formatPercent(r.percentageChange)}
         </span>
       ),
       className: "text-center",
-      headerClassName: "text-center",
+      headerClassName: "text-center whitespace-nowrap",
     },
     {
       key: "status",
@@ -237,9 +279,10 @@ export function UpdateFeeClient() {
           <ActionButton
             tone="outline"
             size="xs"
+            className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
             onClick={() => openEditor(r)}
           >
-            <Edit />
+            <Edit className="size-3 text-amber-600" />
             <span>Revise</span>
           </ActionButton>
         </div>
@@ -253,14 +296,14 @@ export function UpdateFeeClient() {
     records.reduce((s, r) => s + r.percentageChange, 0) / (records.length || 1);
 
   const handlePrint = React.useCallback(() => {
-    const ok = printFeeRevisionsReport(records);
+    const ok = printFeeConfigurationReport(records);
     if (ok) {
       toast.info("Opening print preview for Class Fee Master Schedule…");
     }
   }, [records]);
 
   const handleExportPdf = React.useCallback(() => {
-    const ok = exportFeeRevisionsPdf(records);
+    const ok = exportFeeConfigurationPdf(records);
     if (ok) {
       toast.success(
         `Fee master schedule (${records.length} class tiers) downloaded as PDF.`
@@ -271,7 +314,7 @@ export function UpdateFeeClient() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
-        title="Update Fee & Revisions"
+        title="Fee Configuration"
         className="mb-0 lg:mb-0"
         actions={
           <>
@@ -333,6 +376,7 @@ export function UpdateFeeClient() {
             data={records}
             columns={columns}
             getRowId={(r) => r.id}
+            hideSortArrows
             searchPlaceholder="Search tier or academic year…"
             searchFn={(r, q) =>
               r.className.toLowerCase().includes(q) ||
@@ -347,17 +391,16 @@ export function UpdateFeeClient() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <SlidersHorizontal className="size-4 text-brand" />
-              <span>{editingRecord ? `Revise Fee — ${editingRecord.className}` : "Add Class Fee Structure"}</span>
+            <DialogTitle>
+              {editingRecord ? `Revise Fee — ${editingRecord.className}` : "Add Class Fee Structure"}
             </DialogTitle>
-            <DialogDescription>
-              Configure monthly fee heads and review the resulting total calculation before ratifying.
+            <DialogDescription className="sr-only">
+              Configure monthly fee heads.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSave} className="space-y-3.5 py-1">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Field label="Class / Tier Name">
                 <input
                   type="text"
@@ -377,6 +420,23 @@ export function UpdateFeeClient() {
                   <option>2026–27</option>
                   <option>2027–28</option>
                 </select>
+              </Field>
+              <Field label="Annual Increase (%)">
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    placeholder="e.g. 8.8"
+                    value={annualIncreasePercent}
+                    onChange={(e) => setAnnualIncreasePercent(e.target.value)}
+                    className={`${fieldClass} pr-7 font-mono font-medium`}
+                  />
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground">
+                    %
+                  </span>
+                </div>
               </Field>
             </div>
 
@@ -437,6 +497,96 @@ export function UpdateFeeClient() {
               </Field>
             </div>
 
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Field label="Other Charges (Misc / Additional)">
+                <input
+                  type="number"
+                  min={0}
+                  placeholder="e.g. 500"
+                  value={otherCharges}
+                  onChange={(e) => setOtherCharges(e.target.value)}
+                  className={fieldClass}
+                />
+              </Field>
+              <div className="flex items-end pb-0.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCustomHeads((prev) => [
+                      ...prev,
+                      {
+                        id: `ch-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                        name: "",
+                        amount: "",
+                      },
+                    ])
+                  }
+                  className="w-full text-xs h-9 border-dashed border-primary/40 text-primary hover:bg-primary/5 gap-1.5"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Custom Fee Head
+                </Button>
+              </div>
+            </div>
+
+            {customHeads.length > 0 && (
+              <div className="space-y-2 rounded-md border border-border/70 bg-muted/20 p-2.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Custom Fee Heads ({customHeads.length})
+                  </p>
+                  <span className="text-[11px] text-muted-foreground">
+                    Subtotal: Rs {customHeadsTotal.toLocaleString()}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {customHeads.map((head, idx) => (
+                    <div key={head.id || idx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Fee Head (e.g. Examination / Security)"
+                        value={head.name}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomHeads((prev) =>
+                            prev.map((h, i) => (i === idx ? { ...h, name: val } : h))
+                          );
+                        }}
+                        className={`${fieldClass} flex-1`}
+                      />
+                      <input
+                        type="number"
+                        min={0}
+                        placeholder="Amount"
+                        value={head.amount}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCustomHeads((prev) =>
+                            prev.map((h, i) => (i === idx ? { ...h, amount: val } : h))
+                          );
+                        }}
+                        className={`${fieldClass} w-28`}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                          setCustomHeads((prev) => prev.filter((_, i) => i !== idx))
+                        }
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        title="Remove head"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Live Calculation Preview Banner */}
             <div className="rounded-[4px] border border-brand/20 bg-brand-50/50 p-3 flex items-center justify-between text-xs">
               <div>
@@ -445,9 +595,14 @@ export function UpdateFeeClient() {
                   {formatCurrency(totalCalculated)}
                 </p>
               </div>
-              <span className="rounded bg-brand/10 px-2 py-1 text-[11px] font-semibold text-brand">
-                Ratified AY 2026–27
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="rounded bg-brand/10 px-2.5 py-1 text-[11px] font-semibold text-brand font-mono">
+                  +{Number(annualIncreasePercent || 0).toFixed(1)}% Annual Increase
+                </span>
+                <span className="rounded bg-muted px-2 py-1 text-[11px] font-semibold text-muted-foreground">
+                  AY {academicYear}
+                </span>
+              </div>
             </div>
 
             <DialogFooter className="pt-2 flex items-center justify-end gap-2">

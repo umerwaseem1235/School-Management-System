@@ -4,17 +4,20 @@ import * as React from "react";
 import {
   AlertCircle,
   Banknote,
+  CalendarDays,
   Check,
   ChevronDown,
   CreditCard,
   Download,
   Eye,
+  Landmark,
   Layers,
   PieChart,
   Plus,
   Printer,
   Receipt,
   ShieldCheck,
+  Tag,
   TrendingUp,
   Wallet,
 } from "lucide-react";
@@ -257,7 +260,7 @@ export function ExpensesClient() {
     []
   );
 
-  /* ───────────────────────── Vouchers Table Columns (No Shuffling Arrows, Single View Button) ───────────────────────── */
+  /* ───────────────────────── Vouchers Table Columns (Clean & Professional 9-Column Architecture) ───────────────────────── */
 
   const voucherColumns = React.useMemo<Column<ExpenseVoucherRecord>[]>(
     () => [
@@ -265,90 +268,110 @@ export function ExpensesClient() {
         key: "voucherNo",
         header: "Voucher #",
         align: "center",
-        className: "w-[13%] px-3 text-center",
-        headerClassName: "w-[13%] px-3 text-center whitespace-nowrap",
+        className: "w-[11%] px-3 text-center",
+        headerClassName: "w-[11%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center gap-1 text-center">
-            <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/20 bg-brand-50/70 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e] shadow-2xs">
-              {r.voucherNo}
-            </span>
-            <span
-              className="max-w-full truncate font-mono text-[10.5px] font-medium text-slate-600"
-              title={`Invoice ${r.invoiceNo}`}
-            >
-              {r.invoiceNo}
-            </span>
-            <span className="whitespace-nowrap text-[10.5px] tabular-nums text-muted-foreground">
-              {formatDate(r.date)}
-            </span>
-          </div>
+          <span className="inline-flex items-center justify-center whitespace-nowrap rounded-md border border-brand/20 bg-brand-50/70 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e] shadow-2xs">
+            {r.voucherNo}
+          </span>
+        ),
+      },
+      {
+        key: "date",
+        header: "Date",
+        align: "center",
+        className: "w-[9%] px-2 text-center",
+        headerClassName: "w-[9%] px-2 text-center whitespace-nowrap",
+        cell: (r) => (
+          <span className="whitespace-nowrap text-xs font-semibold text-slate-700">
+            {formatDate(r.date)}
+          </span>
         ),
       },
       {
         key: "title",
         header: "Expense Head",
-        align: "left",
-        headerAlign: "left",
-        className: "w-[26%] px-4 text-left",
-        headerClassName: "w-[26%] px-4 text-left whitespace-nowrap",
+        align: "center",
+        headerAlign: "center",
+        className: "w-[24%] px-4 text-center",
+        headerClassName: "w-[24%] px-4 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex flex-col items-start justify-center text-left min-w-0 py-0.5">
-            <p
-              className="line-clamp-2 text-[13px] font-bold text-foreground leading-snug hover:text-brand transition-colors cursor-pointer"
-              title={`${r.title} — Click to view details (${r.category})`}
-              onClick={() => openVoucher(r, "overview")}
-            >
-              {formatTitle(r.title)}
-            </p>
-          </div>
+          <span
+            className="truncate text-[13px] font-bold text-foreground hover:text-brand transition-colors cursor-pointer"
+            title={`${r.title} — Click to view details`}
+            onClick={() => openVoucher(r, "overview")}
+          >
+            {formatTitle(r.title)}
+          </span>
         ),
       },
       {
         key: "vendor",
         header: "Vendor / Payee",
         align: "center",
-        className: "w-[19%] px-3 text-center",
-        headerClassName: "w-[19%] px-3 text-center whitespace-nowrap",
+        className: "w-[15%] px-3 text-center",
+        headerClassName: "w-[15%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center gap-1 text-center">
-            <p
-              className="line-clamp-2 text-[12.5px] font-bold leading-snug text-foreground"
-              title={r.vendorName}
-            >
-              {formatTitle(r.vendorName)}
-            </p>
-            <span className="whitespace-nowrap font-mono text-[10.5px] font-medium text-muted-foreground">
-              {r.vendorNtn}
-            </span>
-            <span className="inline-flex items-center whitespace-nowrap rounded bg-slate-100 px-1.5 py-0.5 text-[10.5px] font-semibold text-slate-700">
-              {r.paymentMode}
-            </span>
-          </div>
+          <span
+            className="truncate text-[12.5px] font-bold text-foreground"
+            title={r.vendorName}
+          >
+            {formatTitle(r.vendorName)}
+          </span>
         ),
       },
       {
         key: "campus",
         header: "Campus",
         align: "center",
-        className: "w-[10%] px-3 text-center",
-        headerClassName: "w-[10%] px-3 text-center whitespace-nowrap",
+        className: "w-[9%] px-2 text-center",
+        headerClassName: "w-[9%] px-2 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center gap-1 text-center">
-            <span className="whitespace-nowrap text-[12.5px] font-semibold text-foreground">
-              {r.campus}
-            </span>
-            <span className="inline-flex items-center whitespace-nowrap rounded border border-brand/15 bg-brand-50/70 px-1.5 py-0.5 font-mono text-[10px] font-bold text-brand">
-              {r.budgetHeadCode}
-            </span>
-          </div>
+          <span className="whitespace-nowrap text-xs font-semibold text-foreground">
+            {r.campus}
+          </span>
         ),
+      },
+      {
+        key: "paymentMode",
+        header: "Payment Channel",
+        align: "center",
+        className: "w-[11%] px-2 text-center",
+        headerClassName: "w-[11%] px-2 text-center whitespace-nowrap",
+        cell: (r) => {
+          let toneClass = "border-blue-200 bg-blue-50/80 text-blue-800";
+          let Icon = Landmark;
+          if (r.paymentMode === "Corporate Card") {
+            toneClass = "border-purple-200 bg-purple-50/80 text-purple-800";
+            Icon = CreditCard;
+          } else if (r.paymentMode === "Crossed Cheque") {
+            toneClass = "border-amber-200 bg-amber-50/80 text-amber-800";
+            Icon = Receipt;
+          } else if (r.paymentMode === "Petty Cash") {
+            toneClass = "border-emerald-200 bg-emerald-50/80 text-emerald-800";
+            Icon = Banknote;
+          }
+          return (
+            <div className="flex justify-center">
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border px-2 py-0.5 text-[11px] font-semibold shadow-2xs",
+                  toneClass
+                )}
+              >
+                <Icon className="size-3 shrink-0" />
+                <span>{r.paymentMode}</span>
+              </span>
+            </div>
+          );
+        },
       },
       {
         key: "netPayable",
         header: "Net Payable",
         align: "center",
-        className: "w-[13%] px-3 text-center",
-        headerClassName: "w-[13%] px-3 text-center whitespace-nowrap",
+        className: "w-[11%] px-3 text-center",
+        headerClassName: "w-[11%] px-3 text-center whitespace-nowrap",
         cell: (r) => {
           const isPending =
             !r.paymentRef ||
@@ -356,7 +379,7 @@ export function ExpensesClient() {
             r.status === "Pending";
           return (
             <div className="flex flex-col items-center justify-center gap-1 text-center">
-              <span className="whitespace-nowrap font-mono text-[12.5px] font-extrabold tabular-nums text-emerald-700">
+              <span className="whitespace-nowrap font-mono text-[13px] font-extrabold tabular-nums text-emerald-700">
                 {formatCurrency(r.netPayable)}
               </span>
               {isPending ? (
@@ -379,8 +402,8 @@ export function ExpensesClient() {
         key: "status",
         header: "Status",
         align: "center",
-        className: "w-[9%] px-3 text-center",
-        headerClassName: "w-[9%] px-3 text-center whitespace-nowrap",
+        className: "w-[6%] px-2 text-center",
+        headerClassName: "w-[6%] px-2 text-center whitespace-nowrap",
         cell: (r) => (
           <div className="flex justify-center">
             <StatusBadge status={r.status} />
@@ -391,18 +414,18 @@ export function ExpensesClient() {
         key: "actions",
         header: "Actions",
         align: "center",
-        className: "w-[10%] px-4 text-center",
-        headerClassName: "w-[10%] px-4 text-center whitespace-nowrap",
+        className: "w-[4%] px-2 text-center",
+        headerClassName: "w-[4%] px-2 text-center whitespace-nowrap",
         cell: (r) => (
           <div className="flex items-center justify-center">
             <ActionButton
               tone="outline"
               size="xs"
-              className="mx-auto"
-              title={`View Details • Category: ${r.category}`}
+              className="mx-auto border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+              title={`View Details • ${r.voucherNo}`}
               onClick={() => openVoucher(r, "overview")}
             >
-              <Eye className="size-3.5" />
+              <Eye className="size-3.5 text-blue-600" />
               <span>View</span>
             </ActionButton>
           </div>
@@ -448,29 +471,19 @@ export function ExpensesClient() {
         header: "Budget Code",
         align: "center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.budgetCode}
-            </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground">
-              Updated {formatDate(r.lastUpdated)}
-            </p>
-          </div>
+          <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e]">
+            {r.budgetCode}
+          </span>
         ),
       },
       {
         key: "category",
-        header: "Expense Category & Dept",
+        header: "Expense Category",
         align: "center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">
-              {r.category}
-            </p>
-            <p className="text-[10.5px] text-muted-foreground">
-              {r.department} · Custodian: {r.custodian}
-            </p>
-          </div>
+          <span className="text-xs font-semibold text-foreground">
+            {r.category}
+          </span>
         ),
       },
       {
@@ -545,10 +558,11 @@ export function ExpensesClient() {
             <ActionButton
               tone="outline"
               size="xs"
+              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
               title="View & adjust category budget allocation"
               onClick={() => openBudget(r)}
             >
-              <Eye className="size-3.5" />
+              <Eye className="size-3.5 text-blue-600" />
               <span>View</span>
             </ActionButton>
           </div>
@@ -761,8 +775,10 @@ export function ExpensesClient() {
           <DataTable
             data={vouchers}
             columns={voucherColumns}
-            tableClassName="min-w-[980px] table-fixed"
+            tableClassName="min-w-[1150px] table-fixed"
+            theadRowClassName="border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm"
             getRowId={(r) => r.id}
+            hideSortArrows
             filters={voucherFilters}
             searchPlaceholder="Search voucher #, invoice #, expense title, vendor or NTN…"
             searchFn={(r, q) =>
@@ -783,7 +799,10 @@ export function ExpensesClient() {
           <DataTable
             data={budgets}
             columns={budgetColumns}
+            tableClassName="min-w-[1050px] table-fixed"
+            theadRowClassName="border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm"
             getRowId={(r) => r.id}
+            hideSortArrows
             searchPlaceholder="Search budget code, expense category, department or custodian…"
             searchFn={(r, q) =>
               r.budgetCode.toLowerCase().includes(q) ||

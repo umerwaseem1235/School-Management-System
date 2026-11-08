@@ -45,8 +45,6 @@ const SUBNAV_ITEMS: {
     badge: EXTENDED_LEAVE_REQUESTS.filter((l) => l.status === "Pending").length,
   },
   { title: "Leave Policy", href: "/attendance/leave-policy", icon: ShieldCheck },
-  { title: "Student Attendance Report", href: "/attendance/reports", icon: BarChart3 },
-  { title: "Staff Attendance Report", href: "/attendance/staff-reports", icon: FileText },
 ];
 
 export function AttendanceSubnav() {
@@ -55,7 +53,7 @@ export function AttendanceSubnav() {
   return (
     <nav
       aria-label="Attendance sub-modules"
-      className="mb-4 flex flex-wrap items-center gap-2 border-b border-brand/10 pb-4"
+      className="mb-4 flex flex-wrap items-center gap-2 border-b border-border pb-4"
     >
       {SUBNAV_ITEMS.map((item) => {
         const Icon = item.icon;

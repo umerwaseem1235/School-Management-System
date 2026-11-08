@@ -31,7 +31,7 @@ const ROUTE_MAP: Record<string, { title: string; group: string }> = {
   "/sports": { title: "Sports", group: "Student Life" },
   "/library": { title: "Library", group: "Student Life" },
   "/hostel": { title: "Hostel Management", group: "Student Life" },
-  "/fees": { title: "Fee Management", group: "Finance" },
+  "/fees": { title: "Fee Collection", group: "Finance" },
   "/accounts": { title: "Accounts", group: "Finance" },
   "/expenses": { title: "Expenses", group: "Finance" },
   "/inventory": { title: "Inventory", group: "Operations" },

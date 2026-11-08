@@ -76,8 +76,8 @@ const leaveColumns: Column<LeaveRequest>[] = [
     cell: (r) =>
       r.status === "Pending" ? (
         <div className="flex gap-1">
-          <Button size="icon-xs" variant="ghost" className="text-success hover:bg-success-soft"><Check className="size-3.5" /></Button>
-          <Button size="icon-xs" variant="ghost" className="text-danger hover:bg-danger-soft"><X className="size-3.5" /></Button>
+          <Button size="icon-xs" variant="outline" className="h-6 w-6 border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 shadow-2xs"><Check className="size-3 text-emerald-600" /></Button>
+          <Button size="icon-xs" variant="outline" className="h-6 w-6 border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 shadow-2xs"><X className="size-3 text-rose-600" /></Button>
         </div>
       ) : null,
     className: "w-20",
@@ -136,7 +136,7 @@ export function HRClient() {
                     )}
                     <StatusBadge status={p.status} />
                     {p.status === "Disbursed" && (
-                      <Button variant="ghost" size="icon-sm"><Download className="size-4" /></Button>
+                      <Button variant="outline" size="icon-sm" className="h-7 w-7 border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 shadow-2xs"><Download className="size-3.5 text-indigo-600" /></Button>
                     )}
                   </div>
                 </div>

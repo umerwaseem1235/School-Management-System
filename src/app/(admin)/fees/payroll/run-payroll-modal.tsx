@@ -14,6 +14,9 @@ import {
   Banknote,
   RotateCcw,
   FileCheck,
+  Calendar,
+  AlertCircle,
+  Receipt,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -34,6 +37,7 @@ interface RunPayrollModalProps {
   accounts: DisbursementAccountRecord[];
   onDisburseAll: (campus: string, bankId: string) => void;
   onUnlockPayroll?: (campus: string, reason?: string) => void;
+  cycleMonth?: string;
 }
 
 type ModalView = "main" | "unlock-confirm" | "authorize-confirm";
@@ -45,6 +49,7 @@ export function RunPayrollModal({
   accounts,
   onDisburseAll,
   onUnlockPayroll,
+  cycleMonth = "November 2026",
 }: RunPayrollModalProps) {
   const [view, setView] = React.useState<ModalView>("main");
   const [selectedCampus, setSelectedCampus] = React.useState("All Campuses");
@@ -79,10 +84,10 @@ export function RunPayrollModal({
 
   // Separate cleared pending/approved from on-hold records
   const pendingSalaries = campusSalaries.filter(
-    (s) => s.status !== "Disbursed" && s.status !== "On Hold"
+    (s) => s.status !== "Paid" && s.status !== "Disbursed" && s.status !== "On Hold"
   );
   const onHoldSalaries = campusSalaries.filter((s) => s.status === "On Hold");
-  const disbursedSalaries = campusSalaries.filter((s) => s.status === "Disbursed");
+  const disbursedSalaries = campusSalaries.filter((s) => s.status === "Paid" || s.status === "Disbursed");
 
   const grossPayable = pendingSalaries.reduce((acc, s) => acc + s.grossSalary, 0);
   const deductions = pendingSalaries.reduce((acc, s) => acc + s.totalDeductions, 0);
@@ -156,9 +161,8 @@ export function RunPayrollModal({
           <>
             <DialogHeader className="shrink-0 gap-1 border-b border-border/70 px-6 py-4">
               <div className="flex items-center justify-between pr-7">
-                <DialogTitle className="text-base font-bold leading-tight text-foreground flex items-center gap-2">
-                  <Banknote className="size-4.5 text-brand" />
-                  <span>Process Monthly Payroll Batch</span>
+                <DialogTitle className="text-base font-bold leading-tight text-foreground">
+                  Process Monthly Payroll Batch
                 </DialogTitle>
                 {isBatchLocked ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-amber-800">
@@ -175,23 +179,24 @@ export function RunPayrollModal({
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto space-y-4 px-6 py-5 text-xs">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
                 <div>
-                  <label className="text-[11px] font-semibold text-foreground block mb-1">
+                  <label className="text-xs font-semibold text-foreground block mb-1.5">
                     Disbursement Cycle
                   </label>
-                  <div className="flex h-9 items-center rounded-[4px] border border-border/80 bg-cream/40 px-3 font-semibold text-foreground">
-                    October 2026
+                  <div className="flex h-9.5 items-center rounded-lg border border-border/80 bg-slate-50 px-3 text-xs font-semibold text-foreground shadow-2xs">
+                    <Calendar className="mr-2 size-3.5 text-muted-foreground" />
+                    {cycleMonth}
                   </div>
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-foreground block mb-1">
+                  <label className="text-xs font-semibold text-foreground block mb-1.5">
                     Target Campus
                   </label>
                   <select
                     value={selectedCampus}
                     onChange={(e) => handleCampusChange(e.target.value)}
-                    className="h-9 w-full rounded-[4px] border border-border/80 bg-white px-3 text-xs text-foreground focus:border-brand focus:outline-none"
+                    className="h-9.5 w-full rounded-lg border border-border/80 bg-white px-3 text-xs font-medium text-foreground shadow-2xs transition-colors hover:border-border focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   >
                     <option value="All Campuses">All Campuses (Consolidated)</option>
                     <option value="Gulberg">Gulberg Campus</option>
@@ -203,60 +208,96 @@ export function RunPayrollModal({
                 </div>
               </div>
 
-              <div>
-                <label className="text-[11px] font-semibold text-foreground block mb-1">
-                  Select Institutional Clearing Bank Account
-                </label>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground">
+                    Select Institutional Clearing Bank Account
+                  </label>
+                  {activeAccount && (
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      Available: <strong className="font-semibold text-emerald-700">{formatCurrency(activeAccount.currentBalance)}</strong>
+                    </span>
+                  )}
+                </div>
                 <select
                   value={selectedBank}
                   onChange={(e) => setSelectedBank(e.target.value)}
-                  className="h-9 w-full rounded-[4px] border border-border/80 bg-white px-3 text-xs text-foreground focus:border-brand focus:outline-none"
+                  className="h-9.5 w-full rounded-lg border border-border/80 bg-white px-3 text-xs font-medium text-foreground shadow-2xs transition-colors hover:border-border focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 >
                   {accounts.map((a) => (
                     <option key={a.id} value={a.id}>
-                      {a.bankName} — {a.accountTitle} (Bal: {formatCurrency(a.currentBalance)})
+                      {a.bankName} — {a.accountTitle} ({formatCurrency(a.currentBalance)})
                     </option>
                   ))}
                 </select>
                 {activeAccount && (
-                  <p className="mt-1 text-[11px] text-muted-foreground">
-                    IBAN: <span className="font-mono text-foreground">{activeAccount.iban}</span> &bull; Available Balance: <strong className="text-success">{formatCurrency(activeAccount.currentBalance)}</strong>
-                  </p>
+                  <div className="flex items-center justify-between text-[11.5px] text-muted-foreground px-0.5 pt-0.5">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Building2 className="size-3.5 text-muted-foreground" />
+                      IBAN: <span className="font-mono font-medium text-foreground">{activeAccount.iban}</span>
+                    </span>
+                    <span className="font-medium text-muted-foreground">Verified EFT Channel</span>
+                  </div>
                 )}
               </div>
 
-              {/* Batch Calculation Summary */}
-              <div className="rounded-lg border border-border/80 bg-cream/30 p-3.5 space-y-2.5">
-                <h5 className="font-bold text-[#091d3e] text-[11px] uppercase tracking-wider flex items-center justify-between">
-                  <span>Batch Settlement Breakdown</span>
+              {/* Batch Calculation Summary Card */}
+              <div className="rounded-xl border border-border/80 bg-slate-50/60 p-4 space-y-3.5 shadow-2xs">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-border/70 pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-brand-50 text-brand border border-brand/20">
+                      <Receipt className="size-3.5" />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                      Batch Settlement Breakdown
+                    </span>
+                  </div>
                   {isBatchLocked ? (
-                    <span className="font-mono font-bold text-amber-800 bg-amber-100/90 border border-amber-300/80 px-2 py-0.5 rounded text-[10.5px] inline-flex items-center gap-1">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/80 bg-amber-50 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-amber-800">
                       <Lock className="size-3 text-amber-700" />
-                      0 STAFF PENDING &bull; BATCH LOCKED
+                      <span>0 Staff Pending &bull; Batch Locked</span>
                     </span>
                   ) : (
-                    <span className="font-mono font-bold text-foreground">
-                      {pendingSalaries.length} Staff Cleared for Payout
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                      <span className="size-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                      <span>{pendingSalaries.length} Staff Cleared for Payout</span>
                     </span>
                   )}
-                </h5>
+                </div>
 
-                <div className="space-y-1.5 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Gross Salaries:</span>
-                    <span className="font-mono font-medium">
+                {/* Breakdown Rows */}
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Total Gross Salaries:</span>
+                    <span className="font-mono text-xs font-semibold tabular-nums text-foreground">
                       {isBatchLocked ? "Rs 0" : formatCurrency(grossPayable)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Taxes &amp; Statutory Deductions:</span>
-                    <span className="font-mono text-danger">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span>Total Taxes &amp; Statutory Deductions:</span>
+                    <span className="font-mono text-xs font-semibold tabular-nums text-rose-600">
                       {isBatchLocked ? "-Rs 0" : `-${formatCurrency(deductions)}`}
                     </span>
                   </div>
-                  <div className="flex justify-between border-t border-border/60 pt-1.5 font-bold">
-                    <span className="text-foreground">Net Payout to Disburse:</span>
-                    <span className={`font-mono text-sm ${isBatchLocked ? "text-muted-foreground" : "text-success"}`}>
+                </div>
+
+                {/* Highlighted Net Payout Box */}
+                <div className="flex items-center justify-between rounded-lg border border-emerald-200/90 bg-emerald-50/80 px-3.5 py-2.5">
+                  <div>
+                    <div className="text-xs font-bold text-foreground">Net Payout to Disburse</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      {isBatchLocked
+                        ? "Cycle completed and locked"
+                        : `${pendingSalaries.length} verified electronic transfers`}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`font-mono text-base font-bold tabular-nums ${
+                        isBatchLocked ? "text-muted-foreground" : "text-emerald-700"
+                      }`}
+                    >
                       {isBatchLocked ? "Rs 0" : formatCurrency(netDisbursement)}
                     </span>
                   </div>
@@ -264,29 +305,30 @@ export function RunPayrollModal({
 
                 {/* On Hold Callout banner */}
                 {onHoldSalaries.length > 0 && (
-                  <div className="rounded-md border border-rose-200 bg-rose-50/90 p-2.5 text-xs text-rose-950 flex items-center justify-between">
-                    <span className="flex items-center gap-2 font-medium">
-                      <AlertTriangle className="size-4 text-rose-700 shrink-0" />
-                      <span>
-                        <strong>{onHoldSalaries.length} Staff On Hold:</strong> Automatically bypassed and protected from disbursement until cleared.
-                      </span>
-                    </span>
+                  <div className="flex items-start gap-2.5 rounded-lg border border-amber-200/90 bg-amber-50/70 p-2.5 text-xs text-amber-950">
+                    <AlertTriangle className="size-4 shrink-0 text-amber-600 mt-0.5" />
+                    <div className="flex-1 text-[11.5px] leading-relaxed">
+                      <strong className="font-semibold text-amber-900">
+                        {onHoldSalaries.length} Staff On Hold:
+                      </strong>{" "}
+                      Automatically bypassed and protected from disbursement until cleared.
+                    </div>
                   </div>
                 )}
 
-                {/* Sub-note if salaries already disbursed */}
+                {/* Paid Note / Unlock Action */}
                 {disbursedSalaries.length > 0 && !isBatchLocked && (
-                  <div className="border-t border-border/60 pt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span>
-                      {disbursedSalaries.length} staff already disbursed for this selection.
+                  <div className="flex items-center justify-between border-t border-border/60 pt-2.5 text-xs">
+                    <span className="text-[11.5px] text-muted-foreground">
+                      <strong className="font-semibold text-foreground">{disbursedSalaries.length} staff</strong> already paid for this selection.
                     </span>
                     <button
                       type="button"
                       onClick={() => setView("unlock-confirm")}
-                      className="font-semibold text-amber-800 hover:text-amber-950 inline-flex items-center gap-1 hover:underline cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 hover:text-amber-950 hover:underline cursor-pointer transition-colors"
                     >
                       <Unlock className="size-3 text-amber-700" />
-                      <span>Unlock Disbursed Records</span>
+                      <span>Unlock Paid Records</span>
                     </button>
                   </div>
                 )}
@@ -294,26 +336,26 @@ export function RunPayrollModal({
 
               {/* Locked State Callout Banner */}
               {isBatchLocked && (
-                <div className="rounded-lg border border-amber-400/40 bg-amber-500/10 p-3.5 space-y-2 text-xs">
-                  <div className="flex items-start gap-2.5">
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-amber-500/20 text-amber-800">
+                <div className="rounded-xl border border-amber-300/80 bg-amber-50/70 p-4 space-y-3 text-xs shadow-2xs">
+                  <div className="flex items-start gap-3">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-800 border border-amber-200">
                       <Lock className="size-4 text-amber-700" />
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
                         <h6 className="font-bold text-amber-950 text-xs">
-                          Disbursement Cycle Finalized &amp; Locked
+                          Payment Cycle Finalized &amp; Locked
                         </h6>
-                        <span className="rounded-full bg-amber-200/90 border border-amber-300 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-900 uppercase">
+                        <span className="rounded-full bg-amber-200/90 border border-amber-300 px-2 py-0.5 font-mono text-[11px] font-bold text-amber-900 uppercase">
                           Locked
                         </span>
                       </div>
-                      <p className="text-[11px] leading-relaxed text-amber-900/90">
-                        October 2026 payroll for {selectedCampus === "All Campuses" ? "all campuses" : selectedCampus} has been authorized and disbursed ({disbursedSalaries.length} staff records &bull; {formatCurrency(disbursedNet)} net cleared). The payout button is locked to prevent duplicate execution.
+                      <p className="text-[11.5px] leading-relaxed text-amber-900/90">
+                        {cycleMonth} payroll for {selectedCampus === "All Campuses" ? "all campuses" : selectedCampus} has been authorized and paid ({disbursedSalaries.length} staff records &bull; {formatCurrency(disbursedNet)} net cleared). The payout button is locked to prevent duplicate execution.
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-1.5 border-t border-amber-500/20 text-[11px]">
+                  <div className="flex items-center justify-between pt-2 border-t border-amber-300/60 text-[11.5px]">
                     <span className="text-amber-900/80">Need to make adjustments, revise deductions, or re-run?</span>
                     <button
                       type="button"
@@ -368,7 +410,7 @@ export function RunPayrollModal({
                     <span>
                       {isProcessing
                         ? "Transmitting Payout..."
-                        : `Authorize & Disburse (${pendingSalaries.length})`}
+                        : `Authorize & Pay (${pendingSalaries.length})`}
                     </span>
                   </ActionButton>
                 )}
@@ -383,16 +425,10 @@ export function RunPayrollModal({
             <DialogHeader className="shrink-0 gap-1 border-b border-border/70 px-6 py-4">
               <div className="flex items-center justify-between pr-7">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-800 border border-amber-500/30">
-                    <Unlock className="size-5" />
-                  </div>
                   <div>
                     <DialogTitle className="text-base font-bold leading-tight text-foreground">
                       Unlock Payroll Batch Authorization
                     </DialogTitle>
-                    <p className="text-[11px] text-muted-foreground">
-                      Administrative Security Clearance &bull; October 2026 Cycle
-                    </p>
                   </div>
                 </div>
                 <button
@@ -408,18 +444,24 @@ export function RunPayrollModal({
 
             <div className="flex-1 overflow-y-auto space-y-4 px-6 py-5 text-xs">
               {/* Batch Under Lock Snapshot */}
-              <div className="rounded-lg border border-border/80 bg-slate-50/80 p-3.5 space-y-2">
-                <div className="flex items-center justify-between font-bold text-[#091d3e] text-[11px] uppercase tracking-wider">
-                  <span>Batch Authorization Details</span>
-                  <span className="font-mono text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded text-[10px] inline-flex items-center gap-1">
-                    <Lock className="size-3 text-amber-700" />
-                    {disbursedSalaries.length} Records Locked
+              <div className="rounded-xl border border-border/80 bg-slate-50/70 p-4 space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between border-b border-border/70 pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-amber-50 text-amber-800 border border-amber-200/70">
+                      <Lock className="size-3.5 text-amber-700" />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                      Batch Authorization Details
+                    </span>
+                  </div>
+                  <span className="font-mono text-amber-800 bg-amber-100 border border-amber-300/80 px-2.5 py-0.5 rounded-full text-xs font-semibold inline-flex items-center gap-1">
+                    {disbursedSalaries.length} Paid Records Locked
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 pt-1 border-t border-border/60">
+                <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
                     <span className="text-muted-foreground block text-[11px]">Disbursement Cycle:</span>
-                    <span className="font-semibold text-foreground">October 2026</span>
+                    <span className="font-semibold text-foreground">{cycleMonth}</span>
                   </div>
                   <div>
                     <span className="text-muted-foreground block text-[11px]">Target Campus:</span>
@@ -437,14 +479,14 @@ export function RunPayrollModal({
               </div>
 
               {/* Regulatory & Audit Warning Alert */}
-              <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/35 bg-amber-50/90 p-3 text-xs text-amber-950">
+              <div className="flex items-start gap-3 rounded-xl border border-amber-300/80 bg-amber-50/70 p-3.5 text-xs text-amber-950 shadow-2xs">
                 <ShieldAlert className="size-4.5 shrink-0 mt-0.5 text-amber-700" />
-                <div className="space-y-1 text-[11px] leading-relaxed">
+                <div className="space-y-1 text-[11.5px] leading-relaxed">
                   <strong className="block font-bold text-amber-900">
                     Administrative Audit &amp; Compliance Verification
                   </strong>
                   <span>
-                    Unlocking this batch releases the disbursement freeze and reverts all <strong>{disbursedSalaries.length} staff salary records</strong> from <strong>"Disbursed"</strong> back to <strong>"Pending Authorization"</strong>. This permits editing compensation figures, adjusting deductions, or re-executing batch disbursement.
+                    Unlocking this batch releases the payment freeze and reverts all <strong>{disbursedSalaries.length} staff salary records</strong> from <strong>"Paid"</strong> back to <strong>"Pending Authorization"</strong>. This permits editing compensation figures, adjusting deductions, or re-executing batch payment.
                   </span>
                   <span className="block text-amber-900/80 pt-0.5">
                     This administrative action is recorded in the permanent institutional compliance audit trail.
@@ -453,14 +495,14 @@ export function RunPayrollModal({
               </div>
 
               {/* Reason for Unlock Selector */}
-              <div>
-                <label className="text-[11px] font-semibold text-foreground block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground block">
                   Primary Reason for Unlock (Audit Justification) <span className="text-danger">*</span>
                 </label>
                 <select
                   value={unlockReason}
                   onChange={(e) => setUnlockReason(e.target.value)}
-                  className="h-9 w-full rounded-[4px] border border-border/80 bg-white px-3 text-xs text-foreground focus:border-brand focus:outline-none"
+                  className="h-9.5 w-full rounded-lg border border-border/80 bg-white px-3 text-xs font-medium text-foreground shadow-2xs transition-colors hover:border-border focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 >
                   <option value="Salary compensation adjustment / allowances revision">
                     Salary compensation adjustment / allowances revision
@@ -484,8 +526,8 @@ export function RunPayrollModal({
               </div>
 
               {/* Remarks Note */}
-              <div>
-                <label className="text-[11px] font-semibold text-foreground block mb-1">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground block">
                   Authorization Remarks / Ticket Reference <span className="text-muted-foreground font-normal">(Optional)</span>
                 </label>
                 <input
@@ -493,24 +535,24 @@ export function RunPayrollModal({
                   placeholder="e.g. Authorized by CFO for October adjustments..."
                   value={unlockNotes}
                   onChange={(e) => setUnlockNotes(e.target.value)}
-                  className="h-9 w-full rounded-[4px] border border-border/80 bg-white px-3 text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-brand focus:outline-none"
+                  className="h-9.5 w-full rounded-lg border border-border/80 bg-white px-3 text-xs text-foreground shadow-2xs placeholder:text-muted-foreground/60 transition-colors hover:border-border focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
 
               {/* Executive Confirmation Checkbox */}
-              <label className="flex items-start gap-2.5 rounded-lg border border-border/80 bg-cream/40 p-3 cursor-pointer select-none hover:bg-cream/60 transition-colors">
+              <label className="flex items-start gap-3 rounded-xl border border-border/80 bg-slate-50/80 p-3.5 cursor-pointer select-none hover:bg-slate-100/70 transition-colors shadow-2xs">
                 <input
                   type="checkbox"
                   checked={isUnlockConfirmed}
                   onChange={(e) => setIsUnlockConfirmed(e.target.checked)}
-                  className="mt-0.5 size-4 rounded border-border text-brand focus:ring-brand accent-[#091d3e]"
+                  className="mt-0.5 size-4 rounded border-border text-brand focus:ring-brand accent-brand"
                 />
-                <div className="text-[11px] leading-tight text-foreground">
+                <div className="text-xs leading-normal text-foreground">
                   <span className="font-semibold block mb-0.5 text-foreground">
                     Confirm Executive Clearance &amp; Batch Release
                   </span>
-                  <span className="text-muted-foreground">
-                    I verify that I hold administrative authority to unlock this payroll batch and revert salary records for October 2026.
+                  <span className="text-muted-foreground text-[11.5px]">
+                    I verify that I hold administrative authority to unlock this payroll batch and revert salary records for {cycleMonth}.
                   </span>
                 </div>
               </label>
@@ -547,16 +589,10 @@ export function RunPayrollModal({
             <DialogHeader className="shrink-0 gap-1 border-b border-border/70 px-6 py-4">
               <div className="flex items-center justify-between pr-7">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">
-                    <ShieldCheck className="size-5" />
-                  </div>
                   <div>
                     <DialogTitle className="text-base font-bold leading-tight text-foreground">
-                      Confirm Batch Disbursement Authorization
+                      Confirm Batch Payment Authorization
                     </DialogTitle>
-                    <p className="text-[11px] text-muted-foreground">
-                      Electronic Fund Transfer (EFT) Clearance &bull; October 2026 Cycle
-                    </p>
                   </div>
                 </div>
                 <button
@@ -571,48 +607,68 @@ export function RunPayrollModal({
             </DialogHeader>
 
             <div className="flex-1 overflow-y-auto space-y-4 px-6 py-5 text-xs">
-              <div className="rounded-lg border border-border/80 bg-cream/30 p-3.5 space-y-2">
-                <h5 className="font-bold text-[#091d3e] text-[11px] uppercase tracking-wider flex items-center justify-between">
-                  <span>Batch Settlement Summary</span>
-                  <span className="font-mono font-bold text-foreground">
-                    {pendingSalaries.length} Staff Eligible
+              <div className="rounded-xl border border-border/80 bg-slate-50/60 p-4 space-y-3.5 shadow-2xs">
+                <div className="flex items-center justify-between border-b border-border/70 pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-brand-50 text-brand border border-brand/20">
+                      <FileCheck className="size-3.5" />
+                    </div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                      Batch Settlement Summary
+                    </span>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300/80 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                    <span className="size-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                    <span>{pendingSalaries.length} Staff Eligible</span>
                   </span>
-                </h5>
-                <div className="space-y-1.5 text-xs pt-1">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Target Campus:</span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Target Campus:</span>
                     <span className="font-semibold text-foreground">{selectedCampus}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Disbursement Cycle:</span>
-                    <span className="font-semibold text-foreground">October 2026</span>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Disbursement Cycle:</span>
+                    <span className="font-semibold text-foreground">{cycleMonth}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Source Clearing Account:</span>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Source Clearing Account:</span>
                     <span className="font-semibold text-foreground">{activeAccount?.bankName}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Account IBAN:</span>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Account IBAN:</span>
                     <span className="font-mono text-foreground">{activeAccount?.iban}</span>
                   </div>
-                  <div className="flex justify-between border-t border-border/60 pt-1.5">
-                    <span className="text-muted-foreground">Total Gross Payable:</span>
-                    <span className="font-mono font-medium">{formatCurrency(grossPayable)}</span>
+                  <div className="flex justify-between border-t border-border/60 pt-2 text-muted-foreground">
+                    <span>Total Gross Payable:</span>
+                    <span className="font-mono text-xs font-semibold tabular-nums text-foreground">
+                      {formatCurrency(grossPayable)}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Taxes &amp; Deductions:</span>
-                    <span className="font-mono text-danger">-{formatCurrency(deductions)}</span>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Total Taxes &amp; Deductions:</span>
+                    <span className="font-mono text-xs font-semibold tabular-nums text-rose-600">
+                      -{formatCurrency(deductions)}
+                    </span>
                   </div>
-                  <div className="flex justify-between border-t border-border/60 pt-1.5 font-bold">
-                    <span className="text-foreground">Total Net Fund Transfer:</span>
-                    <span className="font-mono text-success text-base">{formatCurrency(netDisbursement)}</span>
+                </div>
+
+                {/* Net Total Highlight Box */}
+                <div className="flex items-center justify-between rounded-lg border border-emerald-200/90 bg-emerald-50/80 px-3.5 py-2.5">
+                  <div>
+                    <div className="text-xs font-bold text-foreground">Total Net Fund Transfer</div>
+                    <div className="text-[11px] text-muted-foreground">EFT batch payout instruction</div>
+                  </div>
+                  <div className="font-mono text-base font-bold tabular-nums text-emerald-700">
+                    {formatCurrency(netDisbursement)}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2.5 rounded-lg border border-blue-500/30 bg-blue-50/80 p-3 text-xs text-blue-950">
+              <div className="flex items-start gap-3 rounded-xl border border-blue-200/80 bg-blue-50/70 p-3.5 text-xs text-blue-950 shadow-2xs">
                 <CreditCard className="size-4.5 shrink-0 mt-0.5 text-blue-700" />
-                <div className="space-y-1 text-[11px] leading-relaxed">
+                <div className="space-y-1 text-[11.5px] leading-relaxed">
                   <strong className="block font-bold text-blue-900">
                     Institutional Electronic Fund Clearance Notice
                   </strong>
@@ -620,7 +676,7 @@ export function RunPayrollModal({
                     Confirming this action will transmit EFT instructions to <strong>{activeAccount?.bankName}</strong> for <strong>{pendingSalaries.length} staff accounts</strong>.
                   </span>
                   <span className="block text-blue-900/80 pt-0.5">
-                    Upon completion, this cycle will be marked as <strong>Disbursed &amp; Locked</strong> to safeguard financial ledger integrity. You may unlock it later if revisions are required.
+                    Upon completion, this cycle will be marked as <strong>Paid &amp; Locked</strong> to safeguard financial ledger integrity. You may unlock it later if revisions are required.
                   </span>
                 </div>
               </div>
@@ -644,7 +700,7 @@ export function RunPayrollModal({
               >
                 <CheckCircle2 className="size-3.5" />
                 <span>
-                  {isProcessing ? "Transmitting EFT Payout..." : "Confirm & Disburse Funds Now"}
+                  {isProcessing ? "Transmitting EFT Payout..." : "Confirm & Pay Funds Now"}
                 </span>
               </ActionButton>
             </DialogFooter>

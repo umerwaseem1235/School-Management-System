@@ -582,11 +582,10 @@ export function StudentSearchSelector({
           <DialogHeader className="border-b border-border/70 bg-gradient-to-r from-slate-50 to-white px-6 py-4.5">
             <div className="flex items-start justify-between gap-4 pr-6">
               <div>
-                <DialogTitle className="flex items-center gap-2 text-base font-bold text-foreground">
-                  <UserRound className="size-4.5 text-brand" />
+                <DialogTitle className="text-base font-bold text-foreground">
                   Select Specific Student for Attendance Report
                 </DialogTitle>
-                <DialogDescription className="mt-1 text-xs text-muted-foreground">
+                <DialogDescription className="sr-only">
                   Search across {options.length} students by name, roll number,
                   class, admission ID, or guardian to load individual attendance
                   records.

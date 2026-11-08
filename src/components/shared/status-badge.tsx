@@ -80,6 +80,12 @@ const STATUS_TONE: Record<string, BadgeTone> = {
   "Off Duty": "neutral",
   Allocated: "brand",
   Waitlisted: "warning",
+  // hostel & residences
+  Available: "success",
+  Full: "brand",
+  Maintenance: "warning",
+  "Checked Out": "neutral",
+  "Checked In": "success",
   // fixed assets
   "In Service": "success",
   "Under Repair": "warning",

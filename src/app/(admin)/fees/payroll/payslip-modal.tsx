@@ -74,7 +74,7 @@ export function PayslipModal({
               <DialogTitle className="text-base font-bold leading-tight text-foreground">
                 Staff Compensation Details
               </DialogTitle>
-              <DialogDescription className="mt-1 font-mono text-xs text-muted-foreground">
+              <DialogDescription className="sr-only">
                 {salary.empCode} · {salary.monthYear} · Ref:{" "}
                 {salary.transactionRef || "BATCH-2610-PENDING"}
               </DialogDescription>
@@ -96,7 +96,7 @@ export function PayslipModal({
         {/* Body */}
         <div className="flex-1 overflow-y-auto space-y-3.5 px-6 py-4 text-xs">
           {/* Employee Profile */}
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-border/70 bg-slate-50/60 p-3.5">
             <div className="flex items-center gap-3.5 min-w-0">
               <UserAvatar
                 name={salary.name}
@@ -104,12 +104,23 @@ export function PayslipModal({
                 className="ring-2 ring-brand/15"
               />
               <div className="min-w-0">
-                <h3 className="truncate text-base font-bold text-foreground">
-                  {salary.name}
-                </h3>
-                <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                  {salary.designation} · {salary.campus} · {salary.department}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="truncate text-base font-bold text-foreground">
+                    {salary.name}
+                  </h3>
+                  <span className="inline-flex items-center rounded-md border border-brand/20 bg-brand-50/70 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e] shadow-2xs">
+                    {salary.empCode}
+                  </span>
+                </div>
+                <div className="mt-1 flex items-center gap-1.5 flex-wrap text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground">{salary.designation}</span>
+                  <span>•</span>
+                  <span className="inline-flex items-center rounded-md border border-border/80 bg-white px-2 py-0.5 text-[11px] font-semibold text-foreground">
+                    Dept: {salary.department}
+                  </span>
+                  <span>•</span>
+                  <span>{salary.campus} Campus</span>
+                </div>
               </div>
             </div>
 
@@ -166,13 +177,13 @@ export function PayslipModal({
                   </p>
                 )}
 
-                {salary.status === "Disbursed" && (
+                {(salary.status === "Paid" || salary.status === "Disbursed") && (
                   <p className="text-[11.5px] text-emerald-950 leading-relaxed">
                     Settled on{" "}
                     <strong>
                       {salary.disbursedDate
                         ? formatDate(salary.disbursedDate)
-                        : "October 2026"}
+                        : salary.monthYear}
                     </strong>{" "}
                     · Bank Transfer Ref:{" "}
                     <code className="font-mono font-bold text-brand">
@@ -183,7 +194,7 @@ export function PayslipModal({
               </div>
 
               {/* Contextual Status Transition Buttons */}
-              {onStatusChange && salary.status !== "Disbursed" && (
+              {onStatusChange && salary.status !== "Paid" && salary.status !== "Disbursed" && (
                 <div className="flex items-center gap-2 shrink-0 sm:pl-3 sm:border-l sm:border-border/60">
                   {salary.status === "Pending" && (
                     <>
@@ -439,7 +450,7 @@ export function PayslipModal({
               <span>Print Payslip</span>
             </ActionButton>
 
-            {salary.status === "Disbursed" && onUnlock && (
+            {(salary.status === "Paid" || salary.status === "Disbursed") && onUnlock && (
               <ActionButton
                 tone="warning"
                 size="sm"
@@ -451,7 +462,8 @@ export function PayslipModal({
               </ActionButton>
             )}
 
-            {salary.status !== "Disbursed" &&
+            {salary.status !== "Paid" &&
+              salary.status !== "Disbursed" &&
               salary.status !== "On Hold" &&
               onDisburse && (
                 <ActionButton
@@ -460,7 +472,7 @@ export function PayslipModal({
                   onClick={() => onDisburse(salary.id)}
                 >
                   <Check className="size-3.5" />
-                  <span>Disburse Salary</span>
+                  <span>Mark as Paid</span>
                 </ActionButton>
               )}
           </div>

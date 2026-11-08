@@ -17,7 +17,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
-import { PersonCell, UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Meter } from "@/components/shared/meter";
 import {
@@ -296,76 +296,59 @@ export function AttendanceReportsClient() {
       {
         key: "student",
         header: "Student",
-        headerAlign: "left",
-        align: "left",
-        className: "w-[22%]",
-        headerClassName: "w-[22%] text-left",
+        headerAlign: "center",
+        align: "center",
+        className: "w-[22%] text-center",
+        headerClassName: "w-[22%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.name}
-            subtitle={`Roll #${r.rollNo} · ${r.admissionNumber}`}
-            showAvatar={false}
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.name}
+          </span>
         ),
       },
       {
         key: "class",
-        header: "Class & Campus",
+        header: "Class",
         align: "center",
-        className: "w-[15%] whitespace-nowrap",
-        headerClassName: "w-[15%]",
+        className: "w-[15%] whitespace-nowrap text-center",
+        headerClassName: "w-[15%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-[13px] font-semibold text-foreground">
-              {r.className} — Sec {r.section}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {shortCampus(r.campus)}
-            </p>
-          </div>
+          <span className="text-[13px] font-medium text-foreground">
+            {r.className} — Sec {r.section}
+          </span>
         ),
       },
       {
         key: "guardian",
         header: "Guardian",
         align: "center",
-        className: "w-[15%] whitespace-nowrap",
-        headerClassName: "w-[15%]",
+        className: "w-[15%] whitespace-nowrap text-center",
+        headerClassName: "w-[15%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-[13px] font-medium text-foreground">
-              {r.guardian}
-            </p>
-            <p className="text-xs tabular-nums text-muted-foreground">
-              {r.phone}
-            </p>
-          </div>
+          <span className="text-[13px] font-medium text-foreground">
+            {r.guardian}
+          </span>
         ),
       },
       {
         key: "summary",
         header: "Present / Absent / Late",
         align: "center",
-        className: "w-[16%] whitespace-nowrap",
-        headerClassName: "w-[16%]",
+        className: "w-[16%] whitespace-nowrap text-center",
+        headerClassName: "w-[16%] text-center",
         cell: (r) => {
           const lateCount = r.statusToday === "Late" ? 2 : 1;
           return (
-            <div className="space-y-0.5 text-center">
-              <div className="flex items-center justify-center gap-2 text-xs tabular-nums">
-                <span className="font-semibold text-success">
-                  {r.daysPresentMonth}P
-                </span>
-                <span className="text-muted-foreground/40">·</span>
-                <span className="font-semibold text-danger">
-                  {r.daysAbsentMonth}A
-                </span>
-                <span className="text-muted-foreground/40">·</span>
-                <span className="font-semibold text-warning">{lateCount}L</span>
-              </div>
-              <p className="text-[10.5px] text-muted-foreground tabular-nums">
-                {r.statusToday} ({r.checkInTime})
-              </p>
+            <div className="flex items-center justify-center gap-2 text-xs tabular-nums">
+              <span className="font-semibold text-success">
+                {r.daysPresentMonth}P
+              </span>
+              <span className="text-muted-foreground/40">·</span>
+              <span className="font-semibold text-danger">
+                {r.daysAbsentMonth}A
+              </span>
+              <span className="text-muted-foreground/40">·</span>
+              <span className="font-semibold text-warning">{lateCount}L</span>
             </div>
           );
         },
@@ -374,29 +357,13 @@ export function AttendanceReportsClient() {
         key: "rate",
         header: "Attendance Rate",
         align: "center",
-        className: "w-[13%]",
-        headerClassName: "w-[13%]",
-        cell: (r) => {
-          const workingDays = r.daysPresentMonth + r.daysAbsentMonth;
-          return (
-            <div className="mx-auto w-16 space-y-1.5 text-center">
-              <div className="flex justify-center text-xs">
-                <span className="font-semibold tabular-nums text-foreground">
-                  {r.monthlyRate}%
-                </span>
-              </div>
-              <Meter
-                value={r.monthlyRate}
-                size="xs"
-                tone="dark-blue"
-                className="h-1"
-              />
-              <p className="text-[10.5px] text-muted-foreground leading-none tabular-nums">
-                {r.daysPresentMonth}/{workingDays} days
-              </p>
-            </div>
-          );
-        },
+        className: "w-[13%] text-center",
+        headerClassName: "w-[13%] text-center",
+        cell: (r) => (
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+            {r.monthlyRate}%
+          </span>
+        ),
       },
       {
         key: "status",
@@ -424,14 +391,16 @@ export function AttendanceReportsClient() {
             <AttendanceActionButton
               size="xs"
               tone="outline"
+              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
               onClick={() => setViewingStudent(r)}
             >
-              <Eye />
-              View
+              <Eye className="size-3 text-blue-600" />
+              <span>View</span>
             </AttendanceActionButton>
             <AttendanceActionButton
               size="xs"
               tone="outline"
+              className="border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 shadow-2xs"
               title={`Download ${r.name}'s report`}
               aria-label={`Download ${r.name}'s report`}
               onClick={() => {
@@ -446,7 +415,8 @@ export function AttendanceReportsClient() {
                 );
               }}
             >
-              <Download />
+              <Download className="size-3 text-indigo-600" />
+              <span>PDF</span>
             </AttendanceActionButton>
           </div>
         ),
@@ -528,28 +498,27 @@ export function AttendanceReportsClient() {
       )}
 
       <SectionCard
-        title={`Student Attendance Report — ${period}`}
         flush
+        title={
+          <StudentSearchSelector
+            options={ALL_STUDENT_OPTIONS}
+            value={selectedStudentId}
+            allValue={ALL_STUDENTS_VALUE}
+            disabled={isFetching}
+            size="md"
+            onChange={(nextId) => {
+              setSelectedStudentId(nextId);
+              if (errorMessage) setErrorMessage(null);
+            }}
+            onSelectAndFetch={(nextId) => {
+              setSelectedStudentId(nextId);
+              if (errorMessage) setErrorMessage(null);
+              handleFetchReport(nextId);
+            }}
+          />
+        }
         action={
           <div className="flex flex-wrap items-center gap-2">
-            {/* Searchable Specific Student Selector */}
-            <StudentSearchSelector
-              options={ALL_STUDENT_OPTIONS}
-              value={selectedStudentId}
-              allValue={ALL_STUDENTS_VALUE}
-              disabled={isFetching}
-              size="md"
-              onChange={(nextId) => {
-                setSelectedStudentId(nextId);
-                if (errorMessage) setErrorMessage(null);
-              }}
-              onSelectAndFetch={(nextId) => {
-                setSelectedStudentId(nextId);
-                if (errorMessage) setErrorMessage(null);
-                handleFetchReport(nextId);
-              }}
-            />
-
             <AttendanceDateRangePicker
               fromDate={fromDate}
               toDate={toDate}

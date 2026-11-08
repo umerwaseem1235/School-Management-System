@@ -29,6 +29,8 @@ export interface FeeRevisionRecord {
   sportsCharges: number;
   libraryFund: number;
   utilitySurcharge: number;
+  otherCharges?: number;
+  customHeads?: Array<{ id: string; name: string; amount: number }>;
   totalMonthly: number;
   previousMonthly: number;
   percentageChange: number;

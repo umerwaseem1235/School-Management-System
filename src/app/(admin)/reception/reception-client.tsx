@@ -23,6 +23,7 @@ import {
   UserCheck,
   Users,
   CheckCircle2,
+  RotateCcw,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CheckInVisitorDialog } from "./check-in-visitor-dialog";
@@ -210,9 +211,9 @@ export function ReceptionClient({
                 variant="outline"
                 size="xs"
                 onClick={() => handleCheckOutVisitor(r.id)}
-                className="h-7 gap-1 px-2.5 rounded-lg text-xs font-semibold text-danger border-border/80 hover:bg-danger-soft hover:text-danger hover:border-danger/30 cursor-pointer shadow-2xs"
+                className="h-7 gap-1 px-2.5 rounded-lg text-xs font-semibold border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 cursor-pointer shadow-2xs"
               >
-                <LogOut className="size-3" />
+                <LogOut className="size-3 text-rose-600" />
                 <span>Check Out</span>
               </Button>
             </div>
@@ -357,9 +358,23 @@ export function ReceptionClient({
                 variant="outline"
                 size="xs"
                 onClick={() => handleToggleInquiryStatus(r.id)}
-                className="h-7 text-xs font-medium border-border/80 hover:bg-muted/60 cursor-pointer shadow-2xs"
+                className={`h-7 gap-1 px-2.5 rounded-lg text-xs font-semibold cursor-pointer shadow-2xs ${
+                  isResolved
+                    ? "border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800"
+                    : "border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 hover:text-emerald-800"
+                }`}
               >
-                {isResolved ? "Reopen" : "Resolve"}
+                {isResolved ? (
+                  <>
+                    <RotateCcw className="size-3 text-amber-600" />
+                    <span>Reopen</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="size-3 text-emerald-600" />
+                    <span>Resolve</span>
+                  </>
+                )}
               </Button>
             </div>
           );

@@ -323,12 +323,7 @@ export function InventoryClient() {
         className: "w-[23%] px-4 text-center",
         headerClassName: "w-[23%] px-4 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
-            <p className="text-[13px] font-bold text-foreground">{r.name}</p>
-            <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
-              {r.sku}
-            </span>
-          </div>
+          <span className="text-[13px] font-bold text-foreground truncate">{r.name}</span>
         ),
       },
       {
@@ -401,9 +396,10 @@ export function InventoryClient() {
         cell: (r) => (
           <div className="flex items-center justify-center gap-1.5">
             <ActionButton
-              tone="primary"
+              tone="outline"
               size="xs"
               disabled={r.quantity <= 0}
+              className="border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 hover:text-emerald-800 disabled:opacity-50 transition-colors shadow-2xs"
               title={
                 r.quantity <= 0
                   ? `${r.name} is out of stock`
@@ -411,31 +407,33 @@ export function InventoryClient() {
               }
               onClick={() => openIssueModal(r.id)}
             >
-              <PackageMinus className="size-3.5" />
+              <PackageMinus className="size-3.5 text-emerald-600" />
               <span>Issue</span>
             </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
+              className="border-sky-200 bg-sky-50/70 text-sky-700 hover:border-sky-400 hover:bg-sky-100 hover:text-sky-800 transition-colors shadow-2xs"
               title={`Adjust stock quantity for ${r.name}`}
               onClick={() => {
                 setSelectedItemId(r.id);
                 setAdjustModalOpen(true);
               }}
             >
-              <ArrowUpDown className="size-3.5" />
+              <ArrowUpDown className="size-3.5 text-sky-600" />
               <span>Adjust</span>
             </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
+              className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-2xs"
               title={`Edit details for ${r.name}`}
               onClick={() => {
                 setEditingItem(r);
                 setAddFormOpen(true);
               }}
             >
-              <Edit className="size-3.5" />
+              <Edit className="size-3.5 text-amber-600" />
               <span>Edit</span>
             </ActionButton>
           </div>
@@ -471,20 +469,15 @@ export function InventoryClient() {
     () => [
       {
         key: "issueNo",
-        header: "Issue # / Date",
+        header: "Issue #",
         align: "center",
         className: "w-[15%] px-3 text-center",
         headerClassName: "w-[15%] px-3 text-center whitespace-nowrap",
         sortValue: (r) => r.issueDate + r.issueNo,
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center gap-0.5">
-            <span className="font-mono text-xs font-extrabold text-[#091d3e]">
-              {r.issueNo}
-            </span>
-            <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
-              {formatDate(r.issueDate)}
-            </span>
-          </div>
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+            {r.issueNo}
+          </span>
         ),
       },
       {
@@ -507,14 +500,9 @@ export function InventoryClient() {
         headerClassName: "w-[12%] px-3 text-center whitespace-nowrap",
         sortValue: (r) => r.quantity,
         cell: (r) => (
-          <div className="flex flex-col items-center">
-            <span className="font-mono text-sm font-extrabold tabular-nums text-rose-600">
-              −{formatNumber(r.quantity)}
-            </span>
-            <span className="text-[10px] font-medium text-muted-foreground">
-              {r.unit}
-            </span>
-          </div>
+          <span className="font-mono text-xs font-bold tabular-nums text-rose-600">
+            −{formatNumber(r.quantity)} {r.unit}
+          </span>
         ),
       },
       {
@@ -553,11 +541,11 @@ export function InventoryClient() {
               <ActionButton
                 tone="outline"
                 size="xs"
-                className="w-full justify-center"
+                className="w-full justify-center border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 transition-colors shadow-2xs"
                 title={`View issue slip ${r.issueNo}`}
                 onClick={() => setViewIssuanceId(r.id)}
               >
-                <Eye className="size-3.5" />
+                <Eye className="size-3.5 text-blue-600" />
                 <span>View</span>
               </ActionButton>
             </div>
@@ -566,11 +554,11 @@ export function InventoryClient() {
                 <ActionButton
                   tone="success"
                   size="xs"
-                  className="w-full justify-center"
+                  className="w-full justify-center border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 hover:text-emerald-800 transition-colors shadow-2xs"
                   title={`Receive ${r.itemName} back from ${r.issuedTo}`}
                   onClick={() => setReturnIssuanceId(r.id)}
                 >
-                  <Undo2 className="size-3.5" />
+                  <Undo2 className="size-3.5 text-emerald-600" />
                   <span>Return</span>
                 </ActionButton>
               ) : null}

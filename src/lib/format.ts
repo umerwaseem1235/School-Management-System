@@ -1,9 +1,3 @@
-const pkr = new Intl.NumberFormat("en-PK", {
-  style: "currency",
-  currency: "PKR",
-  maximumFractionDigits: 0,
-});
-
 const compact = new Intl.NumberFormat("en", {
   notation: "compact",
   maximumFractionDigits: 1,
@@ -11,9 +5,16 @@ const compact = new Intl.NumberFormat("en", {
 
 const number = new Intl.NumberFormat("en-US");
 
-/** Rs 1,250,000 */
-export const formatCurrency = (value: number) =>
-  pkr.format(value).replace("PKR", "Rs").replace(/\s+/, " ");
+/** Rs 1,250,000 - Deterministic formatting for SSR consistency */
+export const formatCurrency = (value: number) => {
+  // Use a deterministic approach to avoid hydration mismatches
+  const num = Number(value) || 0;
+  const formatted = num.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  return `Rs ${formatted}`;
+};
 
 /** Rs 1.3M */
 export const formatCurrencyCompact = (value: number) =>

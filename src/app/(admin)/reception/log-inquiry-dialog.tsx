@@ -99,14 +99,11 @@ export function LogInquiryDialog({
       <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl border border-border shadow-2xl">
         <DialogHeader className="px-6 pt-6 pb-4 bg-muted/30 border-b border-border/60">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-brand-50 text-brand">
-              <PhoneCall className="size-5" />
-            </div>
             <div>
               <DialogTitle className="text-base font-semibold text-foreground">
                 Log New Inquiry
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Record a phone call or front desk inquiry.
               </DialogDescription>
             </div>

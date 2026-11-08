@@ -23,7 +23,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
-import { PersonCell, UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +35,15 @@ import {
 import { Field, fieldClass } from "../../attendance/_components/attendance-kit";
 import { formatCurrency, formatDate } from "@/lib/format";
 import {
+  readFeeScholarships,
+  writeFeeScholarships,
+  syncScholarshipWithFeeChallan,
+  readFeeConfiguration,
+  resolveMatchingTier,
+  readFeeChallans,
+} from "@/lib/mock/finance-storage";
+import { STUDENTS } from "@/lib/mock/institution";
+import {
   FEE_SCHOLARSHIP_AWARDS,
   type FeeScholarshipAward,
 } from "@/lib/mock/finance";
@@ -42,9 +51,9 @@ import { SCHOLARSHIPS } from "@/lib/mock/operations";
 import { exportScholarshipsPdf, printScholarshipsReport } from "./scholarships-export";
 
 export function ScholarshipsClient() {
-  const [records, setRecords] = React.useState<FeeScholarshipAward[]>(
-    FEE_SCHOLARSHIP_AWARDS
-  );
+  const [records, setRecords] = React.useState<FeeScholarshipAward[]>(() => {
+    return readFeeScholarships();
+  });
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   // View modal state
@@ -62,8 +71,8 @@ export function ScholarshipsClient() {
   const [campus, setCampus] = React.useState("Gulberg");
   const [scholarshipName, setScholarshipName] =
     React.useState<FeeScholarshipAward["scholarshipName"]>("Merit Scholarship");
-  const [concessionPercent, setConcessionPercent] = React.useState("50");
-  const [monthlyValue, setMonthlyValue] = React.useState("9250");
+  const [concessionPercent, setConcessionPercent] = React.useState("20");
+  const [monthlyValue, setMonthlyValue] = React.useState("3700");
   const [authority, setAuthority] = React.useState("Academic Board");
 
   // Edit Form states
@@ -73,12 +82,131 @@ export function ScholarshipsClient() {
   const [editCampus, setEditCampus] = React.useState("Gulberg");
   const [editScholarshipName, setEditScholarshipName] =
     React.useState<FeeScholarshipAward["scholarshipName"]>("Merit Scholarship");
-  const [editConcessionPercent, setEditConcessionPercent] = React.useState("50");
-  const [editMonthlyValue, setEditMonthlyValue] = React.useState("9250");
+  const [editConcessionPercent, setEditConcessionPercent] = React.useState("20");
+  const [editMonthlyValue, setEditMonthlyValue] = React.useState("3700");
   const [editValidUntil, setEditValidUntil] = React.useState("2027-06-30");
   const [editStatus, setEditStatus] =
     React.useState<FeeScholarshipAward["status"]>("Active");
   const [editAuthority, setEditAuthority] = React.useState("Academic Board");
+
+  // Cross-submodule live synchronization listener
+  React.useEffect(() => {
+    setRecords(readFeeScholarships());
+    const onSync = () => {
+      setRecords(readFeeScholarships());
+    };
+    window.addEventListener("edusphere:fee-scholarships-updated", onSync);
+    return () => window.removeEventListener("edusphere:fee-scholarships-updated", onSync);
+  }, []);
+
+  // Candidate enrolled students pool for instant auto-complete and lookup
+  const candidateStudents = React.useMemo(() => {
+    const list: Array<{ name: string; rollNo: string; className: string; campus: string; tuitionFee: number }> = [];
+    const seen = new Set<string>();
+    const tiers = readFeeConfiguration();
+
+    const challans = readFeeChallans();
+    for (const c of challans) {
+      const key = `${c.student.trim().toLowerCase()}_${c.className.toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        const tier = resolveMatchingTier(c.className, tiers);
+        const tuition = c.tuitionFee ?? tier?.tuitionFee ?? 18500;
+        list.push({
+          name: c.student.trim(),
+          rollNo: c.rollNo ? c.rollNo.replace(/^Roll\s*#?/i, "").trim() : "10",
+          className: c.className,
+          campus: c.campus,
+          tuitionFee: tuition,
+        });
+      }
+    }
+
+    for (const s of STUDENTS) {
+      const key = `${s.name.trim().toLowerCase()}_${s.className.toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        const tier = resolveMatchingTier(s.className, tiers);
+        const tuition = tier?.tuitionFee ?? 18500;
+        list.push({
+          name: s.name.trim(),
+          rollNo: s.rollNo ? s.rollNo.replace(/^Roll\s*#?/i, "").trim() : "10",
+          className: s.className,
+          campus: s.campus,
+          tuitionFee: tuition,
+        });
+      }
+    }
+    return list;
+  }, []);
+
+  // Standard class base tuition fee
+  const selectedClassTuition = React.useMemo(() => {
+    const tiers = readFeeConfiguration();
+    const tier = resolveMatchingTier(className, tiers);
+    return tier?.tuitionFee ?? 18500;
+  }, [className]);
+
+  const editClassTuition = React.useMemo(() => {
+    const tiers = readFeeConfiguration();
+    const tier = resolveMatchingTier(editClassName, tiers);
+    return tier?.tuitionFee ?? 18500;
+  }, [editClassName]);
+
+  // Dynamic handlers for Student Name, Roll No, Concession %, and Monthly Value
+  const handleStudentChange = (val: string) => {
+    setStudent(val);
+    const trimmed = val.trim().toLowerCase();
+    if (!trimmed) return;
+    const match = candidateStudents.find(
+      (c) => c.name.toLowerCase() === trimmed || c.name.toLowerCase().startsWith(trimmed)
+    );
+    if (match) {
+      setRollNo(match.rollNo);
+      setClassName(match.className);
+      setCampus(match.campus);
+      const pct = Number(concessionPercent) || 20;
+      setMonthlyValue(String(Math.round((match.tuitionFee * pct) / 100)));
+    }
+  };
+
+  const handleRollNoChange = (val: string) => {
+    setRollNo(val);
+    const clean = val.replace(/\D/g, "");
+    if (!clean) return;
+    const match = candidateStudents.find((c) => c.rollNo.replace(/\D/g, "") === clean);
+    if (match) {
+      setStudent(match.name);
+      setClassName(match.className);
+      setCampus(match.campus);
+      const pct = Number(concessionPercent) || 20;
+      setMonthlyValue(String(Math.round((match.tuitionFee * pct) / 100)));
+    }
+  };
+
+  const handleClassChange = (newClass: string) => {
+    setClassName(newClass);
+    const tiers = readFeeConfiguration();
+    const tier = resolveMatchingTier(newClass, tiers);
+    const tuition = tier?.tuitionFee ?? 18500;
+    const pct = Number(concessionPercent) || 20;
+    setMonthlyValue(String(Math.round((tuition * pct) / 100)));
+  };
+
+  const handleConcessionPercentChange = (val: string) => {
+    setConcessionPercent(val);
+    const pct = Math.max(0, Math.min(100, Number(val) || 0));
+    setMonthlyValue(String(Math.round((selectedClassTuition * pct) / 100)));
+  };
+
+  const handleMonthlyValueChange = (val: string) => {
+    setMonthlyValue(val);
+    const amt = Math.max(0, Number(val) || 0);
+    if (selectedClassTuition > 0) {
+      const derivedPct = Math.min(100, Math.round((amt / selectedClassTuition) * 100));
+      setConcessionPercent(String(derivedPct));
+    }
+  };
 
   const totalMonthlySubsidy = records.reduce((s, r) => s + r.monthlyValue, 0);
   const totalBeneficiaries = SCHOLARSHIPS.reduce((s, r) => s + r.beneficiaries, 0);
@@ -115,19 +243,29 @@ export function ScholarshipsClient() {
       className,
       campus,
       scholarshipName,
-      concessionPercent: Number(concessionPercent) || 50,
-      monthlyValue: Number(monthlyValue) || 8000,
+      concessionPercent: Number(concessionPercent) || 20,
+      monthlyValue: Number(monthlyValue) || Math.round((selectedClassTuition * 20) / 100),
       awardedDate: new Date().toISOString().slice(0, 10),
       validUntil: "2027-06-30",
       status: "Active",
-      authority,
+      authority: authority.trim() || "Academic Board",
     };
 
-    setRecords([newAward, ...records]);
+    const updated = [newAward, ...records];
+    setRecords(updated);
+    writeFeeScholarships(updated);
+
+    // Synchronize award directly with the Fee Collection voucher!
+    syncScholarshipWithFeeChallan(newAward, "award");
+
     setDialogOpen(false);
     setStudent("");
     setRollNo("");
-    toast.success(`Scholarship award ${nextNo} granted to ${student.trim()}.`);
+    setConcessionPercent("20");
+    setMonthlyValue("3700");
+    toast.success(
+      `Scholarship ${nextNo} (${newAward.concessionPercent}% Off) awarded to ${newAward.student} and automatically added to Fee Voucher.`
+    );
   };
 
   const handleSaveEdit = (e: React.FormEvent) => {
@@ -152,16 +290,19 @@ export function ScholarshipsClient() {
       authority: editAuthority.trim() || editingAward.authority,
     };
 
-    setRecords((prev) =>
-      prev.map((item) => (item.id === editingAward.id ? updated : item))
-    );
+    const updatedList = records.map((item) => (item.id === editingAward.id ? updated : item));
+    setRecords(updatedList);
+    writeFeeScholarships(updatedList);
+
+    // Sync updated award directly to Fee Collection vouchers!
+    syncScholarshipWithFeeChallan(updated, "update");
 
     if (selectedAward && selectedAward.id === editingAward.id) {
       setSelectedAward(updated);
     }
 
     setEditDialogOpen(false);
-    toast.success(`Scholarship award ${editingAward.awardNo} updated successfully.`);
+    toast.success(`Scholarship award ${editingAward.awardNo} updated and synchronized with Fee Collection voucher.`);
   };
 
   const columns: Column<FeeScholarshipAward>[] = [
@@ -170,7 +311,7 @@ export function ScholarshipsClient() {
       header: "Award #",
       align: "center",
       cell: (r) => (
-        <span className="font-mono text-xs font-bold text-foreground">
+        <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
           {r.awardNo}
         </span>
       ),
@@ -184,19 +325,16 @@ export function ScholarshipsClient() {
       className: "w-[18%] text-center",
       headerClassName: "w-[18%] text-center",
       cell: (r) => (
-        <PersonCell
-          name={r.student}
-          subtitle={`Roll #${r.rollNo} · ${r.className}`}
-          showAvatar={false}
-          className="text-center"
-        />
+        <span className="text-[13px] font-semibold text-foreground">
+          {r.student}
+        </span>
       ),
     },
     {
-      key: "campus",
-      header: "Campus",
+      key: "className",
+      header: "Class",
       align: "center",
-      cell: (r) => <span className="text-[13px]">{r.campus}</span>,
+      cell: (r) => <span className="text-[13px] font-medium text-foreground">{r.className}</span>,
       className: "w-[10%] text-center",
       headerClassName: "w-[10%] text-center",
     },
@@ -205,10 +343,7 @@ export function ScholarshipsClient() {
       header: "Scheme / Program",
       align: "center",
       cell: (r) => (
-        <div className="space-y-0.5 text-center">
-          <p className="text-xs font-semibold text-foreground">{r.scholarshipName}</p>
-          <p className="text-[11px] text-muted-foreground">{r.authority}</p>
-        </div>
+        <span className="text-xs font-semibold text-foreground truncate">{r.scholarshipName}</span>
       ),
       className: "w-[15%] text-center",
       headerClassName: "w-[15%] text-center",
@@ -221,9 +356,8 @@ export function ScholarshipsClient() {
       headerClassName: "w-[9%] text-center",
       cell: (r) => (
         <div className="flex justify-center">
-          <span className="inline-flex flex-col items-center justify-center rounded-md bg-brand/10 px-2.5 py-1 text-center font-mono text-xs font-bold leading-tight text-brand">
-            <span>{r.concessionPercent}%</span>
-            <span>Off</span>
+          <span className="inline-flex items-center justify-center rounded-md bg-brand/10 px-2.5 py-1 text-center font-mono text-xs font-bold leading-tight text-brand">
+            {r.concessionPercent}% Off
           </span>
         </div>
       ),
@@ -283,22 +417,24 @@ export function ScholarshipsClient() {
           <ActionButton
             tone="outline"
             size="xs"
+            className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
             title="View scholarship award details"
             onClick={() => {
               setSelectedAward(r);
               setViewDialogOpen(true);
             }}
           >
-            <Eye className="size-3.5" />
+            <Eye className="size-3.5 text-blue-600" />
             <span>View</span>
           </ActionButton>
           <ActionButton
             tone="outline"
             size="xs"
+            className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
             title="Edit scholarship award"
             onClick={() => handleOpenEdit(r)}
           >
-            <Pencil className="size-3.5" />
+            <Pencil className="size-3.5 text-amber-600" />
             <span>Edit</span>
           </ActionButton>
         </div>
@@ -415,6 +551,7 @@ export function ScholarshipsClient() {
             columns={columns}
             getRowId={(r) => r.id}
             filters={filters}
+            hideSortArrows
             searchPlaceholder="Search by student, award # or scheme…"
             searchFn={(r, q) =>
               r.student.toLowerCase().includes(q) ||
@@ -434,11 +571,8 @@ export function ScholarshipsClient() {
               <DialogHeader>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Award className="size-4 text-brand" />
-                      <span>Scholarship Award Details</span>
-                    </DialogTitle>
-                    <DialogDescription className="font-mono text-xs text-muted-foreground">
+                    <DialogTitle>Scholarship Award Details</DialogTitle>
+                    <DialogDescription className="sr-only">
                       Ref: {selectedAward.awardNo} · Granted on {formatDate(selectedAward.awardedDate)}
                     </DialogDescription>
                   </div>
@@ -565,11 +699,8 @@ export function ScholarshipsClient() {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Pencil className="size-4 text-brand" />
-              <span>Edit Scholarship Award</span>
-            </DialogTitle>
-            <DialogDescription>
+            <DialogTitle>Edit Scholarship Award</DialogTitle>
+            <DialogDescription className="sr-only">
               Modify scholarship parameters, student tier, or concession validity for {editingAward?.awardNo}.
             </DialogDescription>
           </DialogHeader>
@@ -652,23 +783,35 @@ export function ScholarshipsClient() {
               <Field label="Concession %">
                 <input
                   type="number"
-                  min={5}
+                  min={1}
                   max={100}
                   required
-                  placeholder="e.g. 50"
+                  placeholder="e.g. 20"
                   value={editConcessionPercent}
-                  onChange={(e) => setEditConcessionPercent(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditConcessionPercent(val);
+                    const pct = Number(val) || 0;
+                    setEditMonthlyValue(String(Math.round((editClassTuition * pct) / 100)));
+                  }}
                   className={fieldClass}
                 />
               </Field>
               <Field label="Monthly Value (Rs)">
                 <input
                   type="number"
-                  min={500}
+                  min={0}
                   required
-                  placeholder="e.g. 12500"
+                  placeholder="e.g. 3700"
                   value={editMonthlyValue}
-                  onChange={(e) => setEditMonthlyValue(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditMonthlyValue(val);
+                    const amt = Number(val) || 0;
+                    if (editClassTuition > 0) {
+                      setEditConcessionPercent(String(Math.min(100, Math.round((amt / editClassTuition) * 100))));
+                    }
+                  }}
                   className={fieldClass}
                 />
               </Field>
@@ -725,33 +868,48 @@ export function ScholarshipsClient() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Award className="size-4 text-brand" />
-              <span>Award Scholarship / Concession</span>
-            </DialogTitle>
-            <DialogDescription>
+            <DialogTitle>Award Scholarship / Concession</DialogTitle>
+            <DialogDescription className="sr-only">
               Grant fee concession or merit tuition waiver to an eligible enrolled student.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleCreate} className="space-y-3.5 py-1">
+            {/* Datalists for real-time enrolled student auto-complete */}
+            <datalist id="scholarship-student-candidates">
+              {candidateStudents.map((c) => (
+                <option key={`${c.name}-${c.rollNo}`} value={c.name}>
+                  Roll #{c.rollNo} · {c.className} · {c.campus}
+                </option>
+              ))}
+            </datalist>
+            <datalist id="scholarship-rollno-candidates">
+              {candidateStudents.map((c) => (
+                <option key={`roll-${c.rollNo}-${c.name}`} value={c.rollNo}>
+                  {c.name} ({c.className} · {c.campus})
+                </option>
+              ))}
+            </datalist>
+
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <Field label="Student Name">
+              <Field label="Student Name *">
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Areeba Tariq"
+                  list="scholarship-student-candidates"
+                  placeholder="e.g. Zain Ahmed or Hamza Khan"
                   value={student}
-                  onChange={(e) => setStudent(e.target.value)}
+                  onChange={(e) => handleStudentChange(e.target.value)}
                   className={fieldClass}
                 />
               </Field>
               <Field label="Roll Number">
                 <input
                   type="text"
-                  placeholder="e.g. 118"
+                  list="scholarship-rollno-candidates"
+                  placeholder="e.g. 10 or Roll #12"
                   value={rollNo}
-                  onChange={(e) => setRollNo(e.target.value)}
+                  onChange={(e) => handleRollNoChange(e.target.value)}
                   className={fieldClass}
                 />
               </Field>
@@ -761,15 +919,17 @@ export function ScholarshipsClient() {
               <Field label="Class">
                 <select
                   value={className}
-                  onChange={(e) => setClassName(e.target.value)}
+                  onChange={(e) => handleClassChange(e.target.value)}
                   className={fieldClass}
                 >
                   <option>Grade 6-A</option>
                   <option>Grade 7-B</option>
                   <option>Grade 8-C</option>
                   <option>Grade 9-A</option>
+                  <option>Grade 10-A</option>
                   <option>Grade 10-B</option>
                   <option>Grade 11-A</option>
+                  <option>Grade 12-A</option>
                 </select>
               </Field>
               <Field label="Campus">
@@ -808,26 +968,62 @@ export function ScholarshipsClient() {
               <Field label="Concession %">
                 <input
                   type="number"
-                  min={5}
+                  min={1}
                   max={100}
                   required
-                  placeholder="e.g. 50"
+                  placeholder="e.g. 20"
                   value={concessionPercent}
-                  onChange={(e) => setConcessionPercent(e.target.value)}
+                  onChange={(e) => handleConcessionPercentChange(e.target.value)}
                   className={fieldClass}
                 />
               </Field>
               <Field label="Monthly Value (Rs)">
                 <input
                   type="number"
-                  min={500}
+                  min={0}
                   required
-                  placeholder="e.g. 12500"
+                  placeholder="e.g. 3700"
                   value={monthlyValue}
-                  onChange={(e) => setMonthlyValue(e.target.value)}
+                  onChange={(e) => handleMonthlyValueChange(e.target.value)}
                   className={fieldClass}
                 />
               </Field>
+            </div>
+
+            {/* Live Subsidy & Fee Collection Voucher Sync Preview Card */}
+            <div className="rounded-xl border border-brand/20 bg-gradient-to-br from-brand-50/70 via-background to-brand-50/30 p-3.5 text-xs space-y-2 dark:border-brand/30 dark:from-brand-950/20">
+              <div className="flex items-center justify-between font-semibold">
+                <span className="text-muted-foreground flex items-center gap-1.5">
+                  <GraduationCap className="size-3.5 text-brand" />
+                  Base Class Tuition Fee ({className})
+                </span>
+                <span className="font-mono text-foreground font-bold">
+                  {formatCurrency(selectedClassTuition)} / month
+                </span>
+              </div>
+              <div className="flex items-center justify-between font-semibold text-emerald-700 dark:text-emerald-400">
+                <span className="flex items-center gap-1.5">
+                  <Percent className="size-3.5" />
+                  Concession Deduction ({concessionPercent || 0}% Off)
+                </span>
+                <span className="font-mono font-bold">
+                  −{formatCurrency(Number(monthlyValue) || 0)} / month
+                </span>
+              </div>
+              <div className="flex items-center justify-between border-t border-brand/15 pt-2 font-bold">
+                <span className="text-foreground">Net Tuition Payable by Student</span>
+                <span className="font-mono text-brand text-sm sm:text-base">
+                  {formatCurrency(
+                    Math.max(0, selectedClassTuition - (Number(monthlyValue) || 0))
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground pt-0.5">
+                <Check className="size-3 text-emerald-600 shrink-0" />
+                <span>
+                  Automatically links & deducts discount in the Fee Collection voucher
+                </span>
+              </div>
             </div>
 
             <Field label="Sanctioning Authority">
@@ -846,7 +1042,7 @@ export function ScholarshipsClient() {
               </ActionButton>
               <ActionButton type="submit" tone="primary">
                 <Check />
-                Grant Award
+                Grant Award & Apply to Voucher
               </ActionButton>
             </DialogFooter>
           </form>

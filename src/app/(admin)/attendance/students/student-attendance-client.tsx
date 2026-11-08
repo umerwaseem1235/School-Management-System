@@ -16,8 +16,13 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
-import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
-import { PersonCell } from "@/components/shared/user-avatar";
+import {
+  DataTable,
+  type Column,
+  type FilterDef,
+  ALL,
+} from "@/components/shared/data-table";
+
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Meter } from "@/components/shared/meter";
 import {
@@ -28,12 +33,18 @@ import {
 } from "../_components/attendance-ui";
 import { shortCampus } from "../_components/attendance-utils";
 import {
+  CAMPUS_ATTENDANCE_MATRIX,
   STUDENT_ATTENDANCE_RECORDS,
   STUDENT_TODAY,
   type StudentAttendanceRecord,
   type DailyStudentStatus,
 } from "@/lib/mock/attendance";
+import { CAMPUSES } from "@/lib/mock/institution";
 import { formatNumber, formatPercent } from "@/lib/format";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Roll call segmented options
+// ─────────────────────────────────────────────────────────────────────────────
 
 const ROLL_CALL_OPTIONS: RowSegmentedOption<DailyStudentStatus>[] = [
   {
@@ -41,84 +52,146 @@ const ROLL_CALL_OPTIONS: RowSegmentedOption<DailyStudentStatus>[] = [
     code: "P",
     label: "Mark Present",
     activeClassName: "bg-success",
-    inactiveHoverClassName: "hover:bg-success-soft/45 hover:text-success hover:ring-success/35",
+    inactiveHoverClassName:
+      "hover:bg-success-soft/45 hover:text-success hover:ring-success/35",
   },
   {
     value: "Late",
     code: "L",
     label: "Mark Late",
     activeClassName: "bg-warning",
-    inactiveHoverClassName: "hover:bg-warning-soft/45 hover:text-warning hover:ring-warning/35",
+    inactiveHoverClassName:
+      "hover:bg-warning-soft/45 hover:text-warning hover:ring-warning/35",
   },
   {
     value: "Absent",
     code: "A",
     label: "Mark Absent",
     activeClassName: "bg-danger",
-    inactiveHoverClassName: "hover:bg-danger-soft/45 hover:text-danger hover:ring-danger/35",
+    inactiveHoverClassName:
+      "hover:bg-danger-soft/45 hover:text-danger hover:ring-danger/35",
   },
   {
     value: "Excused",
     code: "E",
     label: "Mark Excused",
     activeClassName: "bg-info",
-    inactiveHoverClassName: "hover:bg-info-soft/45 hover:text-info hover:ring-info/35",
+    inactiveHoverClassName:
+      "hover:bg-info-soft/45 hover:text-info hover:ring-info/35",
   },
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Options for Table Filters
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CAMPUS_FILTER_OPTIONS = [
+  ...new Set([
+    ...CAMPUSES.map((c) => c.campusName),
+    ...STUDENT_ATTENDANCE_RECORDS.map((s) => s.campus),
+  ]),
+];
+
+const CLASS_OPTIONS = [
+  ...new Set(STUDENT_ATTENDANCE_RECORDS.map((s) => s.className)),
+].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
 const sections = [
   ...new Set(STUDENT_ATTENDANCE_RECORDS.map((s) => `Section ${s.section}`)),
 ].sort();
+const SECTION_OPTIONS =
+  sections.length > 0 ? sections : ["Section A", "Section B", "Section C"];
 
-const filters: FilterDef<StudentAttendanceRecord>[] = [
-  {
-    key: "campus",
-    label: "Campus",
-    options: [...new Set(STUDENT_ATTENDANCE_RECORDS.map((s) => s.campus))],
-    getValue: (r) => r.campus,
-  },
-  {
-    key: "class",
-    label: "Class",
-    options: [...new Set(STUDENT_ATTENDANCE_RECORDS.map((s) => s.className))].sort((a, b) =>
-      a.localeCompare(b, undefined, { numeric: true })
-    ),
-    getValue: (r) => r.className,
-  },
-  {
-    key: "section",
-    label: "Section",
-    options: sections.length > 0 ? sections : ["Section A", "Section B", "Section C"],
-    getValue: (r) => `Section ${r.section}`,
-  },
-  {
-    key: "status",
-    label: "Status",
-    options: ["Present", "Late", "Absent", "Excused"],
-    getValue: (r) => r.statusToday,
-  },
-];
+// ─────────────────────────────────────────────────────────────────────────────
+// Campus KPI Derivation
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface StudentKPIs {
+  enrolled: number;
+  present: number;
+  absent: number;
+  late: number;
+  rate: number;
+}
+
+function deriveKPIs(campusValue: string): StudentKPIs {
+  if (!campusValue || campusValue === ALL || campusValue === "all") {
+    return {
+      enrolled: STUDENT_TODAY.enrolled,
+      present: STUDENT_TODAY.present,
+      absent: STUDENT_TODAY.absent,
+      late: STUDENT_TODAY.late,
+      rate: STUDENT_TODAY.rate,
+    };
+  }
+
+  const row = CAMPUS_ATTENDANCE_MATRIX.find(
+    (r) =>
+      r.campus.toLowerCase() === campusValue.toLowerCase() ||
+      r.campus.toLowerCase().includes(campusValue.toLowerCase()) ||
+      campusValue.toLowerCase().includes(r.campus.toLowerCase())
+  );
+
+  if (!row) {
+    return {
+      enrolled: STUDENT_TODAY.enrolled,
+      present: STUDENT_TODAY.present,
+      absent: STUDENT_TODAY.absent,
+      late: STUDENT_TODAY.late,
+      rate: STUDENT_TODAY.rate,
+    };
+  }
+
+  const enrolled = row.studentsEnrolled;
+  const present = row.studentsPresent;
+  const absent = row.studentsAbsent;
+  const late = row.studentsLate;
+  const rate = Math.round(((present + late) / (enrolled || 1)) * 1000) / 10;
+
+  return { enrolled, present, absent, late, rate };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Smooth animated KPI value
+// ─────────────────────────────────────────────────────────────────────────────
+
+function KpiValue({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-block animate-in fade-in-0 slide-in-from-bottom-1 duration-300 fill-mode-both">
+      {children}
+    </span>
+  );
+}
 
 const arrivalFor = (status: DailyStudentStatus) =>
   status === "Present" ? "07:52 AM" : status === "Late" ? "08:18 AM" : "—";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Component
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function StudentAttendanceClient() {
+  const [selectedCampus, setSelectedCampus] = React.useState<string>(ALL);
+  const [selectedDate, setSelectedDate] = React.useState("2026-10-12");
+
+  // Editable records for roll call
   const [records, setRecords] = React.useState<StudentAttendanceRecord[]>(
     STUDENT_ATTENDANCE_RECORDS
   );
-  const [selectedDate, setSelectedDate] = React.useState("2026-10-12");
 
-  const tally = React.useMemo(() => {
-    const count = (s: DailyStudentStatus) =>
-      records.filter((r) => r.statusToday === s).length;
-    const present = count("Present");
-    const late = count("Late");
-    const absent = count("Absent");
-    const excused = count("Excused");
-    const total = records.length;
-    const rate = total > 0 ? ((present + late) / total) * 100 : 0;
-    return { total, present, late, absent, excused, rate };
-  }, [records]);
+  // Derive KPI metrics dynamically according to the selected campus
+  const kpis = React.useMemo(() => deriveKPIs(selectedCampus), [selectedCampus]);
+
+  // Absent notification count for current campus selection
+  const absentCount = React.useMemo(() => {
+    const visible = records.filter(
+      (r) =>
+        selectedCampus === ALL ||
+        r.campus.toLowerCase() === selectedCampus.toLowerCase() ||
+        r.campus.toLowerCase().includes(selectedCampus.toLowerCase())
+    );
+    return visible.filter((r) => r.statusToday === "Absent").length;
+  }, [records, selectedCampus]);
 
   const applyStatus = React.useCallback(
     (ids: Set<string>, status: DailyStudentStatus) => {
@@ -141,91 +214,57 @@ export function StudentAttendanceClient() {
     [applyStatus]
   );
 
+  // Table Columns
   const columns = React.useMemo<Column<StudentAttendanceRecord>[]>(
     () => [
       {
         key: "student",
         header: "Student",
-        headerAlign: "left",
-        align: "left",
-        className: "w-[24%]",
-        headerClassName: "w-[24%] text-left",
+        headerAlign: "center",
+        align: "center",
+        className: "w-[24%] text-center",
+        headerClassName: "w-[24%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.name}
-            subtitle={`Roll #${r.rollNo} · ${r.admissionNumber}`}
-            showAvatar={false}
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.name}
+          </span>
         ),
       },
       {
         key: "class",
-        header: "Class & Campus",
+        header: "Class",
         align: "center",
-        className: "w-[16%] whitespace-nowrap",
-        headerClassName: "w-[16%]",
+        className: "w-[16%] whitespace-nowrap text-center",
+        headerClassName: "w-[16%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-[13px] font-semibold text-foreground">
-              {r.className} — Sec {r.section}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {shortCampus(r.campus)}
-            </p>
-          </div>
+          <span className="text-[13px] font-medium text-foreground">
+            {r.className} — Sec {r.section}
+          </span>
         ),
       },
       {
         key: "arrival",
         header: "Arrival Scan",
         align: "center",
-        className: "w-[15%] whitespace-nowrap",
-        headerClassName: "w-[15%]",
+        className: "w-[15%] whitespace-nowrap text-center",
+        headerClassName: "w-[15%] text-center",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center text-center">
-            <p className="text-[13px] font-semibold tabular-nums text-foreground">
-              {r.checkInTime}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {r.checkInTime === "—" ? "No scan" : r.verificationMethod}
-            </p>
-          </div>
+          <span className="text-[13px] font-semibold tabular-nums text-foreground">
+            {r.checkInTime}
+          </span>
         ),
       },
       {
         key: "monthly",
         header: "Monthly Rate",
         align: "center",
-        className: "w-[15%]",
-        headerClassName: "w-[15%]",
-        cell: (r) => {
-          const textTone =
-            r.monthlyRate >= 93
-              ? "text-[#091d3e]"
-              : r.monthlyRate >= 85
-                ? "text-[#1d4ed8]"
-                : r.monthlyRate >= 75
-                  ? "text-[#0284c7]"
-                  : "text-[#0369a1]";
-          return (
-            <div className="mx-auto w-16 space-y-1.5 text-center">
-              <div className="flex justify-center text-xs">
-                <span className="font-semibold tabular-nums text-foreground">
-                  {r.monthlyRate}%
-                </span>
-              </div>
-              <Meter
-                value={r.monthlyRate}
-                size="xs"
-                tone="dark-blue"
-                className="h-1"
-              />
-              <p className="text-[10.5px] text-muted-foreground leading-none tabular-nums">
-                {r.daysPresentMonth}P · {r.daysAbsentMonth}A
-              </p>
-            </div>
-          );
-        },
+        className: "w-[15%] text-center",
+        headerClassName: "w-[15%] text-center",
+        cell: (r) => (
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+            {r.monthlyRate}%
+          </span>
+        ),
       },
       {
         key: "status",
@@ -260,6 +299,44 @@ export function StudentAttendanceClient() {
     [handleRollCall]
   );
 
+  // Table Filters: Campus filter is placed alongside Class, Section, and Status!
+  const filters = React.useMemo<FilterDef<StudentAttendanceRecord>[]>(
+    () => [
+      {
+        key: "campus",
+        label: "Campus",
+        allLabel: "All Campus",
+        options: CAMPUS_FILTER_OPTIONS,
+        getValue: (r) => r.campus,
+        value: selectedCampus,
+        onChange: (val) => setSelectedCampus(val),
+        triggerClassName: "w-[145px] sm:w-[155px]",
+      },
+      {
+        key: "class",
+        label: "Class",
+        allLabel: "All Class",
+        options: CLASS_OPTIONS,
+        getValue: (r) => r.className,
+      },
+      {
+        key: "section",
+        label: "Section",
+        allLabel: "All Sections",
+        options: SECTION_OPTIONS,
+        getValue: (r) => `Section ${r.section}`,
+      },
+      {
+        key: "status",
+        label: "Status",
+        allLabel: "All Status",
+        options: ["Present", "Late", "Absent", "Excused"],
+        getValue: (r) => r.statusToday,
+      },
+    ],
+    [selectedCampus]
+  );
+
   return (
     <>
       <PageHeader
@@ -269,13 +346,11 @@ export function StudentAttendanceClient() {
             <AttendanceActionButton
               tone="outline"
               onClick={() =>
-                toast.info(
-                  `SMS absence alerts queued for ${tally.absent} guardians.`
-                )
+                toast.info(`SMS alerts queued for ${absentCount} absent guardians.`)
               }
             >
               <BellRing />
-              Notify Guardians ({tally.absent})
+              Notify Guardians ({absentCount})
             </AttendanceActionButton>
             <AttendanceActionButton
               tone="outline"
@@ -288,52 +363,69 @@ export function StudentAttendanceClient() {
         }
       />
 
-      {/* Institution-wide Student Attendance KPIs */}
+      {/* ── 5 KPI cards — update live whenever campus changes ────────── */}
       <div className="mb-6">
         <StatGrid className="max-w-none sm:grid-cols-2 lg:grid-cols-5">
           <StatCard
             label="Total Enrolled"
-            value={formatNumber(STUDENT_TODAY.enrolled)}
+            value={
+              <KpiValue key={`enrolled-${selectedCampus}`}>
+                {formatNumber(kpis.enrolled)}
+              </KpiValue>
+            }
             icon={GraduationCap}
           />
           <StatCard
             label="Students Present"
-            value={formatNumber(STUDENT_TODAY.present)}
+            value={
+              <KpiValue key={`present-${selectedCampus}`}>
+                {formatNumber(kpis.present)}
+              </KpiValue>
+            }
             icon={UserCheck}
           />
           <StatCard
             label="Students Absent"
-            value={formatNumber(STUDENT_TODAY.absent)}
+            value={
+              <KpiValue key={`absent-${selectedCampus}`}>
+                {formatNumber(kpis.absent)}
+              </KpiValue>
+            }
             icon={UserX}
           />
           <StatCard
             label="Late Arrivals"
-            value={formatNumber(STUDENT_TODAY.late)}
+            value={
+              <KpiValue key={`late-${selectedCampus}`}>
+                {formatNumber(kpis.late)}
+              </KpiValue>
+            }
             icon={Clock}
           />
           <StatCard
             label="Attendance Percentage"
-            value={formatPercent(STUDENT_TODAY.rate)}
+            value={
+              <KpiValue key={`rate-${selectedCampus}`}>
+                {formatPercent(kpis.rate)}
+              </KpiValue>
+            }
             icon={Percent}
           />
         </StatGrid>
       </div>
 
-      {/* Attendance Details Section Header & Actions Bar */}
+      {/* ── Attendance Details section header & actions ──────────────── */}
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="font-heading text-base font-bold tracking-tight text-foreground md:text-lg">
           Attendance Details
         </h2>
         <div className="flex flex-wrap items-center gap-2">
-          <AttendanceDatePicker
-            value={selectedDate}
-            onChange={setSelectedDate}
-          />
+          <AttendanceDatePicker value={selectedDate} onChange={setSelectedDate} />
           <AttendanceActionButton
             tone="success"
             onClick={() => {
               applyStatus(new Set(records.map((r) => r.id)), "Present");
-              toast.success("All students in current register marked Present");
+              toast.success("All visible students marked Present");
             }}
           >
             <CheckCheck />
@@ -343,7 +435,7 @@ export function StudentAttendanceClient() {
             tone="danger"
             onClick={() => {
               applyStatus(new Set(records.map((r) => r.id)), "Absent");
-              toast.error("All students in current register marked Absent");
+              toast.error("All visible students marked Absent");
             }}
           >
             <UserX />
@@ -361,6 +453,7 @@ export function StudentAttendanceClient() {
         </div>
       </div>
 
+      {/* ── DataTable with Campus dropdown alongside Class, Section & Status ── */}
       <SectionCard flush contentClassName="pt-5">
         <DataTable
           data={records}

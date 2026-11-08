@@ -283,9 +283,6 @@ export function IssueStockModal({
         {/* Executive Header */}
         <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-slate-50/90 via-white to-white px-6 py-4.5">
           <div className="flex items-center gap-3.5 pr-6">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e3a66] text-white shadow-xs ring-1 ring-[#091d3e]/20">
-              <PackageMinus className="size-5" />
-            </span>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold leading-tight text-foreground">
                 Issue Stock
@@ -913,9 +910,6 @@ export function IssuanceViewModal({
       <DialogContent className="flex flex-col sm:max-w-lg gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-slate-50/90 via-white to-white px-6 py-4.5">
           <div className="flex items-center gap-3.5 pr-6">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e3a66] text-white shadow-xs ring-1 ring-[#091d3e]/20">
-              <ClipboardList className="size-5" />
-            </span>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold leading-tight text-foreground">
                 Issue Slip — {record.issueNo}
@@ -1081,9 +1075,6 @@ export function ReturnStockModal({
       <DialogContent className="flex flex-col sm:max-w-md gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-emerald-50/70 via-white to-white px-6 py-4.5">
           <div className="flex items-center gap-3.5 pr-6">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-emerald-600 text-white shadow-xs">
-              <PackageCheck className="size-5" />
-            </span>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold leading-tight text-foreground">
                 Receive Returned Stock

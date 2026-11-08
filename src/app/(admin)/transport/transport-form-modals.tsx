@@ -127,13 +127,6 @@ export function RouteFormModal({
       <DialogContent className="flex flex-col sm:max-w-lg gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-slate-50/90 via-white to-white px-6 py-4.5">
           <div className="flex items-center gap-3.5 pr-6">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e3a66] text-white shadow-xs ring-1 ring-[#091d3e]/20">
-              {isEditing ? (
-                <Edit className="size-5" />
-              ) : (
-                <Navigation className="size-5" />
-              )}
-            </span>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold leading-tight text-foreground">
                 {isEditing
@@ -378,13 +371,6 @@ export function VehicleFormModal({
       <DialogContent className="flex flex-col sm:max-w-lg gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-slate-50/90 via-white to-white px-6 py-4.5">
           <div className="flex items-center gap-3.5 pr-6">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e3a66] text-white shadow-xs ring-1 ring-[#091d3e]/20">
-              {isEditing ? (
-                <Edit className="size-5" />
-              ) : (
-                <Bus className="size-5" />
-              )}
-            </span>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold leading-tight text-foreground">
                 {isEditing
@@ -777,13 +763,6 @@ export function AssignmentFormModal({
       <DialogContent className="flex flex-col sm:max-w-lg gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-gradient-to-r from-slate-50/90 via-white to-white px-6 py-4.5">
           <div className="flex items-center gap-3.5 pr-6">
-            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-[#091d3e] to-[#1e3a66] text-white shadow-xs ring-1 ring-[#091d3e]/20">
-              {isEditing ? (
-                <Edit className="size-5" />
-              ) : (
-                <GraduationCap className="size-5" />
-              )}
-            </span>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold leading-tight text-foreground">
                 {isEditing ? "Edit Student Assignment" : "Assign Student"}
@@ -1050,14 +1029,11 @@ export function DeleteConfirmModal({
       <DialogContent className="flex flex-col sm:max-w-md gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         <DialogHeader className="shrink-0 gap-1 border-b border-border/60 bg-rose-50/50 px-6 py-4.5">
           <div className="flex items-center gap-3.5 pr-6">
-            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-rose-600 text-white shadow-xs">
-              <AlertTriangle className="size-5" />
-            </span>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold leading-tight text-foreground">
                 {title}
               </DialogTitle>
-              <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+              <DialogDescription className="sr-only">
                 {description}
               </DialogDescription>
             </div>

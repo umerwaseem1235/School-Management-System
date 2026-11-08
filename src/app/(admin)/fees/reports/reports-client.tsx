@@ -25,7 +25,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
-import { PersonCell } from "@/components/shared/user-avatar";
+
 import {
   Select,
   SelectContent,
@@ -69,9 +69,26 @@ const REPORT_TYPE_ITEMS: { value: ReportTabKey; label: string }[] = [
 ];
 
 const PERIOD_MODE_ITEMS: { value: ReportPeriodMode; label: string }[] = [
-  { value: "monthly", label: "Monthly View (Month-wise)" },
-  { value: "annual", label: "Annual View (Jan – Dec | 12M)" },
+  { value: "monthly", label: "Monthly View" },
+  { value: "annual", label: "Annual View" },
 ];
+
+const ACADEMIC_SESSION_ITEMS = [
+  { value: "AY 2026–27", label: "AY 2026–27" },
+  { value: "AY 2025–26", label: "AY 2025–26" },
+  { value: "AY 2024–25", label: "AY 2024–25" },
+  { value: "AY 2023–24", label: "AY 2023–24" },
+];
+
+const SESSION_FACTORS: Record<
+  string,
+  { feeFactor: number; salaryFactor: number }
+> = {
+  "AY 2026–27": { feeFactor: 1.0, salaryFactor: 1.0 },
+  "AY 2025–26": { feeFactor: 0.91, salaryFactor: 0.92 },
+  "AY 2024–25": { feeFactor: 0.82, salaryFactor: 0.84 },
+  "AY 2023–24": { feeFactor: 0.74, salaryFactor: 0.76 },
+};
 
 const MONTH_ITEMS = [
   { value: "December 2026", label: "December 2026" },
@@ -116,21 +133,27 @@ function matchesSelectedCampus(recordCampus: string, selectedCampus: string): bo
   return false;
 }
 
-export function ReportsClient() {
+export function ReportsClient({ title = "Fee Reports" }: { title?: string } = {}) {
   const [activeTab, setActiveTab] = React.useState<ReportTabKey>("campus-summary");
   const [selectedCampus, setSelectedCampus] = React.useState<string>("All Campuses");
   const [periodMode, setPeriodMode] = React.useState<ReportPeriodMode>("monthly");
   const [selectedMonth, setSelectedMonth] = React.useState<string>("October 2026");
+  const [selectedSession, setSelectedSession] = React.useState<string>("AY 2026–27");
+
+  const sessionConfig =
+    SESSION_FACTORS[selectedSession] ?? SESSION_FACTORS["AY 2026–27"];
+  const sessionFeeFactor = periodMode === "annual" ? sessionConfig.feeFactor : 1.0;
+  const sessionSalaryFactor = periodMode === "annual" ? sessionConfig.salaryFactor : 1.0;
 
   const monthFactor =
     periodMode === "monthly" ? (MONTH_VARIATION_FACTORS[selectedMonth] ?? 1.0) : 1.0;
-  const periodMultiplier = periodMode === "annual" ? 12 : monthFactor;
-  const salaryMultiplier = periodMode === "annual" ? 12 : 1;
+  const periodMultiplier = periodMode === "annual" ? 12 * sessionFeeFactor : monthFactor;
+  const salaryMultiplier = periodMode === "annual" ? 12 * sessionSalaryFactor : 1;
 
   const periodDisplayLabel =
-    periodMode === "annual" ? "Annual AY 2026–27 (12M)" : selectedMonth;
+    periodMode === "annual" ? `Annual ${selectedSession} (12M)` : selectedMonth;
 
-  // Filtered datasets based on selectedCampus
+  // Filtered base datasets based on selectedCampus
   const filteredCampuses = React.useMemo(
     () =>
       CAMPUS_REALIZATION.filter((c) =>
@@ -155,47 +178,164 @@ export function ReportsClient() {
     [selectedCampus]
   );
 
-  const filteredDefaulters = React.useMemo(
-    () =>
-      FEE_DEFAULTERS.filter((d) =>
-        matchesSelectedCampus(d.campus, selectedCampus)
-      ),
-    [selectedCampus]
-  );
+  // Mapped session datasets
+  const campusSummaryData = React.useMemo(() => {
+    return filteredCampuses.map((c) => {
+      const billed = Math.round(c.totalBilled * periodMultiplier);
+      let collected = Math.round(c.totalCollected * periodMultiplier);
+      let defaultersCount = c.defaultersCount;
 
-  // Dynamic KPIs
+      if (periodMode === "annual") {
+        if (selectedSession === "AY 2025–26") {
+          collected = Math.round(billed * 0.985);
+          defaultersCount = Math.max(0, Math.round(c.defaultersCount * 0.3));
+        } else if (selectedSession === "AY 2024–25") {
+          collected = Math.round(billed * 0.995);
+          defaultersCount = Math.max(0, Math.round(c.defaultersCount * 0.1));
+        } else if (selectedSession === "AY 2023–24") {
+          collected = billed;
+          defaultersCount = 0;
+        }
+      }
+
+      const outstanding = Math.max(0, billed - collected);
+      const collectionRate = billed > 0 ? (collected / billed) * 100 : 100;
+      const staffNetPayroll = Math.round(c.staffNetPayroll * salaryMultiplier);
+      const staffGrossPayroll = Math.round(c.staffGrossPayroll * salaryMultiplier);
+
+      return {
+        ...c,
+        totalBilled: billed,
+        totalCollected: collected,
+        totalOutstanding: outstanding,
+        collectionRate,
+        defaultersCount,
+        staffNetPayroll,
+        staffGrossPayroll,
+      };
+    });
+  }, [filteredCampuses, periodMultiplier, salaryMultiplier, periodMode, selectedSession]);
+
+  const mappedStudentFees = React.useMemo(() => {
+    return filteredStudentFees.map((s) => {
+      if (periodMode !== "annual") {
+        const payable = Math.round(s.monthlyPayable * monthFactor);
+        const paid = Math.round(s.monthlyPaid * monthFactor);
+        const balance = Math.max(0, payable - paid);
+        return {
+          ...s,
+          monthlyPayable: payable,
+          monthlyPaid: paid,
+          balance,
+          annualPayable: s.annualPayable,
+          annualPaid: s.annualPaid,
+          status: s.status,
+        };
+      }
+      const payable = Math.round(s.annualPayable * sessionFeeFactor);
+      if (selectedSession === "AY 2026–27") {
+        const paid = s.annualPaid;
+        const balance = Math.max(0, payable - paid);
+        return {
+          ...s,
+          annualPayable: payable,
+          annualPaid: paid,
+          balance,
+          status: s.status,
+        };
+      }
+      if (selectedSession === "AY 2025–26") {
+        const isTrailing = s.rollNo === "14" || s.rollNo === "06";
+        const paid = isTrailing ? Math.round(payable * 0.92) : payable;
+        const balance = payable - paid;
+        return {
+          ...s,
+          annualPayable: payable,
+          annualPaid: paid,
+          balance,
+          status: (balance === 0 ? "Paid" : "Partial") as StudentFeeReportRecord["status"],
+        };
+      }
+      return {
+        ...s,
+        annualPayable: payable,
+        annualPaid: payable,
+        balance: 0,
+        status: "Paid" as StudentFeeReportRecord["status"],
+      };
+    });
+  }, [filteredStudentFees, periodMode, monthFactor, sessionFeeFactor, selectedSession]);
+
+  const mappedStaffSalaries = React.useMemo(() => {
+    return filteredStaffSalaries.map((st) => {
+      const grossSalary = Math.round(st.grossSalary * salaryMultiplier);
+      const totalDeductions = Math.round(st.totalDeductions * salaryMultiplier);
+      const netSalary = Math.round(st.netSalary * salaryMultiplier);
+      const baseSalary = Math.round(st.baseSalary * salaryMultiplier);
+      const status =
+        periodMode === "annual" && selectedSession !== "AY 2026–27"
+          ? ("Paid" as StaffSalaryRecord["status"])
+          : st.status;
+
+      return {
+        ...st,
+        grossSalary,
+        totalDeductions,
+        netSalary,
+        baseSalary,
+        status,
+      };
+    });
+  }, [filteredStaffSalaries, salaryMultiplier, periodMode, selectedSession]);
+
+  const filteredDefaulters = React.useMemo<FeeDefaulterRecord[]>(() => {
+    const campusFiltered = FEE_DEFAULTERS.filter((d) =>
+      matchesSelectedCampus(d.campus, selectedCampus)
+    );
+    if (periodMode !== "annual" || selectedSession === "AY 2026–27") {
+      return campusFiltered;
+    }
+    if (selectedSession === "AY 2025–26") {
+      return campusFiltered.slice(0, 2).map((d) => ({
+        ...d,
+        overdueMonths: "AY 2025–26 (Arrears)",
+        daysOverdue: 380,
+        severity: "Critical (90d+)" as const,
+      }));
+    }
+    if (selectedSession === "AY 2024–25") {
+      return campusFiltered.slice(0, 1).map((d) => ({
+        ...d,
+        overdueMonths: "AY 2024–25 (Legacy)",
+        daysOverdue: 745,
+        severity: "Critical (90d+)",
+      }));
+    }
+    return [];
+  }, [selectedCampus, periodMode, selectedSession]);
+
+  // Dynamic KPIs derived from mapped data
   const totalBilled = React.useMemo(
-    () =>
-      Math.round(
-        filteredCampuses.reduce((s, c) => s + c.totalBilled, 0) * periodMultiplier
-      ),
-    [filteredCampuses, periodMultiplier]
+    () => campusSummaryData.reduce((s, c) => s + c.totalBilled, 0),
+    [campusSummaryData]
   );
 
   const totalCollected = React.useMemo(
-    () =>
-      Math.round(
-        filteredCampuses.reduce((s, c) => s + c.totalCollected, 0) *
-          periodMultiplier
-      ),
-    [filteredCampuses, periodMultiplier]
+    () => campusSummaryData.reduce((s, c) => s + c.totalCollected, 0),
+    [campusSummaryData]
   );
 
   const totalStaffPayroll = React.useMemo(
-    () =>
-      Math.round(
-        filteredCampuses.reduce((s, c) => s + c.staffNetPayroll, 0) *
-          salaryMultiplier
-      ),
-    [filteredCampuses, salaryMultiplier]
+    () => campusSummaryData.reduce((s, c) => s + c.staffNetPayroll, 0),
+    [campusSummaryData]
   );
 
   const avgEfficiency =
     totalBilled > 0 ? (totalCollected / totalBilled) * 100 : 0;
 
   const totalDefaultersCount = React.useMemo(
-    () => filteredCampuses.reduce((s, c) => s + c.defaultersCount, 0),
-    [filteredCampuses]
+    () => campusSummaryData.reduce((s, c) => s + c.defaultersCount, 0),
+    [campusSummaryData]
   );
 
   const handleSendReminder = React.useCallback((phone: string, student: string) => {
@@ -208,6 +348,7 @@ export function ReportsClient() {
     setSelectedCampus("All Campuses");
     setPeriodMode("monthly");
     setSelectedMonth("October 2026");
+    setSelectedSession("AY 2026–27");
     toast.info("Report filters reset to All Campuses (Monthly — October 2026).");
   }, []);
 
@@ -221,12 +362,7 @@ export function ReportsClient() {
         className: "w-[22%] text-center",
         headerClassName: "w-[22%] text-center",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center text-center">
-            <p className="font-semibold text-foreground text-xs">{r.campus}</p>
-            <p className="text-[11px] text-muted-foreground">
-              {r.enrolledStudents} Students · {r.staffCount} Staff
-            </p>
-          </div>
+          <span className="font-semibold text-foreground text-xs">{r.campus}</span>
         ),
       },
       {
@@ -237,7 +373,7 @@ export function ReportsClient() {
         headerClassName: "w-[12%] text-center",
         cell: () => (
           <span className="inline-flex items-center rounded-md bg-brand/8 px-2 py-0.5 text-[11px] font-semibold text-brand whitespace-nowrap">
-            {periodMode === "annual" ? "AY 2026–27 (12M)" : selectedMonth}
+            {periodMode === "annual" ? `${selectedSession} (12M)` : selectedMonth}
           </span>
         ),
       },
@@ -249,7 +385,7 @@ export function ReportsClient() {
         headerClassName: "w-[13%] text-center",
         cell: (r) => (
           <span className="font-mono text-xs font-semibold tabular-nums text-foreground">
-            {formatCurrency(Math.round(r.totalBilled * periodMultiplier))}
+            {formatCurrency(r.totalBilled)}
           </span>
         ),
       },
@@ -261,7 +397,7 @@ export function ReportsClient() {
         headerClassName: "w-[13%] text-center",
         cell: (r) => (
           <span className="font-mono text-xs font-bold tabular-nums text-emerald-700">
-            {formatCurrency(Math.round(r.totalCollected * periodMultiplier))}
+            {formatCurrency(r.totalCollected)}
           </span>
         ),
       },
@@ -273,7 +409,7 @@ export function ReportsClient() {
         headerClassName: "w-[13%] text-center",
         cell: (r) => (
           <span className="font-mono text-xs font-semibold tabular-nums text-danger">
-            {formatCurrency(Math.round(r.totalOutstanding * periodMultiplier))}
+            {formatCurrency(r.totalOutstanding)}
           </span>
         ),
       },
@@ -286,10 +422,10 @@ export function ReportsClient() {
         cell: (r) => (
           <div className="space-y-0.5 text-center">
             <span className="font-mono text-xs font-bold tabular-nums text-[#091d3e]">
-              {formatCurrency(Math.round(r.staffNetPayroll * salaryMultiplier))}
+              {formatCurrency(r.staffNetPayroll)}
             </span>
             <p className="text-[10.5px] text-muted-foreground">
-              Gross: {formatCurrency(Math.round(r.staffGrossPayroll * salaryMultiplier))}
+              Gross: {formatCurrency(r.staffGrossPayroll)}
             </p>
           </div>
         ),
@@ -312,27 +448,22 @@ export function ReportsClient() {
         ),
       },
     ],
-    [periodMode, selectedMonth, periodMultiplier, salaryMultiplier]
+    [periodMode, selectedSession, selectedMonth]
   );
 
   // 2. Student Fee Reports Columns (Month-wise or Annual-wise)
   const studentFeeColumns = React.useMemo<Column<StudentFeeReportRecord>[]>(
     () => [
       {
-        key: "rollNo",
-        header: "Roll & Challan",
+        key: "challanNumber",
+        header: "Challan #",
         align: "center",
         className: "w-[13%] text-center",
         headerClassName: "w-[13%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="font-mono text-xs font-bold text-foreground">
-              Roll #{r.rollNo}
-            </p>
-            <p className="font-mono text-[11px] text-muted-foreground">
-              {r.challanNumber}
-            </p>
-          </div>
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+            {r.challanNumber}
+          </span>
         ),
       },
       {
@@ -342,24 +473,19 @@ export function ReportsClient() {
         className: "w-[17%] text-center",
         headerClassName: "w-[17%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.student}
-            subtitle={`${r.className} · F/N: ${r.fatherName}`}
-            showAvatar={false}
-            className="text-center"
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.student}
+          </span>
         ),
       },
       {
-        key: "campus",
-        header: "Campus",
+        key: "className",
+        header: "Class",
         align: "center",
         className: "w-[14%] text-center",
         headerClassName: "w-[14%] text-center",
         cell: (r) => (
-          <span className="text-xs font-semibold text-foreground">
-            {r.campus.replace("Main Campus — ", "")}
-          </span>
+          <span className="text-[13px] font-medium text-foreground">{r.className}</span>
         ),
       },
       {
@@ -377,7 +503,7 @@ export function ReportsClient() {
                 : "border border-slate-300 bg-slate-100 text-slate-700"
             )}
           >
-            {periodMode === "annual" ? "Annual (12M)" : selectedMonth}
+            {periodMode === "annual" ? selectedSession : selectedMonth}
           </span>
         ),
       },
@@ -475,15 +601,16 @@ export function ReportsClient() {
             <ActionButton
               tone="outline"
               size="xs"
-              title={`Print ${periodMode === "annual" ? "Annual (Jan–Dec)" : selectedMonth} Fee Statement for ${r.student}`}
+              className="border-purple-200 bg-purple-50/70 text-purple-700 hover:border-purple-400 hover:bg-purple-100 hover:text-purple-800 shadow-2xs"
+              title={`Print ${periodMode === "annual" ? selectedSession : selectedMonth} Fee Statement for ${r.student}`}
               onClick={() => {
-                printSingleStudentFeeStatement(r, periodMode, selectedMonth);
+                printSingleStudentFeeStatement(r, periodMode, selectedMonth, selectedSession);
                 toast.info(
-                  `Opening ${periodMode === "annual" ? "Jan–Dec annual" : selectedMonth} fee statement for ${r.student}…`
+                  `Opening ${periodMode === "annual" ? selectedSession : selectedMonth} fee statement for ${r.student}…`
                 );
               }}
             >
-              <Printer className="size-3.5" />
+              <Printer className="size-3.5 text-purple-600" />
               <span>Statement</span>
             </ActionButton>
           </div>
@@ -515,25 +642,19 @@ export function ReportsClient() {
         className: "w-[18%] text-center",
         headerClassName: "w-[18%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.name}
-            subtitle={`${r.designation} · ${r.department}`}
-            showAvatar={false}
-            className="text-center"
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.name}
+          </span>
         ),
       },
       {
         key: "campus",
-        header: "Campus & Type",
+        header: "Campus",
         align: "center",
         className: "w-[14%] text-center",
         headerClassName: "w-[14%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">{r.campus}</p>
-            <p className="text-[11px] text-muted-foreground">{r.type}</p>
-          </div>
+          <span className="text-xs font-semibold text-foreground">{r.campus}</span>
         ),
       },
       {
@@ -551,7 +672,7 @@ export function ReportsClient() {
                 : "border border-slate-300 bg-slate-100 text-slate-700"
             )}
           >
-            {periodMode === "annual" ? "Annual (12M)" : selectedMonth}
+            {periodMode === "annual" ? selectedSession : selectedMonth}
           </span>
         ),
       },
@@ -619,15 +740,16 @@ export function ReportsClient() {
             <ActionButton
               tone="outline"
               size="xs"
-              title={`Print ${periodMode === "annual" ? "Annual (Jan–Dec)" : selectedMonth} Salary Statement for ${r.name}`}
+              className="border-purple-200 bg-purple-50/70 text-purple-700 hover:border-purple-400 hover:bg-purple-100 hover:text-purple-800 shadow-2xs"
+              title={`Print ${periodMode === "annual" ? selectedSession : selectedMonth} Salary Statement for ${r.name}`}
               onClick={() => {
-                printSingleStaffSalaryStatement(r, periodMode, selectedMonth);
+                printSingleStaffSalaryStatement(r, periodMode, selectedMonth, selectedSession);
                 toast.info(
-                  `Opening ${periodMode === "annual" ? "Jan–Dec annual" : selectedMonth} salary statement for ${r.name}…`
+                  `Opening ${periodMode === "annual" ? selectedSession : selectedMonth} salary statement for ${r.name}…`
                 );
               }}
             >
-              <Printer className="size-3.5" />
+              <Printer className="size-3.5 text-purple-600" />
               <span>Pay Slip</span>
             </ActionButton>
           </div>
@@ -647,34 +769,30 @@ export function ReportsClient() {
         className: "w-[22%] text-center",
         headerClassName: "w-[22%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.student}
-            subtitle={`Challan: ${r.challanNumber} · ${r.className}`}
-            showAvatar={false}
-            className="text-center"
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.student}
+          </span>
         ),
       },
       {
         key: "guardian",
-        header: "Guardian Contact",
+        header: "Guardian",
         align: "center",
         className: "w-[16%] text-center",
         headerClassName: "w-[16%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">{r.guardianName}</p>
-            <p className="font-mono text-[11px] text-muted-foreground">{r.phone}</p>
-          </div>
+          <span className="text-xs font-semibold text-foreground">{r.guardianName}</span>
         ),
       },
       {
-        key: "campus",
-        header: "Campus",
+        key: "className",
+        header: "Class",
         align: "center",
         className: "w-[14%] text-center",
         headerClassName: "w-[14%] text-center",
-        cell: (r) => <span className="text-[13px]">{r.campus}</span>,
+        cell: (r) => (
+          <span className="text-[13px] font-medium text-foreground">{r.className}</span>
+        ),
       },
       {
         key: "months",
@@ -683,12 +801,7 @@ export function ReportsClient() {
         className: "w-[16%] text-center",
         headerClassName: "w-[16%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-xs font-semibold text-foreground">{r.overdueMonths}</p>
-            <p className="text-[11px] font-bold text-danger">
-              {r.daysOverdue} days overdue
-            </p>
-          </div>
+          <span className="text-xs font-semibold text-foreground">{r.overdueMonths}</span>
         ),
       },
       {
@@ -790,7 +903,7 @@ export function ReportsClient() {
     {
       key: "status",
       label: "Status",
-      options: ["Disbursed", "Approved", "Pending"],
+      options: ["Paid", "Approved", "Pending"],
       getValue: (r) => r.status,
     },
   ];
@@ -801,9 +914,10 @@ export function ReportsClient() {
       selectedCampus,
       periodMode,
       selectedMonth,
-      campusList: filteredCampuses,
-      studentFeesList: filteredStudentFees,
-      staffSalariesList: filteredStaffSalaries,
+      selectedSession,
+      campusList: campusSummaryData,
+      studentFeesList: mappedStudentFees,
+      staffSalariesList: mappedStaffSalaries,
       defaultersList: filteredDefaulters,
     });
     if (ok) {
@@ -816,10 +930,11 @@ export function ReportsClient() {
     selectedCampus,
     periodMode,
     selectedMonth,
+    selectedSession,
     periodDisplayLabel,
-    filteredCampuses,
-    filteredStudentFees,
-    filteredStaffSalaries,
+    campusSummaryData,
+    mappedStudentFees,
+    mappedStaffSalaries,
     filteredDefaulters,
   ]);
 
@@ -829,9 +944,10 @@ export function ReportsClient() {
       selectedCampus,
       periodMode,
       selectedMonth,
-      campusList: filteredCampuses,
-      studentFeesList: filteredStudentFees,
-      staffSalariesList: filteredStaffSalaries,
+      selectedSession,
+      campusList: campusSummaryData,
+      studentFeesList: mappedStudentFees,
+      staffSalariesList: mappedStaffSalaries,
       defaultersList: filteredDefaulters,
     });
     if (ok) {
@@ -844,17 +960,18 @@ export function ReportsClient() {
     selectedCampus,
     periodMode,
     selectedMonth,
+    selectedSession,
     periodDisplayLabel,
-    filteredCampuses,
-    filteredStudentFees,
-    filteredStaffSalaries,
+    campusSummaryData,
+    mappedStudentFees,
+    mappedStaffSalaries,
     filteredDefaulters,
   ]);
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Fee & Payroll Reports"
+        title={title}
         className="mb-0 lg:mb-0"
         actions={
           <>
@@ -912,21 +1029,11 @@ export function ReportsClient() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="min-w-[var(--anchor-width)] w-auto max-w-[300px]">
-                {REPORT_TYPE_ITEMS.map((item) => {
-                  const count =
-                    item.value === "campus-summary"
-                      ? filteredCampuses.length
-                      : item.value === "student-fees"
-                      ? filteredStudentFees.length
-                      : item.value === "staff-salaries"
-                      ? filteredStaffSalaries.length
-                      : filteredDefaulters.length;
-                  return (
-                    <SelectItem key={item.value} value={item.value}>
-                      {item.label} ({count})
-                    </SelectItem>
-                  );
-                })}
+                {REPORT_TYPE_ITEMS.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                    {item.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -964,7 +1071,7 @@ export function ReportsClient() {
               </span>
               {(selectedCampus !== "All Campuses" ||
                 periodMode !== "monthly" ||
-                selectedMonth !== "October 2026") && (
+                selectedMonth !== "October 2026" || selectedSession !== "AY 2026–27") && (
                 <button
                   type="button"
                   onClick={handleResetFilters}
@@ -993,12 +1100,22 @@ export function ReportsClient() {
                 </SelectContent>
               </Select>
             ) : (
-              <div className="flex h-9 items-center justify-between rounded-[4px] border border-brand/25 bg-brand-50/50 px-3 text-xs font-bold text-brand">
-                <span>AY 2026–27 (12 Months)</span>
-                <span className="rounded bg-brand/10 px-1.5 py-0.5 text-[10px]">
-                  Annualized
-                </span>
-              </div>
+              <Select
+                items={ACADEMIC_SESSION_ITEMS}
+                value={selectedSession}
+                onValueChange={(v) => setSelectedSession(String(v))}
+              >
+                <SelectTrigger className="h-9! w-full rounded-[4px] border-brand/20 bg-white text-xs font-semibold shadow-2xs hover:border-brand/40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="min-w-[var(--anchor-width)] w-auto max-w-[240px]">
+                  {ACADEMIC_SESSION_ITEMS.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
         </div>
@@ -1023,7 +1140,7 @@ export function ReportsClient() {
         <StatCard
           label={
             periodMode === "annual"
-              ? "Staff Payroll (Annual)"
+              ? `Staff Payroll (${selectedSession})`
               : `Staff Payroll (${selectedMonth})`
           }
           value={formatCurrency(totalStaffPayroll)}
@@ -1039,27 +1156,21 @@ export function ReportsClient() {
       {/* Active Report View (Controlled by Report Type Dropdown) */}
       {activeTab === "campus-summary" && (
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-brand/10 text-brand">
-                <Building2 className="size-4" />
-              </span>
-              <h2 className="font-heading text-base font-bold tracking-tight text-foreground sm:text-lg">
-                Campus-Wise Fee &amp; Staff Salary Realization ({periodDisplayLabel})
-              </h2>
-            </div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand-50/70 px-3 py-1 text-xs font-semibold text-brand">
-              <span>{filteredCampuses.length} Campuses</span>
-              <span>·</span>
-              <span>{periodMode === "annual" ? "Jan – Dec (12M)" : selectedMonth}</span>
+          <div className="flex items-center gap-2 pt-1">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-brand/10 text-brand">
+              <Building2 className="size-4" />
             </span>
+            <h2 className="font-heading text-base font-bold tracking-tight text-foreground sm:text-lg">
+              {selectedCampus}
+            </h2>
           </div>
 
           <SectionCard flush contentClassName="pt-5">
             <DataTable
-              data={filteredCampuses}
+              data={campusSummaryData}
               columns={campusColumns}
               getRowId={(r) => r.campus}
+              hideSortArrows
               searchPlaceholder="Search campus name…"
               searchFn={(r, q) => r.campus.toLowerCase().includes(q)}
               pageSize={6}
@@ -1076,21 +1187,22 @@ export function ReportsClient() {
                 <GraduationCap className="size-4" />
               </span>
               <h2 className="font-heading text-base font-bold tracking-tight text-foreground sm:text-lg">
-                Student Fee Collection &amp; Billing Ledger — {selectedCampus} ({periodDisplayLabel})
+                {selectedCampus}
               </h2>
             </div>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand-50/70 px-3 py-1 text-xs font-semibold text-brand">
               <span>{filteredStudentFees.length} Students</span>
               <span>·</span>
-              <span>{periodMode === "annual" ? "Jan – Dec (12M)" : selectedMonth}</span>
+              <span>{periodMode === "annual" ? selectedSession : selectedMonth}</span>
             </span>
           </div>
 
           <SectionCard flush contentClassName="pt-5">
             <DataTable
-              data={filteredStudentFees}
+              data={mappedStudentFees}
               columns={studentFeeColumns}
               getRowId={(r) => r.id}
+              hideSortArrows
               filters={studentFeeFilters}
               searchPlaceholder="Search student name, roll #, challan # or father name…"
               searchFn={(r, q) =>
@@ -1114,21 +1226,22 @@ export function ReportsClient() {
                 <Users className="size-4" />
               </span>
               <h2 className="font-heading text-base font-bold tracking-tight text-foreground sm:text-lg">
-                Staff Salary &amp; Compensation Register — {selectedCampus} ({periodDisplayLabel})
+                {selectedCampus}
               </h2>
             </div>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/20 bg-brand-50/70 px-3 py-1 text-xs font-semibold text-brand">
               <span>{filteredStaffSalaries.length} Staff Members</span>
               <span>·</span>
-              <span>{periodMode === "annual" ? "Jan – Dec (12M)" : selectedMonth}</span>
+              <span>{periodMode === "annual" ? selectedSession : selectedMonth}</span>
             </span>
           </div>
 
           <SectionCard flush contentClassName="pt-5">
             <DataTable
-              data={filteredStaffSalaries}
+              data={mappedStaffSalaries}
               columns={staffSalaryColumns}
               getRowId={(r) => r.id}
+              hideSortArrows
               filters={staffSalaryFilters}
               searchPlaceholder="Search staff member, emp code, designation or department…"
               searchFn={(r, q) =>
@@ -1151,13 +1264,13 @@ export function ReportsClient() {
                 <AlertOctagon className="size-4" />
               </span>
               <h2 className="font-heading text-base font-bold tracking-tight text-foreground sm:text-lg">
-                Fee Defaulters &amp; Aging Bracket Ledger — {selectedCampus}
+                {selectedCampus}
               </h2>
             </div>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/25 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700">
               <span>{filteredDefaulters.length} Defaulters</span>
               <span>·</span>
-              <span>Recovery Queue</span>
+              <span>{periodMode === "annual" ? `${selectedSession} Recovery` : "Recovery Queue"}</span>
             </span>
           </div>
 
@@ -1166,6 +1279,7 @@ export function ReportsClient() {
               data={filteredDefaulters}
               columns={defaulterColumns}
               getRowId={(r) => r.id}
+              hideSortArrows
               searchPlaceholder="Search defaulter, challan or guardian…"
               searchFn={(r, q) =>
                 r.student.toLowerCase().includes(q) ||

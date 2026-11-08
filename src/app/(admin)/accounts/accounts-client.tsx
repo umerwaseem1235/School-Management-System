@@ -324,14 +324,9 @@ export function AccountsClient() {
         header: "Account #",
         align: "center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.accountNo}
-            </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground whitespace-nowrap">
-              Roll #{r.rollNo}
-            </p>
-          </div>
+          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e]">
+            {r.accountNo}
+          </span>
         ),
       },
       {
@@ -393,10 +388,11 @@ export function AccountsClient() {
             <ActionButton
               tone="outline"
               size="xs"
+              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
               title="View assigned student email, password, and login history"
               onClick={() => openStudent(r, "overview", "student")}
             >
-              <Eye className="size-3.5" />
+              <Eye className="size-3.5 text-blue-600" />
               <span>View</span>
             </ActionButton>
           </div>
@@ -415,14 +411,9 @@ export function AccountsClient() {
         header: "Account #",
         align: "center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.accountNo.replace("STD-", "PRT-")}
-            </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground whitespace-nowrap">
-              Roll #{r.rollNo}
-            </p>
-          </div>
+          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e]">
+            {r.accountNo.replace("STD-", "PRT-")}
+          </span>
         ),
       },
       {
@@ -430,14 +421,9 @@ export function AccountsClient() {
         header: "Parent / Guardian",
         align: "center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-sm font-semibold text-foreground whitespace-nowrap">
-              {r.guardianName}
-            </p>
-            <p className="text-[10.5px] text-muted-foreground whitespace-nowrap">
-              {r.guardianRelation}
-            </p>
-          </div>
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+            {r.guardianName}
+          </span>
         ),
       },
       {
@@ -499,10 +485,11 @@ export function AccountsClient() {
             <ActionButton
               tone="outline"
               size="xs"
+              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
               title="View assigned parent email, password, and login history"
               onClick={() => openStudent(r, "overview", "parent")}
             >
-              <Eye className="size-3.5" />
+              <Eye className="size-3.5 text-blue-600" />
               <span>View</span>
             </ActionButton>
           </div>
@@ -552,14 +539,9 @@ export function AccountsClient() {
         header: "Account #",
         align: "center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
-              {r.accountNo}
-            </span>
-            <p className="font-mono text-[10.5px] text-muted-foreground whitespace-nowrap">
-              {r.empCode}
-            </p>
-          </div>
+          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e]">
+            {r.accountNo}
+          </span>
         ),
       },
       {
@@ -567,14 +549,9 @@ export function AccountsClient() {
         header: "Staff Member",
         align: "center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="text-sm font-semibold text-foreground whitespace-nowrap">
-              {r.name}
-            </p>
-            <p className="text-[10.5px] text-muted-foreground whitespace-nowrap">
-              {r.designation}
-            </p>
-          </div>
+          <span className="text-sm font-semibold text-foreground whitespace-nowrap">
+            {r.name}
+          </span>
         ),
       },
       {
@@ -626,10 +603,11 @@ export function AccountsClient() {
             <ActionButton
               tone="outline"
               size="xs"
+              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
               title="View assigned staff email, password, and login history"
               onClick={() => openStaff(r)}
             >
-              <Eye className="size-3.5" />
+              <Eye className="size-3.5 text-blue-600" />
               <span>View</span>
             </ActionButton>
           </div>
@@ -938,6 +916,7 @@ export function AccountsClient() {
             columns={studentOnlyColumns}
             getRowId={(r) => r.id}
             filters={studentAndParentFilters}
+            hideSortArrows
             searchPlaceholder="Search student name, roll #, account #, or class…"
             searchFn={(r, q) =>
               r.studentName.toLowerCase().includes(q) ||
@@ -959,6 +938,7 @@ export function AccountsClient() {
             columns={parentOnlyColumns}
             getRowId={(r) => r.id}
             filters={studentAndParentFilters}
+            hideSortArrows
             searchPlaceholder="Search parent/guardian, student name, roll #, or campus…"
             searchFn={(r, q) =>
               r.guardianName.toLowerCase().includes(q) ||
@@ -981,6 +961,7 @@ export function AccountsClient() {
             columns={staffColumns}
             getRowId={(r) => r.id}
             filters={staffFilters}
+            hideSortArrows
             searchPlaceholder="Search staff name, emp code, department, or campus…"
             searchFn={(r, q) =>
               r.name.toLowerCase().includes(q) ||

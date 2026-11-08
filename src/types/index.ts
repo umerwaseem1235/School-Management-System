@@ -209,10 +209,34 @@ export interface GradeBand {
 
 export type FeeStatus = "Paid" | "Unpaid" | "Partial" | "Overdue";
 
+export interface PreviousDueMonth {
+  id?: string;
+  monthYear: string;
+  challanNumber?: string;
+  dueDate?: string;
+  billedAmount?: number;
+  paidAmount?: number;
+  balance: number;
+  status?: FeeStatus | string;
+  notes?: string;
+}
+
+export interface FeePaymentRecord {
+  id?: string;
+  receiptNumber?: string;
+  paymentDate: string;
+  paymentMethod?: string;
+  amount: number;
+  lateFee?: number;
+  notes?: string;
+}
+
 export interface FeeChallan {
   id: ID;
   challanNumber: string;
   student: string;
+  rollNo?: string;
+  admissionNumber?: string;
   className: string;
   campus: string;
   monthYear: string;
@@ -220,6 +244,27 @@ export interface FeeChallan {
   totalPayable: number;
   paid: number;
   status: FeeStatus;
+  tuitionFee?: number;
+  labCharges?: number;
+  sportsCharges?: number;
+  libraryFund?: number;
+  utilitySurcharge?: number;
+  otherCharges?: number;
+  transportCharges?: number;
+  fineCharges?: number;
+  scholarshipConcession?: number;
+  scholarshipPercent?: number;
+  scholarshipName?: string;
+  scholarshipAwardNo?: string;
+  previousDues?: number;
+  previousDuesBreakdown?: PreviousDueMonth[];
+  customHeads?: Array<{ id: string; name: string; amount: number }>;
+  payments?: FeePaymentRecord[];
+  collectDate?: string;
+  lastPaymentDate?: string;
+  lastReceiptNumber?: string;
+  lastPaymentMethod?: string;
+  lastPaymentAmount?: number;
 }
 
 export interface FeeHead {

@@ -1,9 +1,5 @@
-import { ReportsClient } from "./reports-client";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Fee Reports & Analytics — EduSphere Multi-Campus",
-};
-
-export default function FeeReportsPage() {
-  return <ReportsClient />;
+export default function LegacyFeesReportsPage() {
+  redirect("/reports/fee-reports");
 }

@@ -152,10 +152,10 @@ export function AppSidebar() {
         {/* Sidebar Header with Brand Logo & Burger Action */}
         <div
           className={cn(
-            "flex h-16 shrink-0 items-center border-b border-border/80 bg-white transition-colors overflow-hidden",
+            "flex h-16 shrink-0 items-center border-b border-[#091d3e]/15 bg-gradient-to-b from-[#eef3fc] via-[#e5eefb] to-[#dce7f8] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors overflow-hidden",
             isExpanded
               ? "justify-between px-3.5"
-              : "justify-center px-2 cursor-pointer hover:bg-slate-50"
+              : "justify-center px-2 cursor-pointer hover:from-[#e6effc] hover:to-[#d3e1f6]"
           )}
           onClick={collapsed ? toggleSidebar : undefined}
           title={collapsed ? "Click to lock sidebar expanded" : undefined}
@@ -171,13 +171,13 @@ export function AppSidebar() {
               title={isLocked ? "Collapse to compact rail (hover to expand)" : "Lock sidebar expanded"}
               aria-label={isLocked ? "Collapse sidebar" : "Lock sidebar expanded"}
               className={cn(
-                "grid size-8 shrink-0 place-items-center rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
+                "grid size-8 shrink-0 place-items-center rounded-[4px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
                 isLocked
-                  ? "bg-brand text-white shadow-xs hover:bg-brand/90"
-                  : "text-muted-foreground hover:bg-brand-50 hover:text-brand"
+                  ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] hover:from-[#1e4275] hover:to-[#102848]"
+                  : "border border-brand/18 bg-white text-foreground/85 shadow-2xs hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand"
               )}
             >
-              <Menu className="size-4.5" />
+              <Menu className="size-4" />
             </button>
           )}
         </div>
@@ -205,16 +205,16 @@ export function MobileSidebar() {
         className="w-[280px] gap-0 border-none bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] p-0 text-sidebar-foreground"
       >
         <SheetTitle className="sr-only">Navigation</SheetTitle>
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-border/80 bg-white px-5">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-[#091d3e]/15 bg-gradient-to-b from-[#eef3fc] via-[#e5eefb] to-[#dce7f8] px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
           <BrandLogo collapsed={false} />
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
             title="Close navigation"
             aria-label="Close navigation"
-            className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-all duration-200 hover:bg-brand-50 hover:text-brand"
+            className="grid size-8 shrink-0 place-items-center rounded-[4px] border border-brand/18 bg-white text-foreground/85 shadow-2xs transition-all duration-200 hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand"
           >
-            <Menu className="size-4.5" />
+            <Menu className="size-4" />
           </button>
         </div>
         <SidebarBody collapsed={false} onNavigate={() => setMobileOpen(false)} />

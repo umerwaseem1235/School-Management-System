@@ -24,7 +24,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
-import { PersonCell, UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Dialog,
   DialogContent,
@@ -201,7 +201,7 @@ export function AdjustmentsClient() {
             setViewDialogOpen(true);
           }}
           title="Click to view adjustment justification & ledger details"
-          className="font-mono text-xs font-bold text-foreground hover:text-brand hover:underline cursor-pointer transition-colors"
+          className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e] hover:border-brand/35 hover:bg-brand-100/60 transition-colors cursor-pointer"
         >
           {r.adjustmentNo}
         </button>
@@ -216,25 +216,19 @@ export function AdjustmentsClient() {
       className: "w-[16%] !px-3 text-center",
       headerClassName: "w-[16%] !px-3 text-center",
       cell: (r) => (
-        <PersonCell
-          name={r.student}
-          subtitle={`Roll #${r.rollNo}`}
-          showAvatar={false}
-          className="text-center"
-        />
+        <span className="text-[13px] font-semibold text-foreground">
+          {r.student}
+        </span>
       ),
     },
     {
-      key: "campus",
-      header: "Campus & Class",
+      key: "className",
+      header: "Class",
       align: "center",
       className: "w-[14%] !px-3 text-center",
       headerClassName: "w-[14%] !px-3 text-center",
       cell: (r) => (
-        <div className="space-y-0.5 text-center">
-          <p className="text-[13px] font-semibold text-foreground">{r.campus}</p>
-          <p className="text-xs text-muted-foreground">{r.className}</p>
-        </div>
+        <span className="text-[13px] font-medium text-foreground">{r.className}</span>
       ),
     },
     {
@@ -244,26 +238,21 @@ export function AdjustmentsClient() {
       cell: (r) => {
         const isCredit = r.type.startsWith("Credit");
         return (
-          <div className="flex flex-col items-center justify-center gap-1 text-center">
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-tight shadow-2xs whitespace-nowrap",
-                isCredit
-                  ? "border border-emerald-500/25 bg-emerald-50/90 text-emerald-700"
-                  : "border border-amber-500/30 bg-amber-50/90 text-amber-800"
-              )}
-            >
-              {isCredit ? (
-                <ArrowDownLeft className="size-3 stroke-[2.5] text-emerald-600" />
-              ) : (
-                <ArrowUpRight className="size-3 stroke-[2.5] text-amber-700" />
-              )}
-              <span>{isCredit ? "Credit" : "Debit"}</span>
-            </span>
-            <span className="text-xs font-semibold text-foreground whitespace-nowrap">
-              {r.head}
-            </span>
-          </div>
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-tight shadow-2xs whitespace-nowrap",
+              isCredit
+                ? "border border-emerald-500/25 bg-emerald-50/90 text-emerald-700"
+                : "border border-amber-500/30 bg-amber-50/90 text-amber-800"
+            )}
+          >
+            {isCredit ? (
+              <ArrowDownLeft className="size-3 stroke-[2.5] text-emerald-600" />
+            ) : (
+              <ArrowUpRight className="size-3 stroke-[2.5] text-amber-700" />
+            )}
+            <span>{isCredit ? "Credit" : "Debit"}</span>
+          </span>
         );
       },
       className: "w-[15%] !px-2.5 text-center",
@@ -323,22 +312,24 @@ export function AdjustmentsClient() {
           <ActionButton
             tone="outline"
             size="xs"
+            className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
             title={`View justification: ${r.reason}`}
             onClick={() => {
               setSelectedAdjustment(r);
               setViewDialogOpen(true);
             }}
           >
-            <Eye className="size-3.5" />
+            <Eye className="size-3.5 text-blue-600" />
             <span>View</span>
           </ActionButton>
           <ActionButton
             tone="outline"
             size="xs"
+            className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
             title="Edit adjustment entry"
             onClick={() => handleOpenEdit(r)}
           >
-            <Pencil className="size-3.5" />
+            <Pencil className="size-3.5 text-amber-600" />
             <span>Edit</span>
           </ActionButton>
         </div>
@@ -449,6 +440,7 @@ export function AdjustmentsClient() {
             columns={columns}
             getRowId={(r) => r.id}
             filters={filters}
+            hideSortArrows
             searchPlaceholder="Search by student, adjustment #, challan or reason…"
             searchFn={(r, q) =>
               r.student.toLowerCase().includes(q) ||
@@ -467,11 +459,8 @@ export function AdjustmentsClient() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Scale className="size-4 text-brand" />
-              <span>Post Student Fee Adjustment</span>
-            </DialogTitle>
-            <DialogDescription>
+            <DialogTitle>Post Student Fee Adjustment</DialogTitle>
+            <DialogDescription className="sr-only">
               Create a signed credit or debit ledger adjustment on an existing student challan.
             </DialogDescription>
           </DialogHeader>
@@ -609,11 +598,8 @@ export function AdjustmentsClient() {
               <DialogHeader>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Scale className="size-4 text-brand" />
-                      <span>Adjustment Justification & Details</span>
-                    </DialogTitle>
-                    <DialogDescription className="font-mono text-xs text-muted-foreground">
+                    <DialogTitle>Adjustment Justification & Details</DialogTitle>
+                    <DialogDescription className="sr-only">
                       Ref: {selectedAdjustment.adjustmentNo} · Challan: {selectedAdjustment.challanNumber}
                     </DialogDescription>
                   </div>
@@ -794,11 +780,8 @@ export function AdjustmentsClient() {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Pencil className="size-4 text-brand" />
-              <span>Edit Fee Adjustment</span>
-            </DialogTitle>
-            <DialogDescription>
+            <DialogTitle>Edit Fee Adjustment</DialogTitle>
+            <DialogDescription className="sr-only">
               {editingAdjustment && (
                 <span>
                   Update details for {editingAdjustment.adjustmentNo} ({editingAdjustment.challanNumber}).

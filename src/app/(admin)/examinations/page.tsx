@@ -242,7 +242,7 @@ export default function ExaminationsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-base font-bold tracking-tight text-foreground sm:text-lg md:text-[19px]">
             Examination Management
           </h1>
         </div>

@@ -120,16 +120,9 @@ export function AssetsClient() {
         key: "name",
         header: "Name",
         cell: (r) => (
-          <div className="min-w-0">
-            <div className="text-xs font-semibold text-foreground truncate">
-              {r.name}
-            </div>
-            {r.remarks && (
-              <div className="text-[10px] text-muted-foreground truncate mt-0.5">
-                {r.remarks}
-              </div>
-            )}
-          </div>
+          <span className="text-xs font-semibold text-foreground truncate">
+            {r.name}
+          </span>
         ),
         sortValue: (r) => r.name,
       },
@@ -192,21 +185,23 @@ export function AssetsClient() {
             <ActionButton
               tone="outline"
               size="xs"
+              className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
               onClick={() => {
                 setEditingAsset(r);
                 setFormOpen(true);
               }}
             >
-              <Edit className="h-3 w-3" />
+              <Edit className="h-3 w-3 text-amber-600" />
             </ActionButton>
             <ActionButton
               tone="danger"
               size="xs"
+              className="border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 shadow-2xs"
               onClick={() =>
                 setDeleteTarget({ id: r.id, name: r.name })
               }
             >
-              <Trash2 className="h-3 w-3" />
+              <Trash2 className="h-3 w-3 text-rose-600" />
             </ActionButton>
           </div>
         ),

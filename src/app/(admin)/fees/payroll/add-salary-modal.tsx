@@ -21,6 +21,7 @@ interface AddSalaryModalProps {
   onOpenChange: (open: boolean) => void;
   onSave: (record: StaffSalaryRecord) => void;
   initialData?: StaffSalaryRecord | null;
+  defaultMonthYear?: string;
 }
 
 const CAMPUSES = [
@@ -170,9 +171,12 @@ export function AddSalaryModal({
   onOpenChange,
   onSave,
   initialData,
+  defaultMonthYear = "November 2026",
 }: AddSalaryModalProps) {
   const [empCode, setEmpCode] = React.useState("EMP-0720");
   const [name, setName] = React.useState("");
+  const [monthYear, setMonthYear] = React.useState(defaultMonthYear);
+  const [paymentStatus, setPaymentStatus] = React.useState<"Pending" | "Paid" | "Disbursed" | "Approved" | "On Hold">("Pending");
   const [designation, setDesignation] = React.useState("");
   const [isCustom, setIsCustom] = React.useState(false);
   const [department, setDepartment] = React.useState("Sciences");
@@ -230,9 +234,13 @@ export function AddSalaryModal({
       setAccountNumber(initialData.accountNumber);
       setIban(initialData.iban);
       setPaymentMode(initialData.paymentMode);
+      setMonthYear(initialData.monthYear || defaultMonthYear);
+      setPaymentStatus(initialData.status || "Pending");
     } else {
       setEmpCode(`EMP-0${Math.floor(700 + Math.random() * 290)}`);
       setName("");
+      setMonthYear(defaultMonthYear);
+      setPaymentStatus("Pending");
       setIsCustom(false);
       setDesignation("");
       setDepartment("Sciences");
@@ -253,7 +261,7 @@ export function AddSalaryModal({
       setIban("");
       setPaymentMode("Bank Transfer");
     }
-  }, [initialData, open]);
+  }, [initialData, open, defaultMonthYear]);
 
   const applyDesignationDefaults = (desig: string) => {
     if (NON_TEACHING_DESIGNATIONS.includes(desig)) {
@@ -426,7 +434,7 @@ export function AddSalaryModal({
       department,
       campus,
       type,
-      monthYear: "October 2026",
+      monthYear,
       baseSalary: Number(baseSalary),
       medicalAllowance: Number(medicalAllowance) || 0,
       conveyanceAllowance: Number(conveyanceAllowance) || 0,
@@ -445,7 +453,7 @@ export function AddSalaryModal({
       accountNumber: accountNumber.trim(),
       iban: cleanIban,
       paymentMode,
-      status: initialData?.status || "Pending",
+      status: paymentStatus,
       cnic: initialData?.cnic || "35201-1928374-1",
       joiningDate: initialData?.joiningDate || "2026-10-01",
     };
@@ -469,16 +477,13 @@ export function AddSalaryModal({
         <DialogHeader className="shrink-0 bg-gradient-to-r from-slate-50/90 via-white to-slate-50/90 px-6 py-4 border-b border-border/80">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]">
-                <Wallet className="size-4.5" />
-              </span>
               <div>
                 <DialogTitle className="text-base font-bold leading-tight text-foreground">
                   {initialData
                     ? "Update Staff Salary Account"
                     : "Add Staff Salary Account"}
                 </DialogTitle>
-                <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+                <DialogDescription className="sr-only">
                   Configure employee profile, monthly compensation structure, and disbursement bank account.
                 </DialogDescription>
               </div>
@@ -659,6 +664,35 @@ export function AddSalaryModal({
                   >
                     <option value="Teaching">Teaching Staff</option>
                     <option value="Non-Teaching">Non-Teaching Staff</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 pt-2 border-t border-border/50">
+                <div>
+                  <label className={labelClass}>Payroll Cycle / Effective Month *</label>
+                  <select
+                    value={monthYear}
+                    onChange={(e) => setMonthYear(e.target.value)}
+                    className={inputClass}
+                  >
+                    <option value="November 2026">November 2026 (Active Cycle)</option>
+                    <option value="October 2026">October 2026 (Audited / Past)</option>
+                    <option value="December 2026">December 2026 (Upcoming)</option>
+                    <option value="September 2026">September 2026 (Past)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Initial Payment Status *</label>
+                  <select
+                    value={paymentStatus}
+                    onChange={(e) => setPaymentStatus(e.target.value as any)}
+                    className={inputClass}
+                  >
+                    <option value="Pending">Unpaid (Pending — Ready for Batch Payment)</option>
+                    <option value="Approved">Approved (Cleared for Batch Payment)</option>
+                    <option value="Paid">Paid (Pre-cleared / Manual Cash)</option>
+                    <option value="On Hold">On Hold (Protected from Payment)</option>
                   </select>
                 </div>
               </div>
@@ -883,7 +917,7 @@ export function AddSalaryModal({
                 </div>
                 <div className="bg-emerald-500/10 px-4 py-2.5 text-center">
                   <dt className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-                    Net Disbursed
+                    Net Pay
                   </dt>
                   <dd className="mt-0.5 font-mono text-sm font-extrabold tabular-nums text-emerald-700">
                     {formatCurrency(netSalary)}
@@ -892,10 +926,10 @@ export function AddSalaryModal({
               </dl>
             </div>
 
-            {/* Section 3: Disbursement Bank Account */}
+            {/* Section 3: Salary Payment Account */}
             <div className="space-y-2.5 border-t border-border/70 pt-3">
               <p className="text-[11px] font-bold uppercase tracking-wider text-brand/90">
-                Disbursement Bank Account
+                Salary Payment Account
               </p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
                 <div className="sm:col-span-2">
@@ -913,7 +947,7 @@ export function AddSalaryModal({
                   </select>
                 </div>
                 <div>
-                  <label className={labelClass}>Disbursal Mode</label>
+                  <label className={labelClass}>Payment Method</label>
                   <select
                     value={paymentMode}
                     onChange={(e) => {
@@ -1014,7 +1048,7 @@ export function AddSalaryModal({
             <div className="flex items-center gap-2 text-xs">
               <span className="size-2 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20" />
               <span className="text-[11px] font-medium text-muted-foreground">
-                Net Disbursed:{" "}
+                Net Pay:{" "}
                 <span className="font-mono font-bold text-emerald-700">
                   {formatCurrency(netSalary)}
                 </span>

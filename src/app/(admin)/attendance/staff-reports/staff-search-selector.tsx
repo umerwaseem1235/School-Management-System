@@ -575,14 +575,11 @@ export function StaffSearchSelector({
           <DialogHeader className="border-b border-border/70 bg-[#f8fafd] px-6 py-4">
             <div className="flex items-center justify-between gap-3 pr-6">
               <div className="flex items-center gap-2.5">
-                <div className="grid size-9 place-items-center rounded-lg bg-brand text-white shadow-xs">
-                  <Briefcase className="size-4.5" />
-                </div>
                 <div>
                   <DialogTitle className="text-base font-bold text-foreground">
                     Search & Select Specific Staff Member
                   </DialogTitle>
-                  <DialogDescription className="text-xs text-muted-foreground">
+                  <DialogDescription className="sr-only">
                     Search across {options.length} faculty and administrative staff by name, EMP code, department, or campus.
                   </DialogDescription>
                 </div>

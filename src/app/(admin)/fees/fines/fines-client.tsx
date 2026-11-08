@@ -25,7 +25,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
-import { PersonCell, UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,7 @@ import {
 import { Field, fieldClass } from "../../attendance/_components/attendance-kit";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { FEE_FINES, type FeeFineRecord } from "@/lib/mock/finance";
+import { readFeeFines, writeFeeFines, syncFineWithFeeChallan } from "@/lib/mock/finance-storage";
 import { exportFinesPdf, printFinesReport } from "./fines-export";
 
 export function FinesClient() {
@@ -61,6 +62,18 @@ export function FinesClient() {
     React.useState<FeeFineRecord["fineType"]>("Late Fee Submission");
   const [amount, setAmount] = React.useState("1500");
   const [dueDate, setDueDate] = React.useState("2026-10-30");
+
+  React.useEffect(() => {
+    setRecords(readFeeFines());
+  }, []);
+
+  const updateRecords = (updater: (current: FeeFineRecord[]) => FeeFineRecord[]) => {
+    setRecords((current) => {
+      const updated = updater(current);
+      writeFeeFines(updated);
+      return updated;
+    });
+  };
 
   const selectedFine = React.useMemo(
     () => records.find((r) => r.id === selectedFineId) ?? records[0],
@@ -95,7 +108,7 @@ export function FinesClient() {
 
   const handleConfirmPaid = () => {
     if (!selectedFine) return;
-    setRecords((list) =>
+    updateRecords((list) =>
       list.map((r) =>
         r.id === selectedFine.id
           ? {
@@ -106,15 +119,17 @@ export function FinesClient() {
           : r
       )
     );
+    // Sync payment settlement with student's fee voucher in Fee Collection
+    syncFineWithFeeChallan(selectedFine, "paid");
     setSettlementOpen(false);
     toast.success(
-      `Fine ${selectedFine.fineNumber} (${formatCurrency(selectedFine.amount)}) marked as Paid for ${selectedFine.student}.`
+      `Fine ${selectedFine.fineNumber} (${formatCurrency(selectedFine.amount)}) marked as Paid and synchronized with fee voucher.`
     );
   };
 
   const handleConfirmWaive = () => {
     if (!selectedFine) return;
-    setRecords((list) =>
+    updateRecords((list) =>
       list.map((r) =>
         r.id === selectedFine.id
           ? {
@@ -126,15 +141,17 @@ export function FinesClient() {
           : r
       )
     );
+    // Deduct waived fine from student's fee voucher in Fee Collection
+    syncFineWithFeeChallan(selectedFine, "waived");
     setSettlementOpen(false);
     toast.info(
-      `Fine ${selectedFine.fineNumber} waived on institutional grounds (${waiveReason}).`
+      `Fine ${selectedFine.fineNumber} waived on institutional grounds and removed from fee voucher.`
     );
   };
 
   const handleReopenUnpaid = (fineId: string) => {
     const fine = records.find((r) => r.id === fineId);
-    setRecords((list) =>
+    updateRecords((list) =>
       list.map((r) =>
         r.id === fineId
           ? {
@@ -147,8 +164,11 @@ export function FinesClient() {
           : r
       )
     );
+    if (fine) {
+      syncFineWithFeeChallan(fine, "reopen");
+    }
     setSettlementOpen(false);
-    toast.info(`Fine notice ${fine?.fineNumber ?? ""} reopened as Unpaid.`);
+    toast.info(`Fine notice ${fine?.fineNumber ?? ""} reopened as Unpaid in fee register.`);
   };
 
   const handleCreate = (e: React.FormEvent) => {
@@ -179,11 +199,16 @@ export function FinesClient() {
       status: "Unpaid",
     };
 
-    setRecords([newFine, ...records]);
+    updateRecords((current) => [newFine, ...current]);
+    // Automatically attach fine to student's fee voucher in Fee Collection
+    syncFineWithFeeChallan(newFine, "impose");
+
     setDialogOpen(false);
     setStudent("");
     setRollNo("");
-    toast.success(`Fine notice ${nextNo} imposed successfully.`);
+    toast.success(
+      `Fine notice ${nextNo} (${formatCurrency(amt)}) imposed and automatically added to ${newFine.student}'s voucher in Fee Collection.`
+    );
   };
 
   const columns = React.useMemo<Column<FeeFineRecord>[]>(
@@ -214,21 +239,18 @@ export function FinesClient() {
         className: "w-[20%] text-center",
         headerClassName: "w-[20%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.student}
-            subtitle={`Roll #${r.rollNo} · ${r.className}`}
-            showAvatar={false}
-            className="text-center"
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.student}
+          </span>
         ),
       },
       {
-        key: "campus",
-        header: "Campus",
+        key: "className",
+        header: "Class",
         align: "center",
         className: "w-[11%] text-center",
         headerClassName: "w-[11%] text-center",
-        cell: (r) => <span className="text-[13px]">{r.campus}</span>,
+        cell: (r) => <span className="text-[13px] font-medium text-foreground">{r.className}</span>,
       },
       {
         key: "fineType",
@@ -237,14 +259,9 @@ export function FinesClient() {
         className: "w-[15%] text-center",
         headerClassName: "w-[15%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="truncate text-xs font-semibold text-foreground">
-              {r.fineType}
-            </p>
-            <p className="truncate text-[11px] text-muted-foreground">
-              Imposed: {formatDate(r.imposedDate)}
-            </p>
-          </div>
+          <span className="truncate text-xs font-semibold text-foreground">
+            {r.fineType}
+          </span>
         ),
       },
       {
@@ -303,20 +320,22 @@ export function FinesClient() {
               <ActionButton
                 tone="outline"
                 size="xs"
+                className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
                 onClick={() => openSettlementDialog(r)}
                 title="Choose Mark as Paid or Waived option"
               >
-                <SlidersHorizontal className="size-3.5" />
+                <SlidersHorizontal className="size-3.5 text-amber-600" />
                 <span>Update</span>
               </ActionButton>
             ) : (
               <ActionButton
                 tone="outline"
                 size="xs"
+                className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
                 onClick={() => openSettlementDialog(r)}
                 title="View settlement receipt & details"
               >
-                <Eye className="size-3.5" />
+                <Eye className="size-3.5 text-blue-600" />
                 <span>Details</span>
               </ActionButton>
             )}
@@ -445,6 +464,7 @@ export function FinesClient() {
             columns={columns}
             getRowId={(r) => r.id}
             filters={filters}
+            hideSortArrows
             searchPlaceholder="Search by student, fine # or roll…"
             searchFn={(r, q) =>
               r.student.toLowerCase().includes(q) ||
@@ -467,7 +487,7 @@ export function FinesClient() {
                     <DialogTitle className="text-base font-bold leading-tight text-foreground">
                       Fine Status Resolution
                     </DialogTitle>
-                    <DialogDescription className="mt-1 font-mono text-xs text-muted-foreground">
+                    <DialogDescription className="sr-only">
                       Fine Notice {selectedFine.fineNumber} · Due {formatDate(selectedFine.dueDate)}
                     </DialogDescription>
                   </div>
@@ -687,11 +707,8 @@ export function FinesClient() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ShieldAlert className="size-4 text-brand" />
-              <span>Impose Fine Notice</span>
-            </DialogTitle>
-            <DialogDescription>
+            <DialogTitle>Impose Fine Notice</DialogTitle>
+            <DialogDescription className="sr-only">
               Record an institutional fine penalty or late fee notice against a student account.
             </DialogDescription>
           </DialogHeader>

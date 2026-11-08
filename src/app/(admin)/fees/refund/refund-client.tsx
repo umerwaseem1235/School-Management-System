@@ -26,7 +26,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
-import { PersonCell, UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Dialog,
   DialogContent,
@@ -148,7 +148,7 @@ export function RefundClient() {
         );
       } else if (nextStatus === "Processed") {
         toast.success(
-          `Refund ${record.refundNo} marked as Disbursed / Processed via ${record.paymentMethod}.`
+          `Refund ${record.refundNo} marked as Paid / Processed via ${record.paymentMethod}.`
         );
       } else if (nextStatus === "Rejected") {
         toast.error(
@@ -267,14 +267,9 @@ export function RefundClient() {
         className: "w-[12%] text-center",
         headerClassName: "w-[12%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold text-foreground">
-              {r.refundNo}
-            </span>
-            <p className="font-mono text-[11px] text-muted-foreground">
-              {r.challanNumber}
-            </p>
-          </div>
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+            {r.refundNo}
+          </span>
         ),
       },
       {
@@ -284,29 +279,21 @@ export function RefundClient() {
         className: "w-[18%] text-center",
         headerClassName: "w-[18%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.student}
-            subtitle={`Roll #${r.rollNo}`}
-            showAvatar={false}
-            className="text-center"
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.student}
+          </span>
         ),
       },
       {
-        key: "classCampus",
-        header: "Class & Campus",
+        key: "className",
+        header: "Class",
         align: "center",
-        className: "w-[15%] text-center",
-        headerClassName: "w-[15%] text-center",
+        className: "w-[14%] text-center",
+        headerClassName: "w-[14%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <p className="truncate text-[13px] font-semibold text-foreground">
-              {r.className}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {r.campus}
-            </p>
-          </div>
+          <span className="text-[13px] font-medium text-foreground">
+            {r.className}
+          </span>
         ),
       },
       {
@@ -318,39 +305,32 @@ export function RefundClient() {
         cell: (r) => {
           const isParent = (r.requestedByRole ?? "Parent") === "Parent";
           return (
-            <div className="flex flex-col items-center justify-center gap-1">
+            <span
+              className={cn(
+                "inline-flex h-6 items-center gap-1.5 rounded-md border px-2.5 text-[11px] font-semibold shadow-2xs",
+                isParent
+                  ? "border-brand/20 bg-white text-brand"
+                  : "border-sky-400/40 bg-sky-50/70 text-sky-700"
+              )}
+            >
               <span
                 className={cn(
-                  "inline-flex h-6 items-center gap-1.5 rounded-md border px-2 text-[11px] font-semibold shadow-2xs",
+                  "grid size-4 shrink-0 place-items-center rounded-[4px] text-white",
                   isParent
-                    ? "border-brand/20 bg-white text-brand"
-                    : "border-sky-400/40 bg-sky-50/70 text-sky-700"
+                    ? "bg-brand"
+                    : "bg-gradient-to-br from-sky-400 to-sky-600"
                 )}
               >
-                <span
-                  className={cn(
-                    "grid size-4 shrink-0 place-items-center rounded-[4px] text-white",
-                    isParent
-                      ? "bg-brand"
-                      : "bg-gradient-to-br from-sky-400 to-sky-600"
-                  )}
-                >
-                  {isParent ? (
-                    <UserCheck className="size-2.5" />
-                  ) : (
-                    <GraduationCap className="size-2.5" />
-                  )}
-                </span>
-                <span className="leading-none">
-                  {isParent ? "Parent" : "Student"}
-                </span>
+                {isParent ? (
+                  <UserCheck className="size-2.5" />
+                ) : (
+                  <GraduationCap className="size-2.5" />
+                )}
               </span>
-              {r.requestedByName && (
-                <span className="max-w-[140px] truncate text-[10.5px] text-muted-foreground">
-                  {r.requestedByName.replace(/\s*\(.*?\)\s*/g, "")}
-                </span>
-              )}
-            </div>
+              <span className="leading-none">
+                {isParent ? "Parent" : "Student"}
+              </span>
+            </span>
           );
         },
       },
@@ -361,33 +341,19 @@ export function RefundClient() {
         className: "w-[14%] text-center",
         headerClassName: "w-[14%] text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <span className="font-mono text-[13px] font-bold tabular-nums text-foreground">
-              {formatCurrency(r.refundAmount)}
-            </span>
-            <p className="font-mono text-[10.5px] tabular-nums text-muted-foreground">
-              Paid: {formatCurrency(r.originalAmount)}
-            </p>
-          </div>
+          <span className="font-mono text-[13px] font-bold tabular-nums text-foreground">
+            {formatCurrency(r.refundAmount)}
+          </span>
         ),
       },
       {
         key: "status",
         header: "Approval Status",
         align: "center",
-        className: "w-[12%] text-center",
-        headerClassName: "w-[12%] text-center",
+        className: "w-[13%] text-center",
+        headerClassName: "w-[13%] text-center",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center gap-0.5">
-            <StatusBadge status={r.status} />
-            <span className="max-w-[110px] truncate text-[10px] text-muted-foreground">
-              {r.status === "Pending"
-                ? "Awaiting Admin"
-                : r.approvedBy
-                ? r.approvedBy.split(" (")[0]
-                : formatDate(r.requestDate)}
-            </span>
-          </div>
+          <StatusBadge status={r.status} />
         ),
       },
       {
@@ -401,6 +367,7 @@ export function RefundClient() {
             <ActionButton
               tone="outline"
               size="xs"
+              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
               title="View notification details & approval controls"
               onClick={() => {
                 setSelectedRefundId(r.id);
@@ -408,7 +375,7 @@ export function RefundClient() {
                 setViewDialogOpen(true);
               }}
             >
-              <Eye className="size-3.5" />
+              <Eye className="size-3.5 text-blue-600" />
               <span>View</span>
             </ActionButton>
           </div>
@@ -466,7 +433,7 @@ export function RefundClient() {
           icon={Clock}
         />
         <StatCard
-          label="Disbursed & Processed"
+          label="Paid & Processed"
           value={formatCurrency(totalRefunded)}
           icon={CheckCircle2}
         />
@@ -492,6 +459,7 @@ export function RefundClient() {
             columns={refundColumns}
             getRowId={(r) => r.id}
             filters={refundFilters}
+            hideSortArrows
             searchPlaceholder="Search by student, parent/guardian, refund # or challan…"
             searchFn={(r, q) =>
               r.student.toLowerCase().includes(q) ||
@@ -514,12 +482,17 @@ export function RefundClient() {
               <DialogHeader className="gap-1 px-6 py-5">
                 <div className="flex items-start justify-between gap-4 pr-8">
                   <div className="min-w-0">
-                    <DialogTitle className="text-base font-bold leading-tight text-foreground">
-                      Refund Notification &amp; Approval Review
+                    <DialogTitle className="text-base font-bold leading-tight text-foreground flex items-center gap-2 flex-wrap">
+                      <span>Refund Review</span>
+                      <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+                        {selectedRefund.refundNo}
+                      </span>
+                      <span className="inline-flex items-center justify-center rounded-md border border-slate-200 bg-slate-100/80 px-2 py-0.5 font-mono text-xs font-medium text-slate-700">
+                        Challan: {selectedRefund.challanNumber}
+                      </span>
                     </DialogTitle>
-                    <DialogDescription className="mt-1 font-mono text-xs text-muted-foreground">
-                      {selectedRefund.refundNo} · Challan {selectedRefund.challanNumber} · Requested{" "}
-                      {formatDate(selectedRefund.requestDate)}
+                    <DialogDescription className="mt-1 text-xs text-muted-foreground">
+                      Requested on {formatDate(selectedRefund.requestDate)} · Settlement via {selectedRefund.paymentMethod}
                     </DialogDescription>
                   </div>
                   <StatusBadge status={selectedRefund.status} />
@@ -701,7 +674,7 @@ export function RefundClient() {
                       }}
                     >
                       <CheckCircle2 className="size-3.5" />
-                      <span>Mark Disbursed</span>
+                      <span>Mark as Paid</span>
                     </ActionButton>
                   </>
                 )}
@@ -730,11 +703,8 @@ export function RefundClient() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <RotateCcw className="size-4 text-brand" />
-              <span>Log Student / Parent Refund Claim</span>
-            </DialogTitle>
-            <DialogDescription>
+            <DialogTitle>Log Student / Parent Refund Claim</DialogTitle>
+            <DialogDescription className="sr-only">
               Record an incoming refund notification from a parent/guardian or student for administrative approval.
             </DialogDescription>
           </DialogHeader>

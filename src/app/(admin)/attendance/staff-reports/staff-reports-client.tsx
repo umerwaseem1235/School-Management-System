@@ -16,7 +16,7 @@ import {
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
-import { PersonCell, UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Meter } from "@/components/shared/meter";
 import {
@@ -315,76 +315,59 @@ export function StaffReportsClient() {
       {
         key: "employee",
         header: "Staff Member",
-        headerAlign: "left",
-        align: "left",
-        className: "w-[21%] pr-3",
-        headerClassName: "w-[21%] pr-3 text-left",
+        headerAlign: "center",
+        align: "center",
+        className: "w-[21%] text-center",
+        headerClassName: "w-[21%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.name}
-            subtitle={`${r.empCode} · ${formatShortDesignation(r.designation)}`}
-            showAvatar={false}
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.name}
+          </span>
         ),
       },
       {
         key: "department",
-        header: "Department & Campus",
+        header: "Department",
         align: "center",
-        className: "w-[17%] px-3 whitespace-nowrap",
-        headerClassName: "w-[17%] px-3",
+        className: "w-[17%] px-3 whitespace-nowrap text-center",
+        headerClassName: "w-[17%] px-3 text-center",
         cell: (r) => (
-          <div className="mx-auto max-w-full space-y-0.5 text-center overflow-hidden">
-            <p className="truncate text-[13px] font-semibold text-foreground">
-              {r.department}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {r.type} · {shortCampus(r.campus)}
-            </p>
-          </div>
+          <span className="truncate text-[13px] font-semibold text-foreground">
+            {r.department}
+          </span>
         ),
       },
       {
         key: "shift",
-        header: "Shift & Terminal",
+        header: "Shift",
         align: "center",
-        className: "w-[16%] px-3 whitespace-nowrap",
-        headerClassName: "w-[16%] px-3",
+        className: "w-[16%] px-3 whitespace-nowrap text-center",
+        headerClassName: "w-[16%] px-3 text-center",
         cell: (r) => (
-          <div className="mx-auto max-w-full space-y-0.5 text-center overflow-hidden">
-            <p className="truncate text-[12.5px] font-medium text-foreground tabular-nums">
-              {r.shift}
-            </p>
-            <p className="truncate text-xs text-muted-foreground tabular-nums">
-              {r.verificationMethod} · {r.workingHours}
-            </p>
-          </div>
+          <span className="truncate text-[12.5px] font-medium text-foreground tabular-nums">
+            {r.shift}
+          </span>
         ),
       },
       {
         key: "summary",
         header: "Present / Absent / Late",
         align: "center",
-        className: "w-[15%] px-3 whitespace-nowrap",
-        headerClassName: "w-[15%] px-3",
+        className: "w-[15%] px-3 whitespace-nowrap text-center",
+        headerClassName: "w-[15%] px-3 text-center",
         cell: (r) => (
-          <div className="space-y-0.5 text-center">
-            <div className="flex items-center justify-center gap-2 text-xs tabular-nums">
-              <span className="font-semibold text-success">
-                {r.daysPresentMonth}P
-              </span>
-              <span className="text-muted-foreground/40">·</span>
-              <span className="font-semibold text-danger">
-                {r.daysAbsentMonth}A
-              </span>
-              <span className="text-muted-foreground/40">·</span>
-              <span className="font-semibold text-warning">
-                {r.daysLateMonth}L
-              </span>
-            </div>
-            <p className="text-[10.5px] text-muted-foreground tabular-nums">
-              {formatLatestStatusLine(r)}
-            </p>
+          <div className="flex items-center justify-center gap-2 text-xs tabular-nums">
+            <span className="font-semibold text-success">
+              {r.daysPresentMonth}P
+            </span>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="font-semibold text-danger">
+              {r.daysAbsentMonth}A
+            </span>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="font-semibold text-warning">
+              {r.daysLateMonth}L
+            </span>
           </div>
         ),
       },
@@ -392,30 +375,13 @@ export function StaffReportsClient() {
         key: "rate",
         header: "Attendance Rate",
         align: "center",
-        className: "w-[11%] px-2",
-        headerClassName: "w-[11%] px-2",
-        cell: (r) => {
-          const totalDays =
-            r.daysPresentMonth + r.daysAbsentMonth || workingDaysCount;
-          return (
-            <div className="mx-auto w-16 space-y-1.5 text-center">
-              <div className="flex justify-center text-xs">
-                <span className="font-semibold tabular-nums text-foreground">
-                  {r.monthlyRate}%
-                </span>
-              </div>
-              <Meter
-                value={r.monthlyRate}
-                size="xs"
-                tone="dark-blue"
-                className="h-1"
-              />
-              <p className="text-[10.5px] text-muted-foreground leading-none tabular-nums">
-                {r.daysPresentMonth}/{totalDays} days
-              </p>
-            </div>
-          );
-        },
+        className: "w-[11%] px-2 text-center",
+        headerClassName: "w-[11%] px-2 text-center",
+        cell: (r) => (
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+            {r.monthlyRate}%
+          </span>
+        ),
       },
       {
         key: "status",
@@ -443,14 +409,16 @@ export function StaffReportsClient() {
             <AttendanceActionButton
               size="xs"
               tone="outline"
+              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
               onClick={() => setViewingStaff(r)}
             >
-              <Eye />
-              View
+              <Eye className="size-3 text-blue-600" />
+              <span>View</span>
             </AttendanceActionButton>
             <AttendanceActionButton
               size="xs"
               tone="outline"
+              className="border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 shadow-2xs"
               title={`Download ${r.name}'s report`}
               aria-label={`Download ${r.name}'s report`}
               onClick={() => {
@@ -465,7 +433,8 @@ export function StaffReportsClient() {
                 );
               }}
             >
-              <Download />
+              <Download className="size-3 text-indigo-600" />
+              <span>PDF</span>
             </AttendanceActionButton>
           </div>
         ),
@@ -547,28 +516,27 @@ export function StaffReportsClient() {
       )}
 
       <SectionCard
-        title={`Staff Attendance Report — ${period}`}
         flush
+        title={
+          <StaffSearchSelector
+            options={ALL_STAFF_OPTIONS}
+            value={selectedStaffId}
+            allValue={ALL_STAFF_VALUE}
+            disabled={isFetching}
+            size="md"
+            onChange={(nextId) => {
+              setSelectedStaffId(nextId);
+              if (errorMessage) setErrorMessage(null);
+            }}
+            onSelectAndFetch={(nextId) => {
+              setSelectedStaffId(nextId);
+              if (errorMessage) setErrorMessage(null);
+              handleFetchReport(nextId);
+            }}
+          />
+        }
         action={
           <div className="flex flex-wrap items-center gap-2">
-            {/* Searchable Specific Staff Selector */}
-            <StaffSearchSelector
-              options={ALL_STAFF_OPTIONS}
-              value={selectedStaffId}
-              allValue={ALL_STAFF_VALUE}
-              disabled={isFetching}
-              size="md"
-              onChange={(nextId) => {
-                setSelectedStaffId(nextId);
-                if (errorMessage) setErrorMessage(null);
-              }}
-              onSelectAndFetch={(nextId) => {
-                setSelectedStaffId(nextId);
-                if (errorMessage) setErrorMessage(null);
-                handleFetchReport(nextId);
-              }}
-            />
-
             <AttendanceDateRangePicker
               fromDate={fromDate}
               toDate={toDate}

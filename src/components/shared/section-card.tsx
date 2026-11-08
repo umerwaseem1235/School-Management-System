@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
 interface SectionCardProps {
-  title?: string;
-  description?: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
@@ -41,20 +41,26 @@ export function SectionCard({
       {hasHeader && (
         <header
           className={cn(
-            "relative z-20 flex justify-between gap-4 px-6 pt-5 pb-2.5",
+            "relative z-20 flex flex-wrap justify-between gap-4 px-6 pt-5 pb-2.5",
             description ? "items-start" : "items-center"
           )}
         >
           <div className="min-w-0">
-            {title && (
+            {typeof title === "string" ? (
               <h2 className="font-heading text-[15px] font-semibold text-foreground tracking-tight">
                 {title}
               </h2>
+            ) : (
+              title
             )}
             {description && (
-              <p className="mt-0.5 text-[13px] font-medium text-muted-foreground/90">
-                {description}
-              </p>
+              typeof description === "string" ? (
+                <p className="mt-0.5 text-[13px] font-medium text-muted-foreground/90">
+                  {description}
+                </p>
+              ) : (
+                description
+              )
             )}
           </div>
           {action && <div className="shrink-0">{action}</div>}

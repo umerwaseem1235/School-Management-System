@@ -19,6 +19,7 @@ export interface ReportExportOptions {
   selectedCampus: string;
   periodMode: ReportPeriodMode;
   selectedMonth: string;
+  selectedSession?: string;
   campusList: CampusRealizationSummary[];
   studentFeesList: StudentFeeReportRecord[];
   staffSalariesList: StaffSalaryRecord[];
@@ -155,7 +156,7 @@ export function buildStaffAnnualMonthlyRows(
 
     // Earlier months (Jan-Sep) are disbursed; Oct-Dec reflect current record status if pending/on-hold
     const monthStatus: StaffMonthSalaryRow["status"] =
-      m.index < 9 ? "Disbursed" : r.status;
+      m.index < 9 ? "Disbursed" : (r.status === "Paid" ? "Disbursed" : r.status);
     const disbursedDate =
       monthStatus === "Disbursed" ? m.paidDate : "Scheduled";
 
@@ -277,10 +278,11 @@ function buildMinimalPdf(
 
 function getPeriodLabel(
   periodMode: ReportPeriodMode,
-  selectedMonth: string
+  selectedMonth: string,
+  selectedSession: string = "AY 2026–27"
 ): string {
   return periodMode === "annual"
-    ? "Annual Consolidated - Jan to Dec 2026 (12 Months)"
+    ? `Annual Consolidated - ${selectedSession} (12 Months)`
     : `Monthly Cycle - ${selectedMonth}`;
 }
 
@@ -306,6 +308,7 @@ export function exportFeeReportsPdf(options: ReportExportOptions): boolean {
     selectedCampus,
     periodMode,
     selectedMonth,
+    selectedSession = "AY 2026–27",
     campusList,
     studentFeesList,
     staffSalariesList,
@@ -313,7 +316,7 @@ export function exportFeeReportsPdf(options: ReportExportOptions): boolean {
   } = options;
 
   const multiplier = periodMode === "annual" ? 12 : 1;
-  const periodLabel = getPeriodLabel(periodMode, selectedMonth);
+  const periodLabel = getPeriodLabel(periodMode, selectedMonth, selectedSession);
   const tabTitle = getTabTitle(activeTab);
 
   const generatedDate = new Date().toLocaleDateString("en-GB", {
@@ -1045,6 +1048,7 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
     selectedCampus,
     periodMode,
     selectedMonth,
+    selectedSession = "AY 2026–27",
     campusList,
     studentFeesList,
     staffSalariesList,
@@ -1212,7 +1216,7 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
           <td class="text-right mono" style="color: #b91c1c;">-${formatCurrency(mPfLoan)}</td>
           <td class="text-right mono" style="color: #b91c1c;">-${formatCurrency(mDed)}</td>
           <td class="text-right mono font-bold" style="color: #15803d;">${formatCurrency(mNet)}</td>
-          <td class="text-center"><span class="status-badge status-paid">Disbursed</span></td>
+          <td class="text-center"><span class="status-badge status-paid">Paid</span></td>
         </tr>`
       ).join("");
 
@@ -1235,7 +1239,7 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
               <th class="text-right">Income Tax</th>
               <th class="text-right">PF / EOBI / Loans</th>
               <th class="text-right">Total Deductions</th>
-              <th class="text-right">Net Disbursed</th>
+              <th class="text-right">Net Paid</th>
               <th class="text-center">Status</th>
             </tr>
           </thead>
@@ -1678,12 +1682,13 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
 export function printSingleStudentFeeStatement(
   r: StudentFeeReportRecord,
   periodMode: ReportPeriodMode,
-  selectedMonth: string
+  selectedMonth: string,
+  selectedSession: string = "AY 2026–27"
 ): boolean {
   if (typeof window === "undefined") return false;
 
   const multiplier = periodMode === "annual" ? 12 : 1;
-  const periodLabel = getPeriodLabel(periodMode, selectedMonth);
+  const periodLabel = getPeriodLabel(periodMode, selectedMonth, selectedSession);
   const payable = periodMode === "annual" ? r.annualPayable : r.monthlyPayable;
   const paid = periodMode === "annual" ? r.annualPaid : r.monthlyPaid;
   const balance = Math.max(0, payable - paid);
@@ -1765,9 +1770,14 @@ export function printSingleStudentFeeStatement(
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Student Fee Statement - ${r.student}</title>
+  <title></title>
   <style>
-    @page { size: A4 portrait; margin: 10mm; }
+    @page { size: A4 portrait; margin: 0; }
+    @media print {
+      @page { size: A4 portrait; margin: 0 !important; }
+      html, body { margin: 0 !important; }
+      body { padding: 10mm 12mm !important; }
+    }
     *, *::before, *::after {
       box-sizing: border-box;
       -webkit-print-color-adjust: exact !important;
@@ -2317,12 +2327,13 @@ export function exportSingleStudentFeeStatementPdf(
 export function printSingleStaffSalaryStatement(
   r: StaffSalaryRecord,
   periodMode: ReportPeriodMode,
-  selectedMonth: string
+  selectedMonth: string,
+  selectedSession: string = "AY 2026–27"
 ): boolean {
   if (typeof window === "undefined") return false;
 
   const multiplier = periodMode === "annual" ? 12 : 1;
-  const periodLabel = getPeriodLabel(periodMode, selectedMonth);
+  const periodLabel = getPeriodLabel(periodMode, selectedMonth, selectedSession);
   const monthlyRows = buildStaffAnnualMonthlyRows(r);
   const otherAllowancesMonthly =
     r.medicalAllowance + r.conveyanceAllowance + r.specialAllowance;
@@ -2407,7 +2418,12 @@ export function printSingleStaffSalaryStatement(
   <meta charset="utf-8" />
   <title>Staff Salary Statement - ${r.name}</title>
   <style>
-    @page { size: A4 portrait; margin: 10mm; }
+    @page { size: A4 portrait; margin: 0; }
+    @media print {
+      @page { size: A4 portrait; margin: 0 !important; }
+      html, body { margin: 0 !important; }
+      body { padding: 10mm 12mm !important; }
+    }
     *, *::before, *::after {
       box-sizing: border-box;
       -webkit-print-color-adjust: exact !important;

@@ -205,9 +205,6 @@ export function StudentAccountFormModal({
       <DialogContent className="flex flex-col max-h-[calc(100vh-3rem)] sm:max-w-2xl gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         <DialogHeader className="shrink-0 bg-gradient-to-r from-[#091d3e]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
           <div className="flex items-center gap-3">
-            <span className="grid size-9 place-items-center rounded-xl bg-[#091d3e] text-white">
-              <GraduationCap className="size-4" />
-            </span>
             <div>
               <DialogTitle className="text-base font-bold text-foreground">
                 {isEditing
@@ -655,16 +652,13 @@ export function StaffAccountFormModal({
       <DialogContent className="flex flex-col max-h-[calc(100vh-3rem)] sm:max-w-2xl gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         <DialogHeader className="shrink-0 bg-gradient-to-r from-[#091d3e]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
           <div className="flex items-center gap-3">
-            <span className="grid size-9 place-items-center rounded-xl bg-[#091d3e] text-white">
-              <Landmark className="size-4" />
-            </span>
             <div>
               <DialogTitle className="text-base font-bold text-foreground">
                 {isEditing
                   ? "Edit Staff Portal Credentials"
                   : "Assign Staff Portal Email & Password"}
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
+              <DialogDescription className="sr-only">
                 Provision official staff login email, password, and portal access role (Staff Admin).
               </DialogDescription>
             </div>

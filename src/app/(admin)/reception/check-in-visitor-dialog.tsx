@@ -105,14 +105,11 @@ export function CheckInVisitorDialog({
       <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl border border-border shadow-2xl">
         <DialogHeader className="px-6 pt-6 pb-4 bg-muted/30 border-b border-border/60">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-brand-50 text-brand">
-              <UserPlus className="size-5" />
-            </div>
             <div>
               <DialogTitle className="text-base font-semibold text-foreground">
                 Add Visitor Entry
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Record a new visitor arriving at the school front desk.
               </DialogDescription>
             </div>

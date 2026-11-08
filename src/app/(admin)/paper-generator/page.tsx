@@ -360,7 +360,7 @@ export default function PaperGeneratorPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          <h1 className="text-base font-bold tracking-tight text-foreground sm:text-lg md:text-[19px]">
             Paper Generator
           </h1>
         </div>

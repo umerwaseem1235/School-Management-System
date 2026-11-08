@@ -27,7 +27,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
-import { PersonCell, UserAvatar } from "@/components/shared/user-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Meter } from "@/components/shared/meter";
 import { Badge } from "@/components/ui/badge";
@@ -270,16 +270,14 @@ export function LeaveRequestsClient() {
       {
         key: "applicant",
         header: "Applicant Name",
-        headerAlign: "left",
-        align: "left",
-        className: "w-[22%]",
-        headerClassName: "w-[22%] text-left",
+        headerAlign: "center",
+        align: "center",
+        className: "w-[22%] text-center",
+        headerClassName: "w-[22%] text-center",
         cell: (r) => (
-          <PersonCell
-            name={r.applicant}
-            subtitle={`${r.refNo} · ${r.applicantCode}`}
-            showAvatar={false}
-          />
+          <span className="text-[13px] font-semibold text-foreground">
+            {r.applicant}
+          </span>
         ),
       },
       {
@@ -336,26 +334,11 @@ export function LeaveRequestsClient() {
         key: "quota",
         header: "Quota Left",
         align: "center",
-        cell: (r) => {
-          const pct = Math.round(
-            (r.leaveBalanceRemaining / r.leaveBalanceTotal) * 100
-          );
-          return (
-            <div className="mx-auto w-16 space-y-1.5 text-center">
-              <div className="flex justify-center text-xs">
-                <span className="font-bold tabular-nums text-foreground">
-                  {r.leaveBalanceRemaining}/{r.leaveBalanceTotal}d
-                </span>
-              </div>
-              <Meter
-                value={pct}
-                size="xs"
-                tone="dark-blue"
-                className="h-1"
-              />
-            </div>
-          );
-        },
+        cell: (r) => (
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+            {r.leaveBalanceRemaining}/{r.leaveBalanceTotal}d
+          </span>
+        ),
       },
       {
         key: "actions",
@@ -367,14 +350,15 @@ export function LeaveRequestsClient() {
             <AttendanceActionButton
               size="xs"
               tone="outline"
+              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
               title="View full details"
               onClick={() => {
                 setSelectedRequest(r);
                 setViewDialogOpen(true);
               }}
             >
-              <Eye className="size-3.5" />
-              View
+              <Eye className="size-3.5 text-blue-600" />
+              <span>View</span>
             </AttendanceActionButton>
           </div>
         ),
@@ -467,7 +451,7 @@ export function LeaveRequestsClient() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>New Leave Request</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="sr-only">
               Log a leave application on behalf of a staff member or student.
             </DialogDescription>
           </DialogHeader>
@@ -622,7 +606,7 @@ export function LeaveRequestsClient() {
                     <DialogTitle className="text-base font-bold leading-tight text-foreground">
                       Leave Request Details
                     </DialogTitle>
-                    <DialogDescription className="mt-1 font-mono text-xs text-muted-foreground">
+                    <DialogDescription className="sr-only">
                       {selectedRequest.refNo} · Applied {formatDate(selectedRequest.appliedOn)}
                     </DialogDescription>
                   </div>

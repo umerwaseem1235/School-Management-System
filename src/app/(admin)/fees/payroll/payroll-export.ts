@@ -93,8 +93,9 @@ function buildMinimalPdf(pagesStreams: string[]): Blob {
 
 export function exportPayrollPdf(
   salaries: StaffSalaryRecord[],
-  monthLabel: string = "October 2026"
+  monthLabel?: string
 ): void {
+  const effectiveMonth = monthLabel || salaries[0]?.monthYear || "November 2026";
   const rowsPerPage = 20;
   const totalPages = Math.max(1, Math.ceil(salaries.length / rowsPerPage));
   const pagesStreams: string[] = [];
@@ -122,7 +123,7 @@ export function exportPayrollPdf(
     streamParts.push("40 790 Td");
     streamParts.push(
       `(${sanitizePdfText(
-        `Disbursement Month: ${monthLabel} | Total Staff: ${salaries.length} | Generated: ${new Date().toLocaleDateString("en-PK")}`
+        `Disbursement Month: ${effectiveMonth} | Total Staff: ${salaries.length} | Generated: ${new Date().toLocaleDateString("en-PK")}`
       )}) Tj`);
     streamParts.push("ET");
 
@@ -142,7 +143,7 @@ export function exportPayrollPdf(
     streamParts.push("170 0 Td");
     streamParts.push(`(Total Deductions: ${sanitizePdfText(formatCurrency(totalDeductions))}) Tj`);
     streamParts.push("170 0 Td");
-    streamParts.push(`(Net Disbursed: ${sanitizePdfText(formatCurrency(totalNet))}) Tj`);
+    streamParts.push(`(Total Paid: ${sanitizePdfText(formatCurrency(totalNet))}) Tj`);
     streamParts.push("ET");
 
     // Table Header
@@ -189,7 +190,7 @@ export function exportPayrollPdf(
       streamParts.push("55 0 Td");
       streamParts.push(`(${sanitizePdfText(formatCurrency(r.netSalary))}) Tj`);
       streamParts.push("55 0 Td");
-      streamParts.push(`(${sanitizePdfText(r.status)}) Tj`);
+      streamParts.push(`(${sanitizePdfText(r.status === "Disbursed" || r.status === "Paid" ? "Paid" : r.status === "Pending" ? "Unpaid" : r.status)}) Tj`);
       streamParts.push("ET");
 
       // separator line
@@ -214,7 +215,7 @@ export function exportPayrollPdf(
   const blob = buildMinimalPdf(pagesStreams);
   triggerBlobDownload(
     blob,
-    `Edusphere-Payroll-Roster-${monthLabel.replace(/\s+/g, "-")}.pdf`
+    `Edusphere-Payroll-Roster-${effectiveMonth.replace(/\s+/g, "-")}.pdf`
   );
 }
 
@@ -238,233 +239,301 @@ export function printPayrollReport(options: {
     (s) => s.status === "Disbursed"
   ).length;
 
+  const generatedDate = new Date().toLocaleDateString("en-PK", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  const cycleLabel = options.salaries[0]?.monthYear || "November 2026";
+
   const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Payroll & Salary Accounts Statement - Edusphere School System</title>
+  <title></title>
   <style>
-    @page { size: A4 landscape; margin: 12mm; }
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      color: #0f172a;
+      color: #2c3e50;
       background: #ffffff;
-      margin: 0;
-      padding: 16px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      font-size: 9.5px;
+      line-height: 1.35;
+      padding: 10mm 12mm;
+      box-sizing: border-box;
     }
+    .sheet { max-width: 100%; margin: 0 auto; }
+
+    /* Header: Simple, Clean, Centered */
     .header {
-      border-bottom: 2px solid #091d3e;
-      padding-bottom: 12px;
-      margin-bottom: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+      text-align: center;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      border-bottom: 1.2px solid #bdc3c7;
     }
-    .org-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: #091d3e;
-      letter-spacing: -0.01em;
-      margin: 0;
+    .school-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #2c3e50;
+      text-transform: uppercase;
     }
     .doc-title {
-      font-size: 13px;
+      font-size: 10.5px;
       font-weight: 600;
-      color: #475569;
-      margin: 2px 0 0 0;
+      color: #2c3e50;
+      margin-top: 2px;
     }
     .doc-meta {
-      font-size: 10px;
-      color: #64748b;
-      text-align: right;
+      font-size: 8.5px;
+      color: #7f8c8d;
+      margin-top: 2px;
     }
+
+    /* KPI Summary Cards */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
     .kpi-card {
-      border: 1px solid #cbd5e1;
-      background: #f8fafc;
+      border: 1px solid #dee2e6;
+      background: #f8f9fa;
       border-radius: 4px;
-      padding: 8px 12px;
+      padding: 6px 10px;
     }
     .kpi-label {
-      font-size: 9px;
-      font-weight: 700;
-      color: #64748b;
+      font-size: 8px;
+      font-weight: 600;
+      color: #6c757d;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.03em;
     }
     .kpi-val {
-      font-size: 15px;
-      font-weight: 800;
-      color: #091d3e;
+      font-size: 12px;
+      font-weight: 700;
+      color: #2c3e50;
       margin-top: 2px;
-      font-family: monospace;
+      font-family: "Courier New", Courier, monospace;
     }
+
+    /* Table */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 10px;
-      margin-bottom: 16px;
+      font-size: 9px;
+      margin-bottom: 10px;
+      border: 1px solid #dee2e6;
     }
     th {
-      background-color: #091d3e;
-      color: #ffffff;
+      background-color: #f1f3f5;
+      color: #2c3e50;
       font-weight: 700;
       text-align: left;
-      padding: 6px 8px;
-      border: 1px solid #091d3e;
+      padding: 4px 6px;
+      border: 1px solid #dee2e6;
+      font-size: 8.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
     th.text-center, td.text-center { text-align: center; }
     th.text-right, td.text-right { text-align: right; }
     td {
-      padding: 6px 8px;
-      border: 1px solid #e2e8f0;
+      padding: 3.5px 6px;
+      border: 1px solid #dee2e6;
       vertical-align: middle;
+      color: #2c3e50;
     }
-    tr:nth-child(even) td { background-color: #f8fafc; }
-    .mono { font-family: monospace; }
+    tr:nth-child(even) td { background-color: #fafbfc; }
+    .mono { font-family: "Courier New", Courier, monospace; }
     .badge {
       display: inline-block;
-      padding: 2px 6px;
+      padding: 1px 5px;
       border-radius: 3px;
-      font-size: 8.5px;
-      font-weight: 700;
+      font-size: 8px;
+      font-weight: 600;
+      border: 1px solid #ced4da;
     }
-    .badge-disbursed { background: #dcfce7; color: #166534; }
-    .badge-pending { background: #fef9c3; color: #854d0e; }
-    .badge-approved { background: #e0f2fe; color: #075985; }
-    .badge-hold { background: #fee2e2; color: #991b1b; }
-    .footer {
-      margin-top: 24px;
-      padding-top: 12px;
-      border-top: 1px solid #cbd5e1;
+    .badge-disbursed { background: #e8f5e9; color: #2e7d32; border-color: #c8e6c9; }
+    .badge-pending { background: #fff8e1; color: #f57f17; border-color: #ffe082; }
+    .badge-approved { background: #e3f2fd; color: #1565c0; border-color: #bbdefb; }
+    .badge-hold { background: #ffebee; color: #c62828; border-color: #ffcdd2; }
+
+    /* Signatures */
+    .footer-signatures {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 14px;
+      page-break-inside: avoid;
+    }
+    .sig-item {
+      text-align: center;
+      border-top: 1px solid #7f8c8d;
+      padding-top: 3px;
+      font-size: 8px;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    /* Document Footer */
+    .doc-footer {
+      border-top: 1px solid #dee2e6;
+      margin-top: 8px;
+      padding-top: 3px;
       display: flex;
       justify-content: space-between;
-      font-size: 9.5px;
-      color: #64748b;
+      font-size: 7.5px;
+      color: #95a5a6;
+      page-break-inside: avoid;
     }
-    .sig-line {
-      border-top: 1px dashed #94a3b8;
-      width: 160px;
-      text-align: center;
-      padding-top: 4px;
-      margin-top: 32px;
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0 !important;
+      }
+      html, body {
+        margin: 0 !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body {
+        padding: 10mm 12mm !important;
+      }
+      .sheet {
+        max-width: 100% !important;
+        margin: 0 auto !important;
+      }
+      th, tfoot td, tfoot th, .kpi-card, .badge {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div>
-      <h1 class="org-title">EDUSPHERE SCHOOL SYSTEM</h1>
-      <p class="doc-title">Central Finance Division &bull; Staff Salary & Disbursement Register</p>
-    </div>
-    <div class="doc-meta">
-      <div>Active Cycle: <strong>October 2026</strong></div>
-      <div>Printed: ${new Date().toLocaleString("en-PK")}</div>
-      <div>Status: <strong>Audited Payroll</strong></div>
-    </div>
-  </div>
+  <div class="sheet">
+    <header class="header">
+      <div class="school-name">EDUSPHERE INTERNATIONAL SYSTEM</div>
+      <div class="doc-title">Staff Salary &amp; Disbursement Register</div>
+      <div class="doc-meta">
+        Disbursement Cycle: <strong>${cycleLabel}</strong> &bull; Generated: ${generatedDate} &bull; Total Staff Enrolled: <strong>${options.salaries.length}</strong>
+      </div>
+    </header>
 
-  <div class="kpi-grid">
-    <div class="kpi-card">
-      <div class="kpi-label">Total Monthly Payroll</div>
-      <div class="kpi-val">${formatCurrency(totalGross)}</div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Gross Payroll</div>
+        <div class="kpi-val">${formatCurrency(totalGross)}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Net Disbursable Amount</div>
+        <div class="kpi-val" style="color: #2e7d32;">${formatCurrency(totalNet)}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Statutory Withholdings (Tax &amp; PF)</div>
+        <div class="kpi-val" style="color: #b71c1c;">${formatCurrency(totalDeductions)}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Disbursement Progress</div>
+        <div class="kpi-val">${disbursedCount} / ${options.salaries.length} Staff Cleared</div>
+      </div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Disbursed Amount</div>
-      <div class="kpi-val" style="color: #166534;">${formatCurrency(totalNet)}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Statutory Deductions (Tax & PF)</div>
-      <div class="kpi-val" style="color: #b91c1c;">${formatCurrency(totalDeductions)}</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Disbursal Progress</div>
-      <div class="kpi-val">${disbursedCount} / ${options.salaries.length} Staff</div>
-    </div>
-  </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th class="text-center" style="width: 75px;">Emp Code</th>
-        <th>Staff Name & Designation</th>
-        <th>Campus / Dept</th>
-        <th class="text-right">Base Salary</th>
-        <th class="text-right">Allowances</th>
-        <th class="text-right">Deductions</th>
-        <th class="text-right">Net Payable</th>
-        <th>Disbursement Bank & Account</th>
-        <th class="text-center">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${options.salaries
-        .map(
-          (s) => `
+    <table>
+      <thead>
         <tr>
-          <td class="text-center mono"><strong>${s.empCode}</strong></td>
-          <td>
-            <strong>${s.name}</strong>
-            <div style="font-size: 8.5px; color: #64748b;">${s.designation} (${s.type})</div>
-          </td>
-          <td>
-            <div>${s.campus}</div>
-            <div style="font-size: 8.5px; color: #64748b;">${s.department}</div>
-          </td>
-          <td class="text-right mono">${formatCurrency(s.baseSalary)}</td>
-          <td class="text-right mono" style="color: #15803d;">+${formatCurrency(
-            s.medicalAllowance +
-              s.conveyanceAllowance +
-              s.houseRentAllowance +
-              s.specialAllowance
-          )}</td>
-          <td class="text-right mono" style="color: #b91c1c;">-${formatCurrency(
-            s.totalDeductions
-          )}</td>
-          <td class="text-right mono" style="font-weight: 700; color: #091d3e;">${formatCurrency(
-            s.netSalary
-          )}</td>
-          <td>
-            <div><strong>${s.bankName}</strong></div>
-            <div class="mono" style="font-size: 8.5px; color: #475569;">${s.accountNumber} &bull; ${s.paymentMode}</div>
-          </td>
-          <td class="text-center">
-            <span class="badge ${
-              s.status === "Disbursed"
-                ? "badge-disbursed"
-                : s.status === "Approved"
-                ? "badge-approved"
-                : s.status === "On Hold"
-                ? "badge-hold"
-                : "badge-pending"
-            }">
-              ${s.status}
-            </span>
-          </td>
+          <th class="text-center" style="width: 70px;">Emp Code</th>
+          <th>Staff Name &amp; Designation</th>
+          <th>Campus / Dept</th>
+          <th class="text-right">Base Salary</th>
+          <th class="text-right">Allowances</th>
+          <th class="text-right">Deductions</th>
+          <th class="text-right">Net Payable</th>
+          <th>Disbursement Bank &amp; Account</th>
+          <th class="text-center">Status</th>
         </tr>
-      `
-        )
-        .join("")}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        ${options.salaries
+          .map(
+            (s) => `
+          <tr>
+            <td class="text-center mono"><strong>${s.empCode}</strong></td>
+            <td>
+              <strong>${s.name}</strong>
+              <div style="font-size: 8px; color: #6c757d;">${s.designation} (${s.type})</div>
+            </td>
+            <td>
+              <div>${s.campus}</div>
+              <div style="font-size: 8px; color: #6c757d;">${s.department}</div>
+            </td>
+            <td class="text-right mono">${formatCurrency(s.baseSalary)}</td>
+            <td class="text-right mono" style="color: #2e7d32;">+${formatCurrency(
+              s.medicalAllowance +
+                s.conveyanceAllowance +
+                s.houseRentAllowance +
+                s.specialAllowance
+            )}</td>
+            <td class="text-right mono" style="color: #b71c1c;">-${formatCurrency(
+              s.totalDeductions
+            )}</td>
+            <td class="text-right mono" style="font-weight: 700; color: #2c3e50;">${formatCurrency(
+              s.netSalary
+            )}</td>
+            <td>
+              <div><strong>${s.bankName}</strong></div>
+              <div class="mono" style="font-size: 8px; color: #6c757d;">${s.accountNumber} &bull; ${s.paymentMode}</div>
+            </td>
+            <td class="text-center">
+              <span class="badge ${
+                s.status === "Paid" || s.status === "Disbursed"
+                  ? "badge-disbursed"
+                  : s.status === "Approved"
+                  ? "badge-approved"
+                  : s.status === "On Hold"
+                  ? "badge-hold"
+                  : "badge-pending"
+              }">
+                ${s.status === "Paid" || s.status === "Disbursed" ? "Paid" : s.status === "Pending" ? "Unpaid" : s.status}
+              </span>
+            </td>
+          </tr>
+        `
+          )
+          .join("")}
+      </tbody>
+    </table>
 
-  <div class="footer">
-    <div>
-      <div class="sig-line">Prepared By (Payroll Officer)</div>
+    <div class="footer-signatures">
+      <div class="sig-item">Prepared By (Payroll Officer)</div>
+      <div class="sig-item">Verified &amp; Audited (Internal Audit)</div>
+      <div class="sig-item">Approved By (Director Finance / CFO)</div>
     </div>
-    <div>
-      <div class="sig-line">Audited By (Internal Audit)</div>
-    </div>
-    <div>
-      <div class="sig-line">Approved By (Director Finance)</div>
-    </div>
+
+    <footer class="doc-footer">
+      <span>Official School Document — EduSphere Multi-Campus Management System &bull; Payroll Division</span>
+      <span>Computer Generated Official Record &bull; Printed: ${generatedDate}</span>
+    </footer>
   </div>
 </body>
 </html>`;
@@ -484,234 +553,466 @@ export function printPayrollReport(options: {
 export function printSinglePayslip(salary: StaffSalaryRecord): boolean {
   if (typeof window === "undefined") return false;
 
+  const generatedDate = new Date().toLocaleDateString("en-PK", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 
-
-  const totalAllowances =
-    salary.medicalAllowance +
-    salary.conveyanceAllowance +
-    salary.houseRentAllowance +
-    salary.specialAllowance;
+  const isPaid = salary.status === "Paid" || salary.status === "Disbursed";
+  const isOnHold = salary.status === "On Hold";
+  const statusLabel = isPaid ? "Paid & Cleared" : isOnHold ? "On Hold" : "Payment Pending (Unpaid)";
+  const badgeClass = isPaid ? "badge-paid" : isOnHold ? "badge-hold" : "badge-pending";
 
   const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Pay Slip - ${salary.empCode} - ${salary.name}</title>
+  <title></title>
   <style>
-    @page { size: A4 portrait; margin: 15mm; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      color: #0f172a;
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
       background: #ffffff;
-      margin: 0;
-      padding: 16px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
-    .slip-box {
-      border: 2px solid #091d3e;
-      border-radius: 6px;
-      padding: 24px;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #2c3e50;
+      background: #ffffff;
+      font-size: 9.5px;
+      line-height: 1.35;
+      padding: 10mm 12mm;
+      box-sizing: border-box;
     }
+    .sheet {
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    /* Clean, Simple, Centered Institutional Header */
     .header {
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 2px solid #091d3e;
-      padding-bottom: 12px;
-      margin-bottom: 16px;
+      text-align: center;
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+      border-bottom: 1.2px solid #bdc3c7;
     }
-    .org-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: #091d3e;
-      margin: 0;
+    .school-name {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #2c3e50;
+      text-transform: uppercase;
     }
-    .doc-sub {
-      font-size: 12px;
+    .doc-title {
+      font-size: 10.5px;
       font-weight: 600;
-      color: #475569;
-      margin: 2px 0 0 0;
+      color: #2c3e50;
+      margin-top: 2px;
     }
+    .doc-meta {
+      font-size: 8.5px;
+      color: #7f8c8d;
+      margin-top: 2px;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 8px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 3px;
+      border: 1px solid #ced4da;
+    }
+    .badge-paid {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-color: #c8e6c9;
+    }
+    .badge-pending {
+      background: #fff8e1;
+      color: #f57f17;
+      border-color: #ffe082;
+    }
+    .badge-hold {
+      background: #ffebee;
+      color: #c62828;
+      border-color: #ffcdd2;
+    }
+
+    /* Staff & Employment Details Box */
     .meta-box {
-      text-align: right;
-      font-size: 11px;
-      color: #334155;
-    }
-    .info-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px 10px;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
       border-radius: 4px;
-      padding: 12px;
-      margin-bottom: 18px;
-      font-size: 11px;
+      padding: 6px 10px;
+      margin-bottom: 8px;
     }
-    .info-item { display: flex; justify-content: space-between; }
-    .info-label { color: #64748b; font-weight: 600; }
-    .info-value { font-weight: 700; color: #091d3e; }
-    .columns-grid {
+    .meta-item .label {
+      font-size: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #6c757d;
+      display: block;
+      margin-bottom: 1px;
+    }
+    .meta-item .value {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .mono {
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    /* Side-by-side Tables */
+    .tables-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 18px;
+      gap: 10px;
+      margin-bottom: 8px;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .section-title {
-      background: #091d3e;
-      color: #ffffff;
-      font-size: 11px;
+      font-size: 9px;
       font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 3px 3px 0 0;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .table-details {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      border: 1px solid #cbd5e1;
-    }
-    .table-details td {
-      padding: 6px 10px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    .table-details tr:last-child td {
-      font-weight: 800;
-      background: #f1f5f9;
-      border-top: 1px solid #cbd5e1;
-    }
-    .mono { font-family: monospace; }
-    .text-right { text-align: right; }
-    .net-box {
-      background: #f0fdf4;
-      border: 2px solid #86efac;
-      border-radius: 4px;
-      padding: 14px 18px;
+      color: #2c3e50;
+      margin-bottom: 3px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
-    .net-label { font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; }
-    .net-val { font-size: 22px; font-weight: 900; color: #14532d; font-family: monospace; }
-    .signatures {
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #dee2e6;
+      font-size: 9px;
+    }
+    th {
+      background: #f1f3f5;
+      color: #2c3e50;
+      font-weight: 700;
+      text-align: left;
+      padding: 3.5px 6px;
+      border: 1px solid #dee2e6;
+      font-size: 8.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    td {
+      padding: 3px 6px;
+      border: 1px solid #dee2e6;
+      color: #2c3e50;
+    }
+    tr:nth-child(even) td {
+      background: #fafbfc;
+    }
+    tfoot td, tfoot th {
+      background: #f8f9fa;
+      font-weight: 700;
+      border-top: 1.2px solid #bdc3c7;
+      color: #2c3e50;
+    }
+    .amount {
+      text-align: right;
+      font-family: "Courier New", Courier, monospace;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* Summary & Settlement Grid */
+    .summary-wrap {
       display: flex;
       justify-content: space-between;
-      margin-top: 48px;
-      padding-top: 12px;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
-    .sig {
-      border-top: 1px solid #475569;
-      width: 170px;
-      text-align: center;
-      font-size: 10px;
-      color: #475569;
+    .instructions-box {
+      flex: 1;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 6px 9px;
+      font-size: 8px;
+      color: #6c757d;
+      line-height: 1.4;
+    }
+    .instructions-box strong {
+      display: block;
+      color: #2c3e50;
+      font-size: 8.5px;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .summary-card {
+      width: 270px;
+      border: 1px solid #bdc3c7;
+      border-radius: 4px;
+      background: #f8f9fa;
+      padding: 6px 10px;
+    }
+    .summary-card .title {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #2c3e50;
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 3px;
+      margin-bottom: 4px;
+    }
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 0;
+      font-size: 9px;
+      color: #495057;
+    }
+    .sum-row .sum-val {
+      font-family: "Courier New", Courier, monospace;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .sum-row.total {
+      border-top: 1.2px solid #bdc3c7;
+      margin-top: 3px;
+      padding-top: 3px;
+      font-weight: 700;
+      font-size: 9.5px;
+      color: #2c3e50;
+    }
+    .sum-row.net {
+      border-top: 1.5px solid #2e7d32;
+      margin-top: 3px;
       padding-top: 4px;
+      font-weight: 700;
+      font-size: 11px;
+      color: #2e7d32;
+    }
+    .sum-row.net .sum-val {
+      color: #2e7d32;
+      font-size: 11.5px;
+    }
+
+    /* Confidentiality Notice */
+    .confidential-notice {
+      background: #f8f9fa;
+      border: 1px dashed #ced4da;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 7.5px;
+      color: #6c757d;
+      line-height: 1.35;
+      margin-bottom: 8px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    /* Signatures */
+    .signatures {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 10px;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .sign-item {
+      text-align: center;
+      border-top: 1px solid #7f8c8d;
+      padding-top: 3px;
+      font-size: 8px;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    /* Document Footer */
+    .doc-footer {
+      border-top: 1px solid #dee2e6;
+      margin-top: 8px;
+      padding-top: 3px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 7.5px;
+      color: #95a5a6;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0 !important;
+      }
+      html, body {
+        margin: 0 !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body {
+        padding: 10mm 12mm !important;
+      }
+      .sheet {
+        max-width: 100% !important;
+        margin: 0 auto !important;
+      }
+      th, tfoot td, tfoot th, .meta-box, .summary-card, .instructions-box, .badge {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="slip-box">
-    <div class="header">
-      <div>
-        <h1 class="org-title">EDUSPHERE SCHOOL SYSTEM</h1>
-        <p class="doc-sub">Confidential Monthly Salary Slip</p>
+  <div class="sheet">
+    <header class="header">
+      <div class="school-name">EDUSPHERE INTERNATIONAL SYSTEM</div>
+      <div class="doc-title">Staff Salary Slip &amp; Compensation Statement</div>
+      <div class="doc-meta">
+        Disbursement Cycle: <strong>${salary.monthYear}</strong> &bull; Generated: ${generatedDate} &bull; Settlement Status: <span class="badge ${badgeClass}">${statusLabel}</span>
       </div>
-      <div class="meta-box">
-        <div>Pay Period: <strong>${salary.monthYear}</strong></div>
-        <div>Campus: <strong>${salary.campus}</strong></div>
-        <div>Status: <strong>${salary.status}</strong></div>
-      </div>
-    </div>
+    </header>
 
-    <div class="info-grid">
-      <div class="info-item">
-        <span class="info-label">Employee Code:</span>
-        <span class="info-value mono">${salary.empCode}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">CNIC:</span>
-        <span class="info-value mono">${salary.cnic}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Employee Name:</span>
-        <span class="info-value">${salary.name}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Department:</span>
-        <span class="info-value">${salary.department}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Designation:</span>
-        <span class="info-value">${salary.designation}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Disbursement Bank:</span>
-        <span class="info-value">${salary.bankName}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Staff Category:</span>
-        <span class="info-value">${salary.type}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label">Account / IBAN:</span>
-        <span class="info-value mono">${salary.accountNumber}</span>
-      </div>
-    </div>
+    <section class="meta-box">
+      <div class="meta-item"><span class="label">Employee ID:</span><span class="value mono">${salary.empCode}</span></div>
+      <div class="meta-item"><span class="label">Staff Name:</span><span class="value">${salary.name}</span></div>
+      <div class="meta-item"><span class="label">Designation:</span><span class="value">${salary.designation}</span></div>
+      <div class="meta-item"><span class="label">Department:</span><span class="value">${salary.department}</span></div>
+      <div class="meta-item"><span class="label">Campus:</span><span class="value">${salary.campus}</span></div>
+      <div class="meta-item"><span class="label">CNIC / Identity:</span><span class="value mono">${salary.cnic}</span></div>
+      <div class="meta-item"><span class="label">Staff Category:</span><span class="value">${salary.type}</span></div>
+      <div class="meta-item"><span class="label">Payment Mode:</span><span class="value">${salary.paymentMode}</span></div>
+      <div class="meta-item"><span class="label">Disbursement Bank:</span><span class="value">${salary.bankName}</span></div>
+      <div class="meta-item"><span class="label">Account / IBAN:</span><span class="value mono">${salary.accountNumber}</span></div>
+      <div class="meta-item"><span class="label">Transaction Ref:</span><span class="value mono">${salary.transactionRef || "Pending Authorization"}</span></div>
+      <div class="meta-item"><span class="label">Settlement Date:</span><span class="value">${salary.disbursedDate ? formatDate(salary.disbursedDate) : "Awaiting Clearance"}</span></div>
+    </section>
 
-    <div class="columns-grid">
+    <div class="tables-grid">
+      <!-- Earnings -->
       <div>
-        <div class="section-title">Earnings & Allowances</div>
-        <table class="table-details">
-          <tr><td>Basic Salary</td><td class="text-right mono">${formatCurrency(salary.baseSalary)}</td></tr>
-          <tr><td>House Rent Allowance (HRA)</td><td class="text-right mono">${formatCurrency(salary.houseRentAllowance)}</td></tr>
-          <tr><td>Medical Allowance</td><td class="text-right mono">${formatCurrency(salary.medicalAllowance)}</td></tr>
-          <tr><td>Conveyance Allowance</td><td class="text-right mono">${formatCurrency(salary.conveyanceAllowance)}</td></tr>
-          <tr><td>Special / Executive Allowance</td><td class="text-right mono">${formatCurrency(salary.specialAllowance)}</td></tr>
-          <tr><td><strong>Total Gross Earnings</strong></td><td class="text-right mono font-bold">${formatCurrency(salary.grossSalary)}</td></tr>
+        <div class="section-title">Earnings &amp; Allowances</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Pay Head Description</th>
+              <th class="amount">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Basic Salary</td><td class="amount">${formatCurrency(salary.baseSalary)}</td></tr>
+            <tr><td>House Rent Allowance (HRA)</td><td class="amount">${formatCurrency(salary.houseRentAllowance)}</td></tr>
+            <tr><td>Medical Allowance</td><td class="amount">${formatCurrency(salary.medicalAllowance)}</td></tr>
+            <tr><td>Conveyance Allowance</td><td class="amount">${formatCurrency(salary.conveyanceAllowance)}</td></tr>
+            <tr><td>Special / Executive Allowance</td><td class="amount">${formatCurrency(salary.specialAllowance)}</td></tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total Gross Earnings</th>
+              <th class="amount" style="color: #2e7d32;">${formatCurrency(salary.grossSalary)}</th>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
+      <!-- Deductions -->
       <div>
-        <div class="section-title">Deductions</div>
-        <table class="table-details">
-          <tr><td>Income Tax Withholding</td><td class="text-right mono">${formatCurrency(salary.taxDeduction)}</td></tr>
-          <tr><td>Provident Fund (Employee 8.33%)</td><td class="text-right mono">${formatCurrency(salary.providentFund)}</td></tr>
-          <tr><td>EOBI Statutory Contribution</td><td class="text-right mono">${formatCurrency(salary.eobi)}</td></tr>
-          <tr><td>Unpaid Leaves / Absent Days</td><td class="text-right mono">${formatCurrency(salary.unpaidLeaveDeduction)}</td></tr>
-          <tr><td>Salary Advance / Loan Recovery</td><td class="text-right mono">${formatCurrency(salary.loanDeduction)}</td></tr>
-          <tr><td><strong>Total Deductions</strong></td><td class="text-right mono font-bold" style="color: #b91c1c;">${formatCurrency(salary.totalDeductions)}</td></tr>
+        <div class="section-title">Deductions &amp; Statutory Withholdings</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Deduction Head</th>
+              <th class="amount">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Income Tax Withholding</td><td class="amount">${formatCurrency(salary.taxDeduction)}</td></tr>
+            <tr><td>Provident Fund (Employee 8.33%)</td><td class="amount">${formatCurrency(salary.providentFund)}</td></tr>
+            <tr><td>EOBI Statutory Contribution</td><td class="amount">${formatCurrency(salary.eobi)}</td></tr>
+            <tr><td>Unpaid Leaves / Absent Days</td><td class="amount">${formatCurrency(salary.unpaidLeaveDeduction)}</td></tr>
+            <tr><td>Salary Advance / Loan Recovery</td><td class="amount">${formatCurrency(salary.loanDeduction)}</td></tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total Deductions</th>
+              <th class="amount" style="color: #b71c1c;">-${formatCurrency(salary.totalDeductions)}</th>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
 
-    <div class="net-box">
-      <div>
-        <div class="net-label">Net Payable Take-Home Salary</div>
-        <div style="font-size: 10px; color: #15803d; margin-top: 2px;">Disbursed via ${salary.paymentMode} (${salary.bankName})</div>
+    <div class="summary-wrap">
+      <div class="instructions-box">
+        <strong>Disbursement &amp; Banking Details</strong>
+        • Payment Channel: <strong>${salary.paymentMode}</strong> via <strong>${salary.bankName}</strong>.<br>
+        • Designated Account / IBAN: <span class="mono">${salary.accountNumber}</span>.<br>
+        • Settlement Status: <strong>${statusLabel}</strong>${salary.transactionRef ? ` (Ref: <span class="mono">${salary.transactionRef}</span>)` : ""}.<br>
+        • Retain this official computer-generated statement for statutory tax reporting and employee record.
       </div>
-      <div class="net-val">${formatCurrency(salary.netSalary)}</div>
+
+      <div class="summary-card">
+        <div class="title">Net Compensation Summary</div>
+        <div class="sum-row">
+          <span>Total Gross Earnings:</span>
+          <span class="sum-val">${formatCurrency(salary.grossSalary)}</span>
+        </div>
+        <div class="sum-row">
+          <span>Total Statutory Deductions:</span>
+          <span class="sum-val" style="color: #b71c1c;">-${formatCurrency(salary.totalDeductions)}</span>
+        </div>
+        <div class="sum-row total">
+          <span>Net Monthly Payout:</span>
+          <span class="sum-val">${formatCurrency(salary.netSalary)}</span>
+        </div>
+        <div class="sum-row net">
+          <span>Net Take-Home Salary:</span>
+          <span class="sum-val">${formatCurrency(salary.netSalary)}</span>
+        </div>
+      </div>
     </div>
 
-    <div class="signatures">
-      <div class="sig">Accounts Officer</div>
-      <div class="sig">Manager HR & Payroll</div>
-      <div class="sig">Employee Signature</div>
+    <div class="confidential-notice">
+      <strong>Confidentiality Notice:</strong> This salary slip contains confidential compensation details issued exclusively for the named employee by EduSphere Multi-Campus Management System. For inquiries regarding tax brackets or statutory deductions, please contact the Central Payroll &amp; Accounts Division.
     </div>
+
+    <section class="signatures">
+      <div class="sign-item">Prepared by (Payroll Officer)</div>
+      <div class="sign-item">Verified &amp; Audited (Director HR / Finance)</div>
+      <div class="sign-item">Staff Member Acknowledgment</div>
+    </section>
+
+    <footer class="doc-footer">
+      <span>Official School Document — EduSphere Multi-Campus Management System &bull; Ref: SLIP-${salary.empCode}-${salary.monthYear.replace(/[^a-zA-Z0-9]/g, "")}</span>
+      <span>Computer Generated Official Record &bull; Printed: ${generatedDate}</span>
+    </footer>
   </div>
 </body>
 </html>`;
 
   return printHtml(html);
-
-
-
-
-
-
-
-
-
 }

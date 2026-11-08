@@ -1,16 +1,5 @@
-import { Suspense } from "react";
-import { StaffReportsClient } from "./staff-reports-client";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Staff Attendance Report",
-};
-
-export const instant = false;
-
-export default function StaffAttendanceReportsPage() {
-  return (
-    <Suspense fallback={null}>
-      <StaffReportsClient />
-    </Suspense>
-  );
+export default function LegacyStaffAttendanceReportsPage() {
+  redirect("/reports/staff-attendance");
 }

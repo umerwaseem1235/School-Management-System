@@ -1,16 +1,5 @@
-import { Suspense } from "react";
-import { AttendanceReportsClient } from "./attendance-reports-client";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Student Attendance Report",
-};
-
-export const instant = false;
-
-export default function AttendanceReportsPage() {
-  return (
-    <Suspense fallback={null}>
-      <AttendanceReportsClient />
-    </Suspense>
-  );
+export default function LegacyAttendanceReportsPage() {
+  redirect("/reports/student-attendance");
 }

@@ -281,14 +281,9 @@ export function TransportClient() {
         className: "w-[32%] px-4 text-center",
         headerClassName: "w-[32%] px-4 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
-            <p className="text-[13px] font-bold text-foreground">
-              {r.routeName}
-            </p>
-            <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
-              {r.routeCode}
-            </span>
-          </div>
+          <span className="text-[13px] font-bold text-foreground truncate">
+            {r.routeName}
+          </span>
         ),
       },
       {
@@ -363,17 +358,17 @@ export function TransportClient() {
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-slate-50/80 text-[#091d3e] hover:border-[#091d3e] hover:bg-[#091d3e] hover:text-white transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Download route manifest PDF for ${r.routeName}`}
               aria-label={`Download route manifest PDF for ${r.routeName}`}
               onClick={() => handleDownloadRouteStudentsPdf(r)}
             >
-              <FileDown className="size-3.5" />
+              <FileDown className="size-3.5 text-indigo-600" />
             </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Edit ${r.routeName}`}
               aria-label={`Edit ${r.routeName}`}
               onClick={() => {
@@ -381,12 +376,12 @@ export function TransportClient() {
                 setRouteModalOpen(true);
               }}
             >
-              <Edit className="size-3.5" />
+              <Edit className="size-3.5 text-amber-600" />
             </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Delete ${r.routeName}`}
               aria-label={`Delete ${r.routeName}`}
               onClick={() =>
@@ -397,7 +392,7 @@ export function TransportClient() {
                 })
               }
             >
-              <Trash2 className="size-3.5" />
+              <Trash2 className="size-3.5 text-rose-600" />
             </ActionButton>
           </div>
         ),
@@ -417,14 +412,9 @@ export function TransportClient() {
         className: "w-[14%] px-3 text-center",
         headerClassName: "w-[14%] px-3 text-center whitespace-nowrap",
         cell: (v) => (
-          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
-            <span className="inline-flex items-center rounded-md border border-slate-300/90 bg-slate-100/90 px-2.5 py-0.5 font-mono text-xs font-extrabold tracking-wide text-[#091d3e]">
-              {v.vehicleNo}
-            </span>
-            <span className="font-mono text-[10px] font-medium text-muted-foreground">
-              {v.vehicleCode}
-            </span>
-          </div>
+          <span className="inline-flex items-center rounded-md border border-slate-300/90 bg-slate-100/90 px-2.5 py-0.5 font-mono text-xs font-extrabold tracking-wide text-[#091d3e]">
+            {v.vehicleNo}
+          </span>
         ),
       },
       {
@@ -497,17 +487,17 @@ export function TransportClient() {
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-slate-50/80 text-[#091d3e] hover:border-[#091d3e] hover:bg-[#091d3e] hover:text-white transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Download student manifest PDF for ${v.vehicleNo} (${v.model})`}
               aria-label={`Download student manifest PDF for ${v.vehicleNo}`}
               onClick={() => handleDownloadVehicleStudentsPdf(v)}
             >
-              <FileDown className="size-3.5" />
+              <FileDown className="size-3.5 text-indigo-600" />
             </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Edit vehicle ${v.vehicleNo}`}
               aria-label={`Edit vehicle ${v.vehicleNo}`}
               onClick={() => {
@@ -515,12 +505,12 @@ export function TransportClient() {
                 setVehicleModalOpen(true);
               }}
             >
-              <Edit className="size-3.5" />
+              <Edit className="size-3.5 text-amber-600" />
             </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Delete vehicle ${v.vehicleNo}`}
               aria-label={`Delete vehicle ${v.vehicleNo}`}
               onClick={() =>
@@ -567,14 +557,9 @@ export function TransportClient() {
         className: "w-[18%] px-3 text-center",
         headerClassName: "w-[18%] px-3 text-center whitespace-nowrap",
         cell: (a) => (
-          <div className="flex flex-col items-center justify-center gap-0.5 text-center">
-            <p className="text-[13px] font-bold text-foreground">
-              {a.studentName}
-            </p>
-            <span className="font-mono text-[10.5px] font-medium text-muted-foreground">
-              {a.studentRollNo} · {a.className}
-            </span>
-          </div>
+          <span className="text-[13px] font-bold text-foreground truncate">
+            {a.studentName}
+          </span>
         ),
       },
       {
@@ -697,17 +682,17 @@ export function TransportClient() {
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-slate-50/80 text-[#091d3e] hover:border-[#091d3e] hover:bg-[#091d3e] hover:text-white transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Download transport pass PDF for ${a.studentName}`}
               aria-label={`Download transport pass PDF for ${a.studentName}`}
               onClick={() => handleDownloadStudentPassPdf(a)}
             >
-              <FileDown className="size-3.5" />
+              <FileDown className="size-3.5 text-indigo-600" />
             </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-100 hover:text-slate-900 transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Edit assignment for ${a.studentName}`}
               aria-label={`Edit assignment for ${a.studentName}`}
               onClick={() => {
@@ -715,12 +700,12 @@ export function TransportClient() {
                 setAssignmentModalOpen(true);
               }}
             >
-              <Edit className="size-3.5" />
+              <Edit className="size-3.5 text-amber-600" />
             </ActionButton>
             <ActionButton
               tone="outline"
               size="xs"
-              className="h-7 w-7 p-0 rounded-md border-slate-200/90 bg-white text-rose-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700 transition-colors shadow-2xs [&_svg]:size-3.5"
+              className="h-7 w-7 p-0 rounded-md border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 transition-colors shadow-2xs [&_svg]:size-3.5"
               title={`Remove ${a.studentName} from route`}
               aria-label={`Remove ${a.studentName} from route`}
               onClick={() =>

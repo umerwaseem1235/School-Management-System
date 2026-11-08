@@ -132,7 +132,7 @@ export function exportRefundPdf(records: FeeRefundRecord[]): boolean {
   );
   cmds.push("0.05 0.55 0.25 rg");
   cmds.push(
-    `BT /F2 8 Tf 220 730 Td (Approved / Disbursed: Rs ${totalApproved.toLocaleString()}) Tj ET`
+    `BT /F2 8 Tf 220 730 Td (Approved / Paid: Rs ${totalApproved.toLocaleString()}) Tj ET`
   );
   cmds.push("0.75 0.20 0.20 rg");
   cmds.push(
@@ -395,7 +395,7 @@ export function printRefundReport(records: FeeRefundRecord[]): boolean {
       <div class="kpi-val">${formatCurrency(totalClaimed)}</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Approved & Disbursed</div>
+      <div class="kpi-label">Approved &amp; Paid</div>
       <div class="kpi-val" style="color: #15803d;">${formatCurrency(totalApproved)}</div>
     </div>
     <div class="kpi-card">
@@ -413,7 +413,7 @@ export function printRefundReport(records: FeeRefundRecord[]): boolean {
         <th>Reason</th>
         <th class="text-right">Original Paid</th>
         <th class="text-right">Refund Claim</th>
-        <th>Disbursement Mode</th>
+        <th>Payment Method</th>
         <th>Requested On</th>
         <th class="text-center">Status</th>
       </tr>

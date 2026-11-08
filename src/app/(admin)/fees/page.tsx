@@ -1,6 +1,6 @@
 import { FeesClient } from "./fees-client";
 
-export const metadata = { title: "Fees & Financial Management" };
+export const metadata = { title: "Fee Collection - EduSphere Multi-Campus" };
 
 export default function FeesPage() {
   return <FeesClient />;
