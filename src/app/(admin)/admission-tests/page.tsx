@@ -16,6 +16,7 @@ import {
   ChevronDown,
   Check,
   FileText,
+  Building2,
 } from "lucide-react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
@@ -57,7 +58,9 @@ import {
   type AdmissionTestSession,
   type AdmissionApplicantRecord,
   type AdmissionDecision,
+  isCampusMatch,
 } from "@/lib/mock/admission-tests";
+import { useBranches } from "@/context/branches-context";
 import { ScheduleSessionDialog } from "./schedule-session-dialog";
 import { ViewSessionDialog } from "./view-session-dialog";
 import { ViewApplicantDialog } from "./view-applicant-dialog";
@@ -87,6 +90,15 @@ export default function AdmissionTestsPage() {
     return seeded;
   });
 
+  // Global Branch / Campus Scope Filter
+  const { branches } = useBranches();
+  const [branchFilter, setBranchFilter] = React.useState<string>("ALL");
+
+  // Filter sessions matching active branch
+  const branchSessions = React.useMemo(() => {
+    return sessions.filter((s) => isCampusMatch(s.campus, branchFilter));
+  }, [sessions, branchFilter]);
+
   // Selected session for Evaluation tab
   const [selectedSessionId, setSelectedSessionId] = React.useState<string>(
     INITIAL_ADMISSION_SESSIONS[0]?.id || ""
@@ -94,6 +106,22 @@ export default function AdmissionTestsPage() {
   const [activeApplicants, setActiveApplicants] = React.useState<
     AdmissionApplicantRecord[]
   >(INITIAL_ADMISSION_APPLICANTS[INITIAL_ADMISSION_SESSIONS[0]?.id] || []);
+
+  // Branch change handler with automatic session adaptation
+  const handleBranchChange = React.useCallback(
+    (newBranch: string) => {
+      setBranchFilter(newBranch);
+      if (newBranch !== "ALL") {
+        const matchingSession = sessions.find((s) =>
+          isCampusMatch(s.campus, newBranch)
+        );
+        if (matchingSession) {
+          setSelectedSessionId(matchingSession.id);
+        }
+      }
+    },
+    [sessions]
+  );
 
   // Filters — Sessions tab
   const [sessionSearch, setSessionSearch] = React.useState("");
@@ -151,18 +179,17 @@ export default function AdmissionTestsPage() {
     sections.find((s) => s.id === activeTab) || sections[0];
 
   const currentSession = React.useMemo(() => {
-    return (
-      sessions.find((s) => s.id === selectedSessionId) || sessions[0] || null
-    );
-  }, [sessions, selectedSessionId]);
+    const matching = branchSessions.find((s) => s.id === selectedSessionId);
+    return matching || branchSessions[0] || null;
+  }, [branchSessions, selectedSessionId]);
 
-  // KPI summary stats
+  // KPI summary stats (dynamically scoped to selected branch)
   const kpiStats = React.useMemo(() => {
     let totalApplicants = 0;
     let totalAppeared = 0;
     let totalQualified = 0;
 
-    sessions.forEach((ses) => {
+    branchSessions.forEach((ses) => {
       const list = applicantsMap[ses.id] || [];
       totalApplicants += list.length;
       if (ses.status === "Completed") {
@@ -181,21 +208,22 @@ export default function AdmissionTestsPage() {
         : "0.0%";
 
     return {
-      sessionCount: sessions.length,
+      sessionCount: branchSessions.length,
       totalApplicants,
       qualificationRate,
     };
-  }, [sessions, applicantsMap]);
+  }, [branchSessions, applicantsMap]);
 
-  // Filtered sessions
+  // Filtered sessions (respects selected branch)
   const filteredSessions = React.useMemo(() => {
-    return sessions.filter((s) => {
+    return branchSessions.filter((s) => {
       const q = sessionSearch.toLowerCase().trim();
       const matchesSearch =
         q === "" ||
         s.title.toLowerCase().includes(q) ||
         s.classGroup.toLowerCase().includes(q) ||
-        s.roomHall.toLowerCase().includes(q);
+        s.roomHall.toLowerCase().includes(q) ||
+        s.campus.toLowerCase().includes(q);
       const matchesGroup =
         groupFilter === "ALL" || s.classGroup === groupFilter;
       const matchesStatus =
@@ -203,7 +231,7 @@ export default function AdmissionTestsPage() {
 
       return matchesSearch && matchesGroup && matchesStatus;
     });
-  }, [sessions, sessionSearch, groupFilter, statusFilter]);
+  }, [branchSessions, sessionSearch, groupFilter, statusFilter]);
 
   // Filtered applicants in Evaluation tab
   const filteredEvaluationApplicants = React.useMemo(() => {
@@ -218,10 +246,10 @@ export default function AdmissionTestsPage() {
     });
   }, [activeApplicants, applicantSearch]);
 
-  // Merit list candidates (all Qualified candidates across Completed sessions, sorted by % desc)
+  // Merit list candidates (Qualified candidates across Completed sessions in the active branch scope)
   const meritCandidates = React.useMemo<MeritCandidateRow[]>(() => {
     const list: MeritCandidateRow[] = [];
-    sessions
+    branchSessions
       .filter((s) => s.status === "Completed")
       .forEach((s) => {
         const apps = applicantsMap[s.id] || [];
@@ -252,7 +280,7 @@ export default function AdmissionTestsPage() {
       })
       .sort((a, b) => b.percentage - a.percentage);
   }, [
-    sessions,
+    branchSessions,
     applicantsMap,
     meritSearch,
     meritClassFilter,
@@ -270,7 +298,7 @@ export default function AdmissionTestsPage() {
     setSessions((prev) => prev.filter((s) => s.id !== id));
     toast.success("Admission test session removed.");
     if (selectedSessionId === id) {
-      const remaining = sessions.filter((s) => s.id !== id);
+      const remaining = branchSessions.filter((s) => s.id !== id);
       if (remaining.length > 0) {
         setSelectedSessionId(remaining[0].id);
       }
@@ -578,6 +606,36 @@ export default function AdmissionTestsPage() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          {/* Active Branch Scope Selector */}
+          <div className="flex items-center gap-2">
+            <Select
+              value={branchFilter}
+              onValueChange={(val) => {
+                if (val) handleBranchChange(val);
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[230px] md:w-[260px] h-9 text-xs font-semibold bg-background shadow-2xs gap-2 rounded-xl border-border/80">
+                <Building2 className="size-3.5 text-brand shrink-0" />
+                <div className="flex items-center gap-1.5 truncate">
+                  <span className="text-muted-foreground font-normal">Branch:</span>
+                  <span className="font-semibold truncate">
+                    {branchFilter === "ALL" ? "All Branches" : branchFilter}
+                  </span>
+                </div>
+              </SelectTrigger>
+              <SelectContent className="w-[270px] max-h-72">
+                <SelectItem value="ALL" className="text-xs font-semibold">
+                  All Branches ({branches.length} Campuses)
+                </SelectItem>
+                {branches.map((b) => (
+                  <SelectItem key={b.id} value={b.campusName} className="text-xs">
+                    <span className="truncate">{b.campusName}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* ================= SECTION 1: Test Sessions ================= */}
@@ -596,7 +654,7 @@ export default function AdmissionTestsPage() {
 
             {/* Filter Toolbar */}
             <div className="flex flex-col md:flex-row md:items-center gap-3 px-5 py-3.5 border-b border-border/60">
-              <div className="relative w-full md:w-72 shrink-0">
+              <div className="relative w-full md:w-64 shrink-0">
                 <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   type="text"
@@ -608,13 +666,41 @@ export default function AdmissionTestsPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 md:ml-auto">
+                {/* Branch Selector */}
+                <Select
+                  value={branchFilter}
+                  onValueChange={(val) => {
+                    if (val) handleBranchChange(val);
+                  }}
+                >
+                  <SelectTrigger className="w-[190px] sm:w-[210px] h-9 text-xs font-semibold bg-background shadow-2xs gap-1.5 rounded-xl border-border/80">
+                    <Building2 className="size-3.5 text-brand shrink-0" />
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span className="text-muted-foreground font-normal">Branch:</span>
+                      <span className="font-semibold truncate">
+                        {branchFilter === "ALL" ? "All Branches" : branchFilter}
+                      </span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="w-[260px] max-h-72">
+                    <SelectItem value="ALL" className="text-xs font-semibold">
+                      All Branches ({branches.length} Campuses)
+                    </SelectItem>
+                    {branches.map((b) => (
+                      <SelectItem key={b.id} value={b.campusName} className="text-xs">
+                        <span className="truncate">{b.campusName}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 <Select
                   value={groupFilter}
                   onValueChange={(val) => {
                     if (val) setGroupFilter(val);
                   }}
                 >
-                  <SelectTrigger className="w-[200px] h-9 text-xs font-medium">
+                  <SelectTrigger className="w-[190px] h-9 text-xs font-medium">
                     <SelectValue placeholder="All Class Wings" />
                   </SelectTrigger>
                   <SelectContent>
@@ -652,6 +738,7 @@ export default function AdmissionTestsPage() {
                 </Select>
 
                 {(sessionSearch ||
+                  branchFilter !== "ALL" ||
                   groupFilter !== "ALL" ||
                   statusFilter !== "ALL") && (
                   <Button
@@ -659,6 +746,7 @@ export default function AdmissionTestsPage() {
                     size="xs"
                     onClick={() => {
                       setSessionSearch("");
+                      handleBranchChange("ALL");
                       setGroupFilter("ALL");
                       setStatusFilter("ALL");
                     }}
@@ -678,19 +766,22 @@ export default function AdmissionTestsPage() {
                     <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-left">
                       Session & Class Wing
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center md:w-[165px]">
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center md:w-[170px]">
+                      Campus / Branch
+                    </TableHead>
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center md:w-[155px]">
                       Date & Time
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center md:w-[190px]">
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center md:w-[165px]">
                       Exam Hall
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-2 py-3 text-center md:w-[95px]">
+                    <TableHead className="font-semibold text-xs text-foreground px-2 py-3 text-center md:w-[90px]">
                       Applicants
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-2 py-3 text-center md:w-[110px]">
+                    <TableHead className="font-semibold text-xs text-foreground px-2 py-3 text-center md:w-[105px]">
                       Status
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-right md:w-[140px]">
+                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-right md:w-[130px]">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -699,7 +790,7 @@ export default function AdmissionTestsPage() {
                   {filteredSessions.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={6}
+                        colSpan={7}
                         className="py-12 text-center text-xs text-muted-foreground"
                       >
                         No entry test sessions found matching your filters.
@@ -722,6 +813,13 @@ export default function AdmissionTestsPage() {
                                 {ses.classGroup}
                               </span>
                             </div>
+                          </TableCell>
+
+                          <TableCell className="text-xs px-3 py-3.5 text-center whitespace-normal">
+                            <span className="inline-flex items-center gap-1.5 rounded-md bg-muted/60 px-2 py-0.5 text-xs font-medium text-foreground">
+                              <Building2 className="size-3 text-brand shrink-0" />
+                              <span className="truncate max-w-[130px]">{ses.campus}</span>
+                            </span>
                           </TableCell>
 
                           <TableCell className="text-xs px-3 py-3.5 text-center whitespace-normal">
@@ -795,9 +893,15 @@ export default function AdmissionTestsPage() {
           <Card className="rounded-2xl border border-border/80 overflow-hidden bg-card shadow-xs">
             {/* Header & Clean Session Selector */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-border/70 bg-muted/20">
-              <h2 className="text-sm font-semibold text-foreground">
-                Applicant Test Evaluation
-              </h2>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-sm font-semibold text-foreground">
+                  Applicant Test Evaluation
+                </h2>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-background text-muted-foreground border border-border/70 shadow-2xs">
+                  <Building2 className="size-3 text-brand shrink-0" />
+                  <span>{branchFilter === "ALL" ? "All Campuses" : branchFilter}</span>
+                </span>
+              </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-2.5 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3.5 h-9 text-xs font-medium shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer w-full sm:w-[290px] md:w-[330px]">
@@ -814,43 +918,61 @@ export default function AdmissionTestsPage() {
                   align="end"
                   className="w-[300px] sm:w-[350px] max-h-80 p-1.5 rounded-xl shadow-xl border-border/80 space-y-0.5"
                 >
-                  {sessions.map((s) => {
-                    const isSelected = currentSession?.id === s.id;
-                    return (
-                      <DropdownMenuItem
-                        key={s.id}
-                        onClick={() => setSelectedSessionId(s.id)}
-                        className={cn(
-                          "flex items-center justify-between gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors",
-                          isSelected
-                            ? "bg-brand-soft text-brand"
-                            : "hover:bg-muted/70 text-foreground"
-                        )}
-                      >
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <span
-                            className={cn(
-                              "text-xs truncate leading-snug",
-                              isSelected
-                                ? "font-semibold text-brand"
-                                : "font-medium text-foreground"
-                            )}
-                          >
-                            {s.title}
-                          </span>
-                          <span className="text-[11px] text-muted-foreground truncate mt-0.5">
-                            {s.classGroup} • {formatDate(s.testDate)}
-                          </span>
-                        </div>
-                        {isSelected && (
-                          <Check className="size-3.5 text-brand shrink-0" />
-                        )}
-                      </DropdownMenuItem>
-                    );
-                  })}
+                  {branchSessions.length === 0 ? (
+                    <div className="p-3 text-center text-xs text-muted-foreground">
+                      No test sessions in this branch
+                    </div>
+                  ) : (
+                    branchSessions.map((s) => {
+                      const isSelected = currentSession?.id === s.id;
+                      return (
+                        <DropdownMenuItem
+                          key={s.id}
+                          onClick={() => setSelectedSessionId(s.id)}
+                          className={cn(
+                            "flex items-center justify-between gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors",
+                            isSelected
+                              ? "bg-brand-soft text-brand"
+                              : "hover:bg-muted/70 text-foreground"
+                          )}
+                        >
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <span
+                              className={cn(
+                                "text-xs truncate leading-snug",
+                                isSelected
+                                  ? "font-semibold text-brand"
+                                  : "font-medium text-foreground"
+                              )}
+                            >
+                              {s.title}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground truncate mt-0.5">
+                              {s.classGroup} • {s.campus} • {formatDate(s.testDate)}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <Check className="size-3.5 text-brand shrink-0" />
+                          )}
+                        </DropdownMenuItem>
+                      );
+                    })
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+
+            {!currentSession && (
+              <div className="py-16 text-center text-xs text-muted-foreground space-y-2">
+                <CalendarClock className="size-10 text-muted-foreground/40 mx-auto" />
+                <p className="font-semibold text-foreground text-sm">No Test Sessions Found</p>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  {branchFilter !== "ALL"
+                    ? `No admission test sessions found for ${branchFilter}. Switch to another branch or schedule a new test session.`
+                    : "No admission test sessions available."}
+                </p>
+              </div>
+            )}
 
             {currentSession && (
               <>
@@ -1122,6 +1244,31 @@ export default function AdmissionTestsPage() {
 
               <div className="flex flex-wrap items-center gap-2 md:ml-auto">
                 <Select
+                  value={branchFilter}
+                  onValueChange={(val) => {
+                    if (val) handleBranchChange(val);
+                  }}
+                >
+                  <SelectTrigger className="w-[190px] sm:w-[210px] h-9 text-xs font-semibold bg-background shadow-2xs gap-2">
+                    <Building2 className="size-3.5 text-brand shrink-0" />
+                    <div className="flex items-center gap-1.5 truncate">
+                      <span className="text-muted-foreground font-normal">Branch:</span>
+                      <span className="truncate">{branchFilter === "ALL" ? "All Branches" : branchFilter}</span>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="w-[260px] max-h-72">
+                    <SelectItem value="ALL" className="text-xs font-semibold">
+                      All Branches ({branches.length} Campuses)
+                    </SelectItem>
+                    {branches.map((b) => (
+                      <SelectItem key={b.id} value={b.campusName} className="text-xs">
+                        <span className="truncate">{b.campusName}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
                   value={meritClassFilter}
                   onValueChange={(val) => {
                     if (val) setMeritClassFilter(val);
@@ -1166,7 +1313,8 @@ export default function AdmissionTestsPage() {
 
                 {(meritSearch ||
                   meritClassFilter !== "ALL" ||
-                  meritDecisionFilter !== "ALL") && (
+                  meritDecisionFilter !== "ALL" ||
+                  branchFilter !== "ALL") && (
                   <Button
                     variant="ghost"
                     size="xs"
@@ -1174,6 +1322,7 @@ export default function AdmissionTestsPage() {
                       setMeritSearch("");
                       setMeritClassFilter("ALL");
                       setMeritDecisionFilter("ALL");
+                      handleBranchChange("ALL");
                     }}
                     className="h-9 px-2 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
                   >
@@ -1201,6 +1350,9 @@ export default function AdmissionTestsPage() {
                       Applied Class
                     </TableHead>
                     <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Campus / Branch
+                    </TableHead>
+                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
                       Test Score
                     </TableHead>
                     <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
@@ -1215,10 +1367,10 @@ export default function AdmissionTestsPage() {
                   {meritCandidates.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={8}
                         className="py-12 text-center text-xs text-muted-foreground"
                       >
-                        No shortlisted candidates match the selected filters.
+                        No shortlisted candidates match the selected filters{branchFilter !== "ALL" ? ` for ${branchFilter}` : ""}.
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -1251,6 +1403,13 @@ export default function AdmissionTestsPage() {
 
                           <TableCell className="px-3 py-3.5 text-center text-xs font-medium text-foreground whitespace-nowrap">
                             {cand.appliedClass}
+                          </TableCell>
+
+                          <TableCell className="px-3 py-3.5 text-center text-xs whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                              <Building2 className="size-3 text-muted-foreground/70 shrink-0" />
+                              <span>{candSession?.campus || "Central Campus"}</span>
+                            </span>
                           </TableCell>
 
                           <TableCell className="px-4 py-3.5 text-center font-mono text-xs whitespace-nowrap">
@@ -1347,6 +1506,7 @@ export default function AdmissionTestsPage() {
         open={isScheduleOpen}
         onOpenChange={setIsScheduleOpen}
         onAddSession={handleAddSession}
+        defaultCampus={branchFilter !== "ALL" ? branchFilter : undefined}
       />
 
       {/* View Test Session Dialog */}
@@ -1392,6 +1552,7 @@ export default function AdmissionTestsPage() {
         classFilterLabel={
           meritClassFilter === "ALL" ? "All Classes" : meritClassFilter
         }
+        campusLabel={branchFilter === "ALL" ? "All Campuses" : branchFilter}
       />
     </div>
   );

@@ -319,7 +319,7 @@ export function LmsClient({
         label: "Status",
         allLabel: "All Statuses",
         options: ["Active", "Graded", "Past Due"],
-        triggerClassName: "w-[130px] shrink-0",
+        triggerClassName: "w-[150px] shrink-0",
         getValue: (r) => r.status,
       },
       {
@@ -334,7 +334,7 @@ export function LmsClient({
             ])
           )
         ),
-        triggerClassName: "w-[185px] shrink-0",
+        triggerClassName: "w-[150px] shrink-0",
         getValue: (r) => r.className,
       },
     ],
@@ -456,7 +456,7 @@ export function LmsClient({
             ...materials.map((m) => m.subject),
           ])
         ).sort((a, b) => a.localeCompare(b)),
-        triggerClassName: "w-[170px] shrink-0",
+        triggerClassName: "w-[150px] shrink-0",
         getValue: (r) => r.subject,
       },
       {
@@ -479,7 +479,7 @@ export function LmsClient({
             ])
           )
         ),
-        triggerClassName: "w-[185px] shrink-0",
+        triggerClassName: "w-[150px] shrink-0",
         getValue: (r) => r.className,
       },
     ],
@@ -600,7 +600,7 @@ export function LmsClient({
         label: "Subject",
         allLabel: "All Subjects",
         options: courseSubjects,
-        triggerClassName: "w-[170px] shrink-0",
+        triggerClassName: "w-[150px] shrink-0",
         getValue: (r) => r.subject,
       },
       {
@@ -615,7 +615,7 @@ export function LmsClient({
             ])
           )
         ),
-        triggerClassName: "w-[185px] shrink-0",
+        triggerClassName: "w-[150px] shrink-0",
         getValue: (r) => r.className,
       },
       {
@@ -623,7 +623,7 @@ export function LmsClient({
         label: "Status",
         allLabel: "All Statuses",
         options: ["Active", "Completed", "Archived"],
-        triggerClassName: "w-[130px] shrink-0",
+        triggerClassName: "w-[150px] shrink-0",
         getValue: (r) => r.status,
       },
     ],
@@ -665,73 +665,72 @@ export function LmsClient({
         onValueChange={(val) => setActiveTab(val as any)}
         className="space-y-4"
       >
-        {/* Module Dropdown Selector Bar */}
+        {/* Module Tabs Selector Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3 h-9 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[200px] sm:min-w-[230px]">
-                <div className="flex items-center gap-2 min-w-0">
-                  <activeSectionObj.icon className="size-4 text-brand shrink-0" />
-                  <span className="text-xs font-semibold text-foreground truncate">
-                    {activeSectionObj.label}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-4 flex items-center justify-center tabular-nums"
-                  >
-                    {activeSectionObj.count}
-                  </Badge>
-                  <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </div>
-              </DropdownMenuTrigger>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3 h-9 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[200px] sm:min-w-[230px]">
+              <div className="flex items-center gap-2 min-w-0">
+                <activeSectionObj.icon className="size-4 text-brand shrink-0" />
+                <span className="text-xs font-semibold text-foreground truncate">
+                  {activeSectionObj.label}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-4 flex items-center justify-center tabular-nums"
+                >
+                  {activeSectionObj.count}
+                </Badge>
+                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+            </DropdownMenuTrigger>
 
-              <DropdownMenuContent
-                align="start"
-                className="w-52 p-1 rounded-xl shadow-lg border-border/80"
-              >
-                {sections.map((sec) => {
-                  const Icon = sec.icon;
-                  const isSelected = activeTab === sec.id;
-                  return (
-                    <DropdownMenuItem
-                      key={sec.id}
-                      onClick={() => setActiveTab(sec.id)}
-                      className={cn(
-                        "flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs transition-colors",
-                        isSelected
-                          ? "bg-brand-soft text-brand font-semibold"
-                          : "hover:bg-muted/70 text-foreground"
-                      )}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Icon
-                          className={cn(
-                            "size-3.5 shrink-0",
-                            isSelected ? "text-brand" : "text-muted-foreground"
-                          )}
-                        />
-                        <span className="truncate">{sec.label}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                        <Badge
-                          variant={isSelected ? "default" : "secondary"}
-                          className={cn(
-                            "text-[10px] font-semibold px-1.5 py-0 h-4 tabular-nums",
-                            isSelected ? "bg-brand text-cream" : ""
-                          )}
-                        >
-                          {sec.count}
-                        </Badge>
-                        {isSelected && <Check className="size-3 text-brand" />}
-                      </div>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+            <DropdownMenuContent
+              align="start"
+              sideOffset={6}
+              className="w-56 p-1 rounded-xl shadow-lg border-border/80"
+            >
+              {sections.map((sec) => {
+                const Icon = sec.icon;
+                const isSelected = activeTab === sec.id;
+                return (
+                  <DropdownMenuItem
+                    key={sec.id}
+                    onClick={() => setActiveTab(sec.id)}
+                    className={cn(
+                      "flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs transition-colors",
+                      isSelected
+                        ? "bg-brand-soft text-brand font-semibold"
+                        : "hover:bg-muted/70 text-foreground"
+                    )}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Icon
+                        className={cn(
+                          "size-3.5 shrink-0",
+                          isSelected ? "text-brand" : "text-muted-foreground"
+                        )}
+                      />
+                      <span className="truncate">{sec.label}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                      <Badge
+                        variant={isSelected ? "default" : "secondary"}
+                        className={cn(
+                          "text-[10px] font-semibold px-1.5 py-0 h-4 tabular-nums",
+                          isSelected ? "bg-brand text-cream" : ""
+                        )}
+                      >
+                        {sec.count}
+                      </Badge>
+                      {isSelected && <Check className="size-3 text-brand" />}
+                    </div>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Context Action for Currently Selected Portion */}
           <div className="flex items-center gap-2 self-end sm:self-auto">
@@ -770,17 +769,7 @@ export function LmsClient({
 
         {/* TAB 1: Courses & Syllabus */}
         <TabsContent value="courses" className="space-y-4 outline-none">
-          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
-            {/* Professional Section Header */}
-            <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border/70 bg-muted/20">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
-                <BookOpen className="size-3.5" />
-              </div>
-              <h2 className="text-sm font-semibold text-foreground">
-                Courses & Syllabus
-              </h2>
-            </div>
-
+          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden pt-5">
             <DataTable
               data={courses}
               columns={courseColumns}
@@ -803,17 +792,7 @@ export function LmsClient({
 
         {/* TAB 2: Assignments & Homework */}
         <TabsContent value="assignments" className="space-y-4 outline-none">
-          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
-            {/* Professional Section Header */}
-            <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border/70 bg-muted/20">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
-                <FileText className="size-3.5" />
-              </div>
-              <h2 className="text-sm font-semibold text-foreground">
-                Homework & Assignments
-              </h2>
-            </div>
-
+          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden pt-5">
             <DataTable
               data={assignments}
               columns={assignmentColumns}
@@ -835,17 +814,7 @@ export function LmsClient({
 
         {/* TAB 3: Study Materials & Notes */}
         <TabsContent value="materials" className="space-y-4 outline-none">
-          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
-            {/* Professional Section Header */}
-            <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border/70 bg-muted/20">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
-                <FolderArchive className="size-3.5" />
-              </div>
-              <h2 className="text-sm font-semibold text-foreground">
-                Study Materials & Notes
-              </h2>
-            </div>
-
+          <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden pt-5">
             <DataTable
               data={materials}
               columns={materialColumns}

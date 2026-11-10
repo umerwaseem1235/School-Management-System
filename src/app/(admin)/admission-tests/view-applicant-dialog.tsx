@@ -88,7 +88,7 @@ export function ViewApplicantDialog({
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
                   Applied for {applicant.appliedClass}
-                  {session ? ` • ${session.title}` : ""}
+                  {session ? ` • ${session.campus} • ${session.title}` : ""}
                 </DialogDescription>
               </div>
             </div>

@@ -33,6 +33,7 @@ interface ScheduleSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAddSession: (session: AdmissionTestSession) => void;
+  defaultCampus?: string;
 }
 
 type TimeSegmentId =
@@ -47,6 +48,7 @@ export function ScheduleSessionDialog({
   open,
   onOpenChange,
   onAddSession,
+  defaultCampus,
 }: ScheduleSessionDialogProps) {
   const [title, setTitle] = React.useState("");
   const [classGroup, setClassGroup] = React.useState(ADMISSION_CLASS_GROUPS[0]);
@@ -84,8 +86,11 @@ export function ScheduleSessionDialog({
     if (open) {
       setTestDate(new Date().toISOString().split("T")[0]);
       pendingDigitRef.current = null;
+      if (defaultCampus && defaultCampus !== "ALL") {
+        setCampus(defaultCampus);
+      }
     }
-  }, [open]);
+  }, [open, defaultCampus]);
 
   const focusSegment = (segment: TimeSegmentId) => {
     const map: Record<

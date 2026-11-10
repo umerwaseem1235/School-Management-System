@@ -74,7 +74,7 @@ export function PrintBroadsheetDialog({
           (r) => `
         <tr>
           <td style="text-align: center; font-weight: bold;">${escapeHtml(r.rollNo)}</td>
-          <td><strong>${escapeHtml(r.studentName)}</strong><br/><span style="font-size: 10px; color: #555;">s/o ${escapeHtml(r.fatherName)}</span></td>
+          <td><strong>${escapeHtml(r.studentName)}</strong></td>
           <td style="text-align: center; font-family: monospace;">${r.totalObtainedMarks} / ${r.totalMaxMarks}</td>
           <td style="text-align: center; font-family: monospace; font-weight: bold;">${r.percentage.toFixed(1)}%</td>
           <td style="text-align: center; font-weight: bold;">${escapeHtml(r.overallGrade)}</td>
@@ -235,7 +235,6 @@ export function PrintBroadsheetDialog({
                       </td>
                       <td className="py-2 px-3">
                         <div className="font-semibold text-zinc-900">{r.studentName}</div>
-                        <div className="text-[11px] text-zinc-500">s/o {r.fatherName}</div>
                       </td>
                       <td className="py-2 px-2 text-center font-mono text-zinc-700">
                         {r.totalObtainedMarks} / {r.totalMaxMarks}

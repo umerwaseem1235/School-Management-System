@@ -2,13 +2,10 @@
 
 import * as React from "react";
 import {
-  ArrowDown,
-  ArrowUp,
   Building2,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  ChevronsUpDown,
   Clock3,
   FileText,
   Inbox,
@@ -250,9 +247,9 @@ export function DataTable<T>({
   return (
     <div className={cn("flex flex-col", className)}>
       {/* Toolbar */}
-      <div className="flex flex-col gap-2 px-6 pb-5 lg:flex-row lg:items-center">
+      <div className="flex flex-col gap-3 px-6 pb-5 md:flex-row md:items-center md:justify-between">
         {searchFn && (
-          <div className="relative w-full sm:w-72 lg:w-72 shrink-0">
+          <div className="relative w-full shrink-0 sm:w-64">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
@@ -261,11 +258,11 @@ export function DataTable<T>({
                 setPage(0);
               }}
               placeholder={searchPlaceholder}
-              className="h-9 w-full rounded-[4px] border border-brand/18 bg-white pl-9 pr-3 text-xs font-medium text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] outline-none transition-colors placeholder:font-normal placeholder:text-muted-foreground/85 hover:border-brand/30 focus:border-ring focus:bg-white focus:ring-3 focus:ring-ring/20"
+              className="h-10 w-full rounded-lg border border-brand/18 bg-white pl-9 pr-3 text-xs font-medium text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] outline-none transition-colors placeholder:font-normal placeholder:text-muted-foreground/85 hover:border-brand/30 focus:border-ring focus:bg-white focus:ring-3 focus:ring-ring/20"
             />
           </div>
         )}
-        <div className="flex flex-wrap items-center gap-2 lg:ml-auto">
+        <div className="flex flex-wrap items-center gap-2.5 md:justify-end">
           {filters.map((f) => {
             if (f.renderCustom) {
               const currentVal = (f.value !== undefined ? (f.value === "all" ? ALL : f.value) : filterState[f.key]) ?? ALL;
@@ -358,7 +355,7 @@ export function DataTable<T>({
               >
                 <SelectTrigger
                   className={cn(
-                    "h-9! w-[140px] rounded-[4px] border-brand/18 bg-white text-xs font-medium shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] hover:border-brand/30",
+                    "h-10! w-[140px] rounded-lg border-brand/18 bg-white text-xs font-medium shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] hover:border-brand/30",
                     f.className,
                     f.triggerClassName
                   )}
@@ -476,35 +473,8 @@ export function DataTable<T>({
                             : (theadRowClassName ? "text-white/90 hover:text-white" : "text-[#1e293b] hover:text-[#091d3e]")
                         )}
                       >
-                        {col.icon && (
-                          <col.icon
-                            className={cn(
-                              "size-3.5 shrink-0 transition-colors",
-                              active
-                                ? (theadRowClassName ? "text-white" : "text-[#1d4ed8]")
-                                : (theadRowClassName ? "text-white/80 group-hover/th:text-white" : "text-[#091d3e]/55 group-hover/th:text-[#091d3e]")
-                            )}
-                          />
-                        )}
                         <span className="text-[12.5px] font-bold tracking-[-0.01em]">
                           {col.header}
-                        </span>
-                        <span
-                          className={cn(
-                            (hideSortArrows || col.hideSortArrow) && "hidden",
-                            "grid size-4 shrink-0 place-items-center rounded transition-all duration-150",
-                            active
-                              ? (theadRowClassName ? "text-white" : "text-[#1d4ed8]")
-                              : (theadRowClassName ? "text-white/60 group-hover/th:text-white" : "text-[#94a3b8] group-hover/th:text-[#091d3e]")
-                          )}
-                        >
-                          {hideSortArrows || col.hideSortArrow ? null : !active ? (
-                            <ChevronsUpDown className="size-3.5" strokeWidth={2} />
-                          ) : sort?.dir === "asc" ? (
-                            <ArrowUp className="size-3" strokeWidth={2.4} />
-                          ) : (
-                            <ArrowDown className="size-3" strokeWidth={2.4} />
-                          )}
                         </span>
                       </button>
                     ) : (
@@ -521,9 +491,6 @@ export function DataTable<T>({
                       >
                         {typeof col.header === "string" ? (
                           <>
-                            {col.icon && (
-                              <col.icon className={cn("size-3.5 shrink-0", theadRowClassName ? "text-white/80" : "text-[#091d3e]/60")} />
-                            )}
                             <span className="text-[12.5px] font-bold tracking-[-0.01em]">
                               {col.header}
                             </span>

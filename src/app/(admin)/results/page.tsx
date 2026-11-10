@@ -993,7 +993,7 @@ export default function ResultsPage() {
                             </span>
                           </div>
                           <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                            s/o {s.fatherName}
+                            {s.className.replace(" (Science - Biology)", " (Bio)").replace(" (Science - Computer)", " (CS)")}
                           </p>
                         </div>
 
