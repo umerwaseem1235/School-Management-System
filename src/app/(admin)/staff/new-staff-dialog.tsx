@@ -205,35 +205,6 @@ const PAKISTANI_SCHOOL_CLASSES: {
   },
 ];
 
-const POPULAR_SUBJECT_CHIPS = [
-  "Mathematics",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "Computer Science",
-  "English Language",
-  "Urdu (اردو)",
-  "Islamiyat (اسلامیات)",
-  "Tarjamat-ul-Quran (ترجمۃ القرآن)",
-  "Pakistan Studies (مطالعہ پاکستان)",
-  "General Science",
-  "Social Studies (معاشرتی علوم)",
-  "Accounting",
-];
-
-const POPULAR_CLASS_CHIPS = [
-  "Grade 9 (Science)",
-  "Grade 10 (Science)",
-  "Grade 8",
-  "Grade 7",
-  "Grade 6",
-  "O-Levels",
-  "A-Levels",
-  "FSc / ICS",
-  "Primary (1–5)",
-  "Early Years (KG)",
-];
-
 export function NewStaffDialog({
   open,
   onOpenChange,
@@ -446,7 +417,7 @@ export function NewStaffDialog({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Hafiz Muhammad Salman"
+                  placeholder="e.g. Dr. Muhammad Usman"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
@@ -462,7 +433,7 @@ export function NewStaffDialog({
                   }}
                 >
                   <SelectTrigger className="w-full h-9 text-xs">
-                    <SelectValue placeholder="Gender" />
+                    <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Male" className="text-xs">
@@ -484,7 +455,7 @@ export function NewStaffDialog({
                 <input
                   type="tel"
                   required
-                  placeholder="0300-1234567"
+                  placeholder="e.g. 0300-1234567"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
@@ -497,7 +468,7 @@ export function NewStaffDialog({
                 </label>
                 <input
                   type="text"
-                  placeholder="35202-1234567-1"
+                  placeholder="e.g. 35202-1234567-1"
                   value={cnic}
                   onChange={(e) => setCnic(e.target.value)}
                   className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
@@ -508,7 +479,7 @@ export function NewStaffDialog({
                 <label className="text-xs font-medium text-foreground">Official Email</label>
                 <input
                   type="email"
-                  placeholder="salman@edusphere.edu.pk"
+                  placeholder="e.g. staff@edusphere.edu.pk"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
@@ -532,7 +503,7 @@ export function NewStaffDialog({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Senior Subject Specialist — Physics"
+                  placeholder="e.g. Senior Subject Specialist / Lecturer"
                   value={designation}
                   onChange={(e) => setDesignation(e.target.value)}
                   className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
@@ -548,7 +519,7 @@ export function NewStaffDialog({
                   }}
                 >
                   <SelectTrigger className="w-full h-9 text-xs">
-                    <SelectValue placeholder="Staff Type" />
+                    <SelectValue placeholder="Select staff type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Teaching" className="text-xs font-semibold text-brand">
@@ -572,7 +543,7 @@ export function NewStaffDialog({
                   }}
                 >
                   <SelectTrigger className="w-full h-9 text-xs">
-                    <SelectValue placeholder="Select Department" />
+                    <SelectValue placeholder="Select department" />
                   </SelectTrigger>
                   <SelectContent>
                     {DEPARTMENTS.map((dept) => (
@@ -593,7 +564,7 @@ export function NewStaffDialog({
                   }}
                 >
                   <SelectTrigger className="w-full h-9 text-xs">
-                    <SelectValue placeholder="Select Campus" />
+                    <SelectValue placeholder="Select campus branch" />
                   </SelectTrigger>
                   <SelectContent>
                     {activeBranches.map((c) => (
@@ -614,7 +585,7 @@ export function NewStaffDialog({
                 <input
                   type="text"
                   required
-                  placeholder="e.g. M.Phil Physics / B.Ed"
+                  placeholder="e.g. M.Phil, M.Sc, B.Ed"
                   value={qualification}
                   onChange={(e) => setQualification(e.target.value)}
                   className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
@@ -625,7 +596,7 @@ export function NewStaffDialog({
                 <label className="text-xs font-medium text-foreground">Experience</label>
                 <input
                   type="text"
-                  placeholder="e.g. 7 Years"
+                  placeholder="e.g. 5 Years"
                   value={experience}
                   onChange={(e) => setExperience(e.target.value)}
                   className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
@@ -642,14 +613,9 @@ export function NewStaffDialog({
                   <div className="grid size-6 place-items-center rounded-md bg-brand text-cream">
                     <GraduationCap className="size-3.5" />
                   </div>
-                  <div>
-                    <span className="text-xs font-semibold text-foreground">
-                      Teaching Academic Assignment
-                    </span>
-                    <p className="text-[10.5px] text-muted-foreground">
-                      Tailored for Pakistani Boards (BISE/Federal) & Cambridge (O/A Levels)
-                    </p>
-                  </div>
+                  <span className="text-xs font-semibold text-foreground">
+                    Teaching Academic Assignment
+                  </span>
                 </div>
                 <span className="text-[10.5px] font-medium text-brand bg-brand-50 border border-brand/20 px-2 py-0.5 rounded-full">
                   Pakistani & Cambridge Curriculum
@@ -677,30 +643,31 @@ export function NewStaffDialog({
                 </div>
 
                 {/* Active Selected Class Badges */}
-                <div className="flex flex-wrap items-center gap-1.5 min-h-[34px] p-2 rounded-lg border border-border/80 bg-background">
-                  {selectedClasses.length === 0 ? (
-                    <span className="text-xs text-muted-foreground/60 italic">
-                      No classes assigned yet. Choose from catalog or type any class/section below.
-                    </span>
-                  ) : (
-                    selectedClasses.map((cls) => (
+                {selectedClasses.length === 0 ? (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border/80 bg-muted/20 min-h-[38px] transition-colors">
+                    <School className="size-3.5 text-brand/70 shrink-0" />
+                    <span className="text-xs font-medium text-muted-foreground/75">No classes assigned yet</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-1.5 min-h-[38px] p-2 rounded-lg border border-border/80 bg-background shadow-2xs">
+                    {selectedClasses.map((cls) => (
                       <span
                         key={cls}
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-medium bg-muted text-foreground border border-border/80 shadow-2xs"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-muted/80 text-foreground border border-border/80 shadow-2xs transition-colors hover:bg-muted"
                       >
                         <span>{cls}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveClass(cls)}
-                          className="hover:bg-muted-foreground/20 rounded-full p-0.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                          className="hover:bg-foreground/15 rounded-full p-0.5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer ml-0.5"
                           title={`Remove ${cls}`}
                         >
                           <X className="size-3" />
                         </button>
                       </span>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Dropdown Catalog + Custom Class Entry */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -710,7 +677,7 @@ export function NewStaffDialog({
                     }}
                   >
                     <SelectTrigger className="w-full h-8.5 text-xs bg-background">
-                      <SelectValue placeholder="Browse School Classes / Grades..." />
+                      <SelectValue placeholder="Select class from catalog..." />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
                       {PAKISTANI_SCHOOL_CLASSES.map((grp) => (
@@ -731,7 +698,7 @@ export function NewStaffDialog({
                   <div className="flex items-center gap-1.5">
                     <input
                       type="text"
-                      placeholder="Or type custom class/section (e.g. 9-A Science)..."
+                      placeholder="Custom class (e.g. 9-A)"
                       value={customClassInput}
                       onChange={(e) => setCustomClassInput(e.target.value)}
                       onKeyDown={(e) => {
@@ -753,33 +720,6 @@ export function NewStaffDialog({
                       Add
                     </Button>
                   </div>
-                </div>
-
-                {/* Quick Class Chips */}
-                <div className="flex items-center gap-1 flex-wrap pt-0.5">
-                  <span className="text-[10px] text-muted-foreground font-medium mr-1">
-                    Quick Add:
-                  </span>
-                  {POPULAR_CLASS_CHIPS.map((chip) => {
-                    const isSelected = selectedClasses.includes(chip);
-                    return (
-                      <button
-                        key={chip}
-                        type="button"
-                        onClick={() => {
-                          if (isSelected) handleRemoveClass(chip);
-                          else handleAddClass(chip);
-                        }}
-                        className={`text-[10.5px] px-2 py-0.5 rounded-md border transition-all cursor-pointer shadow-2xs ${
-                          isSelected
-                            ? "bg-brand text-cream border-brand font-semibold"
-                            : "bg-background hover:bg-brand-50 border-border/80 text-muted-foreground hover:text-brand"
-                        }`}
-                      >
-                        {isSelected ? `✓ ${chip}` : `+ ${chip}`}
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
 
@@ -804,30 +744,31 @@ export function NewStaffDialog({
                 </div>
 
                 {/* Active Selected Subject Badges */}
-                <div className="flex flex-wrap items-center gap-1.5 min-h-[34px] p-2 rounded-lg border border-border/80 bg-background">
-                  {selectedSubjects.length === 0 ? (
-                    <span className="text-xs text-muted-foreground/60 italic">
-                      No subjects assigned yet. Select from Pakistani curriculum catalog or type any subject below.
-                    </span>
-                  ) : (
-                    selectedSubjects.map((sub) => (
+                {selectedSubjects.length === 0 ? (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-border/80 bg-muted/20 min-h-[38px] transition-colors">
+                    <BookOpen className="size-3.5 text-brand/70 shrink-0" />
+                    <span className="text-xs font-medium text-muted-foreground/75">No subjects assigned yet</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap items-center gap-1.5 min-h-[38px] p-2 rounded-lg border border-brand/20 bg-background shadow-2xs">
+                    {selectedSubjects.map((sub) => (
                       <span
                         key={sub}
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-medium bg-brand-50 text-brand border border-brand/20 shadow-2xs"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-brand-50/80 text-brand border border-brand/20 shadow-2xs transition-colors hover:bg-brand-50"
                       >
                         <span>{sub}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveSubject(sub)}
-                          className="hover:bg-brand/20 rounded-full p-0.5 text-brand transition-colors cursor-pointer"
+                          className="hover:bg-brand/20 rounded-full p-0.5 text-brand transition-colors cursor-pointer ml-0.5"
                           title={`Remove ${sub}`}
                         >
                           <X className="size-3" />
                         </button>
                       </span>
-                    ))
-                  )}
-                </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Dropdown Catalog + Custom Subject Entry */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -837,7 +778,7 @@ export function NewStaffDialog({
                     }}
                   >
                     <SelectTrigger className="w-full h-8.5 text-xs bg-background">
-                      <SelectValue placeholder="Browse Curriculum Subject Catalog..." />
+                      <SelectValue placeholder="Select subject from catalog..." />
                     </SelectTrigger>
                     <SelectContent className="max-h-72">
                       {PAKISTANI_CURRICULUM_SUBJECTS.map((grp) => (
@@ -858,7 +799,7 @@ export function NewStaffDialog({
                   <div className="flex items-center gap-1.5">
                     <input
                       type="text"
-                      placeholder="Type ANY other subject (e.g. Sindhi, Robotics)..."
+                      placeholder="Custom subject (e.g. Robotics)"
                       value={customSubjectInput}
                       onChange={(e) => setCustomSubjectInput(e.target.value)}
                       onKeyDown={(e) => {
@@ -881,62 +822,32 @@ export function NewStaffDialog({
                     </Button>
                   </div>
                 </div>
-
-                {/* Quick Subject Chips */}
-                <div className="flex items-center gap-1 flex-wrap pt-0.5">
-                  <span className="text-[10px] text-muted-foreground font-medium mr-1">
-                    Quick Add:
-                  </span>
-                  {POPULAR_SUBJECT_CHIPS.map((chip) => {
-                    const isSelected = selectedSubjects.includes(chip);
-                    return (
-                      <button
-                        key={chip}
-                        type="button"
-                        onClick={() => {
-                          if (isSelected) handleRemoveSubject(chip);
-                          else handleAddSubject(chip);
-                        }}
-                        className={`text-[10.5px] px-2 py-0.5 rounded-md border transition-all cursor-pointer shadow-2xs ${
-                          isSelected
-                            ? "bg-brand text-cream border-brand font-semibold"
-                            : "bg-background hover:bg-brand-50 border-border/80 text-muted-foreground hover:text-brand"
-                        }`}
-                      >
-                        {isSelected ? `✓ ${chip}` : `+ ${chip}`}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
 
               {/* 3. CLASS INCHARGE / HOMEROOM TEACHER (Pakistani School Feature) */}
               <div className="pt-2 border-t border-brand/15 space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={isClassIncharge}
-                      onChange={(e) => setIsClassIncharge(e.target.checked)}
-                      className="size-4 rounded border-border text-brand focus:ring-brand/30 accent-brand cursor-pointer"
-                    />
-                    <span className="text-xs font-semibold text-foreground">
-                      Appoint as Class Incharge / Class Teacher
-                    </span>
-                  </label>
-                  <span className="text-[10px] text-muted-foreground">Homeroom Incharge</span>
-                </div>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isClassIncharge}
+                    onChange={(e) => setIsClassIncharge(e.target.checked)}
+                    className="size-4 rounded border-border text-brand focus:ring-brand/30 accent-brand cursor-pointer"
+                  />
+                  <span className="text-xs font-semibold text-foreground">
+                    Appoint as Class Incharge / Class Teacher
+                  </span>
+                </label>
 
                 {isClassIncharge && (
-                  <div className="pl-6 animate-in fade-in-50 duration-150">
+                  <div className="pl-6 animate-in fade-in-50 duration-150 space-y-1">
                     <input
                       type="text"
-                      placeholder="e.g. Grade 9-A (Science) or Grade 10-B"
+                      placeholder="e.g. Grade 9-A or Grade 10-B"
                       value={classInchargeSection}
                       onChange={(e) => setClassInchargeSection(e.target.value)}
                       className="w-full h-8 px-2.5 rounded-lg border border-brand/30 bg-background text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-brand focus:border-brand transition-all"
                     />
-                    <p className="text-[10.5px] text-muted-foreground mt-1">
+                    <p className="text-[10.5px] text-muted-foreground">
                       This teacher will oversee daily morning assembly attendance, conduct, and parent meetings for this section.
                     </p>
                   </div>
@@ -967,7 +878,7 @@ export function NewStaffDialog({
                 <textarea
                   rows={3}
                   required
-                  placeholder="e.g. Student fee vouchers, billing collection, ledger reconciliation, bank deposits, and monthly financial reporting..."
+                  placeholder="e.g. Fee collection, ledger reconciliation, student records maintenance, vendor coordination..."
                   value={nonTeachingScope}
                   onChange={(e) => setNonTeachingScope(e.target.value)}
                   className="w-full p-2.5 rounded-lg border border-border bg-background text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
@@ -989,8 +900,8 @@ export function NewStaffDialog({
             </Button>
             <Button
               type="submit"
-              size="sm"
-              className="bg-brand text-cream hover:bg-brand-600 text-xs px-5 cursor-pointer shadow-sm font-semibold"
+              size="lg"
+              className="px-5 cursor-pointer"
             >
               Register Staff Member
             </Button>

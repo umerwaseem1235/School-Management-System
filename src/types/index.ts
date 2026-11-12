@@ -68,14 +68,20 @@ export type AdmissionStage =
 
 export interface AdmissionApplication {
   id: ID;
+  admissionNumber?: string;
   applicant: string;
   guardian: string;
   phone: string;
   appliedClass: string;
+  section?: string;
   campus: string;
   stage: AdmissionStage;
   appliedOn: string;
   score?: number;
+  rollNo?: string;
+  gender?: "Male" | "Female";
+  admissionType?: "Entry Test" | "Direct Admission";
+  status?: "Active" | "Pending" | "Confirmed" | "Enrolled";
 }
 
 export type StudentStatus = "Active" | "Transferred" | "Alumni" | "Suspended";

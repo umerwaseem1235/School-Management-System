@@ -368,7 +368,7 @@ export function AddSubjectDialog({
             </Button>
             <Button
               type="submit"
-              className="h-9 text-xs font-semibold bg-primary hover:bg-primary/90 text-white cursor-pointer gap-1.5"
+              className="h-9 text-xs font-semibold cursor-pointer gap-1.5"
             >
               <CheckCircle2 className="size-3.5 text-white" />
               Save & Register Subject

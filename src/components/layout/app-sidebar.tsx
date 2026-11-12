@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Menu, LogOut } from "lucide-react";
 import { NAV_GROUPS } from "@/config/navigation";
 import { cn } from "@/lib/utils";
@@ -50,15 +51,18 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="border-t border-white/10 p-3 shrink-0 overflow-hidden">
       <div className="flex items-center gap-3">
-        <div
-          title="Hamza Tariq (Super Admin)"
-          className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/15 font-heading text-xs font-bold text-white shadow-inner transition-colors duration-200 hover:bg-white/25"
+        <Link
+          href="/profile"
+          title="Hamza Tariq (Super Admin) — View Profile"
+          className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/15 font-heading text-xs font-bold text-white shadow-inner transition-colors duration-200 hover:bg-white/25 cursor-pointer"
         >
           HT
-        </div>
-        <div
+        </Link>
+        <Link
+          href="/profile"
+          title="View Admin Profile"
           className={cn(
-            "min-w-0 flex-1 whitespace-nowrap overflow-hidden transition-all duration-200 ease-out motion-reduce:transition-none",
+            "min-w-0 flex-1 whitespace-nowrap overflow-hidden transition-all duration-200 ease-out motion-reduce:transition-none hover:opacity-90 cursor-pointer",
             collapsed
               ? "pointer-events-none opacity-0 -translate-x-2"
               : "opacity-100 translate-x-0 delay-75"
@@ -66,7 +70,7 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
         >
           <p className="truncate text-xs font-semibold text-white">Hamza Tariq</p>
           <p className="truncate text-[10.5px] text-white/60">Super Administrator</p>
-        </div>
+        </Link>
         <button
           type="button"
           aria-label="Sign out"
@@ -153,10 +157,10 @@ export function AppSidebar() {
         {/* Sidebar Header with Brand Logo & Burger Action */}
         <div
           className={cn(
-            "flex h-16 shrink-0 items-center border-b border-[#091d3e]/15 bg-gradient-to-b from-[#eef3fc] via-[#e5eefb] to-[#dce7f8] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors overflow-hidden",
+            "flex h-16 shrink-0 items-center border-b border-r border-white/10 bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors overflow-hidden",
             isExpanded
               ? "justify-between px-3.5"
-              : "justify-center px-2 cursor-pointer hover:from-[#e6effc] hover:to-[#d3e1f6]"
+              : "justify-center px-2 cursor-pointer hover:bg-white/5"
           )}
           onClick={collapsed ? toggleSidebar : undefined}
           title={collapsed ? "Click to lock sidebar expanded" : undefined}
@@ -172,13 +176,13 @@ export function AppSidebar() {
               title={isLocked ? "Collapse to compact rail (hover to expand)" : "Lock sidebar expanded"}
               aria-label={isLocked ? "Collapse sidebar" : "Lock sidebar expanded"}
               className={cn(
-                "grid size-8 shrink-0 place-items-center rounded-[4px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
+                "grid size-8 shrink-0 place-items-center rounded-[4px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 cursor-pointer",
                 isLocked
-                  ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] hover:from-[#1e4275] hover:to-[#102848]"
-                  : "border border-brand/18 bg-white text-foreground/85 shadow-2xs hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand"
+                  ? "border border-[#386cb0]/50 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] hover:from-[#275797] hover:to-[#14335c]"
+                  : "border border-white/15 bg-white/10 text-white/90 shadow-2xs hover:bg-white/20 hover:text-white"
               )}
             >
-              <Menu className="size-4" />
+              <Menu className="size-4 text-white" />
             </button>
           )}
         </div>
@@ -206,16 +210,16 @@ export function MobileSidebar() {
         className="w-[280px] gap-0 border-none bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] p-0 text-sidebar-foreground"
       >
         <SheetTitle className="sr-only">Navigation</SheetTitle>
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-[#091d3e]/15 bg-gradient-to-b from-[#eef3fc] via-[#e5eefb] to-[#dce7f8] px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
           <BrandLogo collapsed={false} />
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
             title="Close navigation"
             aria-label="Close navigation"
-            className="grid size-8 shrink-0 place-items-center rounded-[4px] border border-brand/18 bg-white text-foreground/85 shadow-2xs transition-all duration-200 hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand"
+            className="grid size-8 shrink-0 place-items-center rounded-[4px] border border-[#386cb0]/50 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] text-white shadow-2xs transition-all duration-200 hover:from-[#275797] hover:to-[#14335c] cursor-pointer"
           >
-            <Menu className="size-4" />
+            <Menu className="size-4 text-white" />
           </button>
         </div>
         <SidebarBody collapsed={false} onNavigate={() => setMobileOpen(false)} />

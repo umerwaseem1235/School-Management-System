@@ -206,7 +206,7 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
               variant="ghost"
               size="icon"
               onClick={() => setViewBranch(r)}
-              className="size-7 rounded-lg text-muted-foreground hover:text-brand hover:bg-brand-50 transition-colors cursor-pointer"
+              className="size-7 rounded-[4px] text-muted-foreground hover:text-brand hover:bg-brand-50 transition-colors cursor-pointer"
               title="View Branch Profile"
             >
               <Eye className="size-3.5" />
@@ -218,7 +218,7 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
               variant="ghost"
               size="icon"
               onClick={() => setEditBranch(r)}
-              className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              className="size-7 rounded-[4px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               title="Edit Branch"
             >
               <Pencil className="size-3.5" />
@@ -231,7 +231,7 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
               size="icon"
               onClick={() => handleToggleStatus(r.id, r.status, r.campusName)}
               className={cn(
-                "size-7 rounded-lg transition-colors cursor-pointer",
+                "size-7 rounded-[4px] transition-colors cursor-pointer",
                 r.status === "Active"
                   ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
                   : "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40"
@@ -255,7 +255,7 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
               variant="ghost"
               size="icon"
               onClick={() => setDeleteBranchState(r)}
-              className="size-7 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
+              className="size-7 rounded-[4px] text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
               title="Remove Branch"
             >
               <Trash2 className="size-3.5" />
@@ -298,9 +298,9 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
         title="Branches"
         actions={
           <Button
-            size="sm"
+            size="lg"
             onClick={() => setCreateOpen(true)}
-            className="gap-1.5 shadow-sm"
+            className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
           >
             <Plus className="size-4" />
             <span>Add Branch</span>

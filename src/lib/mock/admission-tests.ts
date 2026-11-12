@@ -4,7 +4,7 @@ export type AdmissionSessionStatus = "Scheduled" | "Completed";
 
 export type ApplicantResultStatus = "Qualified" | "Not Qualified" | "Absent";
 
-export type AdmissionDecision = "Approved" | "Waitlisted" | "Pending" | "Rejected";
+export type AdmissionDecision = "Approved" | "Waitlisted" | "Pending" | "Rejected" | "Enrolled";
 
 export interface AdmissionTestSession {
   id: string;

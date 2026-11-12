@@ -16,7 +16,11 @@ import {
   ChevronDown,
   Check,
   FileText,
+  GraduationCap,
+  UserPlus,
 } from "lucide-react";
+import Link from "next/link";
+import { enrollNewStudent } from "@/lib/mock/admissions-storage";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -470,6 +474,33 @@ export default function AdmissionTestsPage() {
     toast.success(`Candidate status updated to ${decision}.`);
   };
 
+  const handleEnrollCandidate = (cand: MeritCandidateRow) => {
+    const candSession = sessions.find((s) => s.id === cand.sessionId);
+    const normalizedClass = cand.appliedClass
+      .replace("Class ", "Grade ")
+      .replace(" (Science)", "")
+      .replace(" (Computer)", "");
+
+    const { student } = enrollNewStudent({
+      name: cand.applicantName,
+      guardian: cand.fatherName,
+      phone: cand.phone || "0300-1234567",
+      className: normalizedClass,
+      section: "A",
+      campus: candSession?.campus || "Main Campus — Gulberg",
+      score: cand.percentage,
+      admissionType: "Entry Test",
+      status: "Active",
+      feeStatus: "Paid",
+    });
+
+    handleUpdateDecision(cand.id, "Enrolled");
+
+    toast.success("Candidate Enrolled as Student!", {
+      description: `${cand.applicantName} officially admitted into ${student.className} (${student.admissionNumber}). Added to both Student Directory and Admissions Hub.`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -481,6 +512,14 @@ export default function AdmissionTestsPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/admissions"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border/80 bg-background px-3 h-9 text-xs font-semibold text-foreground hover:bg-muted/60 transition-colors shadow-2xs cursor-pointer"
+          >
+            <GraduationCap className="size-3.5 text-brand" />
+            <span>Admissions Hub</span>
+          </Link>
+
           <Button
             variant="outline"
             size="sm"
@@ -492,9 +531,9 @@ export default function AdmissionTestsPage() {
           </Button>
 
           <Button
-            size="sm"
+            size="lg"
             onClick={() => setIsScheduleOpen(true)}
-            className="bg-brand text-brand-foreground hover:bg-brand/90 text-xs h-9 gap-1.5 shadow-xs cursor-pointer"
+            className="gap-1.5 cursor-pointer"
           >
             <Plus className="size-3.5" />
             <span>Schedule Test</span>
@@ -878,7 +917,7 @@ export default function AdmissionTestsPage() {
                     <Button
                       size="sm"
                       onClick={handleSaveEvaluation}
-                      className="bg-brand text-brand-foreground hover:bg-brand/90 text-xs h-9 gap-1.5 shadow-xs cursor-pointer"
+                      className="h-9 gap-1.5 cursor-pointer"
                     >
                       <Save className="size-3.5" />
                       <span>Save Evaluation</span>
@@ -1267,7 +1306,9 @@ export default function AdmissionTestsPage() {
                               <DropdownMenuTrigger
                                 className={cn(
                                   "inline-flex items-center justify-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 ring-inset transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
-                                  cand.decision === "Approved"
+                                  cand.decision === "Enrolled"
+                                    ? "bg-emerald-100 text-emerald-800 ring-emerald-300 font-bold"
+                                    : cand.decision === "Approved"
                                     ? "bg-success-soft text-success ring-success/20 hover:ring-success/45"
                                     : "bg-brand-50 text-brand ring-brand/15 hover:ring-brand/40"
                                 )}
@@ -1278,8 +1319,27 @@ export default function AdmissionTestsPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent
                                 align="center"
-                                className="w-40 p-1 rounded-xl shadow-lg border-border/80 space-y-0.5"
+                                className="w-44 p-1 rounded-xl shadow-lg border-border/80 space-y-0.5"
                               >
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleEnrollCandidate(cand)
+                                  }
+                                  className={cn(
+                                    "flex items-center justify-between px-2.5 py-2 rounded-lg text-xs cursor-pointer",
+                                    cand.decision === "Enrolled"
+                                      ? "bg-emerald-50 text-emerald-700 font-semibold"
+                                      : "hover:bg-muted/70 text-brand font-semibold"
+                                  )}
+                                >
+                                  <span className="flex items-center gap-1.5">
+                                    <GraduationCap className="size-3.5 text-brand" />
+                                    <span>Enroll in SIS</span>
+                                  </span>
+                                  {cand.decision === "Enrolled" && (
+                                    <Check className="size-3.5 text-emerald-600 shrink-0" />
+                                  )}
+                                </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() =>
                                     handleUpdateDecision(cand.id, "Approved")
@@ -1317,19 +1377,38 @@ export default function AdmissionTestsPage() {
                           </TableCell>
 
                           <TableCell className="px-5 py-3.5 text-right whitespace-nowrap">
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              onClick={() => {
-                                setViewApplicant(cand);
-                                setViewSession(candSession);
-                                setIsViewApplicantOpen(true);
-                              }}
-                              className="h-7.5 px-2.5 text-xs font-semibold text-foreground hover:text-brand hover:bg-brand-soft/50 hover:border-brand/30 border-border/80 cursor-pointer shadow-2xs gap-1.5"
-                            >
-                              <Eye className="size-3.5" />
-                              <span>View</span>
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              {cand.decision === "Enrolled" ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                                  <Check className="size-3" />
+                                  Enrolled in SIS
+                                </span>
+                              ) : (
+                                <Button
+                                  size="xs"
+                                  onClick={() => handleEnrollCandidate(cand)}
+                                  className="h-7.5 px-2.5 gap-1.5 cursor-pointer"
+                                  title="Officially admit and register this qualified candidate into Admissions and Students"
+                                >
+                                  <UserPlus className="size-3.5" />
+                                  <span>Enroll Student</span>
+                                </Button>
+                              )}
+
+                              <Button
+                                variant="outline"
+                                size="xs"
+                                onClick={() => {
+                                  setViewApplicant(cand);
+                                  setViewSession(candSession);
+                                  setIsViewApplicantOpen(true);
+                                }}
+                                className="h-7.5 px-2.5 text-xs font-semibold text-foreground hover:text-brand hover:bg-brand-soft/50 hover:border-brand/30 border-border/80 cursor-pointer shadow-2xs gap-1.5"
+                              >
+                                <Eye className="size-3.5" />
+                                <span>View</span>
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );

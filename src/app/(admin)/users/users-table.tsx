@@ -16,7 +16,21 @@ import {
 import { formatDateTime, formatCampusDisplay } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Role, Status, User } from "@/types";
-import { ChevronDown, Lock, Pencil } from "lucide-react";
+import {
+  Award,
+  Building2,
+  Calculator,
+  ChevronDown,
+  FileCheck2,
+  GraduationCap,
+  Laptop,
+  Lock,
+  Pencil,
+  PhoneCall,
+  ShieldCheck,
+  UserCheck,
+  Users,
+} from "lucide-react";
 
 interface UserTableProps {
   data: User[];
@@ -121,33 +135,126 @@ function UserStatusDropdown({
   );
 }
 
-function getRoleBadgeStyle(role: Role): string {
-  switch (role) {
-    case "Super Admin":
-      return "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900";
-    case "Campus Admin":
-      return "bg-brand-50 text-brand border-brand/20 dark:bg-brand-950/40 dark:text-brand-300 dark:border-brand/40";
-    case "Principal":
-      return "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-900";
-    case "HR Admin":
-      return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900";
-    case "Accountant":
-      return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900";
-    case "Exam Controller":
-      return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900";
-    case "Receptionist":
-      return "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-900";
-    case "Teacher":
-      return "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-900";
-    case "IT Support":
-      return "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
-    case "Student":
-      return "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-300 dark:border-cyan-900";
-    case "Parent":
-      return "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-900";
-    default:
-      return "bg-muted text-muted-foreground border-border";
+const ROLE_CONFIGS: Record<
+  Role,
+  {
+    icon: React.ComponentType<{ className?: string }>;
+    pillBorder: string;
+    pillBg: string;
+    textColor: string;
+    bubbleBg: string;
   }
+> = {
+  "Super Admin": {
+    icon: ShieldCheck,
+    pillBorder: "border-brand/25",
+    pillBg: "bg-white",
+    textColor: "text-[#091d3e]",
+    bubbleBg: "bg-gradient-to-b from-[#1e4275] to-[#091d3e]",
+  },
+  "Campus Admin": {
+    icon: Building2,
+    pillBorder: "border-brand/25",
+    pillBg: "bg-white",
+    textColor: "text-[#091d3e]",
+    bubbleBg: "bg-gradient-to-b from-[#1e4275] to-[#091d3e]",
+  },
+  Principal: {
+    icon: Award,
+    pillBorder: "border-purple-300/80",
+    pillBg: "bg-purple-50/40",
+    textColor: "text-purple-800",
+    bubbleBg: "bg-gradient-to-br from-purple-600 to-indigo-900",
+  },
+  Teacher: {
+    icon: UserCheck,
+    pillBorder: "border-slate-200/90",
+    pillBg: "bg-white",
+    textColor: "text-[#091d3e]",
+    bubbleBg: "bg-[#091d3e]",
+  },
+  Student: {
+    icon: GraduationCap,
+    pillBorder: "border-sky-300/80",
+    pillBg: "bg-sky-50/40",
+    textColor: "text-sky-700",
+    bubbleBg: "bg-gradient-to-br from-sky-400 to-sky-600",
+  },
+  Parent: {
+    icon: Users,
+    pillBorder: "border-amber-300/80",
+    pillBg: "bg-amber-50/40",
+    textColor: "text-amber-800",
+    bubbleBg: "bg-gradient-to-br from-amber-500 to-orange-600",
+  },
+  "HR Admin": {
+    icon: UserCheck,
+    pillBorder: "border-indigo-300/80",
+    pillBg: "bg-indigo-50/40",
+    textColor: "text-indigo-800",
+    bubbleBg: "bg-gradient-to-br from-indigo-600 to-slate-900",
+  },
+  Accountant: {
+    icon: Calculator,
+    pillBorder: "border-emerald-300/80",
+    pillBg: "bg-emerald-50/40",
+    textColor: "text-emerald-800",
+    bubbleBg: "bg-gradient-to-br from-emerald-600 to-teal-800",
+  },
+  "Exam Controller": {
+    icon: FileCheck2,
+    pillBorder: "border-blue-300/80",
+    pillBg: "bg-blue-50/40",
+    textColor: "text-blue-800",
+    bubbleBg: "bg-gradient-to-br from-blue-600 to-indigo-800",
+  },
+  Receptionist: {
+    icon: PhoneCall,
+    pillBorder: "border-teal-300/80",
+    pillBg: "bg-teal-50/40",
+    textColor: "text-teal-800",
+    bubbleBg: "bg-gradient-to-br from-teal-600 to-cyan-800",
+  },
+  "IT Support": {
+    icon: Laptop,
+    pillBorder: "border-slate-300/80",
+    pillBg: "bg-slate-50/40",
+    textColor: "text-slate-800",
+    bubbleBg: "bg-gradient-to-br from-slate-700 to-slate-900",
+  },
+};
+
+export function RoleBadge({ role, className }: { role: Role; className?: string }) {
+  const cfg = ROLE_CONFIGS[role] || {
+    icon: UserCheck,
+    pillBorder: "border-border/80",
+    pillBg: "bg-white",
+    textColor: "text-foreground",
+    bubbleBg: "bg-[#091d3e]",
+  };
+  const Icon = cfg.icon;
+
+  return (
+    <span
+      className={cn(
+        "inline-flex h-7 items-center gap-2 rounded-full border py-0 pl-1 pr-3 text-xs font-semibold shadow-[0_1px_2px_rgb(9_29_62/0.05)] select-none whitespace-nowrap transition-transform duration-150 hover:scale-[1.02]",
+        cfg.pillBorder,
+        cfg.pillBg,
+        cfg.textColor,
+        className
+      )}
+    >
+      <span
+        className={cn(
+          "grid size-5 shrink-0 place-items-center rounded-full text-white shadow-2xs ring-1 ring-white/20",
+          cfg.bubbleBg
+        )}
+      >
+        <Icon className="size-3 text-white" />
+      </span>
+      <span className="leading-none">{role}</span>
+    </span>
+  );
 }
 
 const ALL_ROLES: Role[] = [
@@ -214,13 +321,9 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
         header: "Role",
         align: "center",
         cell: (row) => (
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${getRoleBadgeStyle(
-              row.role
-            )}`}
-          >
-            {row.role}
-          </span>
+          <div className="flex items-center justify-center">
+            <RoleBadge role={row.role} />
+          </div>
         ),
         sortValue: (row) => row.role,
         className: "whitespace-nowrap",

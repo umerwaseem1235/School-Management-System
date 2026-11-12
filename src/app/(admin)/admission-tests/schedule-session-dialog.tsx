@@ -742,7 +742,8 @@ export function ScheduleSessionDialog({
           <DialogFooter className="m-0 px-6 py-4 border-t border-border/70 bg-muted/20 flex flex-row items-center justify-end shrink-0">
             <Button
               type="submit"
-              className="h-9 px-6 rounded-lg text-xs font-semibold bg-brand text-cream hover:bg-brand-600 shadow-xs cursor-pointer gap-1.5"
+              size="lg"
+              className="px-6 cursor-pointer gap-1.5"
             >
               <Check className="size-3.5" />
               <span>Save Session</span>

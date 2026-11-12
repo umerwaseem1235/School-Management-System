@@ -32,6 +32,7 @@ import {
   SlidersHorizontal,
   AlertCircle,
   Scale,
+  UserPlus,
   type LucideIcon,
 } from "lucide-react";
 
@@ -64,6 +65,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Administration",
     icon: ShieldCheck,
     items: [
+      { title: "Admissions", href: "/admissions", icon: UserPlus },
       { title: "Users & Roles", href: "/users", icon: UserCog },
       { title: "Accounts", href: "/accounts", icon: Calculator },
       { title: "Branches", href: "/branches", icon: Building2 },
@@ -163,6 +165,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Fee Reports", href: "/reports/fee-reports", icon: Banknote },
       { title: "Student Attendance Report", href: "/reports/student-attendance", icon: GraduationCap },
       { title: "Staff Attendance Report", href: "/reports/staff-attendance", icon: FileText },
+      { title: "Teacher Salary Report", href: "/reports/teacher-salary", icon: Calculator },
     ],
     defaultExpanded: false,
   },

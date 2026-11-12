@@ -87,16 +87,18 @@ export function StaffClient({ initialStaff }: StaffClientProps) {
           <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
+              size="lg"
               onClick={() => setIsExportOpen(true)}
-              className="gap-2 border-border/80 hover:bg-muted/60 shadow-2xs cursor-pointer text-xs font-semibold"
+              className="gap-2 cursor-pointer"
             >
               <FileDown className="size-4 text-brand" data-icon="inline-start" />
               <span>Export PDF</span>
             </Button>
 
             <Button
+              size="lg"
               onClick={() => setIsAddOpen(true)}
-              className="gap-2 bg-brand text-cream hover:bg-brand-600 cursor-pointer shadow-sm text-xs font-semibold px-4"
+              className="gap-2 cursor-pointer px-4"
             >
               <UserPlus className="size-4" data-icon="inline-start" />
               <span>Add Staff Member</span>

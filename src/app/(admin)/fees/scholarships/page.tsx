@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { ScholarshipsClient } from "./scholarships-client";
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 };
 
 export default function ScholarshipsPage() {
-  return <ScholarshipsClient />;
+  return (
+    <Suspense fallback={null}>
+      <ScholarshipsClient />
+    </Suspense>
+  );
 }

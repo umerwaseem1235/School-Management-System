@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   Building2,
   CalendarRange,
@@ -54,6 +55,7 @@ const YEAR_OPTIONS: AcademicYearOption[] = [
 ];
 
 export function Topbar() {
+  const router = useRouter();
   const { setMobileOpen } = useSidebar();
   const { branches } = useBranches();
   const [selectedCampus, setSelectedCampus] = React.useState<string>("all");
@@ -139,7 +141,7 @@ export function Topbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-[#091d3e]/15 bg-gradient-to-b from-[#eef3fc]/95 via-[#e5eefb]/95 to-[#dce7f8]/95 px-4 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_12px_-3px_rgba(9,29,62,0.10)] sm:px-6">
+      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] px-4 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_20px_-2px_rgba(9,29,62,0.45)] sm:px-6">
         {/* Left Section: Mobile Drawer Toggle & Breadcrumbs */}
         <div className="flex min-w-0 items-center gap-3" suppressHydrationWarning>
           <button
@@ -147,9 +149,9 @@ export function Topbar() {
             aria-label="Open navigation menu"
             suppressHydrationWarning
             onClick={() => setMobileOpen(true)}
-            className="grid size-8.5 shrink-0 place-items-center rounded-[4px] border border-brand/18 bg-white text-foreground/85 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06)] transition-all duration-150 hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 lg:hidden"
+            className="grid size-8.5 shrink-0 place-items-center rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 lg:hidden"
           >
-            <Menu className="size-4" />
+            <Menu className="size-4 text-[#93c5fd] transition-colors hover:text-white" />
           </button>
 
           <Breadcrumbs />
@@ -161,23 +163,23 @@ export function Topbar() {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Select Campus"
-              className="group hidden md:flex h-8.5 items-center gap-2 rounded-[4px] border border-brand/18 bg-white px-3 text-xs font-semibold tracking-[0.01em] text-foreground/85 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06)] transition-all duration-150 hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 data-[state=open]:border-[#091d3e] data-[state=open]:bg-brand-50/70"
+              className="group hidden md:flex h-8.5 items-center gap-2 rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] px-3 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(9,29,62,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 data-[state=open]:border-[#6aa4f0] data-[state=open]:from-[#275797] data-[state=open]:to-[#14335c]"
             >
-              <Building2 className="size-3.5 text-muted-foreground transition-colors group-hover:text-brand" />
-              <span className="max-w-[140px] truncate">
+              <Building2 className="size-3.5 text-[#93c5fd] transition-colors group-hover:text-white" />
+              <span className="max-w-[140px] truncate text-white">
                 {activeCampusObj ? activeCampusObj.campusName.split("—")[0].trim() : "All Campuses"}
               </span>
               {activeCampusObj && activeCampusObj.status !== "Active" && (
                 <span className={cn(
                   "rounded px-1 py-0.2 text-[9.5px] font-semibold",
                   activeCampusObj.status === "Pending"
-                    ? "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
-                    : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                    ? "bg-amber-400/25 text-amber-200 border border-amber-400/40"
+                    : "bg-slate-400/25 text-slate-200 border border-slate-400/40"
                 )}>
                   {activeCampusObj.status}
                 </span>
               )}
-              <ChevronDown className="size-3 text-muted-foreground transition-transform group-hover:text-brand group-data-[popup-open]:rotate-180" />
+              <ChevronDown className="size-3 text-white/70 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
@@ -262,11 +264,11 @@ export function Topbar() {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Select Academic Year"
-              className="group hidden md:flex h-8.5 items-center gap-2 rounded-[4px] border border-brand/18 bg-white px-3 text-xs font-semibold tracking-[0.01em] text-foreground/85 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06)] transition-all duration-150 hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 data-[state=open]:border-[#091d3e] data-[state=open]:bg-brand-50/70"
+              className="group hidden md:flex h-8.5 items-center gap-2 rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] px-3 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(9,29,62,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 data-[state=open]:border-[#6aa4f0] data-[state=open]:from-[#275797] data-[state=open]:to-[#14335c]"
             >
-              <CalendarRange className="size-3.5 text-muted-foreground transition-colors group-hover:text-brand" />
-              <span>{activeYearObj.label}</span>
-              <ChevronDown className="size-3 text-muted-foreground transition-transform group-hover:text-brand group-data-[popup-open]:rotate-180" />
+              <CalendarRange className="size-3.5 text-[#93c5fd] transition-colors group-hover:text-white" />
+              <span className="text-white">{activeYearObj.label}</span>
+              <ChevronDown className="size-3 text-white/70 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
@@ -341,7 +343,7 @@ export function Topbar() {
           <QuickActions />
 
           {/* Divider */}
-          <div className="hidden sm:block h-4 w-px bg-[#0D1C42]/18 mx-0.5" />
+          <div className="hidden sm:block h-4 w-px bg-white/20 mx-0.5" />
 
           {/* Notifications */}
           <NotificationCenter />
@@ -350,22 +352,26 @@ export function Topbar() {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="User Account"
-              className="group flex h-8.5 items-center gap-2 rounded-[4px] border border-brand/18 bg-white pl-1.5 pr-2.5 text-xs font-semibold tracking-[0.01em] text-foreground/85 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06)] transition-all duration-150 hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 data-[state=open]:border-[#091d3e] data-[state=open]:bg-brand-50/70"
+              className="group flex h-8.5 items-center gap-2 rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] pl-1.5 pr-2.5 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(9,29,62,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 data-[state=open]:border-[#6aa4f0]"
             >
-              <span className="grid size-6 place-items-center rounded-[3px] bg-gradient-to-b from-[#16345f] to-[#091d3e] font-heading text-[10.5px] font-bold text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]">
+              <span className="grid size-6 place-items-center rounded-[3px] bg-gradient-to-b from-[#316ec2] to-[#1a447f] text-white font-heading text-[10.5px] font-bold shadow-inner ring-1 ring-white/20">
                 HT
               </span>
               <div className="hidden text-left leading-tight md:block">
-                <span className="block font-semibold text-foreground">Hamza Tariq</span>
+                <span className="block font-semibold text-white">Hamza Tariq</span>
               </div>
-              <ChevronDown className="size-3 text-muted-foreground transition-transform group-hover:text-brand group-data-[popup-open]:rotate-180" />
+              <ChevronDown className="size-3 text-white/70 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
               align="end"
               className="w-60 p-1.5 rounded-[4px] shadow-xl border border-brand/15 bg-popover text-popover-foreground"
             >
-              <div className="px-2.5 py-2 border-b border-border/70 mb-1">
+              <div
+                onClick={() => router.push("/profile")}
+                className="px-2.5 py-2 border-b border-border/70 mb-1 cursor-pointer hover:bg-muted/40 transition-colors rounded-[3px]"
+                title="View Admin Profile"
+              >
                 <p className="text-xs font-semibold text-foreground">Hamza Tariq</p>
                 <p className="text-[11px] text-muted-foreground truncate">
                   hamza.tariq@edusphere.edu.pk
@@ -380,7 +386,7 @@ export function Topbar() {
 
               <DropdownMenuGroup>
                 <DropdownMenuItem
-                  onClick={() => toast.info("Opening Admin Profile...")}
+                  onClick={() => router.push("/profile")}
                   className="gap-2 rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs"
                 >
                   <UserRound className="size-3.5 text-muted-foreground" />
@@ -388,7 +394,7 @@ export function Topbar() {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  onClick={() => toast.info("2FA is active and enforced.")}
+                  onClick={() => router.push("/profile?tab=security")}
                   className="gap-2 rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs"
                 >
                   <ShieldCheck className="size-3.5 text-success" />
@@ -405,7 +411,7 @@ export function Topbar() {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem
-                  onClick={() => toast.info("Opening System Preferences...")}
+                  onClick={() => router.push("/profile?tab=preferences")}
                   className="gap-2 rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs"
                 >
                   <Settings className="size-3.5 text-muted-foreground" />

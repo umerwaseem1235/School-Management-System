@@ -168,16 +168,24 @@ function buildStudentFeeStatementHtml(
   const calculatedAmountDue = feeRows.reduce((sum, [, amount]) => sum + Number(amount), 0);
   const unattachedFines = Math.max(0, unpaidFineTotal - fineCharges);
   const totalPayableWithDuesAndFines = calculatedAmountDue + previousDues + unattachedFines;
-  const effectivePaid = Math.min(
-    totalPayableWithDuesAndFines,
-    challan.status === "Paid" && challan.paid < (calculatedAmountDue + previousDues)
-      ? (calculatedAmountDue + previousDues)
-      : challan.paid
-  );
+
+  // Deduplicate any identical payment entries
+  const rawPayments = challan.payments && challan.payments.length > 0 ? challan.payments : [];
+  const seenP = new Set<string>();
+  const dedupedList = rawPayments.filter((p) => {
+    const key = `${p.receiptNumber || ""}-${p.paymentDate || ""}-${p.amount}-${p.paymentMethod || ""}`;
+    if (seenP.has(key)) return false;
+    seenP.add(key);
+    return true;
+  });
+
+  const sumOfPayments = dedupedList.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const actualPaidAmount = sumOfPayments > 0 ? sumOfPayments : (challan.paid ?? 0);
+  const effectivePaid = Math.min(totalPayableWithDuesAndFines, actualPaidAmount);
   const remainingBalance = Math.max(0, totalPayableWithDuesAndFines - effectivePaid);
 
-  const paymentsList = challan.payments && challan.payments.length > 0
-    ? challan.payments
+  const paymentsList = dedupedList.length > 0
+    ? dedupedList
     : effectivePaid > 0
       ? [{
           id: "pay-1",
@@ -802,16 +810,24 @@ export function exportStudentFeeStatementPdf(
 
   const amountDue = calculatedChargesTotal + additionalAdjustments;
   const totalPayableWithDuesAndFines = amountDue + previousDues + unpaidFineTotal;
-  const effectivePaid = Math.min(
-    totalPayableWithDuesAndFines,
-    challan.status === "Paid" && challan.paid < (amountDue + previousDues)
-      ? (amountDue + previousDues)
-      : challan.paid
-  );
+
+  // Deduplicate any identical payment entries
+  const rawPaymentsPdf = challan.payments && challan.payments.length > 0 ? challan.payments : [];
+  const seenPdfP = new Set<string>();
+  const dedupedPdfList = rawPaymentsPdf.filter((p) => {
+    const key = `${p.receiptNumber || ""}-${p.paymentDate || ""}-${p.amount}-${p.paymentMethod || ""}`;
+    if (seenPdfP.has(key)) return false;
+    seenPdfP.add(key);
+    return true;
+  });
+
+  const sumOfPdfPayments = dedupedPdfList.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const actualPdfPaid = sumOfPdfPayments > 0 ? sumOfPdfPayments : (challan.paid ?? 0);
+  const effectivePaid = Math.min(totalPayableWithDuesAndFines, actualPdfPaid);
   const remainingBalance = Math.max(0, totalPayableWithDuesAndFines - effectivePaid);
 
-  const paymentsList = challan.payments && challan.payments.length > 0
-    ? challan.payments
+  const paymentsList = dedupedPdfList.length > 0
+    ? dedupedPdfList
     : effectivePaid > 0
       ? [{
           id: "pay-1",

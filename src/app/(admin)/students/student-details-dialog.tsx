@@ -249,8 +249,9 @@ Enrolled: ${student.enrolledOn}`;
           <Button
             type="button"
             variant="outline"
+            size="lg"
             onClick={handleCopySummary}
-            className="h-9 gap-2 px-4 rounded-lg text-xs font-semibold border-border/80 bg-background text-foreground/90 hover:bg-muted/70 hover:text-foreground shadow-2xs transition-all active:scale-95 cursor-pointer"
+            className="gap-2 px-4 cursor-pointer"
           >
             {copied ? (
               <>
@@ -266,8 +267,9 @@ Enrolled: ${student.enrolledOn}`;
           </Button>
           <Button
             type="button"
+            size="lg"
             onClick={() => onOpenChange(false)}
-            className="h-9 px-5 rounded-lg text-xs font-semibold bg-brand text-cream hover:bg-brand-600 shadow-sm transition-all active:scale-95 cursor-pointer"
+            className="px-5 cursor-pointer"
           >
             Close
           </Button>

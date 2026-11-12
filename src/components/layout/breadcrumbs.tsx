@@ -12,6 +12,8 @@ const ROUTE_MAP: Record<string, { title: string; group: string }> = {
   "/students": { title: "Students", group: "Students" },
   "/reception": { title: "Reception", group: "Reception" },
   "/staff": { title: "Staff", group: "Staff" },
+  "/profile": { title: "Administrator Profile", group: "Administration" },
+  "/admissions": { title: "Admissions", group: "Administration" },
   "/users": { title: "Users & Roles", group: "Administration" },
   "/academics": { title: "Academic Management", group: "Administration" },
   "/lms": { title: "LMS", group: "Academics" },
@@ -32,6 +34,10 @@ const ROUTE_MAP: Record<string, { title: string; group: string }> = {
   "/library": { title: "Library", group: "Student Life" },
   "/hostel": { title: "Hostel Management", group: "Student Life" },
   "/fees": { title: "Fee Collection", group: "Finance" },
+  "/reports/fee-reports": { title: "Fee Reports", group: "Reports" },
+  "/reports/student-attendance": { title: "Student Attendance Report", group: "Reports" },
+  "/reports/staff-attendance": { title: "Staff Attendance Report", group: "Reports" },
+  "/reports/teacher-salary": { title: "Teacher Salary Report", group: "Reports" },
   "/accounts": { title: "Accounts", group: "Administration" },
   "/branches": { title: "Branches", group: "Administration" },
   "/campuses": { title: "Branches", group: "Administration" },
@@ -65,11 +71,11 @@ export function Breadcrumbs({ className }: { className?: string }) {
 
   return (
     <nav aria-label="Breadcrumb" className={cn("flex min-w-0 items-center gap-2", className)}>
-      <span className="hidden text-xs font-semibold uppercase tracking-wider text-[#0D1C42]/65 sm:inline shrink-0">
+      <span className="hidden text-xs font-bold uppercase tracking-wider text-white sm:inline shrink-0 drop-shadow-xs">
         {current.group}
       </span>
-      <span className="hidden text-[#0D1C42]/30 sm:inline shrink-0">/</span>
-      <h1 className="truncate font-heading text-sm font-bold tracking-tight text-[#0D1C42]">
+      <span className="hidden text-white/70 font-semibold sm:inline shrink-0">/</span>
+      <h1 className="truncate font-heading text-[15px] font-extrabold tracking-tight text-white drop-shadow-xs">
         {current.title}
       </h1>
     </nav>

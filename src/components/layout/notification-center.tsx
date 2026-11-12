@@ -105,13 +105,13 @@ export function NotificationCenter({ className }: { className?: string }) {
       <DropdownMenuTrigger
         aria-label="Notifications"
         className={cn(
-          "group relative grid size-8.5 place-items-center rounded-[4px] border border-brand/18 bg-white text-foreground/85 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06)] transition-all duration-150 hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 data-[state=open]:border-[#091d3e] data-[state=open]:bg-brand-50/70",
+          "group relative grid size-8.5 place-items-center rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 hover:text-white hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(9,29,62,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 data-[state=open]:border-[#6aa4f0]",
           className
         )}
       >
-        <Bell className="size-4" />
+        <Bell className="size-4 text-[#93c5fd] transition-colors group-hover:text-white" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-white" />
+          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-[#102a50]" />
         )}
       </DropdownMenuTrigger>
 

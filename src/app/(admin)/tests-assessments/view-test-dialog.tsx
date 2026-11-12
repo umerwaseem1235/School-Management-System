@@ -258,11 +258,12 @@ export function ViewTestDialog({
           </Button>
           <Button
             type="button"
+            size="lg"
             onClick={() => {
               onOpenChange(false);
               onOpenMarks(test.id);
             }}
-            className="h-9 px-5 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 rounded-lg shadow-xs cursor-pointer"
+            className="px-5 gap-1.5 cursor-pointer"
           >
             <Edit3 className="size-3.5" />
             <span>{test.status === "Graded" ? "View / Edit Marks" : "Enter Marks"}</span>

@@ -590,8 +590,8 @@ export function EditResultDialog({
             </Button>
             <Button
               type="submit"
-              size="sm"
-              className="text-xs bg-brand text-brand-foreground hover:bg-brand/90 gap-1.5 shadow-sm cursor-pointer"
+              size="lg"
+              className="gap-1.5 cursor-pointer"
             >
               <Award className="size-4" />
               <span>Update Result</span>

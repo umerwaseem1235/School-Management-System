@@ -278,7 +278,7 @@ export function EditClassDialog({
             <Button
               type="submit"
               size="sm"
-              className="bg-brand text-cream hover:bg-brand-600 text-xs h-8 gap-1.5"
+              className="text-xs h-8 gap-1.5 cursor-pointer"
             >
               <CheckCircle2 className="size-3.5" />
               Save Changes

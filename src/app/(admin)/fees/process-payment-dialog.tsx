@@ -49,7 +49,10 @@ interface ProcessPaymentDialogProps {
     lateFee: number,
     paymentDate: string,
     paymentMethod?: string,
-    receiptNumber?: string
+    receiptNumber?: string,
+    /** The canonical total payable computed by the dialog (currentMonthCharges + previousDues + unpaidFines + lateFee).
+     *  Passed so the handler can synchronise challan.totalPayable with what the user actually saw. */
+    canonicalTotalPayable?: number
   ) => void;
   fines?: FeeFineRecord[];
   feeTiers?: FeeRevisionRecord[];
@@ -162,6 +165,7 @@ export function ProcessPaymentDialog({
   const [useManualLateFee, setUseManualLateFee] = React.useState(false);
   const [waivedReason, setWaivedReason] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   // Match class fee configuration tier
   const tier = React.useMemo(() => {
@@ -240,8 +244,11 @@ export function ProcessPaymentDialog({
     ? Math.round(Number(manualLateFee) || 0)
     : effectiveAutoLateFee;
 
-  // Base total payable across Current Month + Arrears + Fines
-  const baseTotalPayable = Math.round(calculatedChargesTotal + previousDues + unpaidFineTotal);
+  // Base total payable across Current Month + Arrears + Fines.
+  // MUST use currentMonthCharges (= calculatedChargesTotal + additionalAdjustments)
+  // so that any supplemental challan adjustment is included in the payable total,
+  // matching exactly the "Current month charges" figure shown in the breakdown above.
+  const baseTotalPayable = Math.round(currentMonthCharges + previousDues + unpaidFineTotal);
   
   // Total payable including any dynamically calculated or adjusted late fee
   const totalPayableWithLateFee = Math.round(baseTotalPayable + effectiveLateFee);
@@ -279,6 +286,7 @@ export function ProcessPaymentDialog({
       setUseManualLateFee(false);
       setWaivedReason("");
       setError(null);
+      setIsSubmitting(false);
     }
   }, [open, challan]);
 
@@ -286,6 +294,7 @@ export function ProcessPaymentDialog({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError(null);
 
     if (!paymentDate) {
@@ -306,13 +315,15 @@ export function ProcessPaymentDialog({
       return setError("Please provide a reason for the manual late fee adjustment or waiver.");
     }
 
+    setIsSubmitting(true);
     onProcessPayment(
       challan.id,
       paymentAmt,
       effectiveLateFee,
       paymentDate,
       paymentMethod,
-      referenceNumber || `RCP-${challan.challanNumber.slice(-6)}`
+      referenceNumber || `RCP-${challan.challanNumber.slice(-6)}`,
+      totalPayableWithLateFee
     );
     onOpenChange(false);
   };
@@ -1052,20 +1063,22 @@ export function ProcessPaymentDialog({
               type="submit"
               size="sm"
               variant="default"
-              disabled={isExcessAmount || paymentAmt <= 0}
+              disabled={isSubmitting || isExcessAmount || paymentAmt <= 0}
               className={cn(
                 "gap-1.5 text-xs font-semibold cursor-pointer",
-                isExcessAmount || paymentAmt <= 0
+                isSubmitting || isExcessAmount || paymentAmt <= 0
                   ? "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
                   : "bg-emerald-600 hover:bg-emerald-700 text-white"
               )}
             >
               <Check className="size-4" />
-              {isExcessAmount
-                ? `Exceeds Max Due (${formatCurrency(remainingBeforeThisPayment)})`
-                : paymentAmt > 0
-                  ? `Process Payment (${formatCurrency(paymentAmt)})`
-                  : "Enter Received Amount"}
+              {isSubmitting
+                ? "Processing…"
+                : isExcessAmount
+                  ? `Exceeds Max Due (${formatCurrency(remainingBeforeThisPayment)})`
+                  : paymentAmt > 0
+                    ? `Process Payment (${formatCurrency(paymentAmt)})`
+                    : "Enter Received Amount"}
             </Button>
           </DialogFooter>
         </form>

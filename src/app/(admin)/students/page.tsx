@@ -1,4 +1,4 @@
-import { STUDENTS } from "@/lib/mock/institution";
+import { getStoredStudents } from "@/lib/mock/admissions-storage";
 import { StudentsClient } from "./students-client";
 
 export const metadata = {
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function StudentsPage() {
-  return <StudentsClient initialStudents={STUDENTS} />;
+  return <StudentsClient initialStudents={getStoredStudents()} />;
 }

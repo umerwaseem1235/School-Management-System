@@ -221,7 +221,7 @@ export function AddExamDialog({
             <Button
               type="submit"
               size="sm"
-              className="bg-brand text-cream hover:bg-brand-600 text-xs h-8.5 px-4 cursor-pointer shadow-2xs"
+              className="h-8.5 px-4 cursor-pointer"
             >
               Save Examination
             </Button>

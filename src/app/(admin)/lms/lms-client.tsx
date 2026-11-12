@@ -32,6 +32,7 @@ import {
   Eye,
   ChevronDown,
   Check,
+  Building2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -213,24 +214,53 @@ export function LmsClient({
         headerClassName: "pl-6 pr-3 text-left",
       },
       {
-        key: "class",
-        header: "Class & Instructor",
+        key: "className",
+        header: "Class",
         align: "center",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center min-w-0 leading-tight text-center">
+          <div className="flex items-center justify-center text-center">
             <span
-              className="text-xs font-semibold text-foreground truncate max-w-full text-center"
+              className="inline-flex items-center px-2.5 py-0.5 rounded-[4px] text-xs font-semibold bg-muted/60 text-foreground border border-border/60"
               title={r.className}
             >
               {formatCompactClass(r.className)}
             </span>
-            <span className="text-[11px] text-muted-foreground truncate max-w-full mt-0.5 text-center">
-              {r.teacher}
-            </span>
           </div>
         ),
-        className: "px-3 py-3 text-center min-w-[150px]",
+        className: "px-3 py-3 text-center min-w-[110px]",
         headerClassName: "px-3 text-center",
+      },
+      {
+        key: "teacher",
+        header: "Instructor",
+        align: "left",
+        cell: (r) => {
+          const initials =
+            r.teacher
+              .replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.)\s*/, "")
+              .split(" ")
+              .map((w) => w[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase() || "T";
+          return (
+            <div className="flex items-center gap-2 min-w-0 text-left">
+              <div className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-brand font-semibold text-[10.5px]">
+                {initials}
+              </div>
+              <div className="min-w-0 flex flex-col leading-tight">
+                <span className="text-xs font-semibold text-foreground truncate" title={r.teacher}>
+                  {r.teacher}
+                </span>
+                <span className="text-[10.5px] text-muted-foreground truncate">
+                  Instructor
+                </span>
+              </div>
+            </div>
+          );
+        },
+        className: "px-3 py-3 text-left min-w-[150px]",
+        headerClassName: "px-3 text-left",
       },
       {
         key: "dueDate",
@@ -501,7 +531,7 @@ export function LmsClient({
               ? "Education"
               : r.subject || r.title;
           return (
-            <div className="flex flex-col min-w-0 py-0.5 leading-tight">
+            <div className="flex flex-col min-w-0 py-0.5 leading-tight gap-1">
               <button
                 type="button"
                 onClick={() => setViewingSyllabusCourse(r)}
@@ -510,9 +540,13 @@ export function LmsClient({
               >
                 {courseName}
               </button>
-              <span className="text-[11px] text-muted-foreground truncate mt-0.5 text-left" title={r.campus}>
-                {r.campus}
-              </span>
+              <div
+                className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground truncate text-left"
+                title={r.campus}
+              >
+                <Building2 className="size-3 text-muted-foreground/75 shrink-0" />
+                <span className="truncate">{r.campus}</span>
+              </div>
             </div>
           );
         },
@@ -520,24 +554,53 @@ export function LmsClient({
         headerClassName: "pl-6 pr-3 text-left",
       },
       {
-        key: "class",
-        header: "Class & Instructor",
+        key: "className",
+        header: "Class",
         align: "center",
         cell: (r) => (
-          <div className="flex flex-col items-center justify-center min-w-0 leading-tight text-center">
+          <div className="flex items-center justify-center text-center">
             <span
-              className="text-xs font-semibold text-foreground truncate max-w-full text-center"
+              className="inline-flex items-center px-2.5 py-0.5 rounded-[4px] text-xs font-semibold bg-muted/60 text-foreground border border-border/60"
               title={r.className}
             >
               {formatCompactClass(r.className)}
             </span>
-            <span className="text-[11px] text-muted-foreground truncate max-w-full mt-0.5 text-center">
-              {r.teacher}
-            </span>
           </div>
         ),
-        className: "px-3 py-3 text-center min-w-[150px]",
+        className: "px-3 py-3 text-center min-w-[110px]",
         headerClassName: "px-3 text-center",
+      },
+      {
+        key: "teacher",
+        header: "Instructor",
+        align: "left",
+        cell: (r) => {
+          const initials =
+            r.teacher
+              .replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.)\s*/, "")
+              .split(" ")
+              .map((w) => w[0])
+              .join("")
+              .slice(0, 2)
+              .toUpperCase() || "T";
+          return (
+            <div className="flex items-center gap-2 min-w-0 text-left">
+              <div className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-brand font-semibold text-[10.5px]">
+                {initials}
+              </div>
+              <div className="min-w-0 flex flex-col leading-tight">
+                <span className="text-xs font-semibold text-foreground truncate" title={r.teacher}>
+                  {r.teacher}
+                </span>
+                <span className="text-[10.5px] text-muted-foreground truncate">
+                  Instructor
+                </span>
+              </div>
+            </div>
+          );
+        },
+        className: "px-3 py-3 text-left min-w-[150px]",
+        headerClassName: "px-3 text-left",
       },
       {
         key: "enrollment",
@@ -633,7 +696,43 @@ export function LmsClient({
   return (
     <div className="space-y-6 overflow-x-hidden">
       {/* Top Header */}
-      <PageHeader title="Learning Management System (LMS)" />
+      <PageHeader
+        title="Learning Management System (LMS)"
+        actions={
+          <div className="flex items-center gap-2.5">
+            {activeTab === "courses" && (
+              <Button
+                size="lg"
+                onClick={() => setIsCourseDialogOpen(true)}
+                className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
+              >
+                <Plus className="size-4" />
+                <span>Add Course</span>
+              </Button>
+            )}
+            {activeTab === "assignments" && (
+              <Button
+                size="lg"
+                onClick={handleOpenNewAssignmentGlobal}
+                className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
+              >
+                <Plus className="size-4" />
+                <span>New Assignment</span>
+              </Button>
+            )}
+            {activeTab === "materials" && (
+              <Button
+                size="lg"
+                onClick={() => setIsMaterialDialogOpen(true)}
+                className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
+              >
+                <Upload className="size-4" />
+                <span>Upload Material</span>
+              </Button>
+            )}
+          </div>
+        }
+      />
 
       {/* KPI Stats Row */}
       <StatGrid className="max-w-none">
@@ -731,40 +830,6 @@ export function LmsClient({
                 })}
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-
-          {/* Context Action for Currently Selected Portion */}
-          <div className="flex items-center gap-2 self-end sm:self-auto">
-            {activeTab === "courses" && (
-              <Button
-                size="sm"
-                onClick={() => setIsCourseDialogOpen(true)}
-                className="h-8 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
-              >
-                <Plus className="size-3.5" />
-                <span>Add Course</span>
-              </Button>
-            )}
-            {activeTab === "assignments" && (
-              <Button
-                size="sm"
-                onClick={handleOpenNewAssignmentGlobal}
-                className="h-8 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
-              >
-                <Plus className="size-3.5" />
-                <span>New Assignment</span>
-              </Button>
-            )}
-            {activeTab === "materials" && (
-              <Button
-                size="sm"
-                onClick={() => setIsMaterialDialogOpen(true)}
-                className="h-8 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
-              >
-                <Upload className="size-3.5" />
-                <span>Upload Material</span>
-              </Button>
-            )}
           </div>
         </div>
 

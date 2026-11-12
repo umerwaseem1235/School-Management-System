@@ -304,7 +304,7 @@ export function ViewMaterialDialog({
                 type="button"
                 size="sm"
                 onClick={handleDownload}
-                className="h-8.5 px-3.5 text-xs font-semibold gap-1.5 shadow-xs cursor-pointer flex-1 sm:flex-none bg-primary hover:bg-primary/90 text-white"
+                className="h-8.5 px-3.5 gap-1.5 cursor-pointer flex-1 sm:flex-none"
               >
                 <Download className="size-3.5" />
                 <span>Download</span>

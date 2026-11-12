@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Download, Plus, Printer, Wallet, CreditCard, TrendingUp, UserCheck, Eye, Pencil, Trash2, Clock, CheckCircle2, AlertCircle, CalendarDays, Building2, Receipt } from "lucide-react";
+import { Download, Plus, Printer, Wallet, CreditCard, TrendingUp, UserCheck, Eye, Pencil, Trash2, Clock, CheckCircle2, AlertCircle, CalendarDays, Building2, Receipt, User } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatCurrencyCompact, formatDate, formatNumber } from "@/lib/format";
 import { FEE_CHALLANS } from "@/lib/mock/operations";
+import { STUDENTS } from "@/lib/mock/institution";
 import type { FeeChallan, FeeStatus } from "@/types";
 import { exportFeeChallansPdf, printFeeReport, exportStudentFeeStatementPdf, printStudentFeeStatement } from "./fee-export";
 import { AddFeeDialog } from "./add-fee-dialog";
@@ -21,7 +22,7 @@ import { FeeChallanDetailsDialog } from "./fee-challan-details-dialog";
 import { FeeCollectionCalendarDropdown, isAllDateFilter } from "./fee-collection-calendar";
 import { getMergedChallans } from "@/lib/mock/historical-collections";
 import { FEE_REVISIONS, FEE_FINES, type FeeRevisionRecord, type FeeFineRecord } from "@/lib/mock/finance";
-import { readFeeConfiguration, readFeeFines, readFeeChallans, writeFeeChallans, resolveMatchingTier, calculatePreviousMonthDues, getStudentRollNo } from "@/lib/mock/finance-storage";
+import { readFeeConfiguration, readFeeFines, readFeeChallans, writeFeeChallans, resolveMatchingTier, calculatePreviousMonthDues, getStudentRollNo, calculateChallanAmountDue } from "@/lib/mock/finance-storage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 /* ─── Challan Table ─── */
@@ -261,9 +262,10 @@ function getChallanColumns(
   onEdit: (challan: FeeChallan) => void,
   onPrintStatement: (challan: FeeChallan) => void,
   onDownloadStatement: (challan: FeeChallan) => void,
-  fines: FeeFineRecord[]
-): Column<FeeChallan>[] {
-  return [
+  fines: FeeFineRecord[],
+  feeTiers: FeeRevisionRecord[],
+  allChallans: FeeChallan[]
+): Column<FeeChallan>[] {  return [
     {
       key: "challanNumber",
       header: "Challan #",
@@ -336,13 +338,13 @@ function getChallanColumns(
       header: "Amount Due",
       align: "center",
       cell: (r) => {
-        const { totalDue } = getChallanTotalDueWithFines(r, fines);
+        const { baseTotalPayable } = calculateChallanAmountDue(r, feeTiers, fines, allChallans);
         return (
           <span
             className="font-mono text-[13px] font-bold tabular-nums text-rose-600 dark:text-rose-400"
             suppressHydrationWarning
           >
-            {formatCurrency(totalDue)}
+            {formatCurrency(baseTotalPayable)}
           </span>
         );
       },
@@ -377,61 +379,65 @@ function getChallanColumns(
       key: "actions",
       header: "Actions",
       align: "center",
-      cell: (r) => (
-        <div className="flex items-center justify-center gap-1">
-          {/* Receive Payment Action (for pending / partial / overdue challans) */}
-          {r.status !== "Paid" && (
+      cell: (r) => {
+        const { baseTotalPayable } = calculateChallanAmountDue(r, feeTiers, fines, allChallans);
+        const remaining = Math.max(0, baseTotalPayable - r.paid);
+        return (
+          <div className="flex items-center justify-center gap-1">
+            {/* Receive Payment Action (for pending / partial / overdue challans) */}
+            {r.status !== "Paid" && (
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                onClick={() => onProcessPayment(r)}
+                className="size-7 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40"
+                aria-label="Receive payment"
+                title={`Receive Payment (Remaining: ${formatCurrency(remaining)})`}
+              >
+                <CreditCard className="size-3.5" />
+              </Button>
+            )}
+
+            {/* Primary Action - View Details */}
             <Button
               size="icon-sm"
               variant="ghost"
-              onClick={() => onProcessPayment(r)}
-              className="size-7 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40"
-              aria-label="Receive payment"
-              title={`Receive Payment (Remaining: ${formatCurrency(Math.max(0, getChallanTotalDueWithFines(r, fines).totalDue - r.paid))})`}
+              onClick={() => onViewDetails(r)}
+              className="size-7 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40"
+              aria-label="View details"
+              title="View Details"
             >
-              <CreditCard className="size-3.5" />
+              <Eye className="size-3.5 text-blue-600" />
             </Button>
-          )}
 
-          {/* Primary Action - View Details */}
-          <Button
-            size="icon-sm"
-            variant="ghost"
-            onClick={() => onViewDetails(r)}
-            className="size-7 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40"
-            aria-label="View details"
-            title="View Details"
-          >
-            <Eye className="size-3.5 text-blue-600" />
-          </Button>
+            {/* Edit Action */}
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={() => onEdit(r)}
+              className="size-7 text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/40"
+              aria-label="Edit challan"
+              title="Edit Challan"
+            >
+              <Pencil className="size-3.5 text-amber-600" />
+            </Button>
 
-          {/* Edit Action */}
-          <Button
-            size="icon-sm"
-            variant="ghost"
-            onClick={() => onEdit(r)}
-            className="size-7 text-amber-600 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/40"
-            aria-label="Edit challan"
-            title="Edit Challan"
-          >
-            <Pencil className="size-3.5 text-amber-600" />
-          </Button>
-
-          {/* Print Statement Action */}
-          <Button
-            size="icon-sm"
-            variant="ghost"
-            onClick={() => onPrintStatement(r)}
-            className="size-7 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:hover:bg-purple-950/40"
-            aria-label="Print statement"
-            title="Print Statement"
-          >
-            <Printer className="size-3.5 text-purple-600" />
-          </Button>
+            {/* Print Statement Action */}
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              onClick={() => onPrintStatement(r)}
+              className="size-7 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:hover:bg-purple-950/40"
+              aria-label="Print statement"
+              title="Print Statement"
+            >
+              <Printer className="size-3.5 text-purple-600" />
+            </Button>
 
 
-        </div>
-      ),
+          </div>
+        );
+      },
       className: "text-center",
       headerClassName: "text-center",
     },
@@ -452,6 +458,7 @@ export function FeesClient() {
   const [selectedChallan, setSelectedChallan] = React.useState<FeeChallan | null>(null);
   const [detailsChallan, setDetailsChallan] = React.useState<FeeChallan | null>(null);
   const [editingChallan, setEditingChallan] = React.useState<FeeChallan | null>(null);
+  const [editStudent, setEditStudent] = React.useState("");
   const [editTuition, setEditTuition] = React.useState("");
   const [editLab, setEditLab] = React.useState("");
   const [editSports, setEditSports] = React.useState("");
@@ -466,8 +473,28 @@ export function FeesClient() {
   const [editPaid, setEditPaid] = React.useState("0");
   const [editCollectDate, setEditCollectDate] = React.useState("");
   const [editError, setEditError] = React.useState("");
+  const [editSyncOtherChallans, setEditSyncOtherChallans] = React.useState(true);
   const [feeTiers, setFeeTiers] = React.useState(FEE_REVISIONS);
   const [fineRecords, setFineRecords] = React.useState(FEE_FINES);
+
+  const studentSuggestions = React.useMemo(() => {
+    const names = new Set<string>();
+    challans.forEach((c) => {
+      if (c.student?.trim()) names.add(c.student.trim());
+    });
+    STUDENTS.forEach((s) => {
+      if (s.name?.trim()) names.add(s.name.trim());
+    });
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  }, [challans]);
+
+  const otherChallansCount = React.useMemo(() => {
+    if (!editingChallan) return 0;
+    const name = editingChallan.student.trim().toLowerCase();
+    return challans.filter(
+      (c) => c.id !== editingChallan.id && c.student.trim().toLowerCase() === name
+    ).length;
+  }, [editingChallan, challans]);
 
   React.useEffect(() => {
     const loadedTiers = readFeeConfiguration();
@@ -644,6 +671,7 @@ export function FeesClient() {
     const tier = resolveMatchingTier(challan.className, feeTiers);
     const priorInfo = calculatePreviousMonthDues(challan, challans);
     setEditingChallan(challan);
+    setEditStudent(challan.student || "");
     setEditTuition(String(challan.tuitionFee ?? tier?.tuitionFee ?? challan.totalPayable));
     setEditLab(String(challan.labCharges ?? tier?.labCharges ?? 0));
     setEditSports(String(challan.sportsCharges ?? tier?.sportsCharges ?? 0));
@@ -664,6 +692,7 @@ export function FeesClient() {
     setEditPaid(String(challan.paid));
     setEditCollectDate(challan.collectDate || challan.lastPaymentDate || challan.dueDate || "2026-10-08");
     setEditError("");
+    setEditSyncOtherChallans(true);
   }, [feeTiers, challans]);
 
   const editCustomTotal = editCustomHeads.reduce((acc, h) => acc + (Number(h.amount) || 0), 0);
@@ -682,6 +711,17 @@ export function FeesClient() {
   const handleSaveEdit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!editingChallan) return;
+
+    const nextStudent = editStudent.trim();
+    if (!nextStudent) {
+      setEditError("Student name is required.");
+      return;
+    }
+    if (nextStudent.length < 2) {
+      setEditError("Student name must be at least 2 characters long.");
+      return;
+    }
+
     const nextTuition = Number(editTuition) || 0;
     const nextLab = Number(editLab) || 0;
     const nextSports = Number(editSports) || 0;
@@ -730,35 +770,53 @@ export function FeesClient() {
           ? "Overdue"
           : "Unpaid";
 
+    const oldStudentName = editingChallan.student.trim().toLowerCase();
+    const formattedRoll = editRollNo.trim() || editingChallan.rollNo || getStudentRollNo(editingChallan);
+
     setChallans((current) => {
-      const updated = current.map((item) =>
-        item.id === editingChallan.id
-          ? {
-              ...item,
-              tuitionFee: nextTuition,
-              labCharges: nextLab,
-              sportsCharges: nextSports,
-              transportCharges: nextTransport,
-              fineCharges: nextFines,
-              libraryFund: nextLibrary,
-              utilitySurcharge: nextUtilities,
-              otherCharges: 0,
-              previousDues: nextPreviousDues,
-              previousDuesBreakdown: nextPreviousDues === 0 ? [] : (editingChallan.previousDues === nextPreviousDues ? editingChallan.previousDuesBreakdown : undefined),
-              customHeads: cleanedCustom,
-              totalPayable: nextTotal,
-              dueDate: editDueDate,
-              rollNo: editRollNo.trim() || item.rollNo || getStudentRollNo(item),
-              status,
-              collectDate: editCollectDate || item.collectDate || editDueDate || "2026-10-08",
-              lastPaymentDate: nextPaid > 0 ? (editCollectDate || item.lastPaymentDate || item.collectDate || editDueDate) : undefined,
-            }
-          : item
-      );
+      const updated = current.map((item) => {
+        if (item.id === editingChallan.id) {
+          return {
+            ...item,
+            student: nextStudent,
+            tuitionFee: nextTuition,
+            labCharges: nextLab,
+            sportsCharges: nextSports,
+            transportCharges: nextTransport,
+            fineCharges: nextFines,
+            libraryFund: nextLibrary,
+            utilitySurcharge: nextUtilities,
+            otherCharges: 0,
+            previousDues: nextPreviousDues,
+            previousDuesBreakdown: nextPreviousDues === 0 ? [] : (editingChallan.previousDues === nextPreviousDues ? editingChallan.previousDuesBreakdown : undefined),
+            customHeads: cleanedCustom,
+            totalPayable: nextTotal,
+            dueDate: editDueDate,
+            rollNo: formattedRoll,
+            status,
+            collectDate: editCollectDate || item.collectDate || editDueDate || "2026-10-08",
+            lastPaymentDate: nextPaid > 0 ? (editCollectDate || item.lastPaymentDate || item.collectDate || editDueDate) : undefined,
+          };
+        }
+        if (editSyncOtherChallans && oldStudentName && item.student.trim().toLowerCase() === oldStudentName) {
+          return {
+            ...item,
+            student: nextStudent,
+            rollNo: formattedRoll || item.rollNo,
+          };
+        }
+        return item;
+      });
       writeFeeChallans(updated);
       return updated;
     });
-    toast.success(`Challan ${editingChallan.challanNumber} charges updated successfully.`);
+
+    const studentChanged = nextStudent !== editingChallan.student;
+    if (studentChanged) {
+      toast.success(`Challan ${editingChallan.challanNumber} student updated to "${nextStudent}" and charges saved.`);
+    } else {
+      toast.success(`Challan ${editingChallan.challanNumber} charges updated successfully.`);
+    }
     setEditingChallan(null);
   };
 
@@ -769,19 +827,45 @@ export function FeesClient() {
       lateFee: number,
       paymentDate: string,
       paymentMethod = "Cash",
-      receiptNumber = ""
+      receiptNumber = "",
+      canonicalTotalPayable?: number
     ) => {
       let updatedChallanRef: FeeChallan | null = null;
+      let nextUpdatedToPersist: FeeChallan[] | null = null;
 
       setChallans((prev) => {
         const updated = prev.map((c) => {
           if (c.id !== challanId) return c;
 
-          const newTotalPayable = c.totalPayable + lateFee;
+          const receipt = receiptNumber || `RCP-${c.challanNumber.slice(-6)}`;
+          const existingPayments = c.payments ? [...c.payments] : (c.paid > 0 ? [{
+            id: `pay-prev-${c.id}`,
+            receiptNumber: `RCP-PREV-${c.challanNumber.slice(-6)}`,
+            paymentDate: c.dueDate,
+            paymentMethod: "Bank Deposit",
+            amount: c.paid,
+          }] : []);
+
+          // Deduplicate if identical payment was already recorded
+          const isDuplicate = existingPayments.some(
+            (p) => p.receiptNumber === receipt && p.paymentDate === paymentDate && p.amount === paymentAmount
+          );
+          if (isDuplicate) {
+            updatedChallanRef = c;
+            return c;
+          }
+
+          // Use the canonical total calculated by the dialog (which includes previousDues,
+          // unpaid fines, and late fee) so the stored totalPayable always matches what the
+          // user saw on screen. Fall back to stored value + late fee if not provided.
+          const newTotalPayable = canonicalTotalPayable ?? (c.totalPayable + lateFee);
+
+          // The dialog already validates that paymentAmount ≤ remaining balance, so we
+          // simply add it to what was previously paid, clamped only to newTotalPayable.
           const newPaid = Math.min(newTotalPayable, c.paid + paymentAmount);
           let newStatus: FeeStatus = "Unpaid";
 
-          if (newPaid >= newTotalPayable) {
+          if (newPaid >= newTotalPayable && newTotalPayable > 0) {
             newStatus = "Paid";
           } else if (newPaid > 0) {
             newStatus = "Partial";
@@ -792,15 +876,6 @@ export function FeesClient() {
               newStatus = "Overdue";
             }
           }
-
-          const receipt = receiptNumber || `RCP-${c.challanNumber.slice(-6)}`;
-          const existingPayments = c.payments ? [...c.payments] : (c.paid > 0 ? [{
-            id: `pay-prev-${c.id}`,
-            receiptNumber: `RCP-PREV-${c.challanNumber.slice(-6)}`,
-            paymentDate: c.dueDate,
-            paymentMethod: "Bank Deposit",
-            amount: c.paid,
-          }] : []);
 
           const newPaymentRecord = {
             id: `pay-${Date.now()}`,
@@ -827,9 +902,14 @@ export function FeesClient() {
           updatedChallanRef = updatedC;
           return updatedC;
         });
-        writeFeeChallans(updated);
+
+        nextUpdatedToPersist = updated;
         return updated;
       });
+
+      if (nextUpdatedToPersist) {
+        writeFeeChallans(nextUpdatedToPersist);
+      }
 
       const challan = challans.find((c) => c.id === challanId);
       if (challan) {
@@ -1413,8 +1493,8 @@ export function FeesClient() {
   ]);
 
   const challanColumns = React.useMemo(
-    () => getChallanColumns(handleOpenPaymentDialog, setDetailsChallan, handleEdit, handlePrintStatement, handleDownloadStatement, fineRecords),
-    [handleDownloadStatement, handleEdit, handleOpenPaymentDialog, handlePrintStatement, fineRecords]
+    () => getChallanColumns(handleOpenPaymentDialog, setDetailsChallan, handleEdit, handlePrintStatement, handleDownloadStatement, fineRecords, feeTiers, mergedChallans),
+    [handleDownloadStatement, handleEdit, handleOpenPaymentDialog, handlePrintStatement, fineRecords, feeTiers, mergedChallans]
   );
 
   const handlePrint = () => {
@@ -1554,16 +1634,32 @@ export function FeesClient() {
             </DialogHeader>
 
             {/* Student & Challan Quick Summary Card */}
-            <div className="rounded-lg border border-border/80 bg-muted/30 p-3 text-xs flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <p className="font-semibold text-foreground text-sm">{editingChallan.student}</p>
-                <p className="text-muted-foreground">{getStudentRollNo(editingChallan)} • {editingChallan.className} • {editingChallan.campus} Campus</p>
+            <div className="rounded-lg border border-border/80 bg-muted/30 p-3 text-xs flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-full bg-brand-50 border border-brand/20 text-brand font-bold flex items-center justify-center text-xs shrink-0 shadow-2xs">
+                  {(editStudent.trim() || editingChallan.student).slice(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-foreground text-sm">
+                      {editStudent.trim() || editingChallan.student}
+                    </p>
+                    {editStudent.trim() && editStudent.trim() !== editingChallan.student && (
+                      <span className="text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-300 px-1.5 py-0.5 rounded-full">
+                        Modified
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground text-xs mt-0.5">
+                    {editRollNo.trim() ? (editRollNo.trim().toLowerCase().startsWith("roll") ? editRollNo.trim() : `Roll #${editRollNo.trim()}`) : getStudentRollNo(editingChallan)} • {editingChallan.className} • {editingChallan.campus} Campus
+                  </p>
+                </div>
               </div>
               <div className="text-right">
-                <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2 py-0.5 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+                <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
                   {editingChallan.challanNumber}
                 </span>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Period: {editingChallan.monthYear}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Billing Period: {editingChallan.monthYear}</p>
               </div>
             </div>
 
@@ -1586,11 +1682,93 @@ export function FeesClient() {
               </div>
             )}
 
-            <form onSubmit={handleSaveEdit} className="space-y-4 py-1">
-              {/* Row 1: Due Date, Collect Date & Roll No */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Due Date</label>
+            <form onSubmit={handleSaveEdit} className="space-y-4 py-1" noValidate>
+              {/* ── Student Information ── */}
+              <div className="rounded-lg border border-border/80 bg-card p-3 space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between border-b border-border/50 pb-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-foreground">
+                    <User className="size-3.5 text-brand" />
+                    <span>Student Information</span>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">
+                    Enrolled: <strong className="text-foreground">{editingChallan.className}</strong> ({editingChallan.campus})
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="sm:col-span-2 space-y-1.5">
+                    <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                      <span className="flex items-center gap-1">
+                        <span>Student Full Name</span>
+                        <span className="text-destructive">*</span>
+                      </span>
+                      <span className="text-[10px] font-normal text-muted-foreground">Type or select name</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        list="edit-challan-student-options"
+                        value={editStudent}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setEditStudent(val);
+                          if (editError) setEditError("");
+                          if (!editRollNo.trim()) {
+                            const found = STUDENTS.find((s) => s.name.trim().toLowerCase() === val.trim().toLowerCase());
+                            if (found?.rollNo) {
+                              setEditRollNo(`Roll #${found.rollNo}`);
+                            }
+                          }
+                        }}
+                        placeholder="e.g. Ahmed Raza"
+                        className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-medium"
+                      />
+                      <datalist id="edit-challan-student-options">
+                        {studentSuggestions.map((name) => (
+                          <option key={name} value={name} />
+                        ))}
+                      </datalist>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                      <span>Roll Number</span>
+                      <span className="text-[10px] font-normal text-muted-foreground">e.g. Roll #15</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editRollNo}
+                      onChange={(e) => setEditRollNo(e.target.value)}
+                      placeholder="e.g. Roll #10"
+                      className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* Multi-voucher sync helper */}
+                {otherChallansCount > 0 && editStudent.trim() !== editingChallan.student && (
+                  <div className="pt-1">
+                    <label className="flex items-center gap-2 rounded-md border border-brand/20 bg-brand-50/50 px-2.5 py-1.5 text-xs text-foreground cursor-pointer transition-colors hover:bg-brand-50/80">
+                      <input
+                        type="checkbox"
+                        checked={editSyncOtherChallans}
+                        onChange={(e) => setEditSyncOtherChallans(e.target.checked)}
+                        className="size-3.5 rounded border-input text-brand accent-brand focus:ring-brand"
+                      />
+                      <span className="text-[11px] leading-tight text-muted-foreground">
+                        Also update student name on <strong className="text-foreground">{otherChallansCount}</strong> other billing voucher{otherChallansCount > 1 ? "s" : ""} for <span className="font-semibold text-foreground">{editingChallan.student}</span>
+                      </span>
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              {/* ── Challan Dates & Settlement Status ── */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+                <div className="space-y-1.5 sm:col-span-1">
+                  <label className="text-xs font-semibold text-foreground">Due Date *</label>
                   <input
                     type="date"
                     required
@@ -1599,7 +1777,7 @@ export function FeesClient() {
                     className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-medium"
                   />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 sm:col-span-1">
                   <label className="text-xs font-semibold text-foreground">Collect Date</label>
                   <input
                     type="date"
@@ -1608,25 +1786,11 @@ export function FeesClient() {
                     className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-medium"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-foreground">Roll Number</label>
-                  <input
-                    type="text"
-                    value={editRollNo}
-                    onChange={(e) => setEditRollNo(e.target.value)}
-                    placeholder="e.g. Roll #10"
-                    className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  />
-                </div>
-              </div>
-
-              {/* Row 2: Amount Paid So Far (Rs) & Settlement Status Preview */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 sm:col-span-1">
                   <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                    <span>Amount Paid So Far (Rs)</span>
+                    <span>Paid So Far (Rs)</span>
                     {Number(editPaid) > 0 && (
-                      <span className="text-[11px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
+                      <span className="text-[10px] font-mono text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60">
                         {formatCurrency(Number(editPaid) || 0)}
                       </span>
                     )}
@@ -1640,12 +1804,11 @@ export function FeesClient() {
                     className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring font-mono font-medium"
                   />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 sm:col-span-1">
                   <label className="text-xs font-semibold text-foreground">
-                    Settlement Status Preview
+                    Status Preview
                   </label>
-                  <div className="h-9 flex items-center justify-between rounded-md border border-border/80 bg-muted/20 px-3 text-xs">
-                    <span className="text-muted-foreground font-medium">Derived Status:</span>
+                  <div className="h-9 flex items-center justify-center rounded-md border border-border/80 bg-muted/20 px-2 text-xs">
                     <span
                       className={cn(
                         "rounded-full px-2.5 py-0.5 text-[11px] font-bold border",

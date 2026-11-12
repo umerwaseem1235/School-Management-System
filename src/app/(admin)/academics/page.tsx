@@ -1,12 +1,20 @@
 "use client";
 
 import * as React from "react";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/shared/page-header";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { StatCard, StatGrid } from "@/components/shared/stat-card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -28,9 +36,9 @@ import {
   Search,
   GraduationCap,
   Building2,
-  ArrowRight,
   Layers,
   Eye,
+  ChevronDown,
 } from "lucide-react";
 import { ViewClassDialog } from "./view-class-dialog";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -172,6 +180,29 @@ export default function AcademicsPage() {
     });
   }, [subjects, subjectSearch, subjectClassFilter, subjectTypeFilter]);
 
+  const sectionOptions = React.useMemo(
+    () => [
+      {
+        id: "classes" as const,
+        label: "Academic Classes Directory",
+        shortLabel: "Classes",
+        icon: School,
+        count: classes.length,
+      },
+      {
+        id: "subjects" as const,
+        label: "Curriculum Subjects",
+        shortLabel: "Subjects",
+        icon: BookOpen,
+        count: subjects.length,
+      },
+    ],
+    [classes.length, subjects.length]
+  );
+
+  const activeSection =
+    sectionOptions.find((s) => s.id === activeTab) || sectionOptions[0];
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -180,24 +211,113 @@ export default function AcademicsPage() {
           <div className="flex items-center gap-2">
             {activeTab === "classes" ? (
               <Button
+                size="lg"
                 onClick={() => setIsAddClassOpen(true)}
-                className="gap-2 bg-primary hover:bg-primary/90 text-white cursor-pointer shadow-sm"
+                className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
               >
                 <Plus className="size-4" />
-                Add Class
+                <span>Add Class</span>
               </Button>
             ) : (
               <Button
+                size="lg"
                 onClick={() => setIsAddSubjectOpen(true)}
-                className="gap-2 bg-primary hover:bg-primary/90 text-white cursor-pointer shadow-sm"
+                className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
               >
                 <Plus className="size-4" />
-                Add Subject
+                <span>Add Subject</span>
               </Button>
             )}
           </div>
         }
       />
+
+      {/* ───────────────────────── KPI Stats Row (Project Default StatCards) ───────────────────────── */}
+      <StatGrid className="max-w-none sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Total Classes"
+          value={classes.length}
+          icon={School}
+        />
+        <StatCard
+          label="Total Students"
+          value={totalStudents.toLocaleString()}
+          icon={Users}
+        />
+        <StatCard
+          label="Total Sections"
+          value={totalSections}
+          icon={Layers}
+        />
+        <StatCard
+          label="Curriculum Subjects"
+          value={subjects.length}
+          icon={BookOpen}
+        />
+      </StatGrid>
+
+      {/* ───────────────────────── Classes / Subjects Dropdown Menu Selector Bar ───────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3.5 h-9.5 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[220px] sm:min-w-[250px]">
+              <div className="flex items-center gap-2 min-w-0">
+                <activeSection.icon className="size-4 text-brand shrink-0" />
+                <span className="text-xs font-semibold text-foreground truncate">
+                  {activeSection.label}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Badge
+                  variant="secondary"
+                  className="text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-4 flex items-center justify-center tabular-nums"
+                >
+                  {activeSection.count}
+                </Badge>
+                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="start"
+              className="w-60 p-1.5 rounded-xl shadow-lg border-border/80 bg-card"
+            >
+              {sectionOptions.map((sec) => {
+                const Icon = sec.icon;
+                const isSelected = activeTab === sec.id;
+                return (
+                  <DropdownMenuItem
+                    key={sec.id}
+                    onClick={() => setActiveTab(sec.id)}
+                    className={cn(
+                      "flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg cursor-pointer transition-colors",
+                      isSelected
+                        ? "bg-brand-50 text-brand font-semibold dark:bg-brand-950/40"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon className="size-4 text-brand" />
+                      <span>{sec.label}</span>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="text-[10px] font-mono px-1.5 py-0"
+                    >
+                      {sec.count}
+                    </Badge>
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+          <Building2 className="size-3.5 text-brand" />
+          <span>Academic Year 2026–27 · Central Curriculum Registry</span>
+        </div>
+      </div>
 
       <Tabs
         defaultValue="classes"
@@ -205,61 +325,8 @@ export default function AcademicsPage() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="bg-muted/60 p-1 rounded-xl">
-          <TabsTrigger value="classes" className="rounded-lg text-xs font-medium px-4">
-            <School className="size-3.5 mr-2" />
-            Classes ({classes.length})
-          </TabsTrigger>
-          <TabsTrigger value="subjects" className="rounded-lg text-xs font-medium px-4">
-            <BookOpen className="size-3.5 mr-2" />
-            Subjects ({subjects.length})
-          </TabsTrigger>
-        </TabsList>
-
         {/* TAB 1: Classes Table */}
         <TabsContent value="classes" className="space-y-4 outline-none">
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand shrink-0">
-                <School className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs text-muted-foreground font-medium block">Total Classes</span>
-                <span className="text-base font-bold text-foreground tabular-nums">{classes.length}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand shrink-0">
-                <Users className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs text-muted-foreground font-medium block">Total Students</span>
-                <span className="text-base font-bold text-foreground tabular-nums">{totalStudents.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand shrink-0">
-                <Layers className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs text-muted-foreground font-medium block">Total Sections</span>
-                <span className="text-base font-bold text-foreground tabular-nums">{totalSections}</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card shadow-2xs">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-soft text-brand shrink-0">
-                <BookOpen className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <span className="text-xs text-muted-foreground font-medium block">Curriculum Subjects</span>
-                <span className="text-base font-bold text-foreground tabular-nums">{subjects.length}</span>
-              </div>
-            </div>
-          </div>
 
           <Card className="rounded-2xl border border-border/80 overflow-hidden bg-card shadow-xs">
             {/* Table Section Header */}
@@ -427,12 +494,10 @@ export default function AcademicsPage() {
                             <button
                               type="button"
                               onClick={() => handleViewClassSubjects(cls.className)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand hover:bg-brand-100/80 transition-all cursor-pointer shadow-2xs group"
-                              title={`View ${classSubjectsCount} subjects for ${cls.className}`}
+                              className="inline-flex items-center justify-center px-2.5 py-1 rounded-[4px] text-xs font-semibold text-brand bg-brand-50 hover:bg-brand-100/80 transition-all cursor-pointer shadow-2xs border border-brand/20 tabular-nums"
+                              title={`View ${classSubjectsCount} curriculum subjects for ${cls.className}`}
                             >
-                              <BookOpen className="size-3 text-brand" />
-                              <span className="tabular-nums">{classSubjectsCount}</span>
-                              <ArrowRight className="size-2.5 opacity-60 transition-transform group-hover:translate-x-0.5" />
+                              <span>{classSubjectsCount} Subjects</span>
                             </button>
                           </TableCell>
 
@@ -449,10 +514,10 @@ export default function AcademicsPage() {
                                 size="xs"
                                 onClick={() => setViewingClass(cls)}
                                 className="h-7.5 px-2.5 text-xs font-semibold text-brand hover:bg-brand-soft/50 hover:text-brand border-border/80 cursor-pointer shadow-2xs gap-1.5"
-                                title="View full class details & subjects"
+                                title={`View ${cls.className} Class & Section Information`}
                               >
                                 <Eye className="size-3.5" />
-                                <span>View</span>
+                                <span>View Class & Section</span>
                               </Button>
                               <Button
                                 variant="ghost"

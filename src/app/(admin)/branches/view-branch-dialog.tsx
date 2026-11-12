@@ -225,7 +225,7 @@ Status: ${branch.status}`;
             variant="outline"
             size="sm"
             onClick={handleCopy}
-            className="h-8.5 gap-1.5 px-3.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground border-border/80 shadow-2xs transition-all active:scale-95 cursor-pointer"
+            className="h-8.5 gap-1.5 px-3.5 rounded-[4px] text-xs font-semibold text-muted-foreground hover:text-foreground border-border/80 shadow-2xs transition-all cursor-pointer"
           >
             {copied ? (
               <>
@@ -244,7 +244,7 @@ Status: ${branch.status}`;
             type="button"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="h-8.5 px-5 rounded-lg text-xs font-semibold shadow-xs cursor-pointer active:scale-95 transition-all"
+            className="h-8.5 px-5 rounded-[4px] text-xs font-semibold shadow-xs cursor-pointer transition-all"
           >
             Close
           </Button>

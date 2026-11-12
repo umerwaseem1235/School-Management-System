@@ -676,7 +676,7 @@ export function PrintDatesheetDialog({
               type="button"
               size="sm"
               onClick={handlePrint}
-              className="bg-brand text-cream hover:bg-brand-600 text-xs h-8 px-3.5 gap-1.5 cursor-pointer shadow-2xs font-semibold"
+              className="h-8 px-3.5 gap-1.5 cursor-pointer"
               title="Print official datesheet document"
             >
               <Printer className="size-3.5" />
