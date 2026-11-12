@@ -91,7 +91,6 @@ const INITIAL_FORM: FormState = {
  */
 export function deriveStatus(total: number, paid: number): FeeStatus {
   if (total > 0 && paid >= total) return "Paid";
-  if (paid > 0 && paid < total) return "Partial";
   return "Unpaid";
 }
 
@@ -608,13 +607,19 @@ export function AddFeeDialog({
               <select
                 className={fieldClass}
                 value={form.statusMode}
-                onChange={(e) => set("statusMode", e.target.value as StatusOption)}
+                onChange={(e) => {
+                  const nextMode = e.target.value as StatusOption;
+                  set("statusMode", nextMode);
+                  if (nextMode === "Paid") {
+                    set("paid", String(total));
+                  } else if (nextMode === "Unpaid") {
+                    set("paid", "0");
+                  }
+                }}
               >
                 <option value="auto">Auto ({autoStatus})</option>
                 <option value="Unpaid">Unpaid</option>
-                <option value="Partial">Partial</option>
                 <option value="Paid">Paid</option>
-                <option value="Overdue">Overdue</option>
               </select>
             </Field>
 

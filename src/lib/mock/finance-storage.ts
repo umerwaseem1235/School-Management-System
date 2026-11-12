@@ -8,7 +8,7 @@ import {
 } from "@/lib/mock/finance";
 import { FEE_CHALLANS } from "@/lib/mock/operations";
 import { STUDENTS } from "@/lib/mock/institution";
-import type { FeeChallan, PreviousDueMonth } from "@/types";
+import type { FeeChallan, FeeStatus, PreviousDueMonth } from "@/types";
 
 export const FEE_CONFIG_KEY = "edusphere.finance.fee-configuration.v1";
 export const FEE_FINES_KEY = "edusphere.finance.fines.v1";
@@ -86,6 +86,16 @@ export function calculateTierTotal(tier: FeeRevisionRecord): number {
 
 export function syncChallansWithTiers(challans: FeeChallan[], tiers: FeeRevisionRecord[]): FeeChallan[] {
   return challans.map((challan) => {
+    // Preserve split installment challan rows without overwriting their installment amount with full tier fee
+    if (challan.installmentPlan) {
+      const instStatus: FeeStatus = challan.status === "Paid" ? "Paid" : "Unpaid";
+      return {
+        ...challan,
+        paid: instStatus === "Paid" ? challan.totalPayable : 0,
+        status: instStatus,
+      };
+    }
+
     let newAmountDue: number;
     const scholarshipConcession = challan.scholarshipConcession || 0;
     const fineCharges = challan.fineCharges || 0;
@@ -113,22 +123,9 @@ export function syncChallansWithTiers(challans: FeeChallan[], tiers: FeeRevision
       newAmountDue = Math.max(0, gross - scholarshipConcession);
     }
 
-    let newPaid = challan.paid;
-    let newStatus = challan.status;
-
-    if (challan.status === "Paid") {
-      newPaid = newAmountDue;
-    } else if (challan.status === "Unpaid") {
-      newPaid = 0;
-    } else if (challan.status === "Partial") {
-      if (newPaid >= newAmountDue) {
-        newStatus = "Paid";
-      }
-    } else if (challan.status === "Overdue") {
-      if (newPaid >= newAmountDue) {
-        newStatus = "Paid";
-      }
-    }
+    const isPaid = challan.status === "Paid" || (newAmountDue > 0 && challan.paid >= newAmountDue);
+    const newStatus: FeeStatus = isPaid ? "Paid" : "Unpaid";
+    const newPaid = isPaid ? newAmountDue : 0;
 
     return {
       ...challan,
@@ -200,6 +197,7 @@ export const readFeeChallans = (): FeeChallan[] => {
         lastPaymentMethod: item.lastPaymentMethod || defaultMatch.lastPaymentMethod,
         lastReceiptNumber: item.lastReceiptNumber || defaultMatch.lastReceiptNumber,
         payments: item.payments && item.payments.length > 0 ? item.payments : defaultMatch.payments,
+        installmentPlan: item.installmentPlan || defaultMatch.installmentPlan,
         scholarshipConcession: item.scholarshipConcession !== undefined ? item.scholarshipConcession : defaultMatch.scholarshipConcession,
         scholarshipPercent: item.scholarshipPercent !== undefined ? item.scholarshipPercent : defaultMatch.scholarshipPercent,
         scholarshipName: item.scholarshipName || defaultMatch.scholarshipName,
@@ -345,9 +343,7 @@ export function syncScholarshipWithFeeChallan(
 
       if (target.paid >= target.totalPayable && target.totalPayable > 0) {
         target.status = "Paid";
-      } else if (target.paid > 0 && target.paid < target.totalPayable) {
-        target.status = "Partial";
-      } else if (target.paid === 0) {
+      } else {
         target.status = "Unpaid";
       }
 
@@ -450,7 +446,7 @@ export function syncFineWithFeeChallan(
       target.fineCharges = prevFine + fine.amount;
       target.totalPayable = (target.totalPayable || 0) + fine.amount;
       if (target.status === "Paid") {
-        target.status = target.paid > 0 ? "Partial" : "Unpaid";
+        target.status = "Unpaid";
       }
     } else if (action === "waived") {
       const prevFine = target.fineCharges || 0;
@@ -467,7 +463,7 @@ export function syncFineWithFeeChallan(
     } else if (action === "reopen") {
       target.paid = Math.max(0, (target.paid || 0) - fine.amount);
       if (target.paid < target.totalPayable) {
-        target.status = target.paid > 0 ? "Partial" : "Unpaid";
+        target.status = "Unpaid";
       }
     }
 
@@ -533,6 +529,17 @@ export function calculatePreviousMonthDues(
   challan: FeeChallan,
   allChallans: FeeChallan[] = []
 ): PreviousDuesSummary {
+  if (challan.installmentPlan && (!challan.previousDues || challan.previousDues <= 0)) {
+    return {
+      total: 0,
+      count: 0,
+      details: "Included in installment split",
+      months: [],
+      priorChallans: [],
+      isClear: true,
+    };
+  }
+
   const studentName = challan.student.trim().toLowerCase();
 
   // 1. Check if the challan has an explicit previousDuesBreakdown array
@@ -557,6 +564,7 @@ export function calculatePreviousMonthDues(
     (c) =>
       c.id !== challan.id &&
       c.student.trim().toLowerCase() === studentName &&
+      c.monthYear !== challan.monthYear &&
       c.dueDate < challan.dueDate &&
       c.totalPayable > c.paid
   );

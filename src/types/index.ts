@@ -232,6 +232,28 @@ export interface FeePaymentRecord {
   notes?: string;
 }
 
+export interface FeeInstallmentItem {
+  installmentNo: number;
+  label: string;
+  challanNumber?: string;
+  dueDate: string;
+  amount: number;
+  status: "Paid" | "Unpaid" | "Scheduled" | "Overdue";
+  paidDate?: string;
+  receiptNumber?: string;
+  paymentMethod?: string;
+}
+
+export interface FeeInstallmentPlan {
+  totalInstallments: number;
+  installmentNumber?: number;
+  parentChallanNumber?: string;
+  createdAt: string;
+  approvedBy?: string;
+  remarks?: string;
+  schedule: FeeInstallmentItem[];
+}
+
 export interface FeeChallan {
   id: ID;
   challanNumber: string;
@@ -261,6 +283,7 @@ export interface FeeChallan {
   previousDuesBreakdown?: PreviousDueMonth[];
   customHeads?: Array<{ id: string; name: string; amount: number }>;
   payments?: FeePaymentRecord[];
+  installmentPlan?: FeeInstallmentPlan;
   collectDate?: string;
   lastPaymentDate?: string;
   lastReceiptNumber?: string;
