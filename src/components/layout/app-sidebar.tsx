@@ -23,10 +23,8 @@ function SidebarBody({
       aria-label="Main navigation"
       suppressHydrationWarning
       className={cn(
-        "flex-1 px-3 py-4 space-y-1.5",
-        collapsed
-          ? "overflow-y-auto no-scrollbar"
-          : "scrollbar-thin overflow-y-auto overflow-x-hidden"
+        "flex-1 px-3 py-4 space-y-1.5 overflow-y-auto overflow-x-hidden",
+        collapsed ? "no-scrollbar" : "scrollbar-thin"
       )}
     >
       <div className="space-y-1.5" suppressHydrationWarning>
@@ -88,7 +86,7 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
 /* -------------------------- Desktop Controlled Sidebar -------------------------- */
 
 export function AppSidebar() {
-  const { isLocked, isExpanded, collapsed, toggleSidebar, setIsHovered } = useSidebar();
+  const { isLocked, isExpanded, toggleSidebar, setIsHovered } = useSidebar();
 
   const enterTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   const leaveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -126,14 +124,14 @@ export function AppSidebar() {
     <>
       {/* 
         Document Flow Spacer:
-        Guarantees that the main page content is NEVER covered or behind the sidebar.
-        Expands and contracts in lockstep with the sidebar.
+        Reserves space only for the pinned state (72px rail when unlocked so hover overlays
+        smoothly without reflowing tables/cards; 264px when locked open via hamburger icon).
       */}
       <div
         aria-hidden="true"
         className={cn(
           "hidden shrink-0 transition-[width] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] lg:block motion-reduce:transition-none",
-          isExpanded ? "w-[264px]" : "w-[72px]"
+          isLocked ? "w-[264px]" : "w-[72px]"
         )}
       />
 
@@ -146,20 +144,18 @@ export function AppSidebar() {
           "bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] text-sidebar-foreground",
           "transition-[width,box-shadow] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex motion-reduce:transition-none",
           isExpanded
-            ? "w-[264px] shadow-[4px_0_28px_0_rgba(9,29,62,0.42)] border-r border-white/10"
+            ? isLocked
+              ? "w-[264px] shadow-[2px_0_16px_0_rgba(9,29,62,0.22)] border-r border-white/10"
+              : "w-[264px] shadow-[6px_0_32px_0_rgba(9,29,62,0.45)] border-r border-white/15"
             : "w-[72px] shadow-[2px_0_8px_0_rgba(9,29,62,0.18)] border-r border-white/5"
         )}
       >
-        {/* Sidebar Header with Brand Logo & Burger Action */}
+        {/* Sidebar Header with Brand Logo & Hamburger Lock Toggle */}
         <div
           className={cn(
-            "flex h-16 shrink-0 items-center border-b border-[#091d3e]/15 bg-gradient-to-b from-[#eef3fc] via-[#e5eefb] to-[#dce7f8] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-colors overflow-hidden",
-            isExpanded
-              ? "justify-between px-3.5"
-              : "justify-center px-2 cursor-pointer hover:from-[#e6effc] hover:to-[#d3e1f6]"
+            "flex h-16 shrink-0 items-center border-b border-[#091d3e]/15 bg-gradient-to-b from-[#eef3fc] via-[#e5eefb] to-[#dce7f8] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] transition-all duration-200 overflow-hidden",
+            isExpanded ? "justify-between px-4" : "justify-center px-2"
           )}
-          onClick={collapsed ? toggleSidebar : undefined}
-          title={collapsed ? "Click to lock sidebar expanded" : undefined}
         >
           <BrandLogo collapsed={!isExpanded} />
           {isExpanded && (
@@ -169,10 +165,17 @@ export function AppSidebar() {
                 e.stopPropagation();
                 toggleSidebar();
               }}
-              title={isLocked ? "Collapse to compact rail (hover to expand)" : "Lock sidebar expanded"}
-              aria-label={isLocked ? "Collapse sidebar" : "Lock sidebar expanded"}
+              aria-pressed={isLocked}
+              title={
+                isLocked
+                  ? "Unlock sidebar (auto-collapse on mouse leave)"
+                  : "Lock sidebar open"
+              }
+              aria-label={
+                isLocked ? "Unlock and collapse sidebar" : "Lock sidebar open"
+              }
               className={cn(
-                "grid size-8 shrink-0 place-items-center rounded-[4px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
+                "grid size-8 shrink-0 cursor-pointer place-items-center rounded-[4px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
                 isLocked
                   ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] hover:from-[#1e4275] hover:to-[#102848]"
                   : "border border-brand/18 bg-white text-foreground/85 shadow-2xs hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand"

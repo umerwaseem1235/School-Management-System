@@ -9,7 +9,13 @@ export function BrandLogo({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-center gap-3 overflow-hidden", className)}>
+    <div
+      className={cn(
+        "flex items-center overflow-hidden transition-[gap] duration-200",
+        collapsed ? "gap-0" : "gap-3",
+        className
+      )}
+    >
       <div className="relative grid size-9 shrink-0 place-items-center rounded-xl bg-white text-brand shadow-xs ring-1 ring-brand/15 transition-colors duration-200">
         <GraduationCap className="size-5" strokeWidth={2.25} />
         <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-gold ring-2 ring-white" />
@@ -18,8 +24,8 @@ export function BrandLogo({
         className={cn(
           "min-w-0 leading-tight whitespace-nowrap overflow-hidden transition-all duration-200 ease-out motion-reduce:transition-none",
           collapsed
-            ? "opacity-0 -translate-x-2 pointer-events-none"
-            : "opacity-100 translate-x-0 delay-75"
+            ? "max-w-0 opacity-0 -translate-x-2 pointer-events-none"
+            : "max-w-[160px] opacity-100 translate-x-0 delay-75"
         )}
       >
         <p className="font-heading text-[15px] font-bold tracking-tight text-brand truncate">

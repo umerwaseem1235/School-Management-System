@@ -18,10 +18,10 @@ interface SidebarState {
 
 const SidebarContext = React.createContext<SidebarState | null>(null);
 
-const STORAGE_LOCKED_KEY = "sms.sidebar.locked";
+const STORAGE_LOCKED_KEY = "sms.sidebar.locked_v2";
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [isLocked, setIsLocked] = React.useState(true);
+  const [isLocked, setIsLocked] = React.useState(false);
   const [isHovered, setIsHovered] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -40,6 +40,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const toggleSidebar = React.useCallback(() => {
     setIsLocked((prev) => {
       const next = !prev;
+      if (!next) {
+        setIsHovered(false);
+      }
       try {
         localStorage.setItem(STORAGE_LOCKED_KEY, next ? "1" : "0");
       } catch {}
