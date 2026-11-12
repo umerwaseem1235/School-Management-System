@@ -13,7 +13,6 @@ interface SectionCardProps {
 
 export function SectionCard({
   title,
-  description,
   action,
   children,
   className,
@@ -54,8 +53,7 @@ export function SectionCard({
       {hasHeader && (
         <header
           className={cn(
-            "relative z-20 flex flex-wrap justify-between gap-4 px-6 pt-5 pb-2.5",
-            description ? "items-start" : "items-center"
+            "relative z-20 flex flex-wrap items-center justify-between gap-4 px-6 pt-5 pb-2.5"
           )}
         >
           <div className="min-w-0">
@@ -65,15 +63,6 @@ export function SectionCard({
               </h2>
             ) : (
               title
-            )}
-            {description && (
-              typeof description === "string" ? (
-                <p className="mt-0.5 text-[13px] font-medium text-muted-foreground/90">
-                  {description}
-                </p>
-              ) : (
-                description
-              )
             )}
           </div>
           {action && <div className="shrink-0">{action}</div>}

@@ -22,7 +22,6 @@ const ROUTE_MAP: Record<string, { title: string; group: string }> = {
   "/admission-tests": { title: "Admission Tests", group: "Examinations" },
   "/paper-generator": { title: "Paper Generator", group: "Examinations" },
   "/results": { title: "Results", group: "Examinations" },
-  "/certificates": { title: "Certificates", group: "Examinations" },
   "/attendance": { title: "Attendance Overview", group: "Attendance" },
   "/attendance/overview": { title: "Attendance Overview", group: "Attendance" },
   "/attendance/students": { title: "Student Attendance", group: "Attendance" },

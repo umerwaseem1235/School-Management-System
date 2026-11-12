@@ -19,6 +19,7 @@ interface PrintMeritListDialogProps {
   onOpenChange: (open: boolean) => void;
   candidates: MeritCandidateRow[];
   classFilterLabel: string;
+  campusLabel?: string;
 }
 
 export function PrintMeritListDialog({
@@ -26,6 +27,7 @@ export function PrintMeritListDialog({
   onOpenChange,
   candidates,
   classFilterLabel,
+  campusLabel,
 }: PrintMeritListDialogProps) {
   const [issueDate, setIssueDate] = React.useState("29 Oct 2026");
 
@@ -116,7 +118,7 @@ export function PrintMeritListDialog({
       <div class="crest">SMS</div>
       <div>
         <div class="school">School Management System</div>
-        <div class="sub">Admission Cell • Entry Test & Merit Committee (Session 2026–27)</div>
+        <div class="sub">Admission Cell • Entry Test &amp; Merit Committee (Session 2026–27)${campusLabel && campusLabel !== "ALL" ? ` • Branch: ${campusLabel}` : " • All Campuses (Consolidated)"}</div>
       </div>
     </div>
     <div>
@@ -248,6 +250,9 @@ export function PrintMeritListDialog({
                   </h1>
                   <p className="text-xs font-medium text-muted-foreground">
                     Admission Cell • Entry Test & Merit Committee (Session 2026–27)
+                    {campusLabel && campusLabel !== "ALL"
+                      ? ` • Branch: ${campusLabel}`
+                      : " • All Campuses (Consolidated)"}
                   </p>
                 </div>
               </div>

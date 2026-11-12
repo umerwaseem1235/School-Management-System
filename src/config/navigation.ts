@@ -128,7 +128,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Admission Tests", href: "/admission-tests", icon: FileText },
       { title: "Paper Generator", href: "/paper-generator", icon: FileText },
       { title: "Results", href: "/results", icon: Award },
-      { title: "Certificates", href: "/certificates", icon: Award },
     ],
     defaultExpanded: false,
   },

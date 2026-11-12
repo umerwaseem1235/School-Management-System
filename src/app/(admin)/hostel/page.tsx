@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { HostelClient } from "./hostel-client";
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 };
 
 export default function HostelPage() {
-  return <HostelClient />;
+  return (
+    <Suspense fallback={null}>
+      <HostelClient />
+    </Suspense>
+  );
 }
