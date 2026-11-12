@@ -212,7 +212,7 @@ export function ViewApplicantDialog({
                       onManualQualification(applicant.id, "Qualified");
                       onOpenChange(false);
                     }}
-                    className="h-9 px-5 rounded-lg text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-xs cursor-pointer"
+                    className="h-9 px-5 gap-1.5 shadow-xs cursor-pointer"
                   >
                     <CheckCircle2 className="size-3.5" />
                     <span>Qualify Candidate</span>
@@ -229,7 +229,7 @@ export function ViewApplicantDialog({
                         onUpdateDecision(applicant.id, "Waitlisted");
                         onOpenChange(false);
                       }}
-                      className="h-9 px-4 rounded-lg text-xs font-semibold gap-1.5 cursor-pointer"
+                      className="h-9 px-4 rounded-[4px] text-xs font-semibold gap-1.5 cursor-pointer"
                     >
                       <Clock className="size-3.5" />
                       <span>Move to Waitlist</span>
@@ -242,7 +242,7 @@ export function ViewApplicantDialog({
                         onUpdateDecision(applicant.id, "Approved");
                         onOpenChange(false);
                       }}
-                      className="h-9 px-5 rounded-lg text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-xs cursor-pointer"
+                      className="h-9 px-5 gap-1.5 shadow-xs cursor-pointer"
                     >
                       <CheckCircle2 className="size-3.5" />
                       <span>Approve Admission</span>

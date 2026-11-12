@@ -335,8 +335,8 @@ export function ScheduleTestDialog({
             </Button>
             <Button
               type="submit"
-              size="sm"
-              className="bg-brand text-brand-foreground hover:bg-brand/90 text-xs h-9"
+              size="lg"
+              className="cursor-pointer"
             >
               Schedule Test
             </Button>

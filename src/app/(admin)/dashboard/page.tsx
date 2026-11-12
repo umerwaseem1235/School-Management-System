@@ -1,8 +1,6 @@
-import Link from "next/link";
 import {
   Banknote,
   Briefcase,
-  Building2,
   Cake,
   CalendarClock,
   CircleDollarSign,
@@ -15,12 +13,11 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { CAMPUSES, RECENT_ACTIVITY } from "@/lib/mock/institution";
+import { CAMPUSES } from "@/lib/mock/institution";
 import {
   ENROLLMENT_TREND,
   WEEKLY_ATTENDANCE,
   CAMPUS_ATTENDANCE_TODAY,
-  UPCOMING_EVENTS,
 } from "@/lib/mock/analytics";
 import {
   DASHBOARD_SNAPSHOT,
@@ -32,7 +29,6 @@ import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import { Meter } from "@/components/shared/meter";
 import { AreaTrendChart, BarSeriesChart, LineTrendChart } from "@/components/charts";
-import { DashboardBranchesCard } from "./dashboard-branches-card";
 
 const totalStudents = CAMPUSES.reduce((s, c) => s + c.students, 0);
 const totalStaff = CAMPUSES.reduce((s, c) => s + c.staff, 0);
@@ -71,7 +67,7 @@ export default function DashboardPage() {
       <PageHeader title="Dashboard" />
 
       {/* People */}
-      <div className="mb-6">
+      <div className="mb-6 animate-in fade-in-50 duration-500 fill-mode-both">
         <KpiGroupHeading title="People" />
         <StatGrid>
           <StatCard
@@ -102,7 +98,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Fees — Oct 2026 */}
-      <div className="mb-6">
+      <div className="mb-6 animate-in fade-in-50 duration-500 fill-mode-both">
         <KpiGroupHeading
           title={`Fees — ${snap.activeMonthLabel}`}
           meta={`${formatPercent(feeCollectedRate)} collected`}
@@ -136,7 +132,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Payroll & Attendance — Oct 2026 */}
-      <div className="mb-6">
+      <div className="mb-6 animate-in fade-in-50 duration-500 fill-mode-both">
         <KpiGroupHeading
           title={`Payroll & Attendance — ${snap.activeMonthLabel}`}
           meta={`${formatPercent(salaryDisbursedRate)} disbursed`}
@@ -170,7 +166,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Celebrations */}
-      <div className="mb-6">
+      <div className="mb-6 animate-in fade-in-50 duration-500 fill-mode-both">
         <KpiGroupHeading title="Celebrations" />
         <StatGrid className="sm:grid-cols-2 lg:grid-cols-2">
           <StatCard
@@ -209,7 +205,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Revenue & Enrollment */}
-      <div className="mb-6 grid gap-6 lg:grid-cols-5">
+      <div className="mb-6 grid gap-6 lg:grid-cols-5 animate-in fade-in-50 duration-500 fill-mode-both">
         <SectionCard
           title="Revenue & Expenses"
           description="Monthly trend (Rs in millions)"
@@ -242,7 +238,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Attendance & Campus */}
-      <div className="mb-6 grid gap-6 lg:grid-cols-5">
+      <div className="mb-6 grid gap-6 lg:grid-cols-5 animate-in fade-in-50 duration-500 fill-mode-both">
         <SectionCard
           title="Weekly Attendance"
           description="Student vs Staff attendance %"
@@ -280,90 +276,6 @@ export default function DashboardPage() {
                   <span className="text-success">{c.present} present</span>
                   <span className="text-danger">{c.absent} absent</span>
                   <span className="text-warning">{c.late} late</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SectionCard>
-      </div>
-
-      {/* Campus Cards + Activity + Events */}
-      <div className="mb-6 grid gap-6 lg:grid-cols-3">
-        {/* Dynamic Campus Summary Card */}
-        <DashboardBranchesCard />
-
-        {/* Recent activity */}
-        <SectionCard
-          title="Recent Activity"
-          description="Latest system events"
-          action={
-            <a
-              href="/audit-logs"
-              className="text-xs font-medium text-brand hover:underline"
-            >
-              All logs →
-            </a>
-          }
-        >
-          <ul className="space-y-1">
-            {RECENT_ACTIVITY.slice(0, 3).map((a) => {
-              const iconMap = {
-                admission: UserPlus,
-                fee: Wallet,
-                exam: CalendarClock,
-                hr: Building2,
-                system: ClipboardCheck,
-              };
-              const Icon = iconMap[a.type];
-              return (
-                <li
-                  key={a.id}
-                  className="flex gap-3 rounded-lg p-2.5 transition-colors hover:bg-cream/50"
-                >
-                  <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand">
-                    <Icon className="size-3.5" />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-foreground">
-                      {a.title}
-                    </p>
-                    <p className="text-[12px] text-muted-foreground">
-                      {a.description}
-                    </p>
-                  </div>
-                  <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">
-                    {a.time}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </SectionCard>
-
-        {/* Upcoming events */}
-        <SectionCard
-          title="Upcoming Events"
-          description="Key dates ahead"
-        >
-          <div className="space-y-3">
-            {UPCOMING_EVENTS.slice(0, 3).map((e) => (
-              <div
-                key={e.title}
-                className="flex items-start gap-3 rounded-xl border border-border/60 bg-cream/40 p-3"
-              >
-                <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-brand text-cream">
-                  <span className="text-base font-bold leading-none">{e.date}</span>
-                  <span className="text-[10px] font-medium uppercase tracking-wide opacity-80">
-                    {e.month}
-                  </span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold text-foreground">
-                    {e.title}
-                  </p>
-                  <p className="mt-0.5 text-[12px] text-muted-foreground">
-                    {e.meta}
-                  </p>
                 </div>
               </div>
             ))}

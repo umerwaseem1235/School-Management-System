@@ -34,13 +34,13 @@ export function QuickActions({ className }: { className?: string }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          "group flex h-8.5 items-center gap-2 rounded-[4px] border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] px-3.5 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_2px_6px_-1px_rgb(9_29_62/0.35)] transition-all duration-150 hover:from-[#1e4275] hover:to-[#102848] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30",
+          "group flex h-8.5 items-center gap-2 rounded-[4px] border border-[#4d86d6]/60 bg-gradient-to-b from-[#285ea8] via-[#1e4d8e] to-[#153a70] px-3.5 text-xs font-bold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_2px_8px_rgba(9,29,62,0.45)] transition-all duration-150 hover:from-[#316ec2] hover:to-[#1a447f] hover:border-[#6aa4f0] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_4px_14px_rgba(30,66,117,0.55)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 data-[state=open]:from-[#316ec2] data-[state=open]:to-[#1a447f]",
           className
         )}
       >
-        <Plus className="size-3.5" />
+        <Plus className="size-3.5 text-white" strokeWidth={2.5} />
         <span className="hidden sm:inline">Quick Action</span>
-        <ChevronDown className="size-3 text-white/75 transition-transform group-data-[popup-open]:rotate-180" />
+        <ChevronDown className="size-3 text-white/80 transition-transform group-data-[popup-open]:rotate-180" />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent

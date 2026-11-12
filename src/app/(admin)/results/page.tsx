@@ -334,9 +334,9 @@ export default function ResultsPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Button
-            size="sm"
+            size="lg"
             onClick={() => setIsAddResultOpen(true)}
-            className="bg-brand text-brand-foreground hover:bg-brand/90 text-xs h-9 gap-1.5 shadow-xs cursor-pointer font-semibold"
+            className="gap-1.5 cursor-pointer"
           >
             <Plus className="size-4" />
             <span>Add Result</span>
@@ -778,7 +778,7 @@ export default function ResultsPage() {
                             size="icon-xs"
                             onClick={() => setViewingResult(r)}
                             title="View & Print Detailed Marks Certificate (DMC)"
-                            className="size-7 text-muted-foreground hover:text-brand hover:bg-brand/10 cursor-pointer rounded-lg"
+                            className="size-7 text-muted-foreground hover:text-brand hover:bg-brand/10 cursor-pointer rounded-[4px]"
                           >
                             <Eye className="size-3.5" />
                           </Button>
@@ -1068,7 +1068,7 @@ export default function ResultsPage() {
                       <Button
                         size="sm"
                         onClick={() => setViewingResult(activeReportCardStudent)}
-                        className="h-8 text-xs gap-1.5 bg-brand text-cream hover:bg-brand-600 shadow-xs cursor-pointer"
+                        className="h-8 gap-1.5 cursor-pointer"
                       >
                         <Printer className="size-3.5" />
                         <span>Print Full DMC</span>
@@ -1375,11 +1375,7 @@ export default function ResultsPage() {
                         variant={d.status === "Published" ? "outline" : "default"}
                         size="xs"
                         onClick={() => handleTogglePublication(d.id)}
-                        className={cn(
-                          "text-xs cursor-pointer shadow-2xs",
-                          d.status !== "Published" &&
-                            "bg-brand text-cream hover:bg-brand-600"
-                        )}
+                        className="text-xs cursor-pointer shadow-2xs"
                       >
                         {d.status === "Published" ? "Unpublish" : "Publish"}
                       </Button>

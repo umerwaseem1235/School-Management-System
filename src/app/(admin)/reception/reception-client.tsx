@@ -218,7 +218,7 @@ export function ReceptionClient({
                 variant="outline"
                 size="xs"
                 onClick={() => handleCheckOutVisitor(r.id)}
-                className="h-7 gap-1 px-2.5 rounded-lg text-xs font-semibold border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 cursor-pointer shadow-2xs"
+                className="h-7 gap-1 px-2.5 rounded-[4px] text-xs font-semibold border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 cursor-pointer shadow-2xs"
               >
                 <LogOut className="size-3 text-rose-600" />
                 <span>Check Out</span>
@@ -443,17 +443,17 @@ export function ReceptionClient({
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={() => setIsLogInquiryOpen(true)}
-              className="gap-1.5 text-xs font-medium cursor-pointer shadow-2xs h-9 px-3.5"
+              className="gap-1.5 cursor-pointer"
             >
               <PhoneCall className="size-3.5 text-brand" />
               <span>Log Inquiry</span>
             </Button>
             <Button
-              size="sm"
+              size="lg"
               onClick={() => setIsCheckInOpen(true)}
-              className="gap-1.5 bg-brand text-cream hover:bg-brand-600 cursor-pointer shadow-sm text-xs font-semibold h-9 px-3.5"
+              className="gap-1.5 cursor-pointer"
             >
               <Plus className="size-4" />
               <span>Add Visitor</span>

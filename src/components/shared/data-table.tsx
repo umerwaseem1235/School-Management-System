@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import {
+  ArrowDown,
+  ArrowUp,
   Building2,
   CalendarDays,
   ChevronLeft,
@@ -171,7 +173,7 @@ export function DataTable<T>({
   className,
   tableClassName,
   theadRowClassName = DEFAULT_THEAD_ROW_CLASSNAME,
-  hideSortArrows = false,
+  hideSortArrows = true,
   showFillerRows = false,
 }: DataTableProps<T>) {
   const [query, setQuery] = React.useState("");
@@ -476,6 +478,20 @@ export function DataTable<T>({
                         <span className="text-[12.5px] font-bold tracking-[-0.01em]">
                           {col.header}
                         </span>
+                        {active && !hideSortArrows && !col.hideSortArrow && (
+                          <span
+                            className={cn(
+                              "grid size-4 shrink-0 place-items-center rounded transition-all duration-150",
+                              theadRowClassName ? "text-white" : "text-[#1d4ed8]"
+                            )}
+                          >
+                            {sort?.dir === "asc" ? (
+                              <ArrowUp className="size-3" strokeWidth={2.4} />
+                            ) : (
+                              <ArrowDown className="size-3" strokeWidth={2.4} />
+                            )}
+                          </span>
+                        )}
                       </button>
                     ) : (
                       <div

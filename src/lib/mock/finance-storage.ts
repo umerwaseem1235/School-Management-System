@@ -118,9 +118,10 @@ export function syncChallansWithTiers(challans: FeeChallan[], tiers: FeeRevision
       newAmountDue = Math.max(0, gross - scholarshipConcession);
     } else {
       const tier = resolveMatchingTier(challan.className, tiers);
-      if (!tier) return challan;
-      const gross = calculateTierTotal(tier) + (challan.previousDues || 0) + fineCharges + transportCharges;
-      newAmountDue = Math.max(0, gross - scholarshipConcession);
+      const tierGross = tier ? calculateTierTotal(tier) + (challan.previousDues || 0) + fineCharges + transportCharges : 0;
+      const tierNet = Math.max(0, tierGross - scholarshipConcession);
+      // Preserve custom totalPayable if explicitly set higher than default tier (e.g. customized voucher)
+      newAmountDue = challan.totalPayable && challan.totalPayable > tierNet ? challan.totalPayable : (tierNet || challan.totalPayable || 0);
     }
 
     const isPaid = challan.status === "Paid" || (newAmountDue > 0 && challan.paid >= newAmountDue);
@@ -181,13 +182,41 @@ export const readFeeChallans = (): FeeChallan[] => {
   if (dedupedStored.length !== stored.length) {
     writeList(FEE_CHALLANS_KEY, dedupedStored);
   }
+
+  let needsHeal = false;
+
   // Merge default enriched properties (such as previousDuesBreakdown) if missing from stored records
   const merged = dedupedStored.map((item) => {
+    // Deduplicate any identical payment entries (e.g. from rapid double-clicks or re-entrant calls)
+    let cleanedPayments = item.payments;
+    let cleanedPaid = item.paid;
+
+    if (item.payments && item.payments.length > 1) {
+      const seenPaymentKeys = new Set<string>();
+      const dedupedPayments = item.payments.filter((p) => {
+        const key = `${p.receiptNumber || ""}-${p.paymentDate || ""}-${p.amount}-${p.paymentMethod || ""}`;
+        if (seenPaymentKeys.has(key)) return false;
+        seenPaymentKeys.add(key);
+        return true;
+      });
+
+      if (dedupedPayments.length !== item.payments.length) {
+        cleanedPayments = dedupedPayments;
+        const realSum = dedupedPayments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+        if (realSum > 0 && realSum <= item.totalPayable) {
+          cleanedPaid = realSum;
+        }
+        needsHeal = true;
+      }
+    }
+
     const defaultMatch = FEE_CHALLANS.find((d) => d.id === item.id || d.challanNumber === item.challanNumber);
     if (defaultMatch) {
       return {
         ...defaultMatch,
         ...item,
+        paid: cleanedPaid,
+        payments: cleanedPayments && cleanedPayments.length > 0 ? cleanedPayments : defaultMatch.payments,
         rollNo: item.rollNo || defaultMatch.rollNo,
         admissionNumber: item.admissionNumber || defaultMatch.admissionNumber,
         previousDues: item.previousDues !== undefined ? item.previousDues : defaultMatch.previousDues,
@@ -196,7 +225,6 @@ export const readFeeChallans = (): FeeChallan[] => {
         lastPaymentDate: item.lastPaymentDate || defaultMatch.lastPaymentDate || item.collectDate || defaultMatch.collectDate,
         lastPaymentMethod: item.lastPaymentMethod || defaultMatch.lastPaymentMethod,
         lastReceiptNumber: item.lastReceiptNumber || defaultMatch.lastReceiptNumber,
-        payments: item.payments && item.payments.length > 0 ? item.payments : defaultMatch.payments,
         installmentPlan: item.installmentPlan || defaultMatch.installmentPlan,
         scholarshipConcession: item.scholarshipConcession !== undefined ? item.scholarshipConcession : defaultMatch.scholarshipConcession,
         scholarshipPercent: item.scholarshipPercent !== undefined ? item.scholarshipPercent : defaultMatch.scholarshipPercent,
@@ -206,9 +234,16 @@ export const readFeeChallans = (): FeeChallan[] => {
     }
     return {
       ...item,
+      paid: cleanedPaid,
+      payments: cleanedPayments,
       collectDate: item.collectDate || item.lastPaymentDate || item.dueDate || "2026-10-08",
     };
   });
+
+  if (needsHeal) {
+    writeList(FEE_CHALLANS_KEY, merged);
+  }
+
   const tiers = readFeeConfiguration();
   return deduplicateChallans(syncChallansWithTiers(merged, tiers));
 };
@@ -684,4 +719,80 @@ export function calculatePreviousMonthDues(
     priorChallans: [],
     isClear: true,
   };
+}
+
+/**
+ * Calculates the canonical "Amount Due" for a challan using the exact same
+ * logic as ProcessPaymentDialog — derived from individual fee heads (or
+ * challan.totalPayable when no tier is matched), plus previousDues and
+ * unpaid fines from the Fines module.
+ *
+ * This is the single source of truth that must be used anywhere an
+ * "Amount Due" figure is displayed so the table column and the payment
+ * dialog header always show identical values.
+ */
+export function calculateChallanAmountDue(
+  challan: FeeChallan,
+  tiers: FeeRevisionRecord[],
+  fines: FeeFineRecord[],
+  allChallans: FeeChallan[] = []
+): {
+  baseTotalPayable: number;   // current-month charges + previousDues + unpaid fines (matches payment dialog "Amount due")
+  currentMonthCharges: number; // fee heads sum for the current billing period only
+  previousDues: number;        // carried-forward arrears
+  unpaidFineTotal: number;     // outstanding fines from the Fines module
+} {
+  // Split installment challan rows already carry their exact divided share
+  if (challan.installmentPlan) {
+    const share = Math.round(challan.totalPayable ?? 0);
+    return {
+      baseTotalPayable: share,
+      currentMonthCharges: share,
+      previousDues: 0,
+      unpaidFineTotal: 0,
+    };
+  }
+
+  const tier = resolveMatchingTier(challan.className, tiers);
+
+  // ── Individual fee heads (mirror ProcessPaymentDialog logic exactly) ──
+  const tuitionFee      = Math.round(challan.tuitionFee      ?? tier?.tuitionFee      ?? 0);
+  const labCharges      = Math.round(challan.labCharges      ?? tier?.labCharges      ?? 0);
+  const sportsCharges   = Math.round(challan.sportsCharges   ?? tier?.sportsCharges   ?? 0);
+  const libraryFund     = Math.round(challan.libraryFund     ?? tier?.libraryFund     ?? 0);
+  const utilitySurcharge= Math.round(challan.utilitySurcharge?? tier?.utilitySurcharge?? 0);
+  const otherCharges    = Math.round(challan.otherCharges    ?? tier?.otherCharges    ?? 0);
+  const customHeads     = challan.customHeads ?? tier?.customHeads ?? [];
+  const customHeadsSum  = customHeads.reduce((s, h) => s + (Math.round(Number(h.amount)) || 0), 0);
+
+  // Calculated sum of all monthly fee heads (same as in payment dialog)
+  const calculatedChargesTotal =
+    tier || challan.tuitionFee !== undefined
+      ? tuitionFee + labCharges + sportsCharges + libraryFund + utilitySurcharge + otherCharges + customHeadsSum
+      : Math.round(challan.totalPayable ?? 0);
+
+  // Supplemental adjustment if totalPayable exceeds the sum of heads (same as payment dialog)
+  const priorInfo = calculatePreviousMonthDues(challan, allChallans);
+  const previousDues = Math.round(
+    challan.previousDues !== undefined && challan.previousDues > 0
+      ? challan.previousDues
+      : (priorInfo.total ?? 0)
+  );
+
+  const additionalAdjustments =
+    tier && challan.totalPayable > (calculatedChargesTotal + previousDues)
+      ? Math.round(challan.totalPayable - (calculatedChargesTotal + previousDues))
+      : 0;
+
+  const currentMonthCharges = calculatedChargesTotal + additionalAdjustments;
+
+  // Unpaid fines from the Fines module (same as payment dialog)
+  const studentName = challan.student.trim().toLowerCase();
+  const unpaidFineTotal = fines
+    .filter((f) => f.student.trim().toLowerCase() === studentName && f.status === "Unpaid")
+    .reduce((sum, f) => sum + Math.round(f.amount), 0);
+
+  const baseTotalPayable = Math.round(currentMonthCharges + previousDues + unpaidFineTotal);
+
+  return { baseTotalPayable, currentMonthCharges, previousDues, unpaidFineTotal };
 }

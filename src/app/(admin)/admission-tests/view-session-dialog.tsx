@@ -225,7 +225,7 @@ export function ViewSessionDialog({
               onOpenChange(false);
               onOpenEvaluation(session.id);
             }}
-            className="h-9 px-5 rounded-lg text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-xs cursor-pointer"
+            className="h-9 px-5 gap-1.5 shadow-xs cursor-pointer"
           >
             <ClipboardCheck className="size-3.5" />
             <span>

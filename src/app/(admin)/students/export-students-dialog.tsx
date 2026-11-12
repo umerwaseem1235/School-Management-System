@@ -348,16 +348,18 @@ export function ExportStudentsDialog({
           <Button
             type="button"
             variant="outline"
+            size="lg"
             onClick={() => onOpenChange(false)}
-            className="h-9 px-4 rounded-lg text-xs font-semibold border-border/80 bg-background text-foreground/90 hover:bg-muted/70 hover:text-foreground shadow-2xs transition-all active:scale-95 cursor-pointer"
+            className="px-4 cursor-pointer"
           >
             Cancel
           </Button>
           <Button
             type="button"
+            size="lg"
             onClick={handleDownload}
             disabled={matchingCount === 0 || isExporting}
-            className="h-9 gap-2 bg-brand text-cream hover:bg-brand-600 shadow-sm transition-all active:scale-95 cursor-pointer text-xs font-semibold px-4.5 rounded-lg"
+            className="gap-2 cursor-pointer px-4.5"
           >
             <FileDown className="size-4" />
             <span>Download {selectedCampus !== "all" ? `${formatCampusDisplay(selectedCampus).primary} PDF` : "School PDF"}</span>

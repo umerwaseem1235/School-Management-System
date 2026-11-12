@@ -271,7 +271,7 @@ export function PrintPaperDialog({
               type="button"
               size="sm"
               onClick={handlePrint}
-              className="h-8 text-xs gap-1.5 bg-brand text-cream hover:bg-brand-600 cursor-pointer"
+              className="h-8 gap-1.5 cursor-pointer"
             >
               <Printer className="size-3.5" />
               <span>Print Paper</span>

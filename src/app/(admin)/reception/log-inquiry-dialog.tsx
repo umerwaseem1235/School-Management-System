@@ -211,8 +211,8 @@ export function LogInquiryDialog({
             </Button>
             <Button
               type="submit"
-              size="sm"
-              className="bg-brand text-cream hover:bg-brand-600 text-xs px-4"
+              size="lg"
+              className="px-5 cursor-pointer"
             >
               Save Inquiry
             </Button>

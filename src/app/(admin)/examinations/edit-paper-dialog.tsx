@@ -383,8 +383,8 @@ export function EditPaperDialog({
           <DialogFooter className="m-0 shrink-0 px-6 py-4 border-t border-border/70 bg-muted/30 flex items-center justify-end sm:justify-end">
             <Button
               type="submit"
-              size="sm"
-              className="h-9 px-6 text-xs font-semibold rounded-lg bg-brand text-cream hover:bg-brand-600 shadow-sm cursor-pointer transition-all duration-150 inline-flex items-center gap-2"
+              size="lg"
+              className="px-6 cursor-pointer gap-2"
             >
               <Check className="size-3.5" />
               <span>Save Changes</span>

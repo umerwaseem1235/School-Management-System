@@ -12,6 +12,7 @@ interface StatCardProps {
   value: React.ReactNode;
   icon: LucideIcon;
   className?: string;
+  iconClassName?: string;
   title?: string;
   /** Optional split footer (e.g. Today | Month for birthday cards). */
   split?: [SplitMetric, SplitMetric];
@@ -25,6 +26,7 @@ export function StatCard({
   value,
   icon: Icon,
   className,
+  iconClassName,
   title,
   split,
   href,
@@ -34,39 +36,64 @@ export function StatCard({
 
   const cardContent = (
     <>
+      {/* Ambient sapphire glow bloom */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_55%_at_50%_0%,rgb(30_66_117/0.12),transparent_70%)] opacity-70 transition-opacity duration-300 group-hover:opacity-100 dark:opacity-30"
-      />
-      <span
-        aria-hidden
-        className="absolute inset-x-10 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-primary/70 to-transparent"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_55%_at_50%_0%,rgba(30,66,117,0.14),transparent_75%)] opacity-60 transition-all duration-500 ease-out group-hover:scale-105 group-hover:opacity-100 dark:opacity-30"
       />
 
-      <span className="relative grid size-9 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand shadow-[0_6px_16px_-6px_rgb(53_57_85/0.4)] ring-1 ring-brand/10 transition-transform duration-300 group-hover:scale-105 dark:bg-brand-soft">
-        <Icon className="size-4" />
+      {/* Dynamic expanding top jewel light-beam */}
+      <span
+        aria-hidden
+        className="absolute inset-x-12 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#1e4275] to-transparent opacity-80 transition-all duration-500 ease-out group-hover:inset-x-4 group-hover:h-[2.5px] group-hover:via-[#3f6396] group-hover:shadow-[0_0_12px_rgba(30,66,117,0.7)]"
+      />
+
+      {/* Premium diagonal glass shimmer pass */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-full top-0 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 ease-out group-hover:translate-x-[350%] group-hover:opacity-100"
+      />
+
+      {/* Icon with multi-layer physics and tilt */}
+      <span
+        className={cn(
+          "relative grid size-9 shrink-0 place-items-center rounded-lg",
+          "bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] text-white",
+          "shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_10px_-2px_rgba(9,29,62,0.35)]",
+          "ring-1 ring-white/10 border border-[#091d3e]/20",
+          "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "group-hover:-translate-y-0.5 group-hover:scale-110 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.38),0_8px_18px_-2px_rgba(9,29,62,0.5)]",
+          iconClassName
+        )}
+      >
+        <Icon className="size-4 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:-rotate-3" />
       </span>
-      <p className="relative mt-2 min-w-0 text-xs font-semibold leading-snug tracking-[0.01em] text-foreground">
+
+      <p className="relative mt-2 min-w-0 text-xs font-semibold leading-snug tracking-[0.01em] text-foreground transition-colors duration-200">
         {label}
       </p>
+
       <p
-        className="relative mt-1 w-full truncate font-heading text-base font-bold leading-none tracking-tight tabular-nums text-foreground"
+        className="relative mt-1 w-full truncate font-heading text-base font-bold leading-none tracking-tight tabular-nums text-foreground transition-colors duration-200 group-hover:text-brand"
         title={title ?? (typeof value === "string" ? value : undefined)}
       >
         {value}
       </p>
+
+      {/* Expanding indicator accent line */}
       <span
         aria-hidden
-        className="relative mt-2 h-[2px] w-8 rounded-full bg-gradient-to-r from-primary/80 to-primary/20"
+        className="relative mt-2 h-[2px] w-6 rounded-full bg-gradient-to-r from-primary/80 to-primary/20 transition-all duration-300 ease-out group-hover:w-12 group-hover:from-primary group-hover:to-primary/50"
       />
+
       {split && (
-        <div className="relative mt-2.5 grid w-full grid-cols-2 divide-x divide-border/60 rounded-xl bg-brand-50/60 py-1.5 ring-1 ring-brand/10 dark:bg-muted/40">
+        <div className="relative mt-2.5 grid w-full grid-cols-2 divide-x divide-border/60 rounded-xl bg-brand-50/60 py-1.5 ring-1 ring-brand/10 transition-all duration-300 group-hover:bg-brand-50/90 group-hover:ring-brand/20 dark:bg-muted/40">
           {split.map((s) => (
             <div key={s.label} className="px-2 text-center">
               <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 {s.label}
               </p>
-              <p className="mt-0.5 font-heading text-sm font-bold tabular-nums text-foreground">
+              <p className="mt-0.5 font-heading text-sm font-bold tabular-nums text-foreground transition-transform duration-200 group-hover:scale-105">
                 {s.value}
               </p>
             </div>
@@ -77,8 +104,14 @@ export function StatCard({
   );
 
   const sharedClassName = cn(
-    "group relative flex min-w-0 flex-col items-center overflow-hidden rounded-xl border border-brand/10 bg-white p-3 pt-4 text-center shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_1px_2px_rgb(53_57_85/0.08),0_16px_40px_-24px_rgb(53_57_85/0.35)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_2px_6px_rgb(53_57_85/0.08),0_28px_56px_-20px_rgb(53_57_85/0.4)] dark:bg-card dark:border-border/80 dark:shadow-none",
-    isClickable && "cursor-pointer hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 select-none",
+    "group relative flex min-w-0 flex-col items-center overflow-hidden rounded-xl border border-brand/10 bg-white p-3 pt-4 text-center",
+    "shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_3px_rgb(53_57_85/0.06),0_12px_28px_-16px_rgba(9,29,62,0.2)]",
+    "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+    "hover:-translate-y-1.5 hover:border-brand/35",
+    "hover:shadow-[inset_0_1px_0_rgb(255_255_255/1),0_8px_20px_-4px_rgba(9,29,62,0.14),0_24px_48px_-12px_rgba(9,29,62,0.28)]",
+    "active:translate-y-0 active:scale-[0.985] active:duration-100",
+    "dark:bg-card dark:border-border/80 dark:shadow-none",
+    isClickable && "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 select-none",
     className
   );
 

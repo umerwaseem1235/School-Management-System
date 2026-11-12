@@ -78,7 +78,7 @@ export function DashboardFeatureCard({
       <div className="relative z-10 space-y-3.5 p-4 pb-3.5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand ring-1 ring-brand/10">
+            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_10px_-2px_rgba(9,29,62,0.35)] ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-105">
               {monogram ? (
                 <span className="text-[11px] font-bold tracking-tight tabular-nums">
                   {monogram}

@@ -1482,8 +1482,8 @@ export function CreateUserDialog({
             </Button>
             <Button
               type="submit"
-              size="sm"
-              className="bg-brand text-cream hover:bg-brand-600 text-xs px-5 cursor-pointer shadow-sm font-semibold"
+              size="lg"
+              className="px-5 cursor-pointer"
             >
               Create {category === "teacher" ? "Teacher" : category === "student" ? "Student" : category === "hr" ? "HR Staff" : category === "accountant" ? "Accountant" : category === "parent" ? "Parent" : "User"} Account
             </Button>

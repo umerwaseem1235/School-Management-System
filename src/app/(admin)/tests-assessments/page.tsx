@@ -399,9 +399,9 @@ export default function TestsAssessmentsPage() {
           )}
 
           <Button
-            size="sm"
+            size="lg"
             onClick={() => setIsScheduleOpen(true)}
-            className="bg-brand text-brand-foreground hover:bg-brand/90 text-xs h-9 gap-1.5 shadow-xs"
+            className="gap-1.5 cursor-pointer"
           >
             <Plus className="size-3.5" />
             <span>Schedule Test</span>
@@ -930,7 +930,7 @@ export default function TestsAssessmentsPage() {
                     <Button
                       size="sm"
                       onClick={handleSaveMarks}
-                      className="bg-brand text-brand-foreground hover:bg-brand/90 text-xs h-9 gap-1.5 shadow-xs cursor-pointer"
+                      className="h-9 gap-1.5 cursor-pointer"
                     >
                       <Save className="size-3.5" />
                       <span>Save Marks</span>

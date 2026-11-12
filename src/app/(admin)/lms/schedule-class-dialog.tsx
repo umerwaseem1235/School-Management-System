@@ -282,7 +282,8 @@ export function ScheduleClassDialog({
             </Button>
             <Button
               type="submit"
-              className="text-xs h-9 px-4 bg-primary hover:bg-primary/90 text-white shadow-xs font-semibold"
+              size="lg"
+              className="px-4 cursor-pointer"
             >
               Schedule Session
             </Button>

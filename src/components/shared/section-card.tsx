@@ -24,17 +24,30 @@ export function SectionCard({
   return (
     <section
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-brand/10 bg-white shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_1px_2px_rgb(53_57_85/0.08),0_16px_40px_-24px_rgb(53_57_85/0.35)] transition-all duration-300 hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_2px_6px_rgb(53_57_85/0.08),0_28px_56px_-20px_rgb(53_57_85/0.4)]",
+        "group relative flex flex-col overflow-hidden rounded-2xl border border-brand/10 bg-white",
+        "shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_3px_rgb(53_57_85/0.06),0_14px_32px_-18px_rgba(9,29,62,0.18)]",
+        "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        "hover:-translate-y-1 hover:border-brand/30",
+        "hover:shadow-[inset_0_1px_0_rgb(255_255_255/1),0_8px_24px_-4px_rgba(9,29,62,0.12),0_28px_56px_-16px_rgba(9,29,62,0.25)]",
         className
       )}
     >
+      {/* Ambient sapphire radial bloom */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(100%_40%_at_50%_0%,rgb(96_64_218/0.08),transparent_70%)] opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(100%_40%_at_50%_0%,rgba(30,66,117,0.12),transparent_75%)] opacity-60 transition-all duration-500 ease-out group-hover:scale-105 group-hover:opacity-100"
       />
+
+      {/* Dynamic expanding top light-beam */}
       <span
         aria-hidden
-        className="absolute inset-x-1/4 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+        className="absolute inset-x-1/4 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#1e4275] to-transparent opacity-80 transition-all duration-500 ease-out group-hover:inset-x-8 group-hover:h-[2.5px] group-hover:via-[#3f6396] group-hover:shadow-[0_0_14px_rgba(30,66,117,0.7)]"
+      />
+
+      {/* Subtle glass shimmer sweep on hover */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-full top-0 block h-full w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/15 to-transparent opacity-0 transition-all duration-1000 ease-out group-hover:translate-x-[400%] group-hover:opacity-100"
       />
 
       {hasHeader && (

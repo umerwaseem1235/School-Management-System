@@ -120,7 +120,7 @@ export function HRClient() {
               {PAYROLL_RUNS.map((p) => (
                 <div key={p.id} className="flex flex-col gap-3 rounded-xl border border-border/60 bg-cream/40 p-4 sm:flex-row sm:items-center">
                   <div className="flex items-center gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand"><FileText className="size-4" /></span>
+                    <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_10px_-2px_rgba(9,29,62,0.35)] ring-1 ring-white/10 transition-transform duration-300 group-hover:scale-105"><FileText className="size-4" /></span>
                     <div>
                       <p className="font-semibold text-foreground">{p.monthYear}</p>
                       <p className="text-xs text-muted-foreground">{p.employees} employees</p>

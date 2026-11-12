@@ -208,28 +208,29 @@ Joined: ${staff.joiningDate}`;
                   </DropdownMenu>
 
                   <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${
+                    className={`inline-flex items-center px-2 py-0.5 rounded-[4px] text-xs font-semibold ${
                       staff.type === "Teaching"
-                        ? "bg-brand-50 text-brand"
-                        : "bg-muted text-muted-foreground"
+                        ? "bg-brand-50 text-brand border border-brand/20"
+                        : "bg-muted text-muted-foreground border border-border/80"
                     }`}
                   >
                     {staff.type}
                   </span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-[4px] text-xs font-semibold bg-brand-50/70 text-brand border border-brand/20">
+                    {staff.department}
+                  </span>
                   {staff.classTeacherOf && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-[4px] text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
                       Incharge: {staff.classTeacherOf}
                     </span>
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-mono font-semibold text-brand bg-brand-50 px-1.5 py-0.5 rounded">
-                    {staff.empCode}
+                  <span className="font-mono font-bold text-brand bg-brand-50 px-2 py-0.5 rounded-[4px] border border-brand/25">
+                    ID: {staff.empCode}
                   </span>
                   <span>·</span>
                   <span className="font-medium text-foreground">{staff.designation}</span>
-                  <span>·</span>
-                  <span>{staff.department}</span>
                 </div>
               </div>
             </div>
@@ -247,6 +248,15 @@ Joined: ${staff.joiningDate}`;
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
               <div className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-background/60 p-2.5">
+                <Briefcase className="size-4 text-brand shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[11px] text-muted-foreground">Official Designation & ID</p>
+                  <p className="font-semibold text-foreground truncate">{staff.designation}</p>
+                  <p className="font-mono text-[11px] font-bold text-brand mt-0.5">Employee ID: {staff.empCode}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-background/60 p-2.5">
                 <Building2 className="size-4 text-brand shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[11px] text-muted-foreground">Campus Branch</p>
@@ -260,9 +270,9 @@ Joined: ${staff.joiningDate}`;
               <div className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-background/60 p-2.5">
                 <BookOpen className="size-4 text-brand shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[11px] text-muted-foreground">Department</p>
+                  <p className="text-[11px] text-muted-foreground">Department & Classification</p>
                   <p className="font-semibold text-foreground truncate">{staff.department}</p>
-                  <p className="text-[11px] text-muted-foreground">{staff.type} Staff</p>
+                  <p className="text-[11px] font-medium text-brand">{staff.type} Staff</p>
                 </div>
               </div>
 
@@ -427,7 +437,7 @@ Joined: ${staff.joiningDate}`;
             variant="outline"
             size="sm"
             onClick={handleCopySummary}
-            className="h-8 gap-1.5 px-3 rounded-lg text-xs font-semibold border-border/80 bg-background text-foreground/90 hover:bg-muted/70 hover:text-foreground shadow-2xs transition-all active:scale-95 cursor-pointer"
+            className="h-8 gap-1.5 px-3 cursor-pointer"
           >
             {copied ? (
               <>
@@ -446,7 +456,7 @@ Joined: ${staff.joiningDate}`;
             type="button"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="h-8 px-4 rounded-lg text-xs font-semibold bg-brand text-cream hover:bg-brand-600 shadow-sm transition-all active:scale-95 cursor-pointer"
+            className="h-8 px-4 cursor-pointer"
           >
             Close
           </Button>

@@ -140,11 +140,12 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
         title="Users & Access Control"
         actions={
           <Button
+            size="lg"
             onClick={() => setIsCreateOpen(true)}
-            className="bg-brand text-cream hover:bg-brand-600 gap-1.5 cursor-pointer shadow-sm text-xs font-semibold"
+            className="gap-2 cursor-pointer px-4"
           >
             <UserPlus className="size-4" />
-            <span>+ Create User</span>
+            <span>Create User</span>
           </Button>
         }
       />

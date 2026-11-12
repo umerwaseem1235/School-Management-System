@@ -274,9 +274,9 @@ export default function ExaminationsPage() {
 
           <Button
             type="button"
-            size="sm"
+            size="lg"
             onClick={() => setIsAddExamOpen(true)}
-            className="h-9 px-3.5 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
+            className="gap-1.5 cursor-pointer"
           >
             <Plus className="size-3.5" />
             <span>Schedule Exam Term</span>
@@ -554,9 +554,9 @@ export default function ExaminationsPage() {
 
                 <Button
                   type="button"
-                  size="xs"
+                  size="sm"
                   onClick={() => setIsAddPaperOpen(true)}
-                  className="h-8 px-2.5 text-xs font-semibold bg-brand text-cream hover:bg-brand-600 gap-1.5 shadow-2xs cursor-pointer"
+                  className="h-8 px-2.5 gap-1.5 cursor-pointer"
                 >
                   <Plus className="size-3" />
                   <span>Add Paper</span>

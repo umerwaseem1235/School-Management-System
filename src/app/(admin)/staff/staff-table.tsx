@@ -151,11 +151,8 @@ export function StaffTable({
               {initials(r.name)}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-semibold text-foreground text-[13px] leading-tight truncate">
+              <span className="font-semibold text-foreground text-[13px] leading-tight truncate" title={r.name}>
                 {r.name}
-              </span>
-              <span className="font-mono text-[11px] text-muted-foreground mt-0.5">
-                {r.empCode}
               </span>
             </div>
           </div>
@@ -164,27 +161,13 @@ export function StaffTable({
       },
       {
         key: "designation",
-        header: "Role & Department",
+        header: "Role",
         align: "center",
         cell: (r) => (
           <div className="inline-flex flex-col items-center justify-center min-w-0">
-            <span className="text-xs font-semibold text-foreground leading-tight truncate">
+            <span className="text-xs font-semibold text-foreground leading-tight truncate" title={r.designation}>
               {r.designation}
             </span>
-            <div className="flex items-center justify-center gap-1.5 mt-1 flex-wrap">
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-muted text-muted-foreground">
-                {r.department}
-              </span>
-              <span
-                className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10.5px] font-semibold ${
-                  r.type === "Teaching"
-                    ? "bg-brand-50 text-brand"
-                    : "bg-muted/80 text-muted-foreground"
-                }`}
-              >
-                {r.type}
-              </span>
-            </div>
           </div>
         ),
         sortValue: (r) => r.designation,
@@ -235,8 +218,8 @@ export function StaffTable({
               variant="outline"
               size="xs"
               onClick={() => onSelectStaff(r)}
-              className="h-7 gap-1 px-2.5 rounded-lg text-xs font-semibold border-border/80 text-brand hover:bg-brand-50 hover:text-brand hover:border-brand/40 shadow-2xs transition-all active:scale-95 cursor-pointer"
-              title="View Complete Staff Details"
+              className="h-7.5 gap-1.5 px-3 rounded-[4px] text-xs font-semibold border-brand/20 text-brand hover:bg-brand-50 hover:text-brand hover:border-brand/40 shadow-2xs transition-all active:scale-95 cursor-pointer"
+              title={`View complete profile: ${r.name} (${r.empCode}) — ${r.designation} (${r.department})`}
             >
               <Eye className="size-3.5" />
               <span>View</span>

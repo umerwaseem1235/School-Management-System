@@ -514,7 +514,7 @@ export function PrintAwardListDialog({
             <Button
               onClick={handlePrint}
               size="sm"
-              className="bg-brand text-brand-foreground hover:bg-brand/90 gap-1.5 text-xs font-semibold h-8 shadow-xs"
+              className="gap-1.5 h-8 cursor-pointer"
             >
               <Printer className="size-3.5" />
               <span>Print Award List</span>

@@ -219,7 +219,7 @@ export function PrintMeritListDialog({
             <Button
               onClick={handlePrint}
               size="sm"
-              className="bg-brand text-cream hover:bg-brand-600 gap-1.5 text-xs font-semibold h-8.5 px-3.5 shadow-xs cursor-pointer"
+              className="gap-1.5 h-8.5 px-3.5 cursor-pointer"
             >
               <Printer className="size-3.5" />
               <span>Print Merit List</span>

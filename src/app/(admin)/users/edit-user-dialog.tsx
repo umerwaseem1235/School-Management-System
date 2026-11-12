@@ -902,8 +902,8 @@ export function EditUserDialog({
             {!isSuperAdmin && (
               <Button
                 type="submit"
-                size="sm"
-                className="bg-brand text-cream hover:bg-brand-600 text-xs px-5 cursor-pointer shadow-sm font-semibold"
+                size="lg"
+                className="px-5 cursor-pointer"
               >
                 Save Changes
               </Button>
