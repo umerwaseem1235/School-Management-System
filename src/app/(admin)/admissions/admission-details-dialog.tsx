@@ -15,11 +15,13 @@ import { formatCampusDisplay, formatDate, initials } from "@/lib/format";
 import type { AdmissionApplication } from "@/types";
 import {
   Award,
+  Building2,
   Check,
   CheckCircle2,
   Copy,
   ExternalLink,
   GraduationCap,
+  MapPin,
   Phone,
   ShieldCheck,
   UserCheck,
@@ -54,7 +56,8 @@ Admission No: ${admissionNo}
 Roll No: ${admission.rollNo || "N/A"}
 Gender: ${admission.gender || "N/A"}
 Class: ${admission.appliedClass}${admission.section ? ` - Section ${admission.section}` : ""}
-Campus: ${campusInfo.primary} (${campusInfo.secondary || admission.campus})
+Campus Branch: ${campusInfo.primary}
+Campus Location: ${campusInfo.secondary || "Gulberg, Lahore"}
 Guardian / Parent: ${admission.guardian} (S/D of ${admission.guardian})
 Contact Phone: ${admission.phone}
 Admission Pathway: ${admission.admissionType || (admission.score ? "Entry Test" : "Direct Admission")}${admission.score ? ` (Score: ${admission.score}%)` : ""}
@@ -123,6 +126,14 @@ Enrolled On: ${formatDate(admission.appliedOn)}`;
                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span className="font-mono font-semibold text-brand bg-brand-50 px-1.5 py-0.5 rounded border border-brand/20">
                     {admissionNo}
+                  </span>
+                  <span>·</span>
+                  <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                    <Building2 className="size-3 text-brand" />
+                    <span>{campusInfo.primary}</span>
+                    <span className="text-muted-foreground font-normal">
+                      ({campusInfo.secondary || "Gulberg, Lahore"})
+                    </span>
                   </span>
                   {admission.rollNo && (
                     <>
@@ -235,15 +246,20 @@ Enrolled On: ${formatDate(admission.appliedOn)}`;
                     {admission.rollNo ? `#${admission.rollNo}` : "Assigned in SIS"}
                   </span>
                 </div>
-                <div className="flex justify-between items-start py-1 border-b border-border/40">
+                <div className="flex justify-between items-center py-1 border-b border-border/40">
                   <span className="text-muted-foreground">Campus Branch:</span>
-                  <div className="text-right">
-                    <p className="font-semibold text-foreground">{campusInfo.primary}</p>
-                    {campusInfo.secondary && (
-                      <p className="text-[11px] text-muted-foreground">
-                        {campusInfo.secondary}
-                      </p>
-                    )}
+                  <div className="flex items-center gap-1.5 font-semibold text-foreground">
+                    <Building2 className="size-3.5 text-brand" />
+                    <span>{campusInfo.primary}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center py-1 border-b border-border/40">
+                  <span className="text-muted-foreground">Campus Location:</span>
+                  <div className="flex items-center gap-1.5 font-medium text-foreground">
+                    <MapPin className="size-3.5 text-brand" />
+                    <span className="bg-brand-50/80 border border-brand/20 px-2 py-0.5 rounded text-[11px] font-semibold text-brand">
+                      {campusInfo.secondary || "Gulberg, Lahore"}
+                    </span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center py-1">

@@ -61,12 +61,9 @@ export function AdmissionsTable({ data }: AdmissionsTableProps) {
         cell: (r) => {
           const info = formatCampusDisplay(r.campus);
           return (
-            <div className="flex flex-col leading-tight">
-              <span className="text-[13px] font-medium text-foreground">{info.primary}</span>
-              {info.secondary && (
-                <span className="text-[11px] text-muted-foreground">{info.secondary}</span>
-              )}
-            </div>
+            <span className="text-[13px] font-medium text-foreground whitespace-nowrap">
+              {info.primary}
+            </span>
           );
         },
         sortValue: (r) => r.campus,
