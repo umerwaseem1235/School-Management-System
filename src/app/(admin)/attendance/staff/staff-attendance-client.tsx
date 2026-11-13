@@ -394,8 +394,8 @@ export function StaffAttendanceClient() {
             <button
               type="button"
               onClick={() => setViewingStaff(r)}
-              title={`View ${r.name}'s attendance record, contact details (${r.email || "staff@edusphere.edu.pk"}) & department`}
-              aria-label={`View ${r.name}'s attendance record & contact details`}
+              title={`View ${r.name}'s attendance record & department details`}
+              aria-label={`View ${r.name}'s attendance record`}
               className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-blue-200 bg-blue-50/70 px-2.5 text-xs font-semibold text-blue-700 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-all duration-150 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 active:translate-y-px cursor-pointer"
             >
               <Eye className="size-3.5 text-blue-600" />
@@ -591,26 +591,6 @@ export function StaffAttendanceClient() {
                     <div className="pt-0.5">
                       <StatusBadge status={activeViewingStaff.statusToday} />
                     </div>
-                  </div>
-
-                  {/* Quick Contact Bar in Header */}
-                  <div className="mt-3.5 flex flex-wrap items-center gap-2 pt-3 border-t border-border text-xs text-muted-foreground">
-                    <a
-                      href={`mailto:${activeViewingStaff.email}`}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-muted/60 hover:bg-muted px-2.5 py-1 text-xs text-foreground transition-colors"
-                      title="Send official email"
-                    >
-                      <Mail className="size-3 text-muted-foreground" />
-                      <span className="font-mono text-[11px]">{activeViewingStaff.email}</span>
-                    </a>
-                    <a
-                      href={`tel:${activeViewingStaff.phone}`}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-muted/60 hover:bg-muted px-2.5 py-1 text-xs text-foreground transition-colors"
-                      title="Call staff phone"
-                    >
-                      <Phone className="size-3 text-muted-foreground" />
-                      <span className="font-mono text-[11px]">{activeViewingStaff.phone}</span>
-                    </a>
                   </div>
                 </DialogHeader>
               </div>
@@ -837,7 +817,7 @@ export function StaffAttendanceClient() {
                 <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-mono">
                   <span>ID: {activeViewingStaff.empCode}</span>
                   <span>&bull;</span>
-                  <span>{activeViewingStaff.phone}</span>
+                  <span>{activeViewingStaff.department}</span>
                 </div>
                 <Button
                   variant="outline"
