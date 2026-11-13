@@ -41,6 +41,7 @@ import {
 } from "@/lib/mock/attendance";
 import { CAMPUSES } from "@/lib/mock/institution";
 import { formatNumber, formatPercent } from "@/lib/format";
+import { checkAndRevokeScholarshipByAttendance } from "@/lib/mock/finance-storage";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Roll call segmented options
@@ -210,6 +211,36 @@ export function StudentAttendanceClient() {
     (record: StudentAttendanceRecord, status: DailyStudentStatus) => {
       applyStatus(new Set([record.id]), status);
       toast.success(`${record.name} marked ${status}`);
+
+      // ── Attendance-based scholarship auto-revocation ───────────────────────
+      // Recompute this student's monthly attendance % after the status change.
+      // "Present" and "Late" count as attending; "Absent" and "Excused" do not.
+      const totalDays = record.daysPresentMonth + record.daysAbsentMonth;
+      const presentDays =
+        status === "Present" || status === "Late"
+          ? record.daysPresentMonth + 1
+          : record.daysPresentMonth;
+      const absentDays =
+        status === "Absent" || status === "Excused"
+          ? record.daysAbsentMonth + 1
+          : record.daysAbsentMonth;
+      const effectiveTotal = Math.max(totalDays + 1, 1);
+      const attendancePct = Math.round((presentDays / effectiveTotal) * 1000) / 10;
+
+      const result = checkAndRevokeScholarshipByAttendance(record.name, attendancePct);
+      if (result.revoked) {
+        const awardNos = result.revokedAwards.map((a) => a.awardNo).join(", ");
+        toast.warning(
+          `⚠️ Scholarship revoked for ${record.name} — Attendance dropped to ${attendancePct.toFixed(1)}% (below 80% threshold). Award(s): ${awardNos}`,
+          { duration: 7000 }
+        );
+      } else if (attendancePct < 80 && attendancePct > 0 && totalDays > 0) {
+        // Warn even if no active scholarship exists, so admin is aware
+        toast.warning(
+          `⚠️ ${record.name}'s attendance is at ${attendancePct.toFixed(1)}% — below the 80% scholarship eligibility threshold.`,
+          { duration: 5000 }
+        );
+      }
     },
     [applyStatus]
   );
@@ -443,9 +474,24 @@ export function StudentAttendanceClient() {
           </AttendanceActionButton>
           <AttendanceActionButton
             tone="primary"
-            onClick={() =>
-              toast.success(`Attendance register for ${selectedDate} saved.`)
-            }
+            onClick={() => {
+              // Persist all visible records' attendance % and check for scholarship revocations
+              let totalRevoked = 0;
+              for (const r of records) {
+                const totalDays = r.daysPresentMonth + r.daysAbsentMonth;
+                const effectiveTotal = Math.max(totalDays, 1);
+                const pct = Math.round((r.daysPresentMonth / effectiveTotal) * 1000) / 10;
+                const result = checkAndRevokeScholarshipByAttendance(r.name, pct);
+                if (result.revoked) totalRevoked += result.revokedAwards.length;
+              }
+              toast.success(`Attendance register for ${selectedDate} saved.`);
+              if (totalRevoked > 0) {
+                toast.warning(
+                  `⚠️ ${totalRevoked} scholarship(s) automatically revoked due to attendance below 80% threshold.`,
+                  { duration: 8000 }
+                );
+              }
+            }}
           >
             <Save />
             Save Register

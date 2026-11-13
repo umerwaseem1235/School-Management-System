@@ -15,6 +15,8 @@ import {
   School,
   GraduationCap,
   Calendar,
+  TriangleAlert,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/shared/page-header";
@@ -41,6 +43,8 @@ import {
   readFeeConfiguration,
   resolveMatchingTier,
   readFeeChallans,
+  readStudentAttendancePercent,
+  runAttendanceScholarshipAudit,
 } from "@/lib/mock/finance-storage";
 import { STUDENTS } from "@/lib/mock/institution";
 import {
@@ -51,9 +55,7 @@ import { SCHOLARSHIPS } from "@/lib/mock/operations";
 import { exportScholarshipsPdf, printScholarshipsReport } from "./scholarships-export";
 
 export function ScholarshipsClient() {
-  const [records, setRecords] = React.useState<FeeScholarshipAward[]>(() => {
-    return readFeeScholarships();
-  });
+  const [records, setRecords] = React.useState<FeeScholarshipAward[]>(FEE_SCHOLARSHIP_AWARDS);
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
   // View modal state
@@ -91,29 +93,63 @@ export function ScholarshipsClient() {
 
   // Cross-submodule live synchronization listener
   React.useEffect(() => {
+    // Load from localStorage
+    const loaded = readFeeScholarships();
+
+    // Run an attendance audit on mount — catch revocations that happened while
+    // this page was not open (e.g. attendance was saved from the Attendance module)
+    const auditResults = runAttendanceScholarshipAudit();
+    if (auditResults.length > 0) {
+      const count = auditResults.reduce((s, r) => s + r.revokedAwards.length, 0);
+      toast.warning(
+        `⚠️ ${count} scholarship(s) automatically revoked — student attendance below 80% threshold.`,
+        { duration: 8000 }
+      );
+    }
+
     setRecords(readFeeScholarships());
+
     const onSync = () => {
       setRecords(readFeeScholarships());
     };
     window.addEventListener("edusphere:fee-scholarships-updated", onSync);
-    return () => window.removeEventListener("edusphere:fee-scholarships-updated", onSync);
+    // Also listen for attendance updates so the table refreshes when attendance changes
+    const onAttendance = () => {
+      const auditRes = runAttendanceScholarshipAudit();
+      if (auditRes.length > 0) {
+        const cnt = auditRes.reduce((s, r) => s + r.revokedAwards.length, 0);
+        if (cnt > 0) {
+          toast.warning(
+            `⚠️ ${cnt} scholarship(s) revoked — attendance dropped below 80%.`,
+            { duration: 7000 }
+          );
+        }
+      }
+      setRecords(readFeeScholarships());
+    };
+    window.addEventListener("edusphere:attendance-updated", onAttendance);
+    return () => {
+      window.removeEventListener("edusphere:fee-scholarships-updated", onSync);
+      window.removeEventListener("edusphere:attendance-updated", onAttendance);
+    };
   }, []);
 
   // Candidate enrolled students pool for instant auto-complete and lookup
   const candidateStudents = React.useMemo(() => {
     const list: Array<{ name: string; rollNo: string; className: string; campus: string; tuitionFee: number }> = [];
-    const seen = new Set<string>();
+    const seenNames = new Set<string>();
     const tiers = readFeeConfiguration();
 
     const challans = readFeeChallans();
     for (const c of challans) {
-      const key = `${c.student.trim().toLowerCase()}_${c.className.toLowerCase()}`;
-      if (!seen.has(key)) {
-        seen.add(key);
+      const studentName = c.student.trim();
+      const nameKey = studentName.toLowerCase();
+      if (!seenNames.has(nameKey)) {
+        seenNames.add(nameKey);
         const tier = resolveMatchingTier(c.className, tiers);
         const tuition = c.tuitionFee ?? tier?.tuitionFee ?? 18500;
         list.push({
-          name: c.student.trim(),
+          name: studentName,
           rollNo: c.rollNo ? c.rollNo.replace(/^Roll\s*#?/i, "").trim() : "10",
           className: c.className,
           campus: c.campus,
@@ -123,13 +159,14 @@ export function ScholarshipsClient() {
     }
 
     for (const s of STUDENTS) {
-      const key = `${s.name.trim().toLowerCase()}_${s.className.toLowerCase()}`;
-      if (!seen.has(key)) {
-        seen.add(key);
+      const studentName = s.name.trim();
+      const nameKey = studentName.toLowerCase();
+      if (!seenNames.has(nameKey)) {
+        seenNames.add(nameKey);
         const tier = resolveMatchingTier(s.className, tiers);
         const tuition = tier?.tuitionFee ?? 18500;
         list.push({
-          name: s.name.trim(),
+          name: studentName,
           rollNo: s.rollNo ? s.rollNo.replace(/^Roll\s*#?/i, "").trim() : "10",
           className: s.className,
           campus: s.campus,
@@ -208,7 +245,9 @@ export function ScholarshipsClient() {
     }
   };
 
-  const totalMonthlySubsidy = records.reduce((s, r) => s + r.monthlyValue, 0);
+  // Only count Active records towards KPI subsidy totals
+  const activeRecords = records.filter((r) => r.status === "Active");
+  const totalMonthlySubsidy = activeRecords.reduce((s, r) => s + r.monthlyValue, 0);
   const totalBeneficiaries = SCHOLARSHIPS.reduce((s, r) => s + r.beneficiaries, 0);
 
   const handleOpenEdit = React.useCallback((award: FeeScholarshipAward) => {
@@ -387,11 +426,48 @@ export function ScholarshipsClient() {
       headerClassName: "w-[9%] text-center",
     },
     {
+      key: "attendance",
+      header: "Attendance",
+      align: "center",
+      className: "w-[9%] text-center",
+      headerClassName: "w-[9%] text-center",
+      cell: (r) => {
+        const pct = readStudentAttendancePercent(r.student);
+        if (pct === undefined) {
+          return (
+            <span className="text-xs text-muted-foreground/60 italic">—</span>
+          );
+        }
+        const isLow = pct < 80;
+        return (
+          <div className="flex items-center justify-center gap-1">
+            {isLow && (
+              <TriangleAlert className="size-3.5 shrink-0 text-amber-500" />
+            )}
+            <span
+              className={`inline-flex items-center justify-center rounded-md px-2 py-0.5 font-mono text-xs font-bold tabular-nums ${
+                isLow
+                  ? "bg-red-50 text-red-700 ring-1 ring-red-200"
+                  : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+              }`}
+              title={
+                isLow
+                  ? `Attendance ${pct.toFixed(1)}% — below 80% threshold`
+                  : `Attendance ${pct.toFixed(1)}%`
+              }
+            >
+              {pct.toFixed(1)}%
+            </span>
+          </div>
+        );
+      },
+    },
+    {
       key: "status",
       header: "Status",
       align: "center",
       cell: (r) => (
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-0.5">
           <StatusBadge
             status={
               r.status === "Active"
@@ -401,6 +477,15 @@ export function ScholarshipsClient() {
                 : "Inactive"
             }
           />
+          {r.status === "Lapsed" && r.revocationReason && (
+            <span
+              className="mt-0.5 flex items-center gap-0.5 text-[10px] font-medium text-red-600"
+              title={r.revocationReason}
+            >
+              <Activity className="size-2.5 shrink-0" />
+              Low Attendance
+            </span>
+          )}
         </div>
       ),
       className: "w-[8%] text-center",
@@ -670,6 +755,62 @@ export function ScholarshipsClient() {
                     </span>
                   </div>
                 </div>
+
+                {/* Attendance-based revocation warning */}
+                {selectedAward.status === "Lapsed" && selectedAward.revocationReason && (
+                  <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50/70 p-3.5">
+                    <TriangleAlert className="mt-0.5 size-4 shrink-0 text-red-500" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-red-800">
+                        Scholarship Automatically Revoked
+                      </p>
+                      <p className="mt-0.5 text-xs text-red-700">
+                        {selectedAward.revocationReason}
+                      </p>
+                      <p className="mt-1 text-[11px] text-red-600/80">
+                        Fee concession has been removed from this student&apos;s voucher. Scholarship
+                        can be reinstated once attendance is restored above 80%.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Live attendance indicator in dialog */}
+                {(() => {
+                  const pct = readStudentAttendancePercent(selectedAward.student);
+                  if (pct === undefined) return null;
+                  const isLow = pct < 80;
+                  return (
+                    <div
+                      className={`flex items-center justify-between rounded-xl border p-3 text-xs ${
+                        isLow
+                          ? "border-amber-200 bg-amber-50/70"
+                          : "border-emerald-200 bg-emerald-50/50"
+                      }`}
+                    >
+                      <span
+                        className={`flex items-center gap-1.5 font-medium ${
+                          isLow ? "text-amber-800" : "text-emerald-800"
+                        }`}
+                      >
+                        <Activity className="size-3.5" />
+                        Current Attendance
+                      </span>
+                      <span
+                        className={`font-mono font-bold tabular-nums ${
+                          isLow ? "text-red-700" : "text-emerald-700"
+                        }`}
+                      >
+                        {pct.toFixed(1)}%
+                        {isLow && (
+                          <span className="ml-1.5 text-[10px] font-normal text-amber-700">
+                            (below 80% threshold)
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
 
               <DialogFooter className="flex items-center justify-between gap-2 border-t border-border/60 pt-3">
@@ -877,15 +1018,15 @@ export function ScholarshipsClient() {
           <form onSubmit={handleCreate} className="space-y-3.5 py-1">
             {/* Datalists for real-time enrolled student auto-complete */}
             <datalist id="scholarship-student-candidates">
-              {candidateStudents.map((c) => (
-                <option key={`${c.name}-${c.rollNo}`} value={c.name}>
+              {candidateStudents.map((c, idx) => (
+                <option key={`cand-student-${c.name}-${c.rollNo}-${c.className}-${idx}`} value={c.name}>
                   Roll #{c.rollNo} · {c.className} · {c.campus}
                 </option>
               ))}
             </datalist>
             <datalist id="scholarship-rollno-candidates">
-              {candidateStudents.map((c) => (
-                <option key={`roll-${c.rollNo}-${c.name}`} value={c.rollNo}>
+              {candidateStudents.map((c, idx) => (
+                <option key={`cand-roll-${c.rollNo}-${c.name}-${c.className}-${idx}`} value={c.rollNo}>
                   {c.name} ({c.className} · {c.campus})
                 </option>
               ))}
