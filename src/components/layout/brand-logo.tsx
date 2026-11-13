@@ -16,8 +16,8 @@ export function BrandLogo({
         className
       )}
     >
-      <div className="relative grid size-9.5 shrink-0 place-items-center rounded-full bg-white text-[#12294d] shadow-[0_2px_8px_rgba(0,0,0,0.28)] ring-2 ring-white/25 transition-all duration-200">
-        <GraduationCap className="size-5 text-[#12294d]" strokeWidth={2.4} />
+      <div className="relative grid size-9.5 shrink-0 place-items-center rounded-full bg-white text-[#6e3b1f] shadow-[0_2px_8px_rgba(0,0,0,0.2)] ring-2 ring-white/30 transition-all duration-200">
+        <GraduationCap className="size-5 text-[#6e3b1f]" strokeWidth={2.4} />
       </div>
       <div
         className={cn(
@@ -30,7 +30,7 @@ export function BrandLogo({
         <p className="font-heading text-[16px] font-bold tracking-tight text-white truncate drop-shadow-xs">
           EduSphere
         </p>
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#93c5fd] truncate">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#ebdcc6] truncate">
           Super Admin
         </p>
       </div>

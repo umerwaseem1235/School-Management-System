@@ -1,4 +1,4 @@
-import { formatDate, formatNumber } from "@/lib/format";
+﻿import { formatDate, formatNumber } from "@/lib/format";
 import { printHtml } from "@/lib/print-html";
 import type {
   InventoryItemRecord,
@@ -196,11 +196,11 @@ export function printInventoryRegister(items: InventoryItemRecord[]): boolean {
   <title>Store Stock Register</title>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; padding: 28px; color: #0f172a; }
-    h1 { margin: 0 0 6px; font-size: 18px; color: #091d3e; }
+    h1 { margin: 0 0 6px; font-size: 18px; color: #381e0f; }
     p.sub { margin: 0 0 18px; font-size: 12px; color: #475569; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
     th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
-    th { background: #f1f5f9; font-weight: 700; color: #091d3e; }
+    th { background: #f1f5f9; font-weight: 700; color: #381e0f; }
     .mono { font-family: ui-monospace, monospace; }
     .center { text-align: center; }
   </style>
@@ -330,11 +330,11 @@ export function printIssuanceRegister(records: StockIssuanceRecord[]): boolean {
   <title>Stock Issuance Register</title>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; padding: 28px; color: #0f172a; }
-    h1 { margin: 0 0 6px; font-size: 18px; color: #091d3e; }
+    h1 { margin: 0 0 6px; font-size: 18px; color: #381e0f; }
     p.sub { margin: 0 0 18px; font-size: 12px; color: #475569; }
     table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
     th, td { border: 1px solid #cbd5e1; padding: 7px 9px; text-align: left; vertical-align: top; }
-    th { background: #f1f5f9; font-weight: 700; color: #091d3e; }
+    th { background: #f1f5f9; font-weight: 700; color: #381e0f; }
     .mono { font-family: ui-monospace, monospace; }
     .center { text-align: center; }
     .muted { color: #64748b; font-size: 10.5px; }

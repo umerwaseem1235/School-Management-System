@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -215,7 +215,7 @@ export function ProfileClient() {
             <div className="flex items-end gap-4">
               {/* Avatar Monogram */}
               <div className="relative group">
-                <div className="grid size-24 sm:size-28 place-items-center rounded-2xl bg-gradient-to-b from-[#183968] to-[#091d3e] font-heading text-3xl font-bold text-white shadow-xl ring-4 ring-background border border-white/20">
+                <div className="grid size-24 sm:size-28 place-items-center rounded-2xl bg-gradient-to-b from-[#6e3b1f] to-[#381e0f] font-heading text-3xl font-bold text-white shadow-xl ring-4 ring-background border border-white/20">
                   HT
                 </div>
                 <div

@@ -191,7 +191,7 @@ export function PrintPaperDialog({
     .q-line { display: flex; justify-content: space-between; gap: 12px; }
     .q-mark { font-weight: 700; white-space: nowrap; }
     .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 16px; padding-left: 18px; margin-top: 3px; font-size: 11.5px; }
-    .ans-key { margin-top: 3px; padding-left: 18px; font-size: 11px; font-weight: 700; color: #065f46; }
+    .ans-key { margin-top: 3px; padding-left: 18px; font-size: 11px; font-weight: 700; color: #381e0f; }
   </style>
 </head>
 <body>

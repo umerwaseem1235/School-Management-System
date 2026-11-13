@@ -1,4 +1,4 @@
-import { STUDENTS, CAMPUSES } from "./institution";
+﻿import { STUDENTS, CAMPUSES } from "./institution";
 import { EMPLOYEES } from "./operations";
 import { CAMPUS_ATTENDANCE_TODAY } from "./analytics";
 
@@ -831,9 +831,9 @@ export const STUDENT_TODAY = (() => {
 })();
 
 export const TODAY_DISTRIBUTION_DONUT = [
-  { name: "Present", value: STUDENT_TODAY.present, color: "#1e4275" },
-  { name: "Late", value: STUDENT_TODAY.late, color: "#0ea5e9" },
-  { name: "Absent", value: STUDENT_TODAY.absent, color: "#93c5fd" },
+  { name: "Present", value: STUDENT_TODAY.present, color: "#127c52" },
+  { name: "Late", value: STUDENT_TODAY.late, color: "#c7841f" },
+  { name: "Absent", value: STUDENT_TODAY.absent, color: "#c8463d" },
 ];
 
 /** Headline figures for the chronic-absenteeism programme. */

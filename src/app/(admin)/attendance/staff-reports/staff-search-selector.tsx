@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
@@ -262,7 +262,7 @@ export function StaffSearchSelector({
               {selectedStaff ? (
                 <span
                   className={cn(
-                    "grid shrink-0 place-items-center rounded-full bg-[#091d3e] font-bold text-white shadow-xs",
+                    "grid shrink-0 place-items-center rounded-full bg-[#381e0f] font-bold text-white shadow-xs",
                     size === "md" ? "size-5 text-[10.5px]" : "size-4.5 text-[9px]"
                   )}
                 >

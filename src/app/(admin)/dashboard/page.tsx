@@ -1,4 +1,4 @@
-import {
+﻿import {
   Banknote,
   Briefcase,
   Cake,
@@ -215,9 +215,9 @@ export default function DashboardPage() {
             data={REVENUE_TREND}
             xKey="month"
             series={[
-              { key: "collected", label: "Collected", color: "#1e4275" },
-              { key: "expected", label: "Expected", color: "#0ea5e9" },
-              { key: "expenses", label: "Expenses", color: "#93c5fd" },
+              { key: "collected", label: "Collected", color: "#6e3b1f" },
+              { key: "expected", label: "Expected", color: "#3dbf86" },
+              { key: "expenses", label: "Expenses", color: "#a7e8c9" },
             ]}
             format="millions"
           />
@@ -231,7 +231,7 @@ export default function DashboardPage() {
           <BarSeriesChart
             data={ENROLLMENT_TREND}
             xKey="year"
-            series={[{ key: "students", label: "Students", color: "#1e4275" }]}
+            series={[{ key: "students", label: "Students", color: "#6e3b1f" }]}
             format="compact"
           />
         </SectionCard>
@@ -249,7 +249,7 @@ export default function DashboardPage() {
             xKey="day"
             series={[
               { key: "staff", label: "Staff", color: "#0ea5e9" },
-              { key: "students", label: "Students", color: "#1e4275" },
+              { key: "students", label: "Students", color: "#6e3b1f" },
             ]}
             format="percent"
             yDomain={[85, 100]}

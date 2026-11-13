@@ -1,4 +1,4 @@
-import type { AssetRecord } from "@/lib/mock/assets";
+﻿import type { AssetRecord } from "@/lib/mock/assets";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { printHtml } from "@/lib/print-html";
 
@@ -180,7 +180,7 @@ export function printAssetRegister(records: AssetRecord[]): boolean {
         <span style="display:inline-flex;align-items:center;gap:5px;">
           <span style="width:8px;height:8px;border-radius:50%;background:${
             r.condition === "New"
-              ? "#10b981"
+              ? "#7c4424"
               : r.condition === "Good"
                 ? "#22c55e"
                 : r.condition === "Fair"
@@ -202,7 +202,7 @@ export function printAssetRegister(records: AssetRecord[]): boolean {
 <title>Asset Register — Opus SMS</title>
 <style>
   body { font-family: 'Segoe UI', Arial, sans-serif; padding: 24px; color: #1e293b; }
-  h1 { font-size: 18px; color: #091d3e; margin-bottom: 4px; }
+  h1 { font-size: 18px; color: #381e0f; margin-bottom: 4px; }
   p.sub { font-size: 11px; color: #64748b; margin-bottom: 16px; }
   table { width: 100%; border-collapse: collapse; font-size: 11px; }
   th { background: #f1f5f9; color: #334155; text-align: left; padding: 8px 10px; border-bottom: 2px solid #e2e8f0; font-weight: 600; }

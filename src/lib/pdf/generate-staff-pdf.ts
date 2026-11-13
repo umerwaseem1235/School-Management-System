@@ -1,4 +1,4 @@
-import jsPDF from "jspdf";
+﻿import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { formatCampusDisplay } from "@/lib/format";
 import type { StaffMember } from "@/types";
@@ -58,7 +58,7 @@ export function generateStaffPDF({
   /* ─────────────────────────────────────────────────────────────
      1. Top Brand Banner (Page 1)
      ───────────────────────────────────────────────────────────── */
-  doc.setFillColor(30, 66, 117); // #1e4275
+  doc.setFillColor(56, 30, 15); // #381e0f (Deep Espresso Brown) // #381e0f (Imperial Violet) // #381e0f (Royal Purple) // #6e3b1f
   doc.rect(0, 0, pageWidth, 28, "F");
 
   // Accent gradient border lines
@@ -92,7 +92,7 @@ export function generateStaffPDF({
 
   // Right-aligned report code & print timestamp
   doc.setFontSize(7.5);
-  doc.setTextColor(190, 210, 240);
+  doc.setTextColor(245, 235, 215); // #f5ebd7 (Cream Linen) // #ebdcc6 (Soft Lavender)
   doc.text("OFFICIAL STAFF DOSSIER", pageWidth - marginX, 11, { align: "right" });
   doc.text(`Generated: ${timestamp}`, pageWidth - marginX, 16, { align: "right" });
   doc.text("CONFIDENTIAL & PROPRIETARY", pageWidth - marginX, 21, { align: "right" });
@@ -208,7 +208,7 @@ export function generateStaffPDF({
       overflow: "linebreak",
     },
     headStyles: {
-      fillColor: [30, 66, 117], // #1e4275
+      fillColor: [56, 30, 15], // #381e0f // #381e0f // #381e0f // #6e3b1f
       textColor: [255, 255, 255],
       fontStyle: "bold",
       fontSize: 7.5,
@@ -255,7 +255,7 @@ export function generateStaffPDF({
     didDrawPage: (data) => {
       // Repeat header on subsequent pages
       if (data.pageNumber > 1) {
-        doc.setFillColor(30, 66, 117);
+        doc.setFillColor(56, 30, 15); // #381e0f (Deep Espresso Brown) // #381e0f (Imperial Violet) // #381e0f (Royal Purple)
         doc.rect(0, 0, pageWidth, 16, "F");
 
         doc.setFillColor(60, 111, 176);
@@ -268,7 +268,7 @@ export function generateStaffPDF({
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(7.5);
-        doc.setTextColor(190, 210, 240);
+        doc.setTextColor(245, 235, 215); // #f5ebd7 (Cream Linen) // #ebdcc6 (Soft Lavender)
         doc.text(`${campusInfo ? campusInfo.primary : "All Campuses"} · Page ${data.pageNumber}`, pageWidth - marginX, 10.5, {
           align: "right",
         });

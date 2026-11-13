@@ -96,25 +96,17 @@ export function AppSidebar() {
   const leaveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = React.useCallback(() => {
-    if (leaveTimeoutRef.current) {
-      clearTimeout(leaveTimeoutRef.current);
-      leaveTimeoutRef.current = null;
-    }
-    // 40ms subtle hover debounce prevents accidental triggers during rapid mouse pass-through
+    if (leaveTimeoutRef.current) clearTimeout(leaveTimeoutRef.current);
     enterTimeoutRef.current = setTimeout(() => {
       setIsHovered(true);
-    }, 40);
+    }, 60);
   }, [setIsHovered]);
 
   const handleMouseLeave = React.useCallback(() => {
-    if (enterTimeoutRef.current) {
-      clearTimeout(enterTimeoutRef.current);
-      enterTimeoutRef.current = null;
-    }
-    // 140ms grace period so moving quickly across items doesn't snap shut abruptly
+    if (enterTimeoutRef.current) clearTimeout(enterTimeoutRef.current);
     leaveTimeoutRef.current = setTimeout(() => {
       setIsHovered(false);
-    }, 140);
+    }, 150);
   }, [setIsHovered]);
 
   React.useEffect(() => {
@@ -145,19 +137,19 @@ export function AppSidebar() {
         aria-label="Sidebar navigation"
         className={cn(
           "fixed top-0 bottom-0 left-0 z-40 hidden h-svh flex-col overflow-hidden",
-          "bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] text-sidebar-foreground",
+          "bg-gradient-to-b from-[#381e0f] via-[#2d170b] to-[#1f0f07] text-sidebar-foreground",
           "transition-[width,box-shadow] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] lg:flex motion-reduce:transition-none",
           isExpanded
             ? isLocked
-              ? "w-[264px] shadow-[2px_0_16px_0_rgba(9,29,62,0.22)] border-r border-white/10"
-              : "w-[264px] shadow-[6px_0_32px_0_rgba(9,29,62,0.45)] border-r border-white/15"
-            : "w-[72px] shadow-[2px_0_8px_0_rgba(9,29,62,0.18)] border-r border-white/5"
+              ? "w-[264px] shadow-[2px_0_16px_0_rgba(56,30,15,0.22)] border-r border-white/10"
+              : "w-[264px] shadow-[6px_0_32px_0_rgba(56,30,15,0.45)] border-r border-white/15"
+            : "w-[72px] shadow-[2px_0_8px_0_rgba(56,30,15,0.18)] border-r border-white/10"
         )}
       >
         {/* Sidebar Header with Brand Logo & Hamburger Lock Toggle */}
         <div
           className={cn(
-            "flex h-16 shrink-0 items-center border-b border-r border-white/10 bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-200 overflow-hidden",
+            "flex h-16 shrink-0 items-center border-b border-r border-white/15 bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-200 overflow-hidden",
             isExpanded ? "justify-between px-3.5" : "justify-center px-2"
           )}
         >
@@ -179,10 +171,10 @@ export function AppSidebar() {
                 isLocked ? "Unlock and collapse sidebar" : "Lock sidebar open"
               }
               className={cn(
-                "grid size-8 shrink-0 place-items-center rounded-[4px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 cursor-pointer",
+                "grid size-8 shrink-0 place-items-center rounded-[4px] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 cursor-pointer",
                 isLocked
-                  ? "border border-[#386cb0]/50 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] hover:from-[#275797] hover:to-[#14335c]"
-                  : "border border-white/15 bg-white/10 text-white/90 shadow-2xs hover:bg-white/20 hover:text-white"
+                  ? "border border-[#c28b38]/50 bg-gradient-to-b from-[#7c4424]/80 via-[#5c3118] to-[#381e0f] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(56,30,15,0.35)] hover:from-[#a05a2c]/90 hover:to-[#5c3118]"
+                  : "border border-white/20 bg-white/15 text-white/95 shadow-2xs hover:bg-white/25 hover:text-white"
               )}
             >
               <Menu className="size-4 text-white" />
@@ -210,17 +202,17 @@ export function MobileSidebar() {
       <SheetContent
         side="left"
         showCloseButton={false}
-        className="w-[280px] gap-0 border-none bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] p-0 text-sidebar-foreground"
+        className="w-[280px] gap-0 border-none bg-gradient-to-b from-[#381e0f] via-[#2d170b] to-[#1f0f07] p-0 text-sidebar-foreground"
       >
         <SheetTitle className="sr-only">Navigation</SheetTitle>
-        <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/15 bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
           <BrandLogo collapsed={false} />
           <button
             type="button"
             onClick={() => setMobileOpen(false)}
             title="Close navigation"
             aria-label="Close navigation"
-            className="grid size-8 shrink-0 place-items-center rounded-[4px] border border-[#386cb0]/50 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] text-white shadow-2xs transition-all duration-200 hover:from-[#275797] hover:to-[#14335c] cursor-pointer"
+            className="grid size-8 shrink-0 place-items-center rounded-[4px] border border-[#c28b38]/50 bg-gradient-to-b from-[#7c4424]/80 to-[#381e0f] text-white shadow-2xs transition-all duration-200 hover:from-[#a05a2c] hover:to-[#5c3118] cursor-pointer"
           >
             <Menu className="size-4 text-white" />
           </button>

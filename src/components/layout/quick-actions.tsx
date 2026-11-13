@@ -34,7 +34,7 @@ export function QuickActions({ className }: { className?: string }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          "group flex h-8.5 items-center gap-2 rounded-[4px] border border-[#4d86d6]/60 bg-gradient-to-b from-[#285ea8] via-[#1e4d8e] to-[#153a70] px-3.5 text-xs font-bold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_2px_8px_rgba(9,29,62,0.45)] transition-all duration-150 hover:from-[#316ec2] hover:to-[#1a447f] hover:border-[#6aa4f0] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_4px_14px_rgba(30,66,117,0.55)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60 data-[state=open]:from-[#316ec2] data-[state=open]:to-[#1a447f]",
+          "group flex h-8.5 items-center gap-2 rounded-[4px] border border-white/40 bg-gradient-to-b from-[#a05a2c] via-[#7c4424] to-[#5c3118] px-3.5 text-xs font-bold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.4),0_2px_8px_rgba(56,30,15,0.4)] transition-all duration-150 hover:from-[#a05a2c] hover:to-[#381e0f] hover:border-white/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_4px_14px_rgba(124,68,36,0.5)] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 data-[state=open]:from-[#c28b38] data-[state=open]:to-[#5c3118]",
           className
         )}
       >

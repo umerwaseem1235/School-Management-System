@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { Calendar, Building2 } from "lucide-react";
@@ -24,7 +24,7 @@ const SESSION_ITEMS: GrowthItem[] = [
     name: "2026 (Current)",
     label: "2026 Academic Session",
     value: 5662,
-    color: "#1e4275", // Sapphire Navy Brand
+    color: "#6e3b1f", // Sapphire Navy Brand
     growth: "+5.0% YoY",
     growthVal: "+5.0%",
     share: "17.4%",
@@ -79,7 +79,7 @@ const SESSION_ITEMS: GrowthItem[] = [
     name: "2021",
     label: "2021 Academic Session",
     value: 4180,
-    color: "#3f6396", // Slate Blue
+    color: "#3dbf86", // Slate Blue
     growth: "+6.6% YoY",
     growthVal: "+6.6%",
     share: "12.9%",
@@ -90,7 +90,7 @@ const SESSION_ITEMS: GrowthItem[] = [
     name: "2020",
     label: "2020 Academic Session",
     value: 3920,
-    color: "#7f9cc4", // Soft Sky Blue
+    color: "#6ed5a7", // Soft Sky Blue
     growth: "Base Year",
     growthVal: "Base",
     share: "12.1%",
@@ -104,7 +104,7 @@ const CAMPUS_ITEMS: GrowthItem[] = [
     name: "Gulberg",
     label: "Gulberg Campus",
     value: 1748,
-    color: "#1e4275",
+    color: "#6e3b1f",
     growth: "30.9% share",
     growthVal: "30.9%",
     share: "30.9%",

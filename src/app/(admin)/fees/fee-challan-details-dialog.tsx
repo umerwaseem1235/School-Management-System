@@ -260,7 +260,7 @@ export function FeeChallanDetailsDialog({
             <DialogHeader className="min-w-0 pr-8">
               <DialogTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
                 <span>Fee Challan Details</span>
-                <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/60 px-2 py-0.5 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+                <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/60 px-2 py-0.5 font-mono text-xs font-bold tracking-tight text-[#381e0f]">
                   {challan.challanNumber}
                 </span>
                 {challan.installmentPlan?.installmentNumber && (
@@ -532,7 +532,7 @@ export function FeeChallanDetailsDialog({
                                   )}
                                 </span>
                               </td>
-                              <td className="px-2 py-2 font-mono text-[11px] font-bold text-[#091d3e] truncate">
+                              <td className="px-2 py-2 font-mono text-[11px] font-bold text-[#381e0f] truncate">
                                 {inst.challanNumber || challan.challanNumber}
                               </td>
                               <td className="px-2 py-2 text-muted-foreground whitespace-nowrap">

@@ -8,11 +8,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_2px_6px_-1px_rgba(9,29,62,0.35)] hover:from-[#1e4275] hover:to-[#102848] rounded-[4px]",
+          "border border-[#381e0f] bg-gradient-to-b from-[#7c4424] to-[#5c3118] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_-1px_rgba(56,30,15,0.35)] hover:from-[#a05a2c] hover:to-[#381e0f] rounded-[4px]",
         outline:
-          "border border-brand/20 bg-white text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_1px_2px_rgba(9,29,62,0.05)] hover:border-brand/35 hover:bg-brand-50/50 hover:text-brand rounded-[4px] aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border border-brand/20 bg-white text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_1px_2px_rgba(56,30,15,0.05)] hover:border-[#7c4424] hover:bg-[#faf6ed] hover:text-[#381e0f] rounded-[4px] aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
-          "border border-brand/15 bg-brand-50/80 text-brand shadow-2xs hover:bg-brand-100/80 rounded-[4px] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "border border-brand/15 bg-brand-50 text-brand shadow-2xs hover:bg-brand-100 rounded-[4px] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50 rounded-[4px]",
         destructive:

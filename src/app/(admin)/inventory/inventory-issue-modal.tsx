@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -52,7 +52,7 @@ const fieldClass =
 const labelClass = "mb-1.5 block text-xs font-bold text-foreground";
 
 const toggleClass =
-  "inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-bold text-[#091d3e] transition-colors hover:bg-slate-200/80 cursor-pointer";
+  "inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[10.5px] font-bold text-[#381e0f] transition-colors hover:bg-slate-200/80 cursor-pointer";
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Shared: Issuance Status Pill                                               */
@@ -304,7 +304,7 @@ export function IssueStockModal({
                     Available in Store
                   </span>
                   <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="font-mono text-xl font-extrabold tabular-nums text-[#091d3e]">
+                    <span className="font-mono text-xl font-extrabold tabular-nums text-[#381e0f]">
                       {formatNumber(available)}
                     </span>
                     <span className="text-[11px] font-medium text-muted-foreground">
@@ -347,7 +347,7 @@ export function IssueStockModal({
                       : "bg-emerald-50/60"
                   )}
                 >
-                  <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#091d3e]">
+                  <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#381e0f]">
                     Remaining After Issue
                   </span>
                   <div className="mt-1 flex items-baseline gap-1.5">
@@ -372,8 +372,8 @@ export function IssueStockModal({
             </div>
             {/* ── Section 1: Item & Quantity ── */}
             <section className="space-y-3.5">
-              <h4 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
-                <span className="grid size-5 place-items-center rounded-md bg-[#091d3e] font-mono text-[10px] text-white">
+              <h4 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
+                <span className="grid size-5 place-items-center rounded-md bg-[#381e0f] font-mono text-[10px] text-white">
                   1
                 </span>
                 Item &amp; Quantity
@@ -416,7 +416,7 @@ export function IssueStockModal({
                   </div>
                   {selectedItem && (
                     <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <span className="rounded-md border border-brand/20 bg-brand-50/80 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#091d3e]">
+                      <span className="rounded-md border border-brand/20 bg-brand-50/80 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#381e0f]">
                         {selectedItem.sku}
                       </span>
                       <span className="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
@@ -485,8 +485,8 @@ export function IssueStockModal({
 
             {/* ── Section 2: Issued To ── */}
             <section className="space-y-3.5 border-t border-dashed border-border/80 pt-5">
-              <h4 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
-                <span className="grid size-5 place-items-center rounded-md bg-[#091d3e] font-mono text-[10px] text-white">
+              <h4 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
+                <span className="grid size-5 place-items-center rounded-md bg-[#381e0f] font-mono text-[10px] text-white">
                   2
                 </span>
                 Issued To (Receiving Person)
@@ -630,8 +630,8 @@ export function IssueStockModal({
 
             {/* ── Section 3: Issuance Details ── */}
             <section className="space-y-3.5 border-t border-dashed border-border/80 pt-5">
-              <h4 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
-                <span className="grid size-5 place-items-center rounded-md bg-[#091d3e] font-mono text-[10px] text-white">
+              <h4 className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
+                <span className="grid size-5 place-items-center rounded-md bg-[#381e0f] font-mono text-[10px] text-white">
                   3
                 </span>
                 Issuance Details
@@ -667,7 +667,7 @@ export function IssueStockModal({
                         className={cn(
                           "flex items-start gap-2.5 rounded-xl border px-3.5 py-2.5 text-left transition-all cursor-pointer",
                           active
-                            ? "border-[#091d3e] bg-[#091d3e]/[0.04] ring-2 ring-[#091d3e]/15"
+                            ? "border-[#381e0f] bg-[#381e0f]/[0.04] ring-2 ring-[#381e0f]/15"
                             : "border-border/80 bg-white hover:border-slate-300 hover:bg-slate-50"
                         )}
                       >
@@ -675,7 +675,7 @@ export function IssueStockModal({
                           className={cn(
                             "mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg",
                             active
-                              ? "bg-[#091d3e] text-white"
+                              ? "bg-[#381e0f] text-white"
                               : "bg-slate-100 text-slate-500"
                           )}
                         >
@@ -929,7 +929,7 @@ export function IssuanceViewModal({
                 {record.itemName}
               </p>
               <div className="mt-1 flex items-center gap-1.5">
-                <span className="rounded-md border border-brand/20 bg-brand-50/80 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#091d3e]">
+                <span className="rounded-md border border-brand/20 bg-brand-50/80 px-1.5 py-0.5 font-mono text-[10px] font-bold text-[#381e0f]">
                   {record.itemSku}
                 </span>
                 <span className="rounded-md border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">
@@ -938,7 +938,7 @@ export function IssuanceViewModal({
               </div>
             </div>
             <div className="shrink-0 text-right">
-              <span className="block font-mono text-2xl font-extrabold tabular-nums text-[#091d3e]">
+              <span className="block font-mono text-2xl font-extrabold tabular-nums text-[#381e0f]">
                 {formatNumber(record.quantity)}
               </span>
               <span className="text-[10.5px] font-semibold text-muted-foreground">
@@ -1013,12 +1013,12 @@ function printIssueSlip(r: StockIssuanceRecord) {
 <html><head><title>Issue Slip ${r.issueNo}</title>
 <style>
   body { font-family: system-ui, -apple-system, sans-serif; color: #0f172a; padding: 32px; }
-  .head { background: #091d3e; color: #fff; padding: 16px 20px; border-radius: 8px; }
+  .head { background: #381e0f; color: #fff; padding: 16px 20px; border-radius: 8px; }
   .head h1 { margin: 0; font-size: 16px; }
   .head p { margin: 4px 0 0; font-size: 11px; opacity: .8; }
   table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 12px; }
   td { border: 1px solid #cbd5e1; padding: 9px 12px; }
-  td.l { background: #f1f5f9; font-weight: 700; color: #091d3e; width: 38%; }
+  td.l { background: #f1f5f9; font-weight: 700; color: #381e0f; width: 38%; }
   .sig { display: flex; justify-content: space-between; margin-top: 64px; font-size: 11px; }
   .sig div { border-top: 1px solid #0f172a; padding-top: 6px; width: 40%; text-align: center; }
 </style></head>
@@ -1092,7 +1092,7 @@ export function ReturnStockModal({
               <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 In Store
               </span>
-              <span className="mt-0.5 block font-mono text-lg font-extrabold text-[#091d3e]">
+              <span className="mt-0.5 block font-mono text-lg font-extrabold text-[#381e0f]">
                 {formatNumber(currentStock)}
               </span>
             </div>
@@ -1105,7 +1105,7 @@ export function ReturnStockModal({
               </span>
             </div>
             <div className="bg-emerald-50/70 px-3 py-3">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-[#091d3e]">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-[#381e0f]">
                 New Balance
               </span>
               <span className="mt-0.5 block font-mono text-lg font-extrabold text-emerald-800">

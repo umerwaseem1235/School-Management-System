@@ -14,19 +14,19 @@ export type ActionButtonSize = "md" | "sm" | "xs";
 
 const ACTION_TONE_CLASSES: Record<ActionButtonTone, string> = {
   primary:
-    "border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_2px_6px_-1px_rgb(9_29_62/0.35)] hover:from-[#1e4275] hover:to-[#102848] hover:text-white",
+    "border-[#381e0f] bg-gradient-to-b from-[#7c4424] to-[#5c3118] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_2px_6px_-1px_rgb(56_30_15/0.35)] hover:from-[#a05a2c] hover:to-[#381e0f] hover:text-white",
   outline:
-    "border-brand/18 bg-white text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] hover:border-brand/35 hover:bg-brand-50/50 hover:text-brand",
+    "border-brand/20 bg-white text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(56_30_15/0.05)] hover:border-[#7c4424] hover:bg-brand-50 hover:text-[#381e0f]",
   success:
-    "border-success/35 bg-success-soft/55 text-success shadow-[inset_0_1px_0_rgb(255_255_255/0.75),0_1px_2px_rgb(47_143_107/0.08)] hover:border-success hover:bg-success hover:text-white",
+    "border-success/35 bg-success-soft/55 text-success shadow-[inset_0_1px_0_rgb(255_255_255/0.75),0_1px_2px_rgb(16_185_129/0.08)] hover:border-success hover:bg-success hover:text-white",
   danger:
     "border-danger/35 bg-danger-soft/55 text-danger shadow-[inset_0_1px_0_rgb(255_255_255/0.75),0_1px_2px_rgb(200_70_61/0.08)] hover:border-danger hover:bg-danger hover:text-white",
   warning:
     "border-warning/35 bg-warning-soft/55 text-warning shadow-[inset_0_1px_0_rgb(255_255_255/0.75),0_1px_2px_rgb(199_132_31/0.08)] hover:border-warning hover:bg-warning hover:text-white",
   info:
-    "border-info/35 bg-info-soft/55 text-info shadow-[inset_0_1px_0_rgb(255_255_255/0.75),0_1px_2px_rgb(60_111_176/0.08)] hover:border-info hover:bg-info hover:text-white",
+    "border-info/35 bg-info-soft/55 text-info shadow-[inset_0_1px_0_rgb(255_255_255/0.75),0_1px_2px_rgb(124_58_237/0.08)] hover:border-info hover:bg-info hover:text-white",
   pdf:
-    "border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_2px_6px_-1px_rgb(9_29_62/0.35)] hover:from-[#1e4275] hover:to-[#102848] hover:text-white",
+    "border-[#381e0f] bg-gradient-to-b from-[#7c4424] to-[#5c3118] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_2px_6px_-1px_rgb(56_30_15/0.35)] hover:from-[#a05a2c] hover:to-[#381e0f] hover:text-white",
 };
 
 const ACTION_SIZE_CLASSES: Record<ActionButtonSize, string> = {

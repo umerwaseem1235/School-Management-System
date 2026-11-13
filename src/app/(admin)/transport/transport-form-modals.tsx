@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -203,7 +203,7 @@ export function RouteFormModal({
                       className={cn(
                         "rounded-lg border px-2.5 py-1 font-mono text-[11px] font-bold transition-all cursor-pointer",
                         active
-                          ? "border-[#091d3e] bg-[#091d3e] text-white shadow-2xs"
+                          ? "border-[#381e0f] bg-[#381e0f] text-white shadow-2xs"
                           : "border-border/80 bg-slate-50/80 text-slate-700 hover:border-slate-300 hover:bg-slate-100"
                       )}
                     >
@@ -222,7 +222,7 @@ export function RouteFormModal({
                   {routeName.trim() || "New Transport Route"}
                 </strong>
               </div>
-              <span className="shrink-0 rounded-md bg-[#091d3e]/10 px-2.5 py-1 font-mono text-xs font-extrabold text-[#091d3e]">
+              <span className="shrink-0 rounded-md bg-[#381e0f]/10 px-2.5 py-1 font-mono text-xs font-extrabold text-[#381e0f]">
                 Rs {formatNumber(numericFare)} / mo
               </span>
             </div>
@@ -424,7 +424,7 @@ export function VehicleFormModal({
                         );
                       }
                     }}
-                    className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[#091d3e] hover:underline cursor-pointer"
+                    className="inline-flex items-center gap-1 text-[10.5px] font-bold text-[#381e0f] hover:underline cursor-pointer"
                   >
                     {isManualModel ? (
                       <>
@@ -554,7 +554,7 @@ export function VehicleFormModal({
             {/* Live Vehicle Summary Strip */}
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/70 px-4 py-3 text-xs">
               <div>
-                <strong className="font-mono font-bold text-[#091d3e]">
+                <strong className="font-mono font-bold text-[#381e0f]">
                   {vehicleNo.trim() || "LHR-XXX"}
                 </strong>
                 <span className="mx-2 text-slate-300">|</span>
@@ -787,7 +787,7 @@ export function AssignmentFormModal({
                 <button
                   type="button"
                   onClick={() => setIsManualStudent((prev) => !prev)}
-                  className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-[#091d3e] transition-colors hover:bg-slate-200/80 cursor-pointer"
+                  className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-[#381e0f] transition-colors hover:bg-slate-200/80 cursor-pointer"
                 >
                   {isManualStudent ? (
                     <>
@@ -879,17 +879,17 @@ export function AssignmentFormModal({
               {assignedVehicle ? (
                 <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/80 px-3.5 py-2 text-xs">
                   <div className="flex items-center gap-2">
-                    <Bus className="size-3.5 text-[#091d3e]" />
+                    <Bus className="size-3.5 text-[#381e0f]" />
                     <span className="font-bold text-slate-800">
                       {assignedVehicle.model}
                     </span>
-                    <span className="font-mono text-[11px] font-bold text-[#091d3e]">
+                    <span className="font-mono text-[11px] font-bold text-[#381e0f]">
                       ({assignedVehicle.vehicleNo})
                     </span>
                   </div>
                   <div className="text-right">
                     <span className="text-[11px] text-muted-foreground">Driver: </span>
-                    <strong className="font-bold text-[#091d3e]">
+                    <strong className="font-bold text-[#381e0f]">
                       {assignedVehicle.driverName}
                     </strong>
                     {assignedVehicle.driverPhone && (
@@ -911,7 +911,7 @@ export function AssignmentFormModal({
                 <button
                   type="button"
                   onClick={() => setIsManualStop((prev) => !prev)}
-                  className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-[#091d3e] transition-colors hover:bg-slate-200/80 cursor-pointer"
+                  className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-[#381e0f] transition-colors hover:bg-slate-200/80 cursor-pointer"
                 >
                   {isManualStop ? (
                     <>
@@ -967,7 +967,7 @@ export function AssignmentFormModal({
             {/* Live Assignment Summary Strip */}
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200/90 bg-slate-50/70 px-4 py-3 text-xs">
               <div className="flex items-center gap-2 truncate">
-                <MapPin className="size-3.5 shrink-0 text-[#091d3e]" />
+                <MapPin className="size-3.5 shrink-0 text-[#381e0f]" />
                 <span className="font-bold text-foreground">
                   {resolvedStudentName || "Select Student"}
                 </span>
@@ -977,7 +977,7 @@ export function AssignmentFormModal({
                 </span>
               </div>
               {matchedRoute && (
-                <span className="shrink-0 rounded-md bg-[#091d3e]/10 px-2.5 py-0.5 font-mono text-xs font-extrabold text-[#091d3e]">
+                <span className="shrink-0 rounded-md bg-[#381e0f]/10 px-2.5 py-0.5 font-mono text-xs font-extrabold text-[#381e0f]">
                   Rs {formatNumber(matchedRoute.monthlyFare)} / mo
                 </span>
               )}

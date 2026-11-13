@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ExpenseBudgetRecord,
   ExpenseVoucherRecord,
 } from "@/lib/mock/expenses";
@@ -399,13 +399,13 @@ export function printExpensesRegister(vouchers: ExpenseVoucherRecord[]): boolean
       <title>Institutional Expenses Register - EduSphere</title>
       <style>
         body { font-family: system-ui, -apple-system, sans-serif; margin: 24px; color: #0f172a; }
-        .banner { background: #091d3e; color: #fff; padding: 14px 18px; border-radius: 6px; margin-bottom: 16px; }
+        .banner { background: #381e0f; color: #fff; padding: 14px 18px; border-radius: 6px; margin-bottom: 16px; }
         .banner h1 { font-size: 16px; margin: 0 0 4px; color: #fff; letter-spacing: 0.02em; font-weight: 800; }
         .banner .subhead { font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; }
         .banner p.meta { font-size: 11px; color: #94a3b8; margin: 0; }
         table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
         th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; vertical-align: top; }
-        th { background: #f1f5f9; font-weight: 700; color: #091d3e; }
+        th { background: #f1f5f9; font-weight: 700; color: #381e0f; }
         .sub { color: #64748b; font-size: 10.5px; }
         .mono { font-family: ui-monospace, monospace; font-size: 11px; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: 700; background: #e2e8f0; }
@@ -447,12 +447,12 @@ export function printSingleExpenseVoucher(
       <title>Expense Voucher - ${voucher.voucherNo}</title>
       <style>
         body { font-family: system-ui, -apple-system, sans-serif; margin: 32px; color: #0f172a; }
-        .banner { background: #091d3e; color: #fff; padding: 14px 18px; border-radius: 8px; margin-bottom: 16px; }
+        .banner { background: #381e0f; color: #fff; padding: 14px 18px; border-radius: 8px; margin-bottom: 16px; }
         .banner h1 { font-size: 15px; margin: 0 0 3px; color: #fff; letter-spacing: 0.04em; font-weight: 800; }
         .banner .subhead { font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 3px; }
         .banner p.meta { font-size: 10.5px; color: #94a3b8; margin: 0; }
         .card { border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; margin-bottom: 18px; }
-        h2 { font-size: 14px; margin: 0 0 12px; color: #091d3e; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+        h2 { font-size: 14px; margin: 0 0 12px; color: #381e0f; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
         .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px dashed #e2e8f0; }
         .mono { font-family: ui-monospace, monospace; font-weight: 700; }
       </style>
@@ -475,7 +475,7 @@ export function printSingleExpenseVoucher(
         <div class="row"><span>Gross Invoice Amount:</span><span class="mono">${formatCurrency(voucher.grossAmount)}</span></div>
         <div class="row"><span>GST / Sales Tax Included:</span><span class="mono">+${formatCurrency(voucher.taxAmount)}</span></div>
         <div class="row"><span>Withholding Tax (WHT Deducted):</span><span class="mono">-${formatCurrency(voucher.whtDeduction)}</span></div>
-        <div class="row"><span>Net Payable Amount:</span><span class="mono" style="color:#047857;font-size:15px;">${formatCurrency(voucher.netPayable)}</span></div>
+        <div class="row"><span>Net Payable Amount:</span><span class="mono" style="color:#381e0f;font-size:15px;">${formatCurrency(voucher.netPayable)}</span></div>
         <div class="row"><span>Payment Channel &amp; Ref:</span><span class="mono">${voucher.paymentMode} (${voucher.paymentRef})</span></div>
       </div>
     </body>

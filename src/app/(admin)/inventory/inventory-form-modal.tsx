@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { Check, ChevronDown, Edit, Edit3, List, PackagePlus } from "lucide-react";
@@ -210,7 +210,7 @@ export function InventoryFormModal({
                       setManualCategoryInput(selectedCategory);
                     }
                   }}
-                  className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-semibold text-brand transition-colors hover:text-[#091d3e] hover:underline"
+                  className="inline-flex cursor-pointer items-center gap-1 text-[11px] font-semibold text-brand transition-colors hover:text-[#381e0f] hover:underline"
                 >
                   {isManualCategory ? (
                     <>
@@ -271,7 +271,7 @@ export function InventoryFormModal({
                     }}
                     className={cn(
                       fieldClass,
-                      "cursor-pointer appearance-none pr-9 font-semibold text-[#091d3e]"
+                      "cursor-pointer appearance-none pr-9 font-semibold text-[#381e0f]"
                     )}
                   >
                     {INVENTORY_CATEGORIES.map((cat) => (
@@ -327,14 +327,14 @@ export function InventoryFormModal({
                 <span className="font-medium text-muted-foreground">
                   Initial Stock:{" "}
                 </span>
-                <strong className="font-mono font-bold text-[#091d3e]">
+                <strong className="font-mono font-bold text-[#381e0f]">
                   {numericQty}
                 </strong>
                 <span className="mx-2 text-slate-300">|</span>
                 <span className="font-medium text-muted-foreground">
                   Alert Below:{" "}
                 </span>
-                <strong className="font-mono font-bold text-[#091d3e]">
+                <strong className="font-mono font-bold text-[#381e0f]">
                   {numericReorder}
                 </strong>
                 <span className="mx-2 text-slate-300">|</span>

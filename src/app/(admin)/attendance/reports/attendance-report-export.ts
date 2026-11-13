@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   DailyStudentStatus,
   StudentAttendanceRecord,
 } from "@/lib/mock/attendance";
@@ -272,7 +272,7 @@ function drawInstitutionalHeader(
     rightLine3: string;
   }
 ) {
-  // Navy Header Banner (#091d3e)
+  // Navy Header Banner (#381e0f)
   cmds.push("0.035 0.114 0.243 rg");
   cmds.push("28 748 539.28 64 re f");
 
@@ -1271,7 +1271,7 @@ export function printAttendanceReport({
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #091d3e;
+      background: #381e0f;
       color: #ffffff;
       padding: 14px 18px;
       border-radius: 8px;
@@ -1287,8 +1287,8 @@ export function printAttendanceReport({
       width: 40px;
       height: 40px;
       border-radius: 8px;
-      background: #16345f;
-      border: 1px solid #3f6396;
+      background: #7c4424;
+      border: 1px solid #3dbf86;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1329,7 +1329,7 @@ export function printAttendanceReport({
     }
     .profile-card {
       border: 1px solid #cbd5e1;
-      border-left: 4px solid #091d3e;
+      border-left: 4px solid #381e0f;
       border-radius: 6px;
       background: #f8fafc;
       padding: 10px 14px;
@@ -1340,7 +1340,7 @@ export function printAttendanceReport({
       font-size: 10px;
     }
     .profile-card strong {
-      color: #091d3e;
+      color: #381e0f;
     }
     .kpi-grid {
       display: grid;
@@ -1350,7 +1350,7 @@ export function printAttendanceReport({
     }
     .kpi-card {
       border: 1px solid #cbd5e1;
-      border-top: 3px solid #091d3e;
+      border-top: 3px solid #381e0f;
       border-radius: 6px;
       padding: 7px 10px;
       background: #f8fafc;
@@ -1365,7 +1365,7 @@ export function printAttendanceReport({
     .kpi-val {
       font-size: 13px;
       font-weight: 800;
-      color: #091d3e;
+      color: #381e0f;
       margin-top: 2px;
     }
     .section-heading {
@@ -1373,7 +1373,7 @@ export function printAttendanceReport({
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: #091d3e;
+      color: #381e0f;
       margin: 14px 0 4px;
     }
     table {
@@ -1388,7 +1388,7 @@ export function printAttendanceReport({
       page-break-inside: avoid;
     }
     thead th {
-      background: #091d3e;
+      background: #381e0f;
       color: #ffffff;
       font-size: 9px;
       font-weight: 700;
@@ -1396,7 +1396,7 @@ export function printAttendanceReport({
       letter-spacing: 0.03em;
       padding: 6px 6px;
       text-align: left;
-      border: 1px solid #091d3e;
+      border: 1px solid #381e0f;
     }
     thead th.center, td.center {
       text-align: center;
