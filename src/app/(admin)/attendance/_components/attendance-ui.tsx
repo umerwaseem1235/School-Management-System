@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -68,7 +68,7 @@ export function AttendanceSubnav() {
             className={cn(
               "inline-flex h-9.5 items-center gap-2 rounded-[4px] border px-4 text-xs font-semibold tracking-[0.01em] whitespace-nowrap transition-all duration-150 select-none",
               active
-                ? "border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_3px_8px_-2px_rgb(9_29_62/0.38)]"
+                ? "border-[#381e0f] bg-gradient-to-b from-[#7c4424] to-[#381e0f] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_3px_8px_-2px_rgb(9_29_62/0.38)]"
                 : "border-brand/18 bg-white text-foreground/85 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06)] hover:border-brand/35 hover:bg-brand-50/60 hover:text-brand"
             )}
           >
@@ -322,7 +322,7 @@ type ActionButtonSize = "md" | "sm" | "xs";
 
 const ACTION_TONE_CLASSES: Record<ActionButtonTone, string> = {
   primary:
-    "border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_2px_6px_-1px_rgb(9_29_62/0.35)] hover:from-[#1e4275] hover:to-[#102848]",
+    "border-[#381e0f] bg-gradient-to-b from-[#7c4424] to-[#381e0f] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.18),0_2px_6px_-1px_rgb(9_29_62/0.35)] hover:from-[#6e3b1f] hover:to-[#03543f]",
   outline:
     "border-brand/18 bg-white text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] hover:border-brand/35 hover:bg-brand-50/50 hover:text-brand",
   success:

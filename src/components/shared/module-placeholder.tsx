@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+﻿import type { LucideIcon } from "lucide-react";
 import { CheckCircle2 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { SectionCard } from "@/components/shared/section-card";
@@ -23,7 +23,7 @@ export function ModulePlaceholder({ title, description, icon: Icon, points }: Mo
         description="Workspace setup in progress"
       >
         <div className="flex flex-col items-center py-6 text-center">
-          <span className="grid size-14 place-items-center rounded-2xl bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_20px_-4px_rgba(9,29,62,0.4)] ring-1 ring-white/10 transition-transform duration-300">
+          <span className="grid size-14 place-items-center rounded-2xl bg-gradient-to-b from-[#7c4424] via-[#5c3118] to-[#381e0f] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_8px_20px_-4px_rgba(9,29,62,0.4)] ring-1 ring-white/10 transition-transform duration-300">
             <Icon className="size-7" />
           </span>
           <h2 className="mt-4 font-heading text-base font-bold tracking-tight text-foreground">

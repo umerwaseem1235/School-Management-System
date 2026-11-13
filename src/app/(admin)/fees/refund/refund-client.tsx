@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -267,7 +267,7 @@ export function RefundClient() {
         className: "w-[12%] text-center",
         headerClassName: "w-[12%] text-center",
         cell: (r) => (
-          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#381e0f]">
             {r.refundNo}
           </span>
         ),
@@ -484,7 +484,7 @@ export function RefundClient() {
                   <div className="min-w-0">
                     <DialogTitle className="text-base font-bold leading-tight text-foreground flex items-center gap-2 flex-wrap">
                       <span>Refund Review</span>
-                      <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+                      <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold tracking-tight text-[#381e0f]">
                         {selectedRefund.refundNo}
                       </span>
                       <span className="inline-flex items-center justify-center rounded-md border border-slate-200 bg-slate-100/80 px-2 py-0.5 font-mono text-xs font-medium text-slate-700">

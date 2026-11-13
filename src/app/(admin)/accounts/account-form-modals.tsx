@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -206,7 +206,7 @@ export function StudentAccountFormModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col max-h-[calc(100vh-3rem)] sm:max-w-2xl gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
-        <DialogHeader className="shrink-0 bg-gradient-to-r from-[#091d3e]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
+        <DialogHeader className="shrink-0 bg-gradient-to-r from-[#381e0f]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
           <div className="flex items-center gap-3">
             <div>
               <DialogTitle className="text-base font-bold text-foreground">
@@ -225,7 +225,7 @@ export function StudentAccountFormModal({
           {/* Student Profile & Credentials */}
           <div className="rounded-xl border border-border/80 bg-slate-50/50 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                 1. Student Details &amp; Portal Credentials (Student Admin)
               </h4>
               <button
@@ -360,7 +360,7 @@ export function StudentAccountFormModal({
           {/* Parent / Guardian Details & Credentials */}
           <div className="rounded-xl border border-border/80 bg-slate-50/50 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                 2. Parent / Guardian Portal Credentials (Parent Admin)
               </h4>
               <button
@@ -655,7 +655,7 @@ export function StaffAccountFormModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col max-h-[calc(100vh-3rem)] sm:max-w-2xl gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
-        <DialogHeader className="shrink-0 bg-gradient-to-r from-[#091d3e]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
+        <DialogHeader className="shrink-0 bg-gradient-to-r from-[#381e0f]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
           <div className="flex items-center gap-3">
             <div>
               <DialogTitle className="text-base font-bold text-foreground">
@@ -675,7 +675,7 @@ export function StaffAccountFormModal({
           className="flex-1 overflow-y-auto px-6 py-5 space-y-4 text-xs"
         >
           <div className="rounded-xl border border-border/80 bg-slate-50/50 p-4 space-y-3">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
               1. Staff Member Profile
             </h4>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -755,7 +755,7 @@ export function StaffAccountFormModal({
 
           <div className="rounded-xl border border-border/80 bg-slate-50/50 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                 2. Assigned Staff Email &amp; Password (Staff Admin)
               </h4>
               <button

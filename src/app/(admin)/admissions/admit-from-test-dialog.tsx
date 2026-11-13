@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -93,7 +93,7 @@ export function AdmitFromTestDialog({
         <DialogHeader className="border-b border-border/70 bg-gradient-to-r from-muted/40 via-muted/20 to-background px-6 py-5">
           <div className="flex items-center justify-between pr-4">
             <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-xl bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm ring-1 ring-white/10">
+              <div className="grid size-10 place-items-center rounded-xl bg-gradient-to-b from-[#7c4424] via-[#5c3118] to-[#381e0f] text-white shadow-sm ring-1 ring-white/10">
                 <Award className="size-5" />
               </div>
               <div>

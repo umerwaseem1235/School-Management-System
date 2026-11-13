@@ -1,4 +1,4 @@
-import jsPDF from "jspdf";
+﻿import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { formatDate } from "@/lib/format";
 import type { DatesheetEntry } from "@/lib/mock/examinations";
@@ -41,7 +41,7 @@ export function generateDatesheetPDF({
      1. Header Brand Banner
      ───────────────────────────────────────────────────────────── */
   // Navy background header banner
-  doc.setFillColor(30, 66, 117); // #1e4275 (Primary Brand Navy)
+  doc.setFillColor(56, 30, 15); // #381e0f (Deep Espresso Brown) // #381e0f (Imperial Violet) // #381e0f (Royal Purple) // #6e3b1f (Primary Brand Navy)
   doc.rect(0, 0, pageWidth, 28, "F");
 
   // Accent divider lines

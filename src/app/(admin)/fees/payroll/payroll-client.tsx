@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -65,7 +65,7 @@ const STATUS_OPTIONS = ["All Statuses", "Paid", "Pending", "Approved", "On Hold"
 const MODE_OPTIONS = ["All Methods", "Bank Transfer", "Cheque", "Cash"];
 
 const TABLE_HEAD_ROW_CLASS =
-  "border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm";
+  "border-y border-[#381e0f] bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] text-white shadow-sm";
 
 const TABLE_HEAD_CELL_CLASS =
   "relative whitespace-nowrap px-5 py-3.5 text-center align-middle text-[12.5px] font-bold tracking-[-0.01em] text-white select-none not-last:after:pointer-events-none not-last:after:absolute not-last:after:right-0 not-last:after:top-1/2 not-last:after:h-4 not-last:after:w-px not-last:after:-translate-y-1/2 not-last:after:bg-white/20";
@@ -602,7 +602,7 @@ export function PayrollClient() {
                       >
                         {/* Slip No */}
                         <td className="px-5 py-3 text-center align-middle whitespace-nowrap">
-                          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+                          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#381e0f]">
                             {formatSlipNo(s, globalIdx)}
                           </span>
                         </td>
@@ -847,7 +847,7 @@ function PagerButton({
       className={cn(
         "inline-flex size-8 cursor-pointer select-none items-center justify-center rounded-[4px] border text-xs font-semibold tabular-nums transition-all",
         active
-          ? "border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_2px_4px_rgb(9_29_62/0.25)]"
+          ? "border-[#381e0f] bg-gradient-to-b from-[#7c4424] to-[#381e0f] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_2px_4px_rgb(9_29_62/0.25)]"
           : "border-brand/18 bg-white text-foreground/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] hover:border-brand/35 hover:bg-brand-50/50 hover:text-brand",
         disabled &&
           "pointer-events-none cursor-not-allowed border-border/50 bg-muted/30 text-muted-foreground/35 opacity-60 shadow-none"

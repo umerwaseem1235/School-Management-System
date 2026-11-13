@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -355,7 +355,7 @@ export function InventoryClient() {
                   ? "text-danger"
                   : r.status === "Low Stock"
                   ? "text-amber-700"
-                  : "text-[#091d3e]"
+                  : "text-[#381e0f]"
               )}
             >
               {formatNumber(r.quantity)}
@@ -475,7 +475,7 @@ export function InventoryClient() {
         headerClassName: "w-[15%] px-3 text-center whitespace-nowrap",
         sortValue: (r) => r.issueDate + r.issueNo,
         cell: (r) => (
-          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#381e0f]">
             {r.issueNo}
           </span>
         ),
@@ -711,9 +711,9 @@ export function InventoryClient() {
             className="group inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 px-3 text-xs font-semibold text-foreground shadow-2xs hover:border-slate-300 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer select-none"
           >
             {activeTab === "stock" ? (
-              <Boxes className="size-4 text-[#091d3e]" />
+              <Boxes className="size-4 text-[#381e0f]" />
             ) : (
-              <ClipboardList className="size-4 text-[#091d3e]" />
+              <ClipboardList className="size-4 text-[#381e0f]" />
             )}
             <span>
               {activeTab === "stock" ? "Stock Register" : "Issuance Register"}

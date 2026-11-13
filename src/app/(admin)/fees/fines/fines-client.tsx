@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -225,7 +225,7 @@ export function FinesClient() {
               type="button"
               onClick={() => openSettlementDialog(r)}
               title={`Fine #${r.fineNumber} — Click to choose Mark as Paid or Waived`}
-              className="inline-flex items-center justify-center rounded-[4px] border border-brand/20 bg-brand-50/60 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e] shadow-2xs transition-all hover:border-brand/40 hover:bg-brand-100/70 cursor-pointer whitespace-nowrap select-none"
+              className="inline-flex items-center justify-center rounded-[4px] border border-brand/20 bg-brand-50/60 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#381e0f] shadow-2xs transition-all hover:border-brand/40 hover:bg-brand-100/70 cursor-pointer whitespace-nowrap select-none"
             >
               <span>{r.fineNumber}</span>
             </button>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { BedDouble, Building2, Edit, Plus, Trash2, Users } from "lucide-react";
@@ -117,7 +117,7 @@ export function HostelClient() {
         align: "center",
         headerAlign: "center",
         cell: (r) => (
-          <span className="font-mono text-sm font-extrabold tabular-nums text-[#091d3e]">
+          <span className="font-mono text-sm font-extrabold tabular-nums text-[#381e0f]">
             {r.occupied} / {r.capacity}
           </span>
         ),

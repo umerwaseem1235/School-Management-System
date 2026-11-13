@@ -3,7 +3,6 @@
 import * as React from "react";
 import { toast } from "sonner";
 import {
-  AlertCircle,
   Award,
   BookOpen,
   Briefcase,
@@ -23,11 +22,12 @@ import {
   Filter,
   GraduationCap,
   HeartPulse,
-  HelpCircle,
   Info,
   Layers,
   Minus,
   Pencil,
+  Percent,
+  PieChart,
   Plus,
   Printer,
   RotateCcw,
@@ -36,6 +36,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Sparkles,
+  TrendingDown,
   TrendingUp,
   UserCheck,
   Users,
@@ -55,6 +56,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { AreaTrendChart, DonutChart, type DonutSlice } from "@/components/charts";
 import { printHtml } from "@/lib/print-html";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,7 +119,7 @@ const INITIAL_POLICIES: PolicyQuotaItem[] = [
     documentation: "Standard Leave Slip",
     description: "Short-term personal affairs, urgent domestic matters, and unforeseen errands.",
     colorScheme: {
-      badgeBg: "from-[#1e4275] to-[#091d3e]",
+      badgeBg: "from-[#7c4424] to-[#5c3118]",
       badgeText: "text-white",
       ringColor: "ring-brand/20",
       accentGlow: "bg-brand/10",
@@ -159,10 +161,10 @@ const INITIAL_POLICIES: PolicyQuotaItem[] = [
     documentation: "Handover Protocol & Reliever Form",
     description: "Statutory annual rest entitlement for administrative, accounts, campus IT, and operations personnel.",
     colorScheme: {
-      badgeBg: "from-emerald-700 to-teal-900",
+      badgeBg: "from-[#5c3118] to-[#381e0f]",
       badgeText: "text-white",
-      ringColor: "ring-emerald-500/20",
-      accentGlow: "bg-emerald-500/10",
+      ringColor: "ring-[#5c3118]/20",
+      accentGlow: "bg-[#5c3118]/10",
     },
   },
   {
@@ -201,10 +203,10 @@ const INITIAL_POLICIES: PolicyQuotaItem[] = [
     documentation: "Medical / Birth Certificate",
     description: "Comprehensive statutory parental leave providing 90 calendar days for female personnel and 10 days for male personnel.",
     colorScheme: {
-      badgeBg: "from-purple-700 to-indigo-950",
+      badgeBg: "from-[#c28b38] to-[#7c4424]",
       badgeText: "text-white",
-      ringColor: "ring-purple-500/20",
-      accentGlow: "bg-purple-500/10",
+      ringColor: "ring-[#c28b38]/20",
+      accentGlow: "bg-[#c28b38]/10",
     },
   },
   {
@@ -243,10 +245,10 @@ const INITIAL_POLICIES: PolicyQuotaItem[] = [
     documentation: "Enrollment & Exam Schedule",
     description: "Authorized leave for higher study, research defense, and CAIE training.",
     colorScheme: {
-      badgeBg: "from-blue-700 to-indigo-900",
+      badgeBg: "from-emerald-700 to-teal-900",
       badgeText: "text-white",
-      ringColor: "ring-blue-500/20",
-      accentGlow: "bg-blue-500/10",
+      ringColor: "ring-emerald-500/20",
+      accentGlow: "bg-emerald-500/10",
     },
   },
   {
@@ -500,11 +502,144 @@ const APPROVAL_WORKFLOW_TIERS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// STAFF LEAVE ANALYTICS DATA (PERCENTAGES & TRENDS)
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface StaffLeaveCategoryMetric {
+  id: string;
+  code: string;
+  name: string;
+  percentage: number; // percentage share of staff leaves
+  days: number; // days availed across staff
+  annualQuotaDays: number;
+  color: string;
+  payStatus: string;
+  targetCadres: string;
+  authority: string;
+}
+
+const STAFF_LEAVE_CATEGORIES: StaffLeaveCategoryMetric[] = [
+  {
+    id: "pol-cl",
+    code: "CL",
+    name: "Casual Leave",
+    percentage: 38.5,
+    days: 462,
+    annualQuotaDays: 10,
+    color: "#7c4424", // Cognac brown
+    payStatus: "100% Fully Paid",
+    targetCadres: "All Teaching & Support Staff",
+    authority: "Campus Principal",
+  },
+  {
+    id: "pol-ml",
+    code: "ML",
+    name: "Medical / Sick Leave",
+    percentage: 27.5,
+    days: 330,
+    annualQuotaDays: 12,
+    color: "#be123c", // Crimson Rose
+    payStatus: "100% Fully Paid",
+    targetCadres: "All Academic & Admin Staff",
+    authority: "HR / Campus Clinic",
+  },
+  {
+    id: "pol-el",
+    code: "EL",
+    name: "Annual Earned Leave",
+    percentage: 19.5,
+    days: 234,
+    annualQuotaDays: 20,
+    color: "#5c3118", // Deep Saddle Brown
+    payStatus: "Statutory Paid",
+    targetCadres: "Non-Vacation Officers & IT",
+    authority: "HR Director",
+  },
+  {
+    id: "pol-mpl",
+    code: "MPL",
+    name: "Maternity / Parental",
+    percentage: 8.5,
+    days: 102,
+    annualQuotaDays: 90,
+    color: "#c28b38", // Warm Bronze Gold
+    payStatus: "Statutory Paid",
+    targetCadres: "Permanent Staff Members",
+    authority: "Director HR / Board",
+  },
+  {
+    id: "pol-sl",
+    code: "SL",
+    name: "Duty & Study Special",
+    percentage: 6.0,
+    days: 72,
+    annualQuotaDays: 14,
+    color: "#047857", // Deep Forest Emerald
+    payStatus: "Fully Paid",
+    targetCadres: "Instructional Teaching Faculty",
+    authority: "Director Academics",
+  },
+];
+
+interface MonthlyStaffLeavePoint {
+  [key: string]: string | number;
+  month: string;
+  fullName: string;
+  overall: number; // overall % of staff on leave
+  teaching: number; // % of teaching faculty on leave
+  admin: number; // % of admin & support staff on leave
+  threshold: number; // institutional ceiling 8.0%
+}
+
+const MONTHLY_STAFF_LEAVE_TREND: MonthlyStaffLeavePoint[] = [
+  { month: "Aug", fullName: "August 2026", overall: 3.2, teaching: 2.8, admin: 3.8, threshold: 8.0 },
+  { month: "Sep", fullName: "September 2026", overall: 4.5, teaching: 4.2, admin: 5.1, threshold: 8.0 },
+  { month: "Oct", fullName: "October 2026", overall: 6.8, teaching: 7.1, admin: 6.2, threshold: 8.0 },
+  { month: "Nov", fullName: "November 2026", overall: 5.2, teaching: 4.9, admin: 5.8, threshold: 8.0 },
+  { month: "Dec", fullName: "December 2026", overall: 9.4, teaching: 10.2, admin: 7.8, threshold: 8.0 },
+  { month: "Jan", fullName: "January 2027", overall: 4.8, teaching: 4.4, admin: 5.5, threshold: 8.0 },
+  { month: "Feb", fullName: "February 2027", overall: 5.6, teaching: 5.8, admin: 5.2, threshold: 8.0 },
+  { month: "Mar", fullName: "March 2027", overall: 7.1, teaching: 7.5, admin: 6.4, threshold: 8.0 },
+  { month: "Apr", fullName: "April 2027", overall: 4.2, teaching: 3.9, admin: 4.8, threshold: 8.0 },
+  { month: "May", fullName: "May 2027", overall: 8.6, teaching: 9.2, admin: 7.4, threshold: 8.0 },
+];
+
+const CADRE_STAFF_BENCHMARKS = [
+  {
+    cadre: "Instructional Teaching Faculty",
+    role: "Academic Cadre",
+    activeStaff: 128,
+    leaveSharePercent: 61.8,
+    avgLeaveRate: "6.01%",
+    totalDaysAvailed: 742,
+    color: "#7c4424",
+  },
+  {
+    cadre: "Administrative & Accounts Officers",
+    role: "Administrative Cadre",
+    activeStaff: 62,
+    leaveSharePercent: 23.7,
+    avgLeaveRate: "5.62%",
+    totalDaysAvailed: 284,
+    color: "#c28b38",
+  },
+  {
+    cadre: "IT, Lab & Auxiliary Support Personnel",
+    role: "Support Cadre",
+    activeStaff: 60,
+    leaveSharePercent: 14.5,
+    avgLeaveRate: "6.18%",
+    totalDaysAvailed: 174,
+    color: "#5c3118",
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
 // COMPONENT IMPLEMENTATION
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function LeavePolicyClient() {
-  // State for Policies
+  // State for Policies (persisted in localStorage)
   const [policies, setPolicies] = React.useState<PolicyQuotaItem[]>(() => {
     if (typeof window !== "undefined") {
       try {
@@ -526,37 +661,8 @@ export function LeavePolicyClient() {
     return CADRE_ENTITLEMENTS;
   });
 
-  // View Navigation
-  const [activeTab, setActiveTab] = React.useState<
-    "policies" | "cadres" | "rules" | "workflow"
-  >("policies");
-
-  // Filters & Search for Tab 1
-  const [policyScopeFilter, setPolicyScopeFilter] = React.useState<
-    "All" | "Staff" | "Students"
-  >("All");
-  const [searchQuery, setSearchQuery] = React.useState("");
-
-  // Filtered Policies
-  const filteredPolicies = React.useMemo(() => {
-    return policies.filter((p) => {
-      const matchesScope =
-        policyScopeFilter === "All" ||
-        (policyScopeFilter === "Staff" && (p.scope === "Staff" || p.scope === "All")) ||
-        (policyScopeFilter === "Students" && (p.scope === "Students" || p.scope === "All"));
-
-      const q = searchQuery.toLowerCase().trim();
-      const matchesSearch =
-        !q ||
-        p.category.toLowerCase().includes(q) ||
-        p.code.toLowerCase().includes(q) ||
-        p.applicableTo.toLowerCase().includes(q) ||
-        p.description.toLowerCase().includes(q) ||
-        p.approvalAuthority.toLowerCase().includes(q);
-
-      return matchesScope && matchesSearch;
-    });
-  }, [policies, policyScopeFilter, searchQuery]);
+  // Hover state for interactive donut
+  const [activeDonutIndex, setActiveDonutIndex] = React.useState<number | null>(null);
 
   // Batch Edit Dialog state
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
@@ -592,9 +698,12 @@ export function LeavePolicyClient() {
   };
 
   // Handlers for Single Policy Adjust
-  const handleOpenSingleAdjust = (policy: PolicyQuotaItem) => {
-    setEditingSinglePolicy({ ...policy });
-    setSinglePolicyModalOpen(true);
+  const handleOpenSingleAdjust = (policyId: string) => {
+    const found = policies.find((p) => p.id === policyId) || INITIAL_POLICIES.find((p) => p.id === policyId);
+    if (found) {
+      setEditingSinglePolicy({ ...found });
+      setSinglePolicyModalOpen(true);
+    }
   };
 
   const handleSaveSinglePolicy = (e: React.FormEvent) => {
@@ -634,8 +743,8 @@ export function LeavePolicyClient() {
             <span style="font-size:8.5px;color:#64748b;">${p.description}</span>
           </td>
           <td><span style="display:inline-block;padding:2px 5px;background:#f1f5f9;border-radius:3px;font-size:8px;font-weight:600;">${p.applicableTo}</span></td>
-          <td style="font-weight:bold;text-align:center;font-size:10.5px;color:#091d3e;">${p.days > 0 ? `${p.days} Days` : p.annualQuota}</td>
-          <td><span style="color:#047857;font-weight:600;">${p.payStatus}</span></td>
+          <td style="font-weight:bold;text-align:center;font-size:10.5px;color:#381e0f;">${p.days > 0 ? `${p.days} Days` : p.annualQuota}</td>
+          <td><span style="color:#381e0f;font-weight:600;">${p.payStatus}</span></td>
           <td style="font-size:8.5px;">${p.noticePeriod}</td>
           <td style="font-size:8.5px;">${p.carryForward}</td>
           <td style="font-weight:600;font-size:8.5px;">${p.approvalAuthority}</td>
@@ -648,54 +757,53 @@ export function LeavePolicyClient() {
         (c) => `
         <tr>
           <td><strong>${c.cadre}</strong><br><span style="font-size:8px;color:#64748b;">${c.roleCategory} Cadre</span></td>
-          <td style="text-align:center;font-weight:bold;">${c.casualLeave}d</td>
-          <td style="text-align:center;font-weight:bold;">${c.medicalLeave}d</td>
-          <td style="text-align:center;font-weight:bold;">${c.earnedLeave > 0 ? `${c.earnedLeave}d` : "—"}</td>
-          <td style="text-align:center;font-weight:bold;">${c.emergencyLeave}d</td>
-          <td style="font-size:8.5px;">${c.specialLeave}</td>
+          <td style="text-align:center;font-weight:bold;color:#7c4424;">${c.casualLeave > 0 ? `${c.casualLeave}d` : "—"}</td>
+          <td style="text-align:center;font-weight:bold;color:#be123c;">${c.medicalLeave > 0 ? `${c.medicalLeave}d` : "—"}</td>
+          <td style="text-align:center;font-weight:bold;color:#047857;">${c.earnedLeave > 0 ? `${c.earnedLeave}d` : "—"}</td>
+          <td style="text-align:center;font-weight:bold;color:#b45309;">${c.emergencyLeave > 0 ? `${c.emergencyLeave}d` : "—"}</td>
+          <td><span style="font-size:8px;padding:2px 4px;background:#f1f5f9;border-radius:3px;">${c.specialLeave}</span></td>
           <td style="font-size:8.5px;">${c.maxAccumulation}</td>
-          <td style="text-align:center;">${c.encashable ? '<strong style="color:#047857;">Yes</strong>' : '<span style="color:#94a3b8;">No</span>'}</td>
-          <td style="font-size:8.5px;font-weight:600;">${c.approvalAuthority}</td>
+          <td style="text-align:center;font-size:8px;">${c.encashable ? "Yes (10d)" : "No"}</td>
+          <td style="font-size:8px;font-weight:600;">${c.approvalAuthority}</td>
         </tr>`
       )
       .join("");
 
     const rulesHtml = STATUTORY_RULES.map(
-      (r, idx) => `
-        <div style="margin-bottom:10px;page-break-inside:avoid;">
-          <h4 style="margin:0 0 3px;font-size:9.5px;color:#091d3e;text-transform:uppercase;">
-            ${idx + 1}. ${r.title} — <span style="font-weight:normal;color:#64748b;">${r.badge}</span>
-          </h4>
-          <p style="margin:0 0 4px;font-size:8.5px;color:#334155;line-height:1.4;">${r.summary}</p>
-          <ul style="margin:0;padding-left:14px;font-size:8px;color:#475569;">
-            ${r.points.map((pt) => `<li style="margin-bottom:2px;">${pt}</li>`).join("")}
-          </ul>
-        </div>`
+      (r) => `
+      <div style="margin-bottom: 12px; page-break-inside: avoid; border: 1px solid #e2e8f0; border-radius: 4px; padding: 8px;">
+        <div style="font-size: 10px; font-weight: bold; color: #381e0f; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 4px;">
+          ${r.title} <span style="float:right;font-size:8px;color:#7c4424;font-weight:normal;">[${r.badge}]</span>
+        </div>
+        <p style="font-size: 8.5px; color: #475569; margin: 0 0 6px 0; line-height: 1.3;">${r.summary}</p>
+        <ul style="margin: 0; padding-left: 14px; font-size: 8px; color: #334155; line-height: 1.35;">
+          ${r.points.map((p) => `<li>${p}</li>`).join("")}
+        </ul>
+      </div>`
     ).join("");
 
     const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Institutional Leave Policy & Entitlement Framework (AY 2026–27) - EduSphere</title>
+  <title>Institutional Leave Policy & Staff Entitlements Gazette · 2026–27</title>
   <style>
-    @page { size: A4 portrait; margin: 10mm 12mm; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #0f172a; font-size: 9px; line-height: 1.35; margin: 0; }
-    .header-table { width: 100%; border-bottom: 2px solid #091d3e; padding-bottom: 8px; margin-bottom: 12px; }
-    .header-logo { font-size: 15px; font-weight: 900; color: #091d3e; text-transform: uppercase; letter-spacing: 0.05em; }
-    .header-sub { font-size: 8.5px; color: #475569; font-weight: 500; margin-top: 2px; }
-    .header-ref { font-size: 8px; font-family: monospace; color: #64748b; text-align: right; }
-    h2 { font-size: 10.5px; font-weight: 800; text-transform: uppercase; margin: 12px 0 6px; color: #091d3e; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 8.5px; }
-    th, td { border: 1px solid #cbd5e1; padding: 4.5px 6px; text-align: left; vertical-align: top; }
-    th { background: #091d3e; color: #ffffff; font-weight: 700; font-size: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
-    .footer-signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px; text-align: center; page-break-inside: avoid; }
-    .sign-box { border-top: 1px solid #64748b; padding-top: 4px; font-size: 8px; font-weight: 700; text-transform: uppercase; color: #334155; }
-    .sign-title { font-size: 7.5px; font-weight: normal; color: #64748b; margin-top: 1px; }
+    @page { size: A4 landscape; margin: 12mm; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; font-size: 9.5px; color: #0f172a; line-height: 1.3; }
+    .header-logo { font-size: 17px; font-weight: 800; color: #381e0f; letter-spacing: -0.3px; }
+    .header-sub { font-size: 9px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .header-ref { font-size: 8.5px; color: #334155; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 16px 0; }
+    th { background: #381e0f; color: #ffffff; font-size: 8.5px; text-transform: uppercase; font-weight: 700; padding: 5px 6px; border: 1px solid #381e0f; }
+    td { padding: 4.5px 6px; border: 1px solid #cbd5e1; font-size: 8.5px; vertical-align: top; }
+    h2 { font-size: 11px; font-weight: 800; color: #381e0f; border-bottom: 1.5px solid #7c4424; padding-bottom: 3px; margin: 14px 0 6px 0; text-transform: uppercase; letter-spacing: 0.3px; }
+    .footer-signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 24px; padding-top: 10px; border-top: 1px solid #cbd5e1; }
+    .sign-box { border-bottom: 1px dashed #64748b; height: 35px; margin-bottom: 4px; font-weight: bold; font-size: 8.5px; display: flex; align-items: flex-end; }
+    .sign-title { font-size: 8px; color: #64748b; text-transform: uppercase; }
   </style>
 </head>
 <body>
-  <table class="header-table">
+  <table style="border:none;margin-bottom:8px;">
     <tr>
       <td style="border:none;padding:0;">
         <div class="header-logo">EduSphere International System</div>
@@ -728,7 +836,7 @@ export function LeavePolicyClient() {
     </tbody>
   </table>
 
-  <h2>Section 2: Cadre-Wise Entitlement Matrix (Teaching, Admin, Support, Students)</h2>
+  <h2>Section 2: Cadre-Wise Entitlement Matrix (Teaching, Admin, Support)</h2>
   <table>
     <thead>
       <tr>
@@ -773,6 +881,15 @@ export function LeavePolicyClient() {
     printHtml(html);
   };
 
+  // Convert categories into Donut slices for Graph 1
+  const donutData: DonutSlice[] = React.useMemo(() => {
+    return STAFF_LEAVE_CATEGORIES.map((c) => ({
+      name: `${c.name} (${c.code})`,
+      value: c.percentage,
+      color: c.color,
+    }));
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* ───────────────────────── Page Header ───────────────────────── */}
@@ -784,16 +901,16 @@ export function LeavePolicyClient() {
               variant="outline"
               size="default"
               onClick={handlePrintPolicy}
-              className="gap-2 cursor-pointer shadow-xs"
+              className="gap-2 cursor-pointer shadow-xs rounded-[4px] border-brand/20 hover:border-brand hover:bg-brand-50"
             >
-              <Printer className="size-4" />
+              <Printer className="size-4 text-brand" />
               <span>Print Policy</span>
             </Button>
             <Button
               variant="default"
               size="default"
               onClick={() => handleOpenEditDialog()}
-              className="gap-2 cursor-pointer"
+              className="gap-2 cursor-pointer rounded-[4px] bg-gradient-to-r from-[#7c4424] to-[#5c3118] hover:from-[#6e3b1f] hover:to-[#381e0f] text-white shadow-sm"
             >
               <SlidersHorizontal className="size-4" />
               <span>Update Quotas</span>
@@ -806,7 +923,7 @@ export function LeavePolicyClient() {
       <StatGrid className="max-w-none sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Annual Staff Quota Pool"
-          value="49 Days"
+          value="49 Days Max"
           icon={CalendarDays}
           split={[
             { label: "Vacation Cadre", value: "29d" },
@@ -814,7 +931,7 @@ export function LeavePolicyClient() {
           ]}
         />
         <StatCard
-          label="Institutional Utilization"
+          label="Institutional Staff Utilization"
           value="64.2%"
           icon={TrendingUp}
           split={[
@@ -836,454 +953,291 @@ export function LeavePolicyClient() {
           value="75.0% Min"
           icon={ShieldCheck}
           split={[
-            { label: "Staff Standard", value: "92%" },
+            { label: "Staff Target", value: "92%" },
             { label: "Exam Mandate", value: "75%" },
           ]}
         />
       </StatGrid>
 
-      {/* ───────────────────────── Navigation Tabs ───────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/80 pb-3">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100/80 dark:bg-muted/40 border border-slate-200/80 dark:border-border">
-          <button
-            type="button"
-            onClick={() => setActiveTab("policies")}
-            className={cn(
-              "flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] text-xs font-semibold transition-all cursor-pointer",
-              activeTab === "policies"
-                ? "bg-gradient-to-r from-[#16345f] to-[#091d3e] text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-muted-foreground dark:hover:text-foreground"
-            )}
-          >
-            <Layers className="size-3.5" />
-            <span>Policy Categories & Quotas</span>
-            <span
-              className={cn(
-                "ml-1 text-[10px] font-mono px-1.5 py-0.2 rounded-full",
-                activeTab === "policies"
-                  ? "bg-white/20 text-white"
-                  : "bg-slate-200 text-slate-700"
-              )}
-            >
-              {policies.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("cadres")}
-            className={cn(
-              "flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] text-xs font-semibold transition-all cursor-pointer",
-              activeTab === "cadres"
-                ? "bg-gradient-to-r from-[#16345f] to-[#091d3e] text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-muted-foreground dark:hover:text-foreground"
-            )}
-          >
-            <Briefcase className="size-3.5" />
-            <span>Cadre Entitlement Matrix</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("rules")}
-            className={cn(
-              "flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] text-xs font-semibold transition-all cursor-pointer",
-              activeTab === "rules"
-                ? "bg-gradient-to-r from-[#16345f] to-[#091d3e] text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-muted-foreground dark:hover:text-foreground"
-            )}
-          >
-            <ShieldCheck className="size-3.5" />
-            <span>Statutory Regulations & Rules</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab("workflow")}
-            className={cn(
-              "flex items-center gap-2 px-3.5 py-1.5 rounded-[4px] text-xs font-semibold transition-all cursor-pointer",
-              activeTab === "workflow"
-                ? "bg-gradient-to-r from-[#16345f] to-[#091d3e] text-white shadow-sm"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60 dark:text-muted-foreground dark:hover:text-foreground"
-            )}
-          >
-            <UserCheck className="size-3.5" />
-            <span>Sanctioning & Escalation</span>
-          </button>
-        </div>
-
-        {/* Academic Session Indicator */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-          <Building2 className="size-3.5 text-brand" />
-          <span>Institutional Quota Framework · Session 2026–27</span>
-        </div>
-      </div>
-
-      {/* ───────────────────────── TAB 1: POLICY CATEGORIES & QUOTAS ───────────────────────── */}
-      {activeTab === "policies" && (
-        <div className="space-y-5">
-          {/* Filter Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-brand/10 shadow-[0_1px_3px_rgb(9_29_62/0.05)]">
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search category code, name, notice rules, or authority..."
-                className="h-9 w-full rounded-[4px] border border-input bg-background pl-9 pr-8 text-xs font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-brand"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  <X className="size-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Scope Filter Pills */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mr-1">
-                Filter:
+      {/* ───────────────────────── TWO CORE STAFF LEAVE GRAPHS ───────────────────────── */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* ── GRAPH 1: Staff Leave Distribution by Category (%) ── */}
+        <SectionCard
+          title={
+            <div className="flex items-center gap-2">
+              <span className="grid size-7 place-items-center rounded-md bg-brand-50 border border-brand/20 text-brand">
+                <PieChart className="size-4 text-brand" />
               </span>
-              {(["All", "Staff", "Students"] as const).map((scope) => (
-                <button
-                  key={scope}
-                  type="button"
-                  onClick={() => setPolicyScopeFilter(scope)}
+              <span className="font-heading font-bold text-base text-foreground">
+                Staff Leave Distribution by Category (%)
+              </span>
+            </div>
+          }
+          description="Percentage allocation and volume of 1,200 sanctioned staff leave days across statutory categories"
+          className="lg:col-span-5 flex flex-col justify-between"
+          contentClassName="flex-1 flex flex-col justify-between p-5 space-y-4"
+        >
+          {/* Interactive Donut Display */}
+          <div className="relative py-2">
+            <DonutChart
+              data={donutData}
+              centerValue="64.2%"
+              centerLabel="Staff Availed"
+              format="percent"
+              activeIndex={activeDonutIndex}
+              onHoverIndex={setActiveDonutIndex}
+              className="h-[210px] w-full max-w-[210px]"
+            />
+          </div>
+
+          {/* Category-by-Category Percentage Breakdown List */}
+          <div className="space-y-2.5 border-t border-border/70 pt-4">
+            {STAFF_LEAVE_CATEGORIES.map((cat, idx) => {
+              const isHovered = activeDonutIndex === idx;
+              return (
+                <div
+                  key={cat.id}
+                  onMouseEnter={() => setActiveDonutIndex(idx)}
+                  onMouseLeave={() => setActiveDonutIndex(null)}
                   className={cn(
-                    "px-3 py-1 rounded-[4px] text-xs font-semibold transition-all cursor-pointer",
-                    policyScopeFilter === scope
-                      ? "bg-brand-50 text-brand border border-brand/25 font-bold shadow-2xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-slate-50 border border-transparent"
+                    "group/item flex items-center justify-between gap-3 p-2 rounded-lg transition-all border",
+                    isHovered
+                      ? "bg-brand-50/60 border-brand/30 shadow-2xs"
+                      : "bg-slate-50/50 hover:bg-slate-100/70 border-slate-200/60"
                   )}
                 >
-                  {scope === "All" ? "All Policies" : scope === "Staff" ? "Staff Only" : "Students"}
-                </button>
-              ))}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className="size-3 rounded-full shrink-0 ring-2 ring-white shadow-xs"
+                      style={{ backgroundColor: cat.color }}
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-[3px] bg-white border border-slate-200 text-slate-800">
+                          {cat.code}
+                        </span>
+                        <span className="text-xs font-bold text-foreground truncate">
+                          {cat.name}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {cat.targetCadres} · <span className="font-semibold text-emerald-700">{cat.payStatus}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 shrink-0 text-right">
+                    <div>
+                      <span className="font-mono text-xs font-bold tabular-nums text-foreground">
+                        {cat.percentage}%
+                      </span>
+                      <p className="text-[10px] text-muted-foreground tabular-nums">
+                        {cat.days} days
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => handleOpenSingleAdjust(cat.id)}
+                      title={`Adjust ${cat.name} Quota`}
+                      className="opacity-60 group-hover/item:opacity-100 hover:bg-brand-50 hover:text-brand cursor-pointer size-6 rounded-[4px]"
+                    >
+                      <Pencil className="size-3 text-brand" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Quick Context Summary */}
+          <div className="rounded-lg bg-amber-50/70 border border-amber-200/80 p-2.5 text-xs text-amber-900 flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-[11px] font-semibold">
+              <Info className="size-3.5 text-amber-700 shrink-0" />
+              Casual Leave (38.5%) and Medical Leave (27.5%) form 66.0% of all staff absences.
+            </span>
+            <span className="font-mono text-[10px] font-bold text-amber-800 shrink-0 ml-2">
+              1,200 Days Total
+            </span>
+          </div>
+        </SectionCard>
+
+        {/* ── GRAPH 2: Monthly Staff Leave Utilization Trend (%) ── */}
+        <SectionCard
+          title={
+            <div className="flex items-center gap-2">
+              <span className="grid size-7 place-items-center rounded-md bg-brand-50 border border-brand/20 text-brand">
+                <TrendingUp className="size-4 text-brand" />
+              </span>
+              <span className="font-heading font-bold text-base text-foreground">
+                Monthly Staff Leave Utilization Rate (%)
+              </span>
+            </div>
+          }
+          description="Academic session month-by-month percentage of personnel on sanctioned leave vs. 8.0% institutional ceiling"
+          className="lg:col-span-7 flex flex-col justify-between"
+          contentClassName="flex-1 flex flex-col justify-between p-5 space-y-4"
+        >
+          {/* Main Area Trend Chart */}
+          <div className="py-1">
+            <AreaTrendChart
+              data={MONTHLY_STAFF_LEAVE_TREND}
+              xKey="month"
+              series={[
+                {
+                  key: "overall",
+                  label: "Overall Staff Leave Rate (%)",
+                  color: "#7c4424",
+                  strokeWidth: 2.75,
+                  fillOpacity: 0.3,
+                },
+                {
+                  key: "teaching",
+                  label: "Teaching Faculty (%)",
+                  color: "#c28b38",
+                  strokeWidth: 2,
+                  fillOpacity: 0.15,
+                },
+                {
+                  key: "admin",
+                  label: "Admin & Support (%)",
+                  color: "#5c3118",
+                  strokeWidth: 2,
+                  fillOpacity: 0.1,
+                },
+              ]}
+              format="percent"
+              yDomain={[0, 12]}
+              className="h-[280px] w-full"
+              showLegend
+            />
+          </div>
+
+          {/* Monthly Trajectory Performance Highlights */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-border/70 pt-4">
+            <div className="rounded-lg bg-slate-50/80 border border-slate-200/80 p-2.5 text-center">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                Session Average
+              </span>
+              <span className="font-mono text-base font-black text-[#381e0f]">
+                5.94%
+              </span>
+              <span className="text-[10px] text-emerald-700 font-semibold block mt-0.5">
+                Within 8% Target
+              </span>
+            </div>
+
+            <div className="rounded-lg bg-rose-50/80 border border-rose-200/80 p-2.5 text-center">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-800 block">
+                Peak Absence Month
+              </span>
+              <span className="font-mono text-base font-black text-rose-900">
+                9.4%
+              </span>
+              <span className="text-[10px] text-rose-700 font-semibold block mt-0.5">
+                December (Winter Recess)
+              </span>
+            </div>
+
+            <div className="rounded-lg bg-emerald-50/80 border border-emerald-200/80 p-2.5 text-center">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">
+                Lowest Absence Month
+              </span>
+              <span className="font-mono text-base font-black text-emerald-900">
+                3.2%
+              </span>
+              <span className="text-[10px] text-emerald-700 font-semibold block mt-0.5">
+                August (Term Opening)
+              </span>
+            </div>
+
+            <div className="rounded-lg bg-brand-50/60 border border-brand/20 p-2.5 text-center">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-brand block">
+                Statutory Ceiling
+              </span>
+              <span className="font-mono text-base font-black text-brand">
+                8.0% Max
+              </span>
+              <span className="text-[10px] text-muted-foreground font-semibold block mt-0.5">
+                Escalation Alert Line
+              </span>
             </div>
           </div>
 
-          {/* Cards Grid */}
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {filteredPolicies.map((p) => (
-              <div
-                key={p.id}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-brand/12 bg-white p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_3px_rgb(9_29_62/0.05),0_10px_24px_-16px_rgb(9_29_62/0.14)] transition-all duration-300 hover:-translate-y-1 hover:border-brand/35 hover:shadow-[0_8px_24px_-6px_rgba(9,29,62,0.18)]"
-              >
-                {/* Ambient sapphire top glow beam */}
-                <span
-                  aria-hidden
-                  className="absolute inset-x-8 top-0 h-[2.5px] rounded-full bg-gradient-to-r from-transparent via-[#1e4275] to-transparent opacity-80 transition-all duration-500 group-hover:inset-x-3 group-hover:h-[3px] group-hover:via-[#3f6396]"
-                />
-
-                <div>
-                  {/* Header: Code Badge + Applicability Tag */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span
-                      className={cn(
-                        "inline-flex size-9 items-center justify-center rounded-lg bg-gradient-to-b font-mono text-xs font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(9,29,62,0.3)] ring-1 ring-white/10",
-                        p.colorScheme.badgeBg,
-                        p.colorScheme.badgeText
-                      )}
-                    >
-                      {p.code}
-                    </span>
-                    <span className="inline-flex items-center rounded-full border border-slate-200/90 bg-slate-50/90 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 shadow-2xs">
-                      {p.applicableTo}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <div className="mb-2">
-                    <h3 className="font-heading text-sm font-bold text-foreground group-hover:text-brand transition-colors">
-                      {p.category}
-                    </h3>
-                  </div>
-
-                  {/* Annual Quota Spotlight */}
-                  <div className="my-3.5 rounded-lg border border-brand/10 bg-gradient-to-b from-slate-50/80 to-white p-3 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/90">
-                      Annual Quota
-                    </span>
-                    <div className="mt-0.5 flex items-baseline justify-center gap-1.5">
-                      <span className="font-mono text-2xl font-black tracking-tight text-[#091d3e]">
-                        {p.days > 0 ? p.days : p.annualQuota}
-                      </span>
-                      {p.days > 0 && (
-                        <span className="text-xs font-semibold text-slate-500">
-                          Days / Year
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Key Specifications */}
-                  <div className="space-y-2 border-t border-slate-100 pt-3 text-xs">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="flex items-center gap-1.5 text-muted-foreground">
-                        <Clock className="size-3 text-muted-foreground/70 shrink-0" />
-                        Notice Period
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        {p.noticePeriod}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="flex items-center gap-1.5 text-muted-foreground">
-                        <RotateCcw className="size-3 text-muted-foreground/70 shrink-0" />
-                        Carry-over
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        {p.carryForward}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="flex items-center gap-1.5 text-muted-foreground">
-                        <UserCheck className="size-3 text-muted-foreground/70 shrink-0" />
-                        Sanction Authority
-                      </span>
-                      <span className="font-semibold text-foreground">
-                        {p.approvalAuthority}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Action Footer */}
-                <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-[4px] border border-emerald-200/80">
-                    <CheckCircle2 className="size-3 text-emerald-600" />
-                    <span>Active Quota</span>
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="xs"
-                    onClick={() => handleOpenSingleAdjust(p)}
-                    className="h-7 px-2.5 rounded-[4px] border-brand/20 hover:border-brand hover:bg-brand-50 text-foreground font-semibold cursor-pointer shadow-2xs gap-1.5 text-xs"
-                  >
-                    <Pencil className="size-3 text-brand" />
-                    <span>Adjust</span>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ───────────────────────── TAB 2: CADRE ENTITLEMENT MATRIX ───────────────────────── */}
-      {activeTab === "cadres" && (
-        <SectionCard
-          title="Cadre-Wise Leave Entitlement Matrix"
-          description="Institutional distribution of leave allowances across academic, administrative, and student hierarchies"
-          flush
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#091d3e] text-white">
-                <tr>
-                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">
-                    Cadre / Designation
-                  </th>
-                  <th className="py-3 px-3 font-semibold uppercase tracking-wider text-[11px] text-center">
-                    Casual (CL)
-                  </th>
-                  <th className="py-3 px-3 font-semibold uppercase tracking-wider text-[11px] text-center">
-                    Medical (ML)
-                  </th>
-                  <th className="py-3 px-3 font-semibold uppercase tracking-wider text-[11px] text-center">
-                    Earned (EL)
-                  </th>
-                  <th className="py-3 px-3 font-semibold uppercase tracking-wider text-[11px] text-center">
-                    Emergency
-                  </th>
-                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">
-                    Special Entitlements
-                  </th>
-                  <th className="py-3 px-3 font-semibold uppercase tracking-wider text-[11px]">
-                    Accumulation Cap
-                  </th>
-                  <th className="py-3 px-3 font-semibold uppercase tracking-wider text-[11px] text-center">
-                    Encashable?
-                  </th>
-                  <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">
-                    Approval Authority
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60 bg-white">
-                {cadres.map((c, idx) => (
-                  <tr
-                    key={c.id}
-                    className={cn(
-                      "hover:bg-brand-50/30 transition-colors",
-                      idx % 2 === 1 ? "bg-slate-50/40" : "bg-white"
-                    )}
-                  >
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-foreground text-xs">{c.cadre}</div>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">
-                        {c.roleCategory} Cadre
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-center font-mono font-bold text-brand">
-                      {c.casualLeave > 0 ? `${c.casualLeave}d` : "—"}
-                    </td>
-                    <td className="py-3 px-3 text-center font-mono font-bold text-rose-700">
-                      {c.medicalLeave > 0 ? `${c.medicalLeave}d` : "—"}
-                    </td>
-                    <td className="py-3 px-3 text-center font-mono font-bold text-emerald-700">
-                      {c.earnedLeave > 0 ? `${c.earnedLeave}d` : "—"}
-                    </td>
-                    <td className="py-3 px-3 text-center font-mono font-bold text-amber-700">
-                      {c.emergencyLeave > 0 ? `${c.emergencyLeave}d` : "—"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 border border-slate-200">
-                        {c.specialLeave}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-xs font-semibold text-muted-foreground">
-                      {c.maxAccumulation}
-                    </td>
-                    <td className="py-3 px-3 text-center">
-                      {c.encashable ? (
-                        <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
-                          Yes (10d)
-                        </span>
-                      ) : (
-                        <span className="text-[11px] text-muted-foreground">No</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 font-semibold text-foreground text-[11px]">
-                      {c.approvalAuthority}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Month Trend Explanation Footer */}
+          <div className="rounded-lg bg-slate-50 border border-slate-200/70 p-3 text-xs text-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <span className="flex items-center gap-1.5 font-medium text-[11px]">
+              <Sparkles className="size-3.5 text-brand shrink-0" />
+              Staff leave rates peaked during December (9.4%) and May (8.6%) corresponding with exam transitions.
+            </span>
+            <span className="inline-flex items-center gap-1 font-semibold text-emerald-700 text-[10px] bg-emerald-50 px-2 py-0.5 rounded-[4px] border border-emerald-200 shrink-0">
+              <CheckCircle2 className="size-3" />
+              94.2% Staff Availability Met
+            </span>
           </div>
         </SectionCard>
-      )}
+      </div>
 
-      {/* ───────────────────────── TAB 3: STATUTORY REGULATIONS & RULES ───────────────────────── */}
-      {activeTab === "rules" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {STATUTORY_RULES.map((rule) => {
-            const Icon = rule.icon;
-            return (
-              <div
-                key={rule.id}
-                className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-brand/12 bg-white p-5 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_3px_rgb(9_29_62/0.05),0_10px_24px_-16px_rgb(9_29_62/0.14)] transition-all duration-300 hover:-translate-y-1 hover:border-brand/35 hover:shadow-md"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="grid size-9 place-items-center rounded-lg bg-gradient-to-b from-[#1e4275] to-[#091d3e] text-white shadow-sm ring-1 ring-white/10">
-                      <Icon className="size-4" />
-                    </span>
-                    <span className="inline-flex items-center rounded-full border border-brand/20 bg-brand-50/80 px-2.5 py-0.5 text-[10px] font-bold text-brand uppercase tracking-wider">
-                      {rule.badge}
-                    </span>
-                  </div>
-
-                  <h3 className="font-heading text-sm font-bold text-foreground group-hover:text-brand transition-colors">
-                    {rule.title}
-                  </h3>
-                  <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                    {rule.summary}
-                  </p>
-
-                  <div className="mt-4 space-y-2 border-t border-border/70 pt-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Operational Clauses & Standards:
-                    </span>
-                    <ul className="space-y-1.5">
-                      {rule.points.map((pt, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start gap-2 text-[11px] text-slate-700 leading-snug"
-                        >
-                          <ChevronRight className="size-3 text-brand shrink-0 mt-0.5" />
-                          <span>{pt}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-1 font-semibold text-brand">
-                    <ShieldCheck className="size-3 text-brand" />
-                    Enforced by Academic Council
-                  </span>
-                  <span className="font-mono text-[10px]">AY 2026–27</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* ───────────────────────── TAB 4: SANCTIONING & APPROVAL ESCALATION ───────────────────────── */}
-      {activeTab === "workflow" && (
-        <SectionCard
-          title="Institutional Leave Sanctioning Hierarchy"
-          description="Formal escalation pathways and Service Level Agreements (SLAs) for leave authorizations"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {APPROVAL_WORKFLOW_TIERS.map((tier, idx) => (
-              <div
-                key={tier.tier}
-                className="relative flex flex-col justify-between rounded-xl border border-brand/15 bg-white p-5 shadow-xs transition-all hover:-translate-y-1 hover:border-brand/40"
-              >
-                {/* Step badge */}
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="inline-flex items-center justify-center size-7 rounded-md bg-gradient-to-b from-[#1e4275] to-[#091d3e] text-white font-mono text-xs font-bold shadow-2xs">
-                      {idx + 1}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-slate-100 px-2 py-0.5 rounded-full">
-                      {tier.sla}
-                    </span>
-                  </div>
-
-                  <h4 className="font-heading text-sm font-bold text-foreground">
-                    {tier.authority}
-                  </h4>
-                  <p className="text-[11px] font-semibold text-brand mt-0.5">
-                    {tier.level}
-                  </p>
-
-                  <div className="my-3 rounded-lg bg-slate-50 p-2.5 border border-slate-200/80 text-xs font-medium text-slate-800">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">
-                      Sanction Jurisdiction:
-                    </span>
-                    {tier.scope}
-                  </div>
-
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {tier.description}
-                  </p>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-semibold text-emerald-700">
-                  <span className="flex items-center gap-1">
-                    <CheckCircle2 className="size-3 text-emerald-600" />
-                    Formal Sign-off Required
-                  </span>
-                </div>
-              </div>
-            ))}
+      {/* ───────────────────────── CADRE-WISE STAFF LEAVE BENCHMARK STRIP ───────────────────────── */}
+      <SectionCard
+        title={
+          <div className="flex items-center gap-2">
+            <Building2 className="size-4 text-brand" />
+            <span className="font-heading font-bold text-sm text-foreground">
+              Staff Leave Share &amp; Average Leave Rate by Cadre
+            </span>
           </div>
-        </SectionCard>
-      )}
+        }
+        description="Consolidated leave breakdown per staff group across teaching, administration, and support services"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {CADRE_STAFF_BENCHMARKS.map((cadre) => (
+            <div
+              key={cadre.cadre}
+              className="rounded-xl border border-brand/12 bg-white p-4 shadow-xs hover:border-brand/30 transition-all hover:shadow-sm"
+            >
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-brand bg-brand-50 px-2 py-0.5 rounded-[4px] border border-brand/20">
+                  {cadre.role}
+                </span>
+                <span className="font-mono text-xs font-bold text-muted-foreground">
+                  {cadre.activeStaff} Active Staff
+                </span>
+              </div>
+
+              <h4 className="font-heading text-sm font-bold text-foreground">
+                {cadre.cadre}
+              </h4>
+
+              <div className="mt-3.5 grid grid-cols-2 gap-2 text-center">
+                <div className="rounded-lg bg-slate-50 p-2 border border-slate-200/60">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                    Share of Total Leaves
+                  </span>
+                  <span className="font-mono text-lg font-black text-[#381e0f]">
+                    {cadre.leaveSharePercent}%
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    {cadre.totalDaysAvailed} days
+                  </span>
+                </div>
+
+                <div className="rounded-lg bg-slate-50 p-2 border border-slate-200/60">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+                    Avg Monthly Rate
+                  </span>
+                  <span className="font-mono text-lg font-black text-brand">
+                    {cadre.avgLeaveRate}
+                  </span>
+                  <span className="text-[10px] text-emerald-700 font-medium block">
+                    Compliant
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
 
       {/* ───────────────────────── UPDATE INSTITUTIONAL QUOTAS DIALOG (BATCH) ───────────────────────── */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
@@ -1343,7 +1297,7 @@ export function LeavePolicyClient() {
                             )
                           );
                         }}
-                        className="size-7 cursor-pointer"
+                        className="size-7 cursor-pointer rounded-[4px]"
                       >
                         <Minus className="size-3" />
                       </Button>
@@ -1386,7 +1340,7 @@ export function LeavePolicyClient() {
                             )
                           );
                         }}
-                        className="size-7 cursor-pointer"
+                        className="size-7 cursor-pointer rounded-[4px]"
                       >
                         <Plus className="size-3" />
                       </Button>
@@ -1402,7 +1356,7 @@ export function LeavePolicyClient() {
                 variant="outline"
                 size="sm"
                 onClick={handleResetDefaults}
-                className="gap-1.5 text-xs cursor-pointer"
+                className="gap-1.5 text-xs cursor-pointer rounded-[4px]"
               >
                 <RotateCcw className="size-3.5" />
                 <span>Reset Defaults</span>
@@ -1413,7 +1367,7 @@ export function LeavePolicyClient() {
                   variant="outline"
                   size="sm"
                   onClick={() => setEditDialogOpen(false)}
-                  className="text-xs cursor-pointer"
+                  className="text-xs cursor-pointer rounded-[4px]"
                 >
                   Cancel
                 </Button>
@@ -1421,7 +1375,7 @@ export function LeavePolicyClient() {
                   type="submit"
                   size="sm"
                   variant="default"
-                  className="gap-1.5 text-xs font-semibold cursor-pointer"
+                  className="gap-1.5 text-xs font-semibold cursor-pointer rounded-[4px] bg-gradient-to-r from-[#7c4424] to-[#5c3118] text-white"
                 >
                   <Check className="size-3.5" />
                   <span>Save Quotas</span>
@@ -1539,7 +1493,7 @@ export function LeavePolicyClient() {
 
               <div>
                 <label className="block text-[11px] font-bold text-foreground mb-1 uppercase tracking-wider">
-                  Carry-Forward & Lapsing Rule
+                  Carry-Forward &amp; Lapsing Rule
                 </label>
                 <input
                   type="text"
@@ -1556,7 +1510,7 @@ export function LeavePolicyClient() {
 
               <div>
                 <label className="block text-[11px] font-bold text-foreground mb-1 uppercase tracking-wider">
-                  Policy Description & Scope
+                  Policy Description &amp; Scope
                 </label>
                 <textarea
                   rows={3}
@@ -1577,7 +1531,7 @@ export function LeavePolicyClient() {
                   variant="outline"
                   size="sm"
                   onClick={() => setSinglePolicyModalOpen(false)}
-                  className="text-xs cursor-pointer"
+                  className="text-xs cursor-pointer rounded-[4px]"
                 >
                   Cancel
                 </Button>
@@ -1585,7 +1539,7 @@ export function LeavePolicyClient() {
                   type="submit"
                   size="sm"
                   variant="default"
-                  className="gap-1.5 text-xs font-semibold cursor-pointer"
+                  className="gap-1.5 text-xs font-semibold cursor-pointer rounded-[4px] bg-gradient-to-r from-[#7c4424] to-[#5c3118] text-white"
                 >
                   <Check className="size-3.5" />
                   <span>Update Policy</span>

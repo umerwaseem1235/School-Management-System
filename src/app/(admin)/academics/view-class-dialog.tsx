@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -58,10 +58,10 @@ export function ViewClassDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl p-0 overflow-hidden rounded-2xl border border-border shadow-2xl bg-card">
         {/* Top Header Card */}
-        <div className="bg-gradient-to-r from-[#16345f]/15 via-brand-50/40 to-background p-6 border-b border-border/80">
+        <div className="bg-gradient-to-r from-[#7c4424]/15 via-brand-50/40 to-background p-6 border-b border-border/80">
           <DialogHeader>
             <div className="flex items-center gap-4 pr-8">
-              <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-b from-[#1e4275] to-[#091d3e] text-white shadow-md shrink-0 ring-1 ring-white/10">
+              <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-b from-[#6e3b1f] to-[#381e0f] text-white shadow-md shrink-0 ring-1 ring-white/10">
                 <GraduationCap className="size-6" />
               </div>
               <div className="min-w-0">

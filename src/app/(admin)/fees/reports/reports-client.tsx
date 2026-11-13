@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -421,7 +421,7 @@ export function ReportsClient({ title = "Fee Reports" }: { title?: string } = {}
         headerClassName: "w-[14%] text-center",
         cell: (r) => (
           <div className="space-y-0.5 text-center">
-            <span className="font-mono text-xs font-bold tabular-nums text-[#091d3e]">
+            <span className="font-mono text-xs font-bold tabular-nums text-[#381e0f]">
               {formatCurrency(r.staffNetPayroll)}
             </span>
             <p className="text-[10.5px] text-muted-foreground">
@@ -461,7 +461,7 @@ export function ReportsClient({ title = "Fee Reports" }: { title?: string } = {}
         className: "w-[13%] text-center",
         headerClassName: "w-[13%] text-center",
         cell: (r) => (
-          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#381e0f]">
             {r.challanNumber}
           </span>
         ),

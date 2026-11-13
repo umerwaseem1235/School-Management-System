@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -201,7 +201,7 @@ export function AdjustmentsClient() {
             setViewDialogOpen(true);
           }}
           title="Click to view adjustment justification & ledger details"
-          className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e] hover:border-brand/35 hover:bg-brand-100/60 transition-colors cursor-pointer"
+          className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#381e0f] hover:border-brand/35 hover:bg-brand-100/60 transition-colors cursor-pointer"
         >
           {r.adjustmentNo}
         </button>

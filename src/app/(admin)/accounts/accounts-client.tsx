@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -330,7 +330,7 @@ export function AccountsClient() {
         header: "Account #",
         align: "center",
         cell: (r) => (
-          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e]">
+          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#381e0f]">
             {r.accountNo}
           </span>
         ),
@@ -417,7 +417,7 @@ export function AccountsClient() {
         header: "Account #",
         align: "center",
         cell: (r) => (
-          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e]">
+          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#381e0f]">
             {r.accountNo.replace("STD-", "PRT-")}
           </span>
         ),
@@ -545,7 +545,7 @@ export function AccountsClient() {
         header: "Account #",
         align: "center",
         cell: (r) => (
-          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e]">
+          <span className="inline-flex items-center whitespace-nowrap rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#381e0f]">
             {r.accountNo}
           </span>
         ),
@@ -813,7 +813,7 @@ export function AccountsClient() {
       {/* Account Register Selector Dropdown (Clean Single-Line Executive Control) */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <DropdownMenu>
-          <DropdownMenuTrigger className="group inline-flex h-9 cursor-pointer items-center gap-2.5 rounded-[4px] border border-brand/20 bg-white px-3 text-xs font-semibold text-[#091d3e] shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-colors hover:border-brand/35 hover:bg-brand-50/40 focus:outline-none focus:ring-2 focus:ring-brand/15">
+          <DropdownMenuTrigger className="group inline-flex h-9 cursor-pointer items-center gap-2.5 rounded-[4px] border border-brand/20 bg-white px-3 text-xs font-semibold text-[#381e0f] shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-colors hover:border-brand/35 hover:bg-brand-50/40 focus:outline-none focus:ring-2 focus:ring-brand/15">
             {activeTab === "students" ? (
               <GraduationCap className="size-3.5 shrink-0 text-brand" />
             ) : activeTab === "parents" ? (
@@ -821,7 +821,7 @@ export function AccountsClient() {
             ) : (
               <Landmark className="size-3.5 shrink-0 text-brand" />
             )}
-            <span className="font-semibold text-[#091d3e]">
+            <span className="font-semibold text-[#381e0f]">
               {activeRegisterLabel}
             </span>
             <span className="rounded-[3px] border border-brand/15 bg-brand-50/80 px-1.5 py-0.5 font-mono text-[11px] font-bold tabular-nums text-brand">
@@ -866,7 +866,7 @@ export function AccountsClient() {
                   className={cn(
                     "flex items-center justify-between gap-2 rounded-[4px] px-2.5 py-2 text-xs cursor-pointer transition-colors",
                     isSelected
-                      ? "bg-brand-50/80 font-semibold text-[#091d3e] focus:bg-brand-50"
+                      ? "bg-brand-50/80 font-semibold text-[#381e0f] focus:bg-brand-50"
                       : "font-medium text-foreground/85 hover:bg-slate-50 focus:bg-slate-100/80"
                   )}
                 >
@@ -874,7 +874,7 @@ export function AccountsClient() {
                     <Icon
                       className={cn(
                         "size-3.5 shrink-0",
-                        isSelected ? "text-[#091d3e]" : "text-muted-foreground"
+                        isSelected ? "text-[#381e0f]" : "text-muted-foreground"
                       )}
                     />
                     <span className="whitespace-nowrap">{item.label}</span>
@@ -884,7 +884,7 @@ export function AccountsClient() {
                       className={cn(
                         "min-w-[26px] rounded-[3px] px-1.5 py-0.5 text-center font-mono text-[10.5px] font-bold tabular-nums",
                         isSelected
-                          ? "bg-[#091d3e] text-white"
+                          ? "bg-[#381e0f] text-white"
                           : "bg-slate-100 text-muted-foreground"
                       )}
                     >
@@ -892,7 +892,7 @@ export function AccountsClient() {
                     </span>
                     <span className="grid size-3.5 shrink-0 place-items-center">
                       {isSelected && (
-                        <Check className="size-3.5 text-[#091d3e] stroke-[2.5]" />
+                        <Check className="size-3.5 text-[#381e0f] stroke-[2.5]" />
                       )}
                     </span>
                   </div>

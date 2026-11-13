@@ -149,15 +149,15 @@ const ROLE_CONFIGS: Record<
     icon: ShieldCheck,
     pillBorder: "border-brand/25",
     pillBg: "bg-white",
-    textColor: "text-[#091d3e]",
-    bubbleBg: "bg-gradient-to-b from-[#1e4275] to-[#091d3e]",
+    textColor: "text-[#381e0f]",
+    bubbleBg: "bg-gradient-to-b from-[#7c4424] to-[#5c3118]",
   },
   "Campus Admin": {
     icon: Building2,
     pillBorder: "border-brand/25",
     pillBg: "bg-white",
-    textColor: "text-[#091d3e]",
-    bubbleBg: "bg-gradient-to-b from-[#1e4275] to-[#091d3e]",
+    textColor: "text-[#381e0f]",
+    bubbleBg: "bg-gradient-to-b from-[#7c4424] to-[#5c3118]",
   },
   Principal: {
     icon: Award,
@@ -170,8 +170,8 @@ const ROLE_CONFIGS: Record<
     icon: UserCheck,
     pillBorder: "border-slate-200/90",
     pillBg: "bg-white",
-    textColor: "text-[#091d3e]",
-    bubbleBg: "bg-[#091d3e]",
+    textColor: "text-[#381e0f]",
+    bubbleBg: "bg-[#6e3b1f]",
   },
   Student: {
     icon: GraduationCap,
@@ -230,7 +230,7 @@ export function RoleBadge({ role, className }: { role: Role; className?: string 
     pillBorder: "border-border/80",
     pillBg: "bg-white",
     textColor: "text-foreground",
-    bubbleBg: "bg-[#091d3e]",
+    bubbleBg: "bg-[#6e3b1f]",
   };
   const Icon = cfg.icon;
 

@@ -79,7 +79,7 @@ export function PrintBroadsheetDialog({
           <td style="text-align: center; font-family: monospace; font-weight: bold;">${r.percentage.toFixed(1)}%</td>
           <td style="text-align: center; font-weight: bold;">${escapeHtml(r.overallGrade)}</td>
           <td style="text-align: center; font-weight: bold;">${r.position}${r.position === 1 ? "st" : r.position === 2 ? "nd" : r.position === 3 ? "rd" : "th"}</td>
-          <td style="text-align: center; font-weight: bold; color: ${r.status === "Passed" ? "#065f46" : r.status === "Compartment" ? "#b45309" : "#b91c1c"};">${escapeHtml(r.status)}</td>
+          <td style="text-align: center; font-weight: bold; color: ${r.status === "Passed" ? "#381e0f" : r.status === "Compartment" ? "#b45309" : "#b91c1c"};">${escapeHtml(r.status)}</td>
         </tr>`
         )
         .join("");

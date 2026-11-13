@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
@@ -255,7 +255,7 @@ export function LibraryClient() {
         headerAlign: "center",
         cell: (r) => (
           <div className="flex flex-col items-center">
-            <span className="font-mono text-sm font-extrabold tabular-nums text-[#091d3e]">
+            <span className="font-mono text-sm font-extrabold tabular-nums text-[#381e0f]">
               {r.availableCopies} / {r.totalCopies}
             </span>
           </div>

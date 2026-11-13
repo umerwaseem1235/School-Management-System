@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -308,7 +308,7 @@ export function TransportClient() {
               {assignedVehicles.map((v) => (
                 <span
                   key={v.id}
-                  className="inline-flex items-center gap-1 rounded-md border border-slate-200/90 bg-slate-100/80 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]"
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200/90 bg-slate-100/80 px-2 py-0.5 font-mono text-xs font-bold text-[#381e0f]"
                 >
                   <Bus className="size-3 text-slate-500" />
                   {v.vehicleNo}
@@ -342,7 +342,7 @@ export function TransportClient() {
         className: "w-[16%] px-3 text-center",
         headerClassName: "w-[16%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <span className="font-mono text-sm font-extrabold tabular-nums text-[#091d3e]">
+          <span className="font-mono text-sm font-extrabold tabular-nums text-[#381e0f]">
             Rs {formatNumber(r.monthlyFare)}
           </span>
         ),
@@ -412,7 +412,7 @@ export function TransportClient() {
         className: "w-[14%] px-3 text-center",
         headerClassName: "w-[14%] px-3 text-center whitespace-nowrap",
         cell: (v) => (
-          <span className="inline-flex items-center rounded-md border border-slate-300/90 bg-slate-100/90 px-2.5 py-0.5 font-mono text-xs font-extrabold tracking-wide text-[#091d3e]">
+          <span className="inline-flex items-center rounded-md border border-slate-300/90 bg-slate-100/90 px-2.5 py-0.5 font-mono text-xs font-extrabold tracking-wide text-[#381e0f]">
             {v.vehicleNo}
           </span>
         ),
@@ -437,7 +437,7 @@ export function TransportClient() {
         headerClassName: "w-[22%] px-3 text-center whitespace-nowrap",
         cell: (v) => (
           <div className="flex flex-col items-center justify-center gap-0.5 text-center">
-            <span className="text-[13px] font-bold text-[#091d3e]">
+            <span className="text-[13px] font-bold text-[#381e0f]">
               {v.driverName || "—"}
             </span>
             {v.driverPhone ? (
@@ -455,7 +455,7 @@ export function TransportClient() {
         className: "w-[10%] px-2 text-center",
         headerClassName: "w-[10%] px-2 text-center whitespace-nowrap",
         cell: (v) => (
-          <span className="font-mono text-sm font-extrabold tabular-nums text-[#091d3e]">
+          <span className="font-mono text-sm font-extrabold tabular-nums text-[#381e0f]">
             {formatNumber(v.capacity)}
           </span>
         ),
@@ -469,7 +469,7 @@ export function TransportClient() {
         cell: (v) =>
           v.routeName ? (
             <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200/90 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
-              <Navigation className="size-3 shrink-0 text-[#091d3e]" />
+              <Navigation className="size-3 shrink-0 text-[#381e0f]" />
               <span className="truncate">{v.routeName}</span>
             </span>
           ) : (
@@ -570,7 +570,7 @@ export function TransportClient() {
         headerClassName: "w-[18%] px-3 text-center whitespace-nowrap",
         cell: (a) => (
           <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200/90 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
-            <Navigation className="size-3 shrink-0 text-[#091d3e]" />
+            <Navigation className="size-3 shrink-0 text-[#381e0f]" />
             <span className="truncate">{a.routeName}</span>
           </span>
         ),
@@ -602,7 +602,7 @@ export function TransportClient() {
                 {busModel}
               </span>
               {plate && (
-                <span className="inline-flex items-center gap-1 font-mono text-[10.5px] font-bold text-[#091d3e]">
+                <span className="inline-flex items-center gap-1 font-mono text-[10.5px] font-bold text-[#381e0f]">
                   <Bus className="size-3 text-slate-400" />
                   {plate}
                 </span>
@@ -634,7 +634,7 @@ export function TransportClient() {
 
           return (
             <div className="flex flex-col items-center justify-center gap-0.5 text-center">
-              <span className="text-[12.5px] font-bold text-[#091d3e]">
+              <span className="text-[12.5px] font-bold text-[#381e0f]">
                 {driver}
               </span>
               {phone && (
@@ -666,7 +666,7 @@ export function TransportClient() {
         className: "w-[9%] px-2 text-center",
         headerClassName: "w-[9%] px-2 text-center whitespace-nowrap",
         cell: (a) => (
-          <span className="font-mono text-sm font-extrabold tabular-nums text-[#091d3e]">
+          <span className="font-mono text-sm font-extrabold tabular-nums text-[#381e0f]">
             Rs {formatNumber(a.monthlyFare)}
           </span>
         ),
@@ -831,11 +831,11 @@ export function TransportClient() {
             className="group inline-flex h-9 items-center gap-2.5 rounded-lg border border-slate-200/90 bg-white hover:bg-slate-50 px-3.5 text-xs font-semibold text-foreground shadow-2xs hover:border-slate-300 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer select-none"
           >
             {activeTab === "routes" ? (
-              <Navigation className="size-4 text-[#091d3e]" />
+              <Navigation className="size-4 text-[#381e0f]" />
             ) : activeTab === "vehicles" ? (
-              <Bus className="size-4 text-[#091d3e]" />
+              <Bus className="size-4 text-[#381e0f]" />
             ) : (
-              <GraduationCap className="size-4 text-[#091d3e]" />
+              <GraduationCap className="size-4 text-[#381e0f]" />
             )}
             <span>
               {activeTab === "routes"

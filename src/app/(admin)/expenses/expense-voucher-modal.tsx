@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -423,7 +423,7 @@ export function ExpenseVoucherModal({
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <StatusBadge status={voucher.status} />
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-md border border-brand/20 bg-brand-50/70 px-2.5 py-0.5 text-[11px] font-bold text-[#091d3e] shadow-2xs"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-brand/20 bg-brand-50/70 px-2.5 py-0.5 text-[11px] font-bold text-[#381e0f] shadow-2xs"
                     title={`Expense Category: ${voucher.category}`}
                   >
                     <Tag className="size-3 text-brand" />
@@ -447,7 +447,7 @@ export function ExpenseVoucherModal({
               <button
                 type="button"
                 onClick={() => handleCopy(voucher.invoiceNo, "Invoice Number")}
-                className="group mt-0.5 inline-flex items-center gap-1.5 font-mono text-[13px] font-bold text-[#091d3e] hover:text-brand transition-colors cursor-pointer"
+                className="group mt-0.5 inline-flex items-center gap-1.5 font-mono text-[13px] font-bold text-[#381e0f] hover:text-brand transition-colors cursor-pointer"
                 title="Click to copy invoice number"
               >
                 <span>{voucher.invoiceNo}</span>
@@ -502,7 +502,7 @@ export function ExpenseVoucherModal({
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
                 activeTab === "overview"
-                  ? "bg-white text-[#091d3e] shadow-2xs"
+                  ? "bg-white text-[#381e0f] shadow-2xs"
                   : "text-muted-foreground hover:text-foreground hover:bg-white/40"
               )}
             >
@@ -528,7 +528,7 @@ export function ExpenseVoucherModal({
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer",
                 activeTab === "audit"
-                  ? "bg-white text-[#091d3e] shadow-2xs"
+                  ? "bg-white text-[#381e0f] shadow-2xs"
                   : "text-muted-foreground hover:text-foreground hover:bg-white/40"
               )}
             >
@@ -538,7 +538,7 @@ export function ExpenseVoucherModal({
                 className={cn(
                   "rounded-full px-1.5 py-0.2 font-mono text-[10px] font-bold",
                   activeTab === "audit"
-                    ? "bg-[#091d3e] text-white"
+                    ? "bg-[#381e0f] text-white"
                     : "bg-slate-300/80 text-slate-700"
                 )}
               >
@@ -605,7 +605,7 @@ export function ExpenseVoucherModal({
                     <Building2 className="size-3.5 text-brand" />
                     Originating Department
                   </span>
-                  <p className="mt-1.5 font-bold text-[#091d3e] text-[13px] leading-snug">
+                  <p className="mt-1.5 font-bold text-[#381e0f] text-[13px] leading-snug">
                     {voucher.department}
                   </p>
                 </div>
@@ -631,7 +631,7 @@ export function ExpenseVoucherModal({
 
               {/* Narration Box */}
               <div className="rounded-xl border border-slate-200/90 bg-slate-50/60 p-4">
-                <div className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-wider text-[#091d3e]">
+                <div className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-wider text-[#381e0f]">
                   <FileText className="size-3.5 text-brand" />
                   <span>Expense Purpose &amp; Scope Narration</span>
                 </div>
@@ -647,7 +647,7 @@ export function ExpenseVoucherModal({
                 <div className="flex items-center justify-between border-b border-border/60 bg-gradient-to-r from-slate-50 via-slate-50/80 to-white px-4 py-3">
                   <div className="flex items-center gap-2">
                     <FileSpreadsheet className="size-4 text-brand" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                       Procurement Line Items &amp; Itemized Breakdown
                     </span>
                   </div>
@@ -659,7 +659,7 @@ export function ExpenseVoucherModal({
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="border-b border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-[10.5px] font-bold uppercase tracking-wider text-white">
+                      <tr className="border-b border-[#381e0f] bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] text-[10.5px] font-bold uppercase tracking-wider text-white">
                         <th className="px-3.5 py-2.5 text-center w-12">#</th>
                         <th className="px-3.5 py-2.5 text-left">Item Description &amp; Technical Specifications</th>
                         <th className="px-3.5 py-2.5 text-center w-28">Quantity</th>
@@ -683,7 +683,7 @@ export function ExpenseVoucherModal({
                           <td className="px-3.5 py-2.5 text-right font-mono tabular-nums text-slate-700">
                             {formatCurrency(item.unitPrice)}
                           </td>
-                          <td className="px-3.5 py-2.5 text-right font-mono font-bold tabular-nums text-[#091d3e]">
+                          <td className="px-3.5 py-2.5 text-right font-mono font-bold tabular-nums text-[#381e0f]">
                             {formatCurrency(item.totalPrice)}
                           </td>
                         </tr>
@@ -731,7 +731,7 @@ export function ExpenseVoucherModal({
                 {/* Left: Financial & Tax Breakdown */}
                 <div className="flex flex-col justify-between overflow-hidden rounded-xl border border-border/80 bg-white shadow-2xs">
                   <div className="flex items-center justify-between border-b border-border/60 bg-slate-50/80 px-4 py-3 gap-2">
-                    <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+                    <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                       <Receipt className="size-3.5 text-brand shrink-0" />
                       <span>Taxation &amp; Net Calculation</span>
                     </span>
@@ -792,7 +792,7 @@ export function ExpenseVoucherModal({
                 {/* Right: Vendor & Governance Details */}
                 <div className="flex flex-col justify-between overflow-hidden rounded-xl border border-border/80 bg-white shadow-2xs">
                   <div className="flex items-center justify-between border-b border-border/60 bg-slate-50/80 px-4 py-3 gap-2">
-                    <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+                    <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                       <Building2 className="size-3.5 text-brand shrink-0" />
                       <span>Vendor &amp; Governance</span>
                     </span>
@@ -826,7 +826,7 @@ export function ExpenseVoucherModal({
                             "Vendor Account Number"
                           )
                         }
-                        className="inline-flex items-center gap-1.5 font-mono font-bold text-[#091d3e] hover:text-brand cursor-pointer rounded px-1.5 py-0.5 hover:bg-slate-100 transition-colors"
+                        className="inline-flex items-center gap-1.5 font-mono font-bold text-[#381e0f] hover:text-brand cursor-pointer rounded px-1.5 py-0.5 hover:bg-slate-100 transition-colors"
                         title="Click to copy account number"
                       >
                         <span>{voucher.vendorAccountNo}</span>
@@ -846,7 +846,7 @@ export function ExpenseVoucherModal({
                       <span className="text-muted-foreground font-medium">
                         Authorized By
                       </span>
-                      <span className="inline-flex items-center gap-1 font-semibold text-[#091d3e]">
+                      <span className="inline-flex items-center gap-1 font-semibold text-[#381e0f]">
                         <ShieldCheck className="size-3.5 text-emerald-600" />
                         <span>{voucher.approvedBy}</span>
                       </span>
@@ -872,7 +872,7 @@ export function ExpenseVoucherModal({
                   <div className="flex items-center gap-2">
                     <PieChart className="size-4 text-brand" />
                     <div>
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#091d3e]">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-[#381e0f]">
                         Budget Allocation &amp; Cost Center Health
                       </h4>
                       <p className="text-[11px] text-muted-foreground">
@@ -938,7 +938,7 @@ export function ExpenseVoucherModal({
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/70 pb-2.5">
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="size-4 text-emerald-600" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                       Taxation Compliance &amp; Federal Treasury Audit
                     </span>
                   </div>
@@ -992,7 +992,7 @@ export function ExpenseVoucherModal({
                 <div className="flex items-center justify-between border-b border-slate-200/70 pb-2.5">
                   <div className="flex items-center gap-2">
                     <FileCheck2 className="size-4 text-brand" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                       Verified Audit Attachments &amp; Scanned Documents
                     </span>
                   </div>
@@ -1057,7 +1057,7 @@ export function ExpenseVoucherModal({
               <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-2xs">
                 <div className="flex items-center gap-2 mb-3">
                   <CheckCircle2 className="size-4 text-emerald-600" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                     Executive Approval Hierarchy &amp; Audit Status
                   </span>
                 </div>
@@ -1125,7 +1125,7 @@ export function ExpenseVoucherModal({
               <div className="rounded-xl border border-brand/20 bg-brand-50/30 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#091d3e]">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#381e0f]">
                       Voucher Approval &amp; Disbursal Control
                     </h4>
                     <p className="mt-0.5 text-[11px] text-muted-foreground">
@@ -1197,7 +1197,7 @@ export function ExpenseVoucherModal({
                       required
                       value={paymentRef}
                       onChange={(e) => setPaymentRef(e.target.value)}
-                      className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs font-bold text-[#091d3e] focus:border-brand focus:outline-none"
+                      className="h-9 w-full rounded-[4px] border border-brand/20 bg-white px-3 font-mono text-xs font-bold text-[#381e0f] focus:border-brand focus:outline-none"
                     />
                   </div>
                   <div className="space-y-1.5">

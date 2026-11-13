@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -153,7 +153,7 @@ export function StaffAccountModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col max-h-[calc(100vh-3rem)] sm:max-w-2xl gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
         {/* Clean Executive Header */}
-        <DialogHeader className="shrink-0 gap-1 border-b border-border/70 bg-gradient-to-r from-[#091d3e]/[0.04] via-white to-white px-6 py-4">
+        <DialogHeader className="shrink-0 gap-1 border-b border-border/70 bg-gradient-to-r from-[#381e0f]/[0.04] via-white to-white px-6 py-4">
           <div className="flex items-center justify-between gap-4 pr-8">
             <div className="flex items-center gap-3.5 min-w-0">
               <UserAvatar
@@ -167,7 +167,7 @@ export function StaffAccountModal({
                     {account.name}
                   </DialogTitle>
                   <StatusBadge status={account.credentialStatus} />
-                  <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/70 px-2 py-0.5 font-mono text-[11px] font-bold text-[#091d3e]">
+                  <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/70 px-2 py-0.5 font-mono text-[11px] font-bold text-[#381e0f]">
                     {account.accountNo}
                   </span>
                 </div>
@@ -182,7 +182,7 @@ export function StaffAccountModal({
               <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 Assigned By
               </p>
-              <span className="mt-0.5 inline-flex items-center gap-1.5 rounded-md border border-border/80 bg-slate-50 px-2.5 py-0.5 text-xs font-bold text-[#091d3e] whitespace-nowrap">
+              <span className="mt-0.5 inline-flex items-center gap-1.5 rounded-md border border-border/80 bg-slate-50 px-2.5 py-0.5 text-xs font-bold text-[#381e0f] whitespace-nowrap">
                 <ShieldCheck className="size-3.5 text-brand shrink-0" />
                 <span>{account.assignedByAdmin}</span>
               </span>
@@ -199,7 +199,7 @@ export function StaffAccountModal({
               className={cn(
                 "inline-flex h-8 items-center gap-1.5 rounded-[4px] px-3 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer",
                 activeTab === "overview"
-                  ? "bg-[#091d3e] text-white shadow-2xs"
+                  ? "bg-[#381e0f] text-white shadow-2xs"
                   : "text-muted-foreground hover:bg-white hover:text-foreground"
               )}
             >
@@ -227,7 +227,7 @@ export function StaffAccountModal({
               className={cn(
                 "inline-flex h-8 items-center gap-1.5 rounded-[4px] px-3 text-xs font-semibold whitespace-nowrap transition-all cursor-pointer",
                 activeTab === "logs"
-                  ? "bg-[#091d3e] text-white shadow-2xs"
+                  ? "bg-[#381e0f] text-white shadow-2xs"
                   : "text-muted-foreground hover:bg-white hover:text-foreground"
               )}
             >
@@ -261,7 +261,7 @@ export function StaffAccountModal({
               {/* Primary Login Credentials Box */}
               <div className="overflow-hidden rounded-xl border border-brand/20 bg-white shadow-2xs">
                 <div className="flex items-center justify-between border-b border-border/60 bg-slate-50/90 px-4 py-2.5">
-                  <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+                  <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                     <KeyRound className="size-3.5 text-brand" />
                     <span>Assigned Staff Portal Login Credentials</span>
                   </span>
@@ -273,7 +273,7 @@ export function StaffAccountModal({
                         "Staff Login Credentials"
                       )
                     }
-                    className="inline-flex items-center gap-1.5 rounded-[4px] border border-brand/20 bg-white px-2.5 py-1 text-[11px] font-semibold text-[#091d3e] hover:bg-brand-50 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-[4px] border border-brand/20 bg-white px-2.5 py-1 text-[11px] font-semibold text-[#381e0f] hover:bg-brand-50 cursor-pointer"
                   >
                     <Copy className="size-3 text-brand" />
                     <span>Copy Both</span>
@@ -297,7 +297,7 @@ export function StaffAccountModal({
                         <span>Copy</span>
                       </button>
                     </div>
-                    <p className="mt-2 font-mono text-[13px] font-bold text-[#091d3e] break-all">
+                    <p className="mt-2 font-mono text-[13px] font-bold text-[#381e0f] break-all">
                       {account.staffEmail}
                     </p>
                   </div>
@@ -342,7 +342,7 @@ export function StaffAccountModal({
               {/* Structured Staff Account & Login Information */}
               <div className="overflow-hidden rounded-xl border border-border/80 bg-white shadow-2xs">
                 <div className="border-b border-border/60 bg-slate-50/80 px-4 py-2.5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                     Staff Account &amp; Login Information
                   </span>
                 </div>
@@ -351,7 +351,7 @@ export function StaffAccountModal({
                   <div className="divide-y divide-border/60">
                     <div className="flex items-center justify-between px-4 py-2.5">
                       <span className="text-muted-foreground">Account #</span>
-                      <span className="font-mono font-bold text-[#091d3e]">
+                      <span className="font-mono font-bold text-[#381e0f]">
                         {account.accountNo}
                       </span>
                     </div>
@@ -390,7 +390,7 @@ export function StaffAccountModal({
                     </div>
                     <div className="flex items-center justify-between px-4 py-2.5">
                       <span className="text-muted-foreground">Portal Role</span>
-                      <span className="font-semibold text-[#091d3e]">
+                      <span className="font-semibold text-[#381e0f]">
                         {account.portalRole}
                       </span>
                     </div>
@@ -402,7 +402,7 @@ export function StaffAccountModal({
                     </div>
                     <div className="flex items-center justify-between px-4 py-2.5">
                       <span className="text-muted-foreground">Last Login</span>
-                      <span className="font-mono font-semibold text-[#091d3e]">
+                      <span className="font-mono font-semibold text-[#381e0f]">
                         {account.lastLogin}
                       </span>
                     </div>
@@ -415,7 +415,7 @@ export function StaffAccountModal({
           {activeTab === "reset" && (
             <form onSubmit={handleSaveCredentials} className="space-y-4">
               <div className="rounded-xl border border-brand/20 bg-slate-50/70 p-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#091d3e]">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[#381e0f]">
                   Assign / Reset Staff Portal Credentials ({account.name})
                 </h4>
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -563,7 +563,7 @@ export function StaffAccountModal({
                       <td className="px-3.5 py-2.5 font-mono text-[11px] text-foreground whitespace-nowrap">
                         {log.timestamp}
                       </td>
-                      <td className="px-3.5 py-2.5 text-center font-semibold text-[#091d3e] whitespace-nowrap">
+                      <td className="px-3.5 py-2.5 text-center font-semibold text-[#381e0f] whitespace-nowrap">
                         {log.actor}
                       </td>
                       <td className="px-3.5 py-2.5 text-foreground">

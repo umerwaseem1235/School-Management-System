@@ -141,7 +141,7 @@ export function Topbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/10 bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] px-4 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_20px_-2px_rgba(9,29,62,0.45)] sm:px-6">
+      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-white/15 bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] px-4 backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_4px_20px_-2px_rgba(56,30,15,0.35)] sm:px-6">
         {/* Left Section: Mobile Drawer Toggle & Breadcrumbs */}
         <div className="flex min-w-0 items-center gap-3" suppressHydrationWarning>
           <button
@@ -149,9 +149,9 @@ export function Topbar() {
             aria-label="Open navigation menu"
             suppressHydrationWarning
             onClick={() => setMobileOpen(true)}
-            className="grid size-8.5 shrink-0 place-items-center rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 lg:hidden"
+            className="grid size-8.5 shrink-0 place-items-center rounded-[4px] border border-[#c28b38]/40 bg-gradient-to-b from-[#7c4424]/80 via-[#5c3118]/90 to-[#381e0f] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(56,30,15,0.3)] transition-all duration-150 hover:from-[#a05a2c]/90 hover:to-[#5c3118] hover:border-[#ebdcc6]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 lg:hidden"
           >
-            <Menu className="size-4 text-[#93c5fd] transition-colors hover:text-white" />
+            <Menu className="size-4 text-[#f5ebd7] transition-colors hover:text-white" />
           </button>
 
           <Breadcrumbs />
@@ -163,9 +163,9 @@ export function Topbar() {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Select Campus"
-              className="group hidden md:flex h-8.5 items-center gap-2 rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] px-3 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(9,29,62,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 data-[state=open]:border-[#6aa4f0] data-[state=open]:from-[#275797] data-[state=open]:to-[#14335c]"
+              className="group hidden md:flex h-8.5 items-center gap-2 rounded-[4px] border border-[#c28b38]/40 bg-gradient-to-b from-[#7c4424]/80 via-[#5c3118]/90 to-[#381e0f] px-3 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(56,30,15,0.3)] transition-all duration-150 hover:from-[#a05a2c]/90 hover:to-[#5c3118] hover:border-[#ebdcc6]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_12px_rgba(56,30,15,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 data-[state=open]:border-[#ebdcc6] data-[state=open]:from-[#c28b38] data-[state=open]:to-[#5c3118]"
             >
-              <Building2 className="size-3.5 text-[#93c5fd] transition-colors group-hover:text-white" />
+              <Building2 className="size-3.5 text-[#f5ebd7] transition-colors group-hover:text-white" />
               <span className="max-w-[140px] truncate text-white">
                 {activeCampusObj ? activeCampusObj.campusName.split("—")[0].trim() : "All Campuses"}
               </span>
@@ -179,7 +179,7 @@ export function Topbar() {
                   {activeCampusObj.status}
                 </span>
               )}
-              <ChevronDown className="size-3 text-white/70 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
+              <ChevronDown className="size-3 text-white/80 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
@@ -196,8 +196,8 @@ export function Topbar() {
                   className={cn(
                     "flex items-center justify-between rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs font-medium transition-colors",
                     selectedCampus === "all"
-                      ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] focus:bg-[#091d3e] focus:text-white"
-                      : "text-foreground hover:bg-[#eef3fc]"
+                      ? "border border-[#5c3118] bg-gradient-to-b from-[#7c4424] to-[#5c3118] text-white shadow-sm focus:bg-[#5c3118] focus:text-white"
+                      : "text-foreground hover:bg-[#faf6ed]"
                   )}
                 >
                   <span className="truncate">All Campuses</span>
@@ -218,10 +218,10 @@ export function Topbar() {
                         className={cn(
                           "flex items-center justify-between rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs font-medium transition-colors",
                           isSelected
-                            ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] focus:bg-[#091d3e] focus:text-white"
+                            ? "border border-[#5c3118] bg-gradient-to-b from-[#7c4424] to-[#5c3118] text-white shadow-sm focus:bg-[#5c3118] focus:text-white"
                             : isInactive
-                            ? "opacity-75 hover:bg-[#eef3fc]"
-                            : "text-foreground hover:bg-[#eef3fc]"
+                            ? "opacity-75 hover:bg-[#faf6ed]"
+                            : "text-foreground hover:bg-[#faf6ed]"
                         )}
                       >
                         <div className="min-w-0 flex-1">
@@ -264,11 +264,11 @@ export function Topbar() {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Select Academic Year"
-              className="group hidden md:flex h-8.5 items-center gap-2 rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] px-3 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(9,29,62,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 data-[state=open]:border-[#6aa4f0] data-[state=open]:from-[#275797] data-[state=open]:to-[#14335c]"
+              className="group hidden md:flex h-8.5 items-center gap-2 rounded-[4px] border border-[#c28b38]/40 bg-gradient-to-b from-[#7c4424]/80 via-[#5c3118]/90 to-[#381e0f] px-3 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(56,30,15,0.3)] transition-all duration-150 hover:from-[#a05a2c]/90 hover:to-[#5c3118] hover:border-[#ebdcc6]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_12px_rgba(56,30,15,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 data-[state=open]:border-[#ebdcc6] data-[state=open]:from-[#c28b38] data-[state=open]:to-[#5c3118]"
             >
-              <CalendarRange className="size-3.5 text-[#93c5fd] transition-colors group-hover:text-white" />
+              <CalendarRange className="size-3.5 text-[#f5ebd7] transition-colors group-hover:text-white" />
               <span className="text-white">{activeYearObj.label}</span>
-              <ChevronDown className="size-3 text-white/70 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
+              <ChevronDown className="size-3 text-white/80 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
@@ -294,8 +294,8 @@ export function Topbar() {
                       className={cn(
                         "flex items-center justify-between rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs font-medium transition-colors",
                         isSelected
-                          ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)] focus:bg-[#091d3e] focus:text-white"
-                          : "text-foreground hover:bg-[#eef3fc]"
+                          ? "border border-[#5c3118] bg-gradient-to-b from-[#7c4424] to-[#5c3118] text-white shadow-sm focus:bg-[#5c3118] focus:text-white"
+                          : "text-foreground hover:bg-[#faf6ed]"
                       )}
                     >
                       <div className="flex items-center gap-2">
@@ -306,7 +306,7 @@ export function Topbar() {
                               "rounded-[3px] px-1.5 py-0.5 text-[9.5px] font-semibold tracking-tight",
                               isSelected
                                 ? "bg-white/20 text-white"
-                                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : "bg-purple-50 text-purple-700 border border-purple-200"
                             )}
                           >
                             Current
@@ -343,7 +343,7 @@ export function Topbar() {
           <QuickActions />
 
           {/* Divider */}
-          <div className="hidden sm:block h-4 w-px bg-white/20 mx-0.5" />
+          <div className="hidden sm:block h-4 w-px bg-white/25 mx-0.5" />
 
           {/* Notifications */}
           <NotificationCenter />
@@ -352,15 +352,15 @@ export function Topbar() {
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="User Account"
-              className="group flex h-8.5 items-center gap-2 rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] pl-1.5 pr-2.5 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(9,29,62,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 data-[state=open]:border-[#6aa4f0]"
+              className="group flex h-8.5 items-center gap-2 rounded-[4px] border border-[#c28b38]/40 bg-gradient-to-b from-[#7c4424]/80 via-[#5c3118]/90 to-[#381e0f] pl-1.5 pr-2.5 text-xs font-semibold tracking-[0.01em] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(56,30,15,0.3)] transition-all duration-150 hover:from-[#a05a2c]/90 hover:to-[#5c3118] hover:border-[#ebdcc6]/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_12px_rgba(56,30,15,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 data-[state=open]:border-[#ebdcc6]"
             >
-              <span className="grid size-6 place-items-center rounded-[3px] bg-gradient-to-b from-[#316ec2] to-[#1a447f] text-white font-heading text-[10.5px] font-bold shadow-inner ring-1 ring-white/20">
+              <span className="grid size-6 place-items-center rounded-[3px] bg-gradient-to-b from-[#c28b38] to-[#5c3118] text-white font-heading text-[10.5px] font-bold shadow-inner ring-1 ring-white/30">
                 HT
               </span>
               <div className="hidden text-left leading-tight md:block">
                 <span className="block font-semibold text-white">Hamza Tariq</span>
               </div>
-              <ChevronDown className="size-3 text-white/70 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
+              <ChevronDown className="size-3 text-white/80 transition-transform group-hover:text-white group-data-[popup-open]:rotate-180" />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
@@ -377,7 +377,7 @@ export function Topbar() {
                   hamza.tariq@edusphere.edu.pk
                 </p>
                 <div className="mt-1 flex items-center gap-1.5">
-                  <span className="inline-block size-1.5 rounded-full bg-emerald-500" />
+                  <span className="inline-block size-1.5 rounded-full bg-violet-500" />
                   <span className="text-[10px] font-medium text-muted-foreground">
                     Super Administrator
                   </span>

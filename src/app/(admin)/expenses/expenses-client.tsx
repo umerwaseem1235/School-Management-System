@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -277,7 +277,7 @@ export function ExpensesClient() {
         className: "w-[11%] px-3 text-center",
         headerClassName: "w-[11%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <span className="inline-flex items-center justify-center whitespace-nowrap rounded-md border border-brand/20 bg-brand-50/70 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e] shadow-2xs">
+          <span className="inline-flex items-center justify-center whitespace-nowrap rounded-md border border-brand/20 bg-brand-50/70 px-2.5 py-1 font-mono text-xs font-bold text-[#381e0f] shadow-2xs">
             {r.voucherNo}
           </span>
         ),
@@ -477,7 +477,7 @@ export function ExpensesClient() {
         header: "Budget Code",
         align: "center",
         cell: (r) => (
-          <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#091d3e]">
+          <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold text-[#381e0f]">
             {r.budgetCode}
           </span>
         ),
@@ -497,7 +497,7 @@ export function ExpensesClient() {
         header: "Monthly Limit",
         align: "center",
         cell: (r) => (
-          <span className="font-mono text-xs font-bold tabular-nums text-[#091d3e]">
+          <span className="font-mono text-xs font-bold tabular-nums text-[#381e0f]">
             {formatCurrency(r.monthlyAllocation)}
           </span>
         ),
@@ -682,13 +682,13 @@ export function ExpensesClient() {
       {/* Expense Register Selector Dropdown (Clean Single-Line Executive Control) */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <DropdownMenu>
-          <DropdownMenuTrigger className="group inline-flex h-9 cursor-pointer items-center gap-2.5 rounded-[4px] border border-brand/20 bg-white px-3 text-xs font-semibold text-[#091d3e] shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-colors hover:border-brand/35 hover:bg-brand-50/40 focus:outline-none focus:ring-2 focus:ring-brand/15">
+          <DropdownMenuTrigger className="group inline-flex h-9 cursor-pointer items-center gap-2.5 rounded-[4px] border border-brand/20 bg-white px-3 text-xs font-semibold text-[#381e0f] shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-colors hover:border-brand/35 hover:bg-brand-50/40 focus:outline-none focus:ring-2 focus:ring-brand/15">
             {activeTab === "vouchers" ? (
               <Receipt className="size-3.5 shrink-0 text-brand" />
             ) : (
               <Layers className="size-3.5 shrink-0 text-brand" />
             )}
-            <span className="font-semibold text-[#091d3e]">
+            <span className="font-semibold text-[#381e0f]">
               {activeTab === "vouchers"
                 ? "Expense Vouchers"
                 : "Category Budgets"}
@@ -729,7 +729,7 @@ export function ExpensesClient() {
                   className={cn(
                     "flex items-center justify-between gap-2 rounded-[4px] px-2.5 py-2 text-xs cursor-pointer transition-colors",
                     isSelected
-                      ? "bg-brand-50/80 font-semibold text-[#091d3e] focus:bg-brand-50"
+                      ? "bg-brand-50/80 font-semibold text-[#381e0f] focus:bg-brand-50"
                       : "font-medium text-foreground/85 hover:bg-slate-50 focus:bg-slate-100/80"
                   )}
                 >
@@ -737,7 +737,7 @@ export function ExpensesClient() {
                     <Icon
                       className={cn(
                         "size-3.5 shrink-0",
-                        isSelected ? "text-[#091d3e]" : "text-muted-foreground"
+                        isSelected ? "text-[#381e0f]" : "text-muted-foreground"
                       )}
                     />
                     <span className="whitespace-nowrap">{item.label}</span>
@@ -747,7 +747,7 @@ export function ExpensesClient() {
                       className={cn(
                         "min-w-[26px] rounded-[3px] px-1.5 py-0.5 text-center font-mono text-[10.5px] font-bold tabular-nums",
                         isSelected
-                          ? "bg-[#091d3e] text-white"
+                          ? "bg-[#381e0f] text-white"
                           : "bg-slate-100 text-muted-foreground"
                       )}
                     >
@@ -755,7 +755,7 @@ export function ExpensesClient() {
                     </span>
                     <span className="grid size-3.5 shrink-0 place-items-center">
                       {isSelected && (
-                        <Check className="size-3.5 text-[#091d3e] stroke-[2.5]" />
+                        <Check className="size-3.5 text-[#381e0f] stroke-[2.5]" />
                       )}
                     </span>
                   </div>
@@ -782,7 +782,7 @@ export function ExpensesClient() {
             data={vouchers}
             columns={voucherColumns}
             tableClassName="min-w-[1150px] table-fixed"
-            theadRowClassName="border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm"
+            theadRowClassName="border-y border-[#381e0f] bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] text-white shadow-sm"
             getRowId={(r) => r.id}
             hideSortArrows
             filters={voucherFilters}
@@ -806,7 +806,7 @@ export function ExpensesClient() {
             data={budgets}
             columns={budgetColumns}
             tableClassName="min-w-[1050px] table-fixed"
-            theadRowClassName="border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm"
+            theadRowClassName="border-y border-[#381e0f] bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] text-white shadow-sm"
             getRowId={(r) => r.id}
             hideSortArrows
             searchPlaceholder="Search budget code, expense category, department or custodian…"

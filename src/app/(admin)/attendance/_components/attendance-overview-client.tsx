@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -155,9 +155,9 @@ function deriveDonut(campusId: string) {
   if (campusId === ALL_CAMPUSES_VALUE) return TODAY_DISTRIBUTION_DONUT;
   const kpi = deriveStudentKPIs(campusId);
   return [
-    { name: "Present", value: kpi.present, color: "#1e4275" },
-    { name: "Late", value: kpi.late, color: "#0ea5e9" },
-    { name: "Absent", value: kpi.absent, color: "#93c5fd" },
+    { name: "Present", value: kpi.present, color: "#127c52" },
+    { name: "Late", value: kpi.late, color: "#c7841f" },
+    { name: "Absent", value: kpi.absent, color: "#c8463d" },
   ];
 }
 
@@ -243,7 +243,7 @@ function CampusSelector({
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-[4px] px-3 py-2 text-xs font-semibold transition-colors",
                 value === ALL_CAMPUSES_VALUE
-                  ? "bg-gradient-to-r from-[#091d3e] to-[#1e4275] text-white"
+                  ? "bg-gradient-to-r from-[#381e0f] to-[#6e3b1f] text-white"
                   : "text-foreground hover:bg-brand-50/70"
               )}
             >
@@ -276,7 +276,7 @@ function CampusSelector({
                   className={cn(
                     "flex w-full items-center gap-2.5 rounded-[4px] px-3 py-2.5 text-xs font-semibold transition-colors",
                     isActive
-                      ? "bg-gradient-to-r from-[#091d3e] to-[#1e4275] text-white"
+                      ? "bg-gradient-to-r from-[#381e0f] to-[#6e3b1f] text-white"
                       : "text-foreground hover:bg-brand-50/70"
                   )}
                 >
@@ -447,7 +447,7 @@ export function AttendanceOverviewClient() {
       {/* ── Page-level filter bar ───────────────────────────────────────── */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand/10 bg-white/80 px-4 py-3 shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_1px_3px_rgb(9_29_62/0.06)] backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#091d3e] to-[#1e4275] shadow-[0_4px_10px_-3px_rgb(9_29_62/0.45)]">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#381e0f] to-[#6e3b1f] shadow-[0_4px_10px_-3px_rgb(9_29_62/0.45)]">
             <Building2 className="size-4 text-white" />
           </div>
           <div>
@@ -598,7 +598,7 @@ export function AttendanceOverviewClient() {
             xKey="day"
             series={[
               { key: "staff", label: "Staff", color: "#0ea5e9" },
-              { key: "students", label: "Students", color: "#1e4275" },
+              { key: "students", label: "Students", color: "#6e3b1f" },
             ]}
             format="percent"
             yDomain={[88, 100]}

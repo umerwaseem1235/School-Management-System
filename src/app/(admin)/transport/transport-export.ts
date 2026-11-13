@@ -1,4 +1,4 @@
-import { formatNumber } from "@/lib/format";
+﻿import { formatNumber } from "@/lib/format";
 import { printHtml } from "@/lib/print-html";
 import type {
   TransportAssignmentRecord,
@@ -655,11 +655,11 @@ export function printTransportOverview(
   <title>Transport Register — Opus SMS</title>
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; color: #0f172a; margin: 28px; }
-    h1 { font-size: 18px; margin: 0 0 4px; color: #091d3e; }
-    h2 { font-size: 13px; margin: 22px 0 8px; color: #091d3e; text-transform: uppercase; letter-spacing: 0.05em; }
+    h1 { font-size: 18px; margin: 0 0 4px; color: #381e0f; }
+    h2 { font-size: 13px; margin: 22px 0 8px; color: #381e0f; text-transform: uppercase; letter-spacing: 0.05em; }
     p { font-size: 12px; color: #64748b; margin: 0 0 16px; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 14px; }
-    th { background: #091d3e; color: #fff; padding: 8px 10px; text-align: left; font-size: 11px; text-transform: uppercase; }
+    th { background: #381e0f; color: #fff; padding: 8px 10px; text-align: left; font-size: 11px; text-transform: uppercase; }
     td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
     tr:nth-child(even) { background: #f8fafc; }
   </style>

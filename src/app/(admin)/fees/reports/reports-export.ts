@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   CampusRealizationSummary,
   FeeDefaulterRecord,
   StudentFeeReportRecord,
@@ -1503,7 +1503,7 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      background: #091d3e;
+      background: #381e0f;
       color: #ffffff;
       border-radius: 6px;
       padding: 14px 18px;
@@ -1551,12 +1551,12 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
       justify-content: space-between;
       align-items: center;
       background: #f1f5f9;
-      border-left: 4px solid #091d3e;
+      border-left: 4px solid #381e0f;
       padding: 6px 10px;
       margin-bottom: 6px;
       font-size: 10.5px;
       font-weight: 800;
-      color: #091d3e;
+      color: #381e0f;
       text-transform: uppercase;
       letter-spacing: 0.02em;
     }
@@ -1585,8 +1585,8 @@ export function printFeeReportsReport(options: ReportExportOptions): boolean {
     tr.even { background-color: #f8fafc; }
     tr.summary-total-row td {
       background: #e2e8f0;
-      border-top: 2px solid #091d3e;
-      border-bottom: 2px solid #091d3e;
+      border-top: 2px solid #381e0f;
+      border-bottom: 2px solid #381e0f;
       font-weight: 800;
       padding: 7px;
     }
@@ -1799,7 +1799,7 @@ export function printSingleStudentFeeStatement(
       padding: 4px;
     }
     .banner {
-      background: #091d3e;
+      background: #381e0f;
       color: #ffffff;
       padding: 13px 16px;
       border-radius: 6px;
@@ -1837,19 +1837,19 @@ export function printSingleStudentFeeStatement(
       background: #ffffff;
     }
     .kpi-box-label { font-size: 8px; text-transform: uppercase; color: #64748b; font-weight: 700; }
-    .kpi-box-val { font-size: 11.5px; font-weight: 800; color: #091d3e; margin-top: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .kpi-box-val { font-size: 11.5px; font-weight: 800; color: #381e0f; margin-top: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     .section-title {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #f1f5f9;
-      border-left: 3.5px solid #091d3e;
+      border-left: 3.5px solid #381e0f;
       padding: 5px 10px;
       margin: 10px 0 5px 0;
       font-size: 9.5px;
       font-weight: 800;
       text-transform: uppercase;
-      color: #091d3e;
+      color: #381e0f;
       letter-spacing: 0.02em;
     }
     table {
@@ -2445,7 +2445,7 @@ export function printSingleStaffSalaryStatement(
       padding: 4px;
     }
     .banner {
-      background: #091d3e;
+      background: #381e0f;
       color: #ffffff;
       padding: 13px 16px;
       border-radius: 6px;
@@ -2483,19 +2483,19 @@ export function printSingleStaffSalaryStatement(
       background: #ffffff;
     }
     .kpi-box-label { font-size: 8px; text-transform: uppercase; color: #64748b; font-weight: 700; }
-    .kpi-box-val { font-size: 11.5px; font-weight: 800; color: #091d3e; margin-top: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .kpi-box-val { font-size: 11.5px; font-weight: 800; color: #381e0f; margin-top: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
     .section-title {
       display: flex;
       justify-content: space-between;
       align-items: center;
       background: #f1f5f9;
-      border-left: 3.5px solid #091d3e;
+      border-left: 3.5px solid #381e0f;
       padding: 5px 10px;
       margin: 10px 0 5px 0;
       font-size: 9.5px;
       font-weight: 800;
       text-transform: uppercase;
-      color: #091d3e;
+      color: #381e0f;
       letter-spacing: 0.02em;
     }
     table {

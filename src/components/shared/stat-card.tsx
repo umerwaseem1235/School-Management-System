@@ -36,16 +36,16 @@ export function StatCard({
 
   const cardContent = (
     <>
-      {/* Ambient sapphire glow bloom */}
+      {/* Ambient emerald glow bloom */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_55%_at_50%_0%,rgba(30,66,117,0.14),transparent_75%)] opacity-60 transition-all duration-500 ease-out group-hover:scale-105 group-hover:opacity-100 dark:opacity-30"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_55%_at_50%_0%,rgba(124,68,36,0.18),transparent_75%)] opacity-60 transition-all duration-500 ease-out group-hover:scale-105 group-hover:opacity-100 dark:opacity-30"
       />
 
       {/* Dynamic expanding top jewel light-beam */}
       <span
         aria-hidden
-        className="absolute inset-x-12 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#1e4275] to-transparent opacity-80 transition-all duration-500 ease-out group-hover:inset-x-4 group-hover:h-[2.5px] group-hover:via-[#3f6396] group-hover:shadow-[0_0_12px_rgba(30,66,117,0.7)]"
+        className="absolute inset-x-12 top-0 h-[2px] rounded-full bg-gradient-to-r from-transparent via-[#7c4424] to-transparent opacity-80 transition-all duration-500 ease-out group-hover:inset-x-4 group-hover:h-[2.5px] group-hover:via-[#c28b38] group-hover:shadow-[0_0_12px_rgba(194,139,56,0.8)]"
       />
 
       {/* Premium diagonal glass shimmer pass */}
@@ -58,11 +58,11 @@ export function StatCard({
       <span
         className={cn(
           "relative grid size-9 shrink-0 place-items-center rounded-lg",
-          "bg-gradient-to-b from-[#1e4275] via-[#12294d] to-[#091d3e] text-white",
-          "shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_10px_-2px_rgba(9,29,62,0.35)]",
-          "ring-1 ring-white/10 border border-[#091d3e]/20",
+          "bg-gradient-to-b from-[#7c4424] via-[#5c3118] to-[#381e0f] text-white",
+          "shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_4px_10px_-2px_rgba(56,30,15,0.35)]",
+          "ring-1 ring-white/10 border border-[#381e0f]/20",
           "transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          "group-hover:-translate-y-0.5 group-hover:scale-110 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.38),0_8px_18px_-2px_rgba(9,29,62,0.5)]",
+          "group-hover:-translate-y-0.5 group-hover:scale-110 group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.38),0_8px_18px_-2px_rgba(56,30,15,0.5)]",
           iconClassName
         )}
       >
@@ -74,7 +74,7 @@ export function StatCard({
       </p>
 
       <p
-        className="relative mt-1 w-full truncate font-heading text-base font-bold leading-none tracking-tight tabular-nums text-foreground transition-colors duration-200 group-hover:text-brand"
+        className="relative mt-1 w-full truncate font-heading text-base font-bold leading-none tracking-tight tabular-nums text-foreground transition-colors duration-200 group-hover:text-[#6e3b1f]"
         title={title ?? (typeof value === "string" ? value : undefined)}
       >
         {value}

@@ -298,7 +298,7 @@ function InstallmentPlanForm({
             <Layers className="size-4" />
           </span>
           <span>Create Fee Installment Plan</span>
-          <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/60 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+          <span className="inline-flex items-center rounded-md border border-brand/15 bg-brand-50/60 px-2 py-0.5 font-mono text-xs font-bold text-[#381e0f]">
             {challan.challanNumber}
           </span>
         </DialogTitle>
@@ -424,7 +424,7 @@ function InstallmentPlanForm({
                       <td className="px-2 py-2">
                         <span
                           title={item.challanNumber}
-                          className="inline-block max-w-full truncate rounded border border-brand/15 bg-brand-50/60 px-1.5 py-0.5 font-mono text-[11px] font-bold text-[#091d3e] align-middle"
+                          className="inline-block max-w-full truncate rounded border border-brand/15 bg-brand-50/60 px-1.5 py-0.5 font-mono text-[11px] font-bold text-[#381e0f] align-middle"
                         >
                           {item.challanNumber}
                         </span>

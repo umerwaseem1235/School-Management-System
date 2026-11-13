@@ -151,7 +151,7 @@ interface DataTableProps<T> {
 export const ALL = "__all__";
 
 export const DEFAULT_THEAD_ROW_CLASSNAME =
-  "border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm";
+  "border-y border-[#381e0f] bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] text-white shadow-sm";
 
 /**
  * Generic, typed client-side data table.
@@ -421,7 +421,7 @@ export function DataTable<T>({
                     aria-label="Select all rows on page"
                     className={
                       theadRowClassName
-                        ? "border-white/60 data-[state=checked]:bg-white data-[state=checked]:text-[#091d3e]"
+                        ? "border-white/60 data-[state=checked]:bg-white data-[state=checked]:text-[#6e3b1f]"
                         : undefined
                     }
                   />
@@ -455,7 +455,7 @@ export function DataTable<T>({
                         : "relative whitespace-nowrap px-5 py-3.5 align-middle select-none not-last:after:pointer-events-none not-last:after:absolute not-last:after:right-0 not-last:after:top-1/2 not-last:after:h-4 not-last:after:w-px not-last:after:-translate-y-1/2 not-last:after:bg-[#d8e2f0]",
                       isCenter ? "text-center" : isRight ? "text-right" : "text-left",
                       active &&
-                        "bg-[#e8f0fe]/45 before:pointer-events-none before:absolute before:inset-x-3 before:bottom-0 before:h-[2px] before:rounded-full before:bg-[#1d4ed8]",
+                        "bg-[#faf6ed]/45 before:pointer-events-none before:absolute before:inset-x-3 before:bottom-0 before:h-[2px] before:rounded-full before:bg-[#7c4424]",
                       col.headerClassName
                     )}
                   >
@@ -471,8 +471,8 @@ export function DataTable<T>({
                             ? "w-full justify-end text-right"
                             : "text-left",
                           active
-                            ? (theadRowClassName ? "text-white font-extrabold" : "text-[#091d3e]")
-                            : (theadRowClassName ? "text-white/90 hover:text-white" : "text-[#1e293b] hover:text-[#091d3e]")
+                            ? (theadRowClassName ? "text-white font-extrabold" : "text-[#6e3b1f]")
+                            : (theadRowClassName ? "text-white/90 hover:text-white" : "text-[#28160c] hover:text-[#6e3b1f]")
                         )}
                       >
                         <span className="text-[12.5px] font-bold tracking-[-0.01em]">
@@ -482,7 +482,7 @@ export function DataTable<T>({
                           <span
                             className={cn(
                               "grid size-4 shrink-0 place-items-center rounded transition-all duration-150",
-                              theadRowClassName ? "text-white" : "text-[#1d4ed8]"
+                              theadRowClassName ? "text-white" : "text-[#7c4424]"
                             )}
                           >
                             {sort?.dir === "asc" ? (
@@ -679,8 +679,8 @@ function PagerButton({
       className={cn(
         "inline-flex size-8 items-center justify-center rounded-[4px] border text-xs font-semibold tabular-nums transition-all select-none cursor-pointer",
         active
-          ? "border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_2px_4px_rgb(9_29_62/0.25)]"
-          : "border-brand/18 bg-white text-foreground/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] hover:border-brand/35 hover:bg-brand-50/50 hover:text-brand",
+          ? "border-[#381e0f] bg-gradient-to-b from-[#7c4424] to-[#5c3118] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.25),0_2px_4px_rgb(56_30_15/0.3)]"
+          : "border-brand/18 bg-white text-foreground/80 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(56_30_15/0.05)] hover:border-brand/35 hover:bg-brand-50/50 hover:text-brand",
         disabled &&
           "pointer-events-none cursor-not-allowed border-border/50 bg-muted/30 text-muted-foreground/35 shadow-none opacity-60"
       )}

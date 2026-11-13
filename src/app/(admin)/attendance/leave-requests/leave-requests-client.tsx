@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { toast } from "sonner";
@@ -341,7 +341,7 @@ export function LeaveRequestsClient() {
         header: "Quota Left",
         align: "center",
         cell: (r) => (
-          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#381e0f]">
             {r.leaveBalanceRemaining}/{r.leaveBalanceTotal}d
           </span>
         ),

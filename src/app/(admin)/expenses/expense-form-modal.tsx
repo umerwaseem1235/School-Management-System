@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { Check, CreditCard, ShieldCheck } from "lucide-react";
@@ -218,7 +218,7 @@ export function ExpenseFormModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col max-h-[calc(100vh-3rem)] sm:max-w-2xl gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
-        <DialogHeader className="shrink-0 bg-gradient-to-r from-[#091d3e]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
+        <DialogHeader className="shrink-0 bg-gradient-to-r from-[#381e0f]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
           <div className="flex items-center gap-3">
             <div>
               <DialogTitle className="text-base font-bold text-foreground">
@@ -239,7 +239,7 @@ export function ExpenseFormModal({
         >
           {/* Section 1: Expense Head & Scope */}
           <div className="rounded-xl border border-border/80 bg-slate-50/50 p-4 space-y-3">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
               1. Expense Classification &amp; Campus
             </h4>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -337,7 +337,7 @@ export function ExpenseFormModal({
 
           {/* Section 2: Vendor & Banking */}
           <div className="rounded-xl border border-border/80 bg-slate-50/50 p-4 space-y-3">
-            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
               2. Vendor / Payee &amp; Banking Details
             </h4>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -399,7 +399,7 @@ export function ExpenseFormModal({
           {/* Section 3: Financial & Taxation */}
           <div className="rounded-xl border border-brand/20 bg-brand-50/25 p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e]">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f]">
                 3. Financial &amp; Taxation Breakdown (PKR)
               </h4>
               <span className="font-mono text-xs font-extrabold text-emerald-700">
@@ -581,7 +581,7 @@ export function BudgetViewModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex flex-col sm:max-w-xl gap-0 overflow-hidden p-0 rounded-2xl border border-border/80 shadow-2xl bg-white">
-        <DialogHeader className="bg-gradient-to-r from-[#091d3e]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
+        <DialogHeader className="bg-gradient-to-r from-[#381e0f]/[0.04] via-white to-white px-6 py-4 border-b border-border/70">
           <div className="flex items-center gap-3">
             <div>
               <DialogTitle className="text-base font-bold text-foreground">
@@ -600,7 +600,7 @@ export function BudgetViewModal({
               <span className="text-[10.5px] font-semibold uppercase text-muted-foreground">
                 Monthly Budget
               </span>
-              <p className="mt-0.5 font-mono text-sm font-bold text-[#091d3e]">
+              <p className="mt-0.5 font-mono text-sm font-bold text-[#381e0f]">
                 {formatCurrency(budget.monthlyAllocation)}
               </p>
             </div>

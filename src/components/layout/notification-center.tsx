@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import Link from "next/link";
@@ -105,13 +105,13 @@ export function NotificationCenter({ className }: { className?: string }) {
       <DropdownMenuTrigger
         aria-label="Notifications"
         className={cn(
-          "group relative grid size-8.5 place-items-center rounded-[4px] border border-[#386cb0]/45 bg-gradient-to-b from-[#204980] via-[#183968] to-[#102a50] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_6px_rgba(9,29,62,0.4)] transition-all duration-150 hover:from-[#275797] hover:to-[#14335c] hover:border-[#5087ce]/60 hover:text-white hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.3),0_4px_12px_rgba(9,29,62,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50 data-[state=open]:border-[#6aa4f0]",
+          "group relative grid size-8.5 place-items-center rounded-[4px] border border-[#c28b38]/40 bg-gradient-to-b from-[#7c4424]/80 via-[#5c3118]/90 to-[#381e0f] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_2px_6px_rgba(56,30,15,0.3)] transition-all duration-150 hover:from-[#a05a2c]/90 hover:to-[#5c3118] hover:border-[#ebdcc6]/60 hover:text-white hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_12px_rgba(56,30,15,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 data-[state=open]:border-[#ebdcc6]",
           className
         )}
       >
-        <Bell className="size-4 text-[#93c5fd] transition-colors group-hover:text-white" />
+        <Bell className="size-4 text-[#f5ebd7] transition-colors group-hover:text-white" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-[#102a50]" />
+          <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-danger ring-2 ring-[#381e0f]" />
         )}
       </DropdownMenuTrigger>
 
@@ -149,7 +149,7 @@ export function NotificationCenter({ className }: { className?: string }) {
             className={cn(
               "rounded-[3px] px-2.5 py-0.5 text-xs font-semibold tracking-[0.01em] transition-all",
               tab === "all"
-                ? "border border-[#091d3e] bg-gradient-to-b from-[#16345f] to-[#091d3e] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]"
+                ? "border border-[#381e0f] bg-gradient-to-b from-[#7c4424] to-[#381e0f] text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2)]"
                 : "border border-transparent text-muted-foreground hover:bg-brand-50/60 hover:text-brand"
             )}
           >

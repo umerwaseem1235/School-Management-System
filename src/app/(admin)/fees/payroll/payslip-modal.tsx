@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -108,7 +108,7 @@ export function PayslipModal({
                   <h3 className="truncate text-base font-bold text-foreground">
                     {salary.name}
                   </h3>
-                  <span className="inline-flex items-center rounded-md border border-brand/20 bg-brand-50/70 px-2 py-0.5 font-mono text-xs font-bold text-[#091d3e] shadow-2xs">
+                  <span className="inline-flex items-center rounded-md border border-brand/20 bg-brand-50/70 px-2 py-0.5 font-mono text-xs font-bold text-[#381e0f] shadow-2xs">
                     {salary.empCode}
                   </span>
                 </div>
@@ -154,7 +154,7 @@ export function PayslipModal({
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0 flex-1 space-y-1">
-                <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[#091d3e] text-[10.5px]">
+                <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[#381e0f] text-[10.5px]">
                   <ShieldCheck className="size-3.5 text-brand shrink-0" />
                   <span>Compensation Governance Status</span>
                 </div>
@@ -340,7 +340,7 @@ export function PayslipModal({
               </div>
               <div className="flex items-center justify-between border-t border-border/60 bg-slate-50/60 px-3.5 py-2 font-bold text-foreground">
                 <span>Gross Total</span>
-                <span className="font-mono tabular-nums text-[#091d3e]">
+                <span className="font-mono tabular-nums text-[#381e0f]">
                   {formatCurrency(salary.grossSalary)}
                 </span>
               </div>

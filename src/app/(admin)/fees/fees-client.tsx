@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { Download, Plus, Printer, Wallet, CreditCard, TrendingUp, UserCheck, Eye, Pencil, Trash2, Clock, CheckCircle2, AlertCircle, CalendarDays, Building2, Receipt, Layers, User } from "lucide-react";
@@ -281,7 +281,7 @@ function getChallanColumns(
               ? `${formatOrdinal(r.installmentPlan.installmentNumber)} of ${r.installmentPlan.totalInstallments} Installments (${r.challanNumber})`
               : r.challanNumber
           }
-          className="inline-flex max-w-full items-center justify-center truncate rounded-md border border-brand/15 bg-brand-50/50 px-1.5 py-0.5 font-mono text-[11px] font-bold tracking-tight text-[#091d3e]"
+          className="inline-flex max-w-full items-center justify-center truncate rounded-md border border-brand/15 bg-brand-50/50 px-1.5 py-0.5 font-mono text-[11px] font-bold tracking-tight text-[#381e0f]"
         >
           {r.challanNumber}
         </span>
@@ -1770,7 +1770,7 @@ export function FeesClient() {
                   ))}
                 </div>
               </div>
-              <div className="h-10 border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e]" />
+              <div className="h-10 border-y border-[#381e0f] bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f]" />
               <div className="divide-y divide-border/50">
                 {Array.from({ length: 8 }).map((_, idx) => (
                   <div
@@ -1811,7 +1811,7 @@ export function FeesClient() {
               pageSize={8}
               hideSortArrows
               tableClassName="w-full table-fixed"
-              theadRowClassName="border-y border-[#091d3e] bg-gradient-to-r from-[#1e4275] via-[#12294d] to-[#091d3e] text-white shadow-sm"
+              theadRowClassName="border-y border-[#381e0f] bg-gradient-to-r from-[#7c4424] via-[#5c3118] to-[#381e0f] text-white shadow-sm"
             />
           )}
         </SectionCard>
@@ -1882,7 +1882,7 @@ export function FeesClient() {
                 </div>
               </div>
               <div className="text-right">
-                <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#091d3e]">
+                <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-1 font-mono text-xs font-bold tracking-tight text-[#381e0f]">
                   {editingChallan.challanNumber}
                 </span>
                 <p className="text-[11px] text-muted-foreground mt-0.5">Billing Period: {editingChallan.monthYear}</p>

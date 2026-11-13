@@ -1,4 +1,4 @@
-import jsPDF from "jspdf";
+﻿import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { formatCampusDisplay } from "@/lib/format";
 import type { Student } from "@/types";
@@ -61,7 +61,7 @@ export function generateStudentsPDF({
      1. Top Brand Banner (Page 1)
      ───────────────────────────────────────────────────────────── */
   // Main navy background banner
-  doc.setFillColor(30, 66, 117); // #1e4275
+  doc.setFillColor(56, 30, 15); // #381e0f (Deep Espresso Brown) // #381e0f (Imperial Violet) // #381e0f (Royal Purple) // #6e3b1f
   doc.rect(0, 0, pageWidth, 28, "F");
 
   // Accent gradient/cyan border lines
@@ -132,7 +132,7 @@ export function generateStudentsPDF({
 
   doc.setFillColor(34, 197, 94);
   doc.circle(pageWidth - marginX - 32, 21, 1.2, "F");
-  doc.setTextColor(240, 253, 244);
+  doc.setTextColor(250, 246, 237); // #faf6ed (Warm Ivory Cream) // #faf6ed // #faf6ed
   doc.setFont("helvetica", "bold");
   doc.setFontSize(7.5);
   doc.text("Official Record", pageWidth - marginX, 22, { align: "right" });
@@ -373,7 +373,7 @@ export function generateStudentsPDF({
     didDrawPage: (data) => {
       // Header for continuation pages (page 2+)
       if (data.pageNumber > 1) {
-        doc.setFillColor(30, 66, 117);
+        doc.setFillColor(56, 30, 15); // #381e0f (Deep Espresso Brown) // #381e0f (Imperial Violet) // #381e0f (Royal Purple)
         doc.rect(0, 0, pageWidth, 11, "F");
 
         doc.setFillColor(60, 111, 176);

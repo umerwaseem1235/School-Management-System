@@ -69,7 +69,7 @@ export function ViewReportCardDialog({
           <td style="text-align: center;">${sub.maxMarks}</td>
           <td style="text-align: center;">${sub.passMarks}</td>
           <td style="text-align: center; font-weight: bold;">${sub.obtainedMarks}</td>
-          <td style="text-align: center; font-weight: bold; color: ${sub.isPassed ? "#065f46" : "#b91c1c"};">${escapeHtml(sub.grade)}</td>
+          <td style="text-align: center; font-weight: bold; color: ${sub.isPassed ? "#381e0f" : "#b91c1c"};">${escapeHtml(sub.grade)}</td>
           <td>${escapeHtml(sub.remarks || (sub.isPassed ? "Pass" : "Compartment"))}</td>
         </tr>`
         )
@@ -155,7 +155,7 @@ export function ViewReportCardDialog({
       <span>Percentage: ${result.percentage.toFixed(1)}%</span>
       <span>Grade: ${escapeHtml(result.overallGrade)}</span>
       <span>Class Position: ${result.position}${result.position === 1 ? "st" : result.position === 2 ? "nd" : result.position === 3 ? "rd" : "th"}</span>
-      <span>Result: <strong style="color: ${result.status === "Passed" ? "#065f46" : result.status === "Compartment" ? "#b45309" : "#b91c1c"};">${escapeHtml(result.status)}</strong></span>
+      <span>Result: <strong style="color: ${result.status === "Passed" ? "#381e0f" : result.status === "Compartment" ? "#b45309" : "#b91c1c"};">${escapeHtml(result.status)}</strong></span>
     </div>
 
     <div class="remarks-box">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { toast } from "sonner";
@@ -361,7 +361,7 @@ export function StaffAttendanceClient() {
         className: "w-[18%] text-center",
         headerClassName: "w-[18%] text-center",
         cell: (r) => (
-          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#091d3e]">
+          <span className="inline-flex items-center justify-center rounded-md border border-brand/15 bg-brand-50/50 px-2.5 py-0.5 font-mono text-xs font-bold text-[#381e0f]">
             {r.monthlyPunctuality}%
           </span>
         ),
@@ -620,7 +620,7 @@ export function StaffAttendanceClient() {
                 {/* Official Staff Contact & Communication Directory */}
                 <div className="rounded-lg border border-border bg-white p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#091d3e] flex items-center gap-1.5">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[#381e0f] flex items-center gap-1.5">
                       <Mail className="size-3.5 text-brand" />
                       Official Staff Contact &amp; Directory Details
                     </p>

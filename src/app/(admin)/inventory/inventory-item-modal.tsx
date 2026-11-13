@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -93,7 +93,7 @@ export function InventoryItemModal({
                   Adjust Stock — {item.name}
                 </DialogTitle>
                 <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center rounded-md border border-brand/20 bg-brand-50/80 px-2 py-0.5 font-mono text-[11px] font-bold text-[#091d3e]">
+                  <span className="inline-flex items-center rounded-md border border-brand/20 bg-brand-50/80 px-2 py-0.5 font-mono text-[11px] font-bold text-[#381e0f]">
                     {item.sku}
                   </span>
                   <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] font-semibold capitalize text-slate-700">
@@ -119,7 +119,7 @@ export function InventoryItemModal({
                     Current Stock
                   </span>
                   <div className="mt-1 flex items-baseline gap-1.5">
-                    <span className="font-mono text-xl font-extrabold tabular-nums text-[#091d3e]">
+                    <span className="font-mono text-xl font-extrabold tabular-nums text-[#381e0f]">
                       {formatNumber(item.quantity)}
                     </span>
                     <span className="text-[11px] font-medium text-muted-foreground">
@@ -171,7 +171,7 @@ export function InventoryItemModal({
                       : "bg-slate-50/60"
                   )}
                 >
-                  <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#091d3e]">
+                  <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#381e0f]">
                     New Balance
                   </span>
                   <div className="mt-1 flex items-baseline gap-1.5">

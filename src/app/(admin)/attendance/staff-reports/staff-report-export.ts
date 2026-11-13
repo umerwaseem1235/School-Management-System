@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   DailyStaffStatus,
   StaffAttendanceRecord,
 } from "@/lib/mock/attendance";
@@ -272,7 +272,7 @@ function drawInstitutionalHeader(
     rightLine3: string;
   }
 ) {
-  // Navy Header Banner (#091d3e)
+  // Navy Header Banner (#381e0f)
   cmds.push("0.035 0.114 0.243 rg");
   cmds.push("28 748 539.28 64 re f");
 
@@ -1180,7 +1180,7 @@ export function printStaffAttendanceReport({
           if (logs.length === 0) return "";
           return `
             <div style="margin-top: 16px;">
-              <div style="font-size: 11px; font-weight: 800; color: #091d3e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
+              <div style="font-size: 11px; font-weight: 800; color: #381e0f; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;">
                 Daily Biometric & Shift Register Log (${logs.length} Shifts Displayed)
               </div>
               <table>
@@ -1251,7 +1251,7 @@ export function printStaffAttendanceReport({
       line-height: 1.4;
     }
     .banner {
-      background: #091d3e;
+      background: #381e0f;
       color: #ffffff;
       padding: 16px 20px;
       border-radius: 6px;
@@ -1312,7 +1312,7 @@ export function printStaffAttendanceReport({
     }
     .profile-card {
       border: 1px solid #d0dae7;
-      border-left: 4px solid #091d3e;
+      border-left: 4px solid #381e0f;
       background: #f7f9fc;
       border-radius: 6px;
       padding: 12px 16px;
@@ -1330,7 +1330,7 @@ export function printStaffAttendanceReport({
     }
     .kpi-card {
       border: 1px solid #d0dae7;
-      border-top: 3px solid #091d3e;
+      border-top: 3px solid #381e0f;
       background: #f7f9fc;
       border-radius: 5px;
       padding: 8px 10px;
@@ -1345,7 +1345,7 @@ export function printStaffAttendanceReport({
     .kpi-val {
       font-size: 14px;
       font-weight: 800;
-      color: #091d3e;
+      color: #381e0f;
       margin-top: 2px;
     }
     table {
@@ -1357,7 +1357,7 @@ export function printStaffAttendanceReport({
       display: table-header-group;
     }
     th {
-      background: #16345f;
+      background: #7c4424;
       color: #ffffff;
       font-size: 10px;
       font-weight: 700;
@@ -1365,7 +1365,7 @@ export function printStaffAttendanceReport({
       letter-spacing: 0.04em;
       padding: 8px 8px;
       text-align: left;
-      border-bottom: 1px solid #091d3e;
+      border-bottom: 1px solid #381e0f;
     }
     th.center, td.center {
       text-align: center;
@@ -1397,7 +1397,7 @@ export function printStaffAttendanceReport({
     .rate {
       font-weight: 800;
       font-size: 11.5px;
-      color: #091d3e;
+      color: #381e0f;
     }
     .badge {
       display: inline-block;
