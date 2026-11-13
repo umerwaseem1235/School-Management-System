@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/shared/page-header";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -23,7 +24,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CLASSES, SUBJECTS } from "@/lib/mock/academics";
+import {
+  CLASSES,
+  SUBJECTS,
+  getClassSectionLetters,
+  getSectionAllocation,
+  normalizeAcademicClassName,
+  isAcademicDirectoryClass,
+} from "@/lib/mock/academics";
 import { PAKISTANI_SCHOOL_CLASSES, sortPakistaniClasses } from "@/lib/mock/lms";
 import type { AcademicClass, Subject } from "@/types";
 import {
@@ -58,22 +66,42 @@ export default function AcademicsPage() {
   const [isAddSubjectOpen, setIsAddSubjectOpen] = React.useState(false);
   const [editingClass, setEditingClass] = React.useState<AcademicClass | null>(null);
   const [viewingClass, setViewingClass] = React.useState<AcademicClass | null>(null);
+  const [viewingSection, setViewingSection] = React.useState<string>("ALL");
   const [editingSubject, setEditingSubject] = React.useState<Subject | null>(null);
 
   // Class search & filter state
   const [classSearch, setClassSearch] = React.useState("");
+  const [classNameFilter, setClassNameFilter] = React.useState("ALL");
   const [classCampusFilter, setClassCampusFilter] = React.useState("ALL");
-  const [classStatusFilter, setClassStatusFilter] = React.useState("ALL");
+  const [classSectionFilter, setClassSectionFilter] = React.useState("ALL");
 
   // Subject search & filter state
   const [subjectSearch, setSubjectSearch] = React.useState("");
   const [subjectClassFilter, setSubjectClassFilter] = React.useState("ALL");
   const [subjectTypeFilter, setSubjectTypeFilter] = React.useState("ALL");
 
+  // Unique sorted class names for the Classes tab dropdown
+  const directoryClassNames = React.useMemo(() => {
+    const names = Array.from(new Set(classes.map((c) => c.className).filter(Boolean)));
+    return sortPakistaniClasses(names);
+  }, [classes]);
+
   // Campuses for classes filter
   const classCampuses = React.useMemo(() => {
     return Array.from(new Set(classes.map((c) => c.campus).filter(Boolean)));
   }, [classes]);
+
+  const availableClassSections = React.useMemo(() => {
+    const matchingClasses =
+      classNameFilter === "ALL"
+        ? classes
+        : classes.filter((c) => c.className === classNameFilter);
+    const maxSections = matchingClasses.reduce(
+      (max, c) => Math.max(max, (c as { sectionsCount?: number }).sectionsCount || c.sections || 1),
+      1
+    );
+    return getClassSectionLetters(maxSections);
+  }, [classes, classNameFilter]);
 
   // Overall stats
   const totalStudents = React.useMemo(() => {
@@ -95,15 +123,21 @@ export default function AcademicsPage() {
         (cls.classTeacher && cls.classTeacher.toLowerCase().includes(q)) ||
         String(cls.gradeLevel).includes(q);
 
+      const matchesClassName =
+        classNameFilter === "ALL" || cls.className === classNameFilter;
+
       const matchesCampus =
         classCampusFilter === "ALL" || cls.campus === classCampusFilter;
 
-      const matchesStatus =
-        classStatusFilter === "ALL" || (cls.status || "Active") === classStatusFilter;
+      const clsSections = getClassSectionLetters(
+        (cls as { sectionsCount?: number }).sectionsCount || cls.sections || 1
+      );
+      const matchesSection =
+        classSectionFilter === "ALL" || clsSections.includes(classSectionFilter);
 
-      return matchesSearch && matchesCampus && matchesStatus;
+      return matchesSearch && matchesClassName && matchesCampus && matchesSection;
     });
-  }, [classes, classSearch, classCampusFilter, classStatusFilter]);
+  }, [classes, classSearch, classNameFilter, classCampusFilter, classSectionFilter]);
 
   const handleUpdateClass = (updated: AcademicClass) => {
     setClasses((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
@@ -120,10 +154,13 @@ export default function AcademicsPage() {
 
   // Sorted list of all classes for the Subject tab class dropdown
   const availableClasses = React.useMemo(() => {
+    const normalizedDefaults = PAKISTANI_SCHOOL_CLASSES
+      .map(normalizeAcademicClassName)
+      .filter(isAcademicDirectoryClass);
     const classSet = new Set<string>([
-      ...PAKISTANI_SCHOOL_CLASSES,
-      ...classes.map((c) => c.className),
-      ...subjects.map((s) => s.className).filter(Boolean),
+      ...normalizedDefaults,
+      ...classes.map((c) => normalizeAcademicClassName(c.className)),
+      ...subjects.map((s) => normalizeAcademicClassName(s.className || "")).filter(Boolean),
     ]);
     return sortPakistaniClasses(Array.from(classSet));
   }, [classes, subjects]);
@@ -260,7 +297,7 @@ export default function AcademicsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
         <div className="flex items-center gap-3">
           <DropdownMenu>
-            <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3.5 h-9.5 text-xs font-semibold shadow-2xs transition-all hover:border-brand/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[220px] sm:min-w-[250px]">
+            <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3.5 h-9.5 text-xs font-semibold shadow-2xs transition-all duration-150 hover:border-brand/40 data-[popup-open]:border-brand/50 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[220px] sm:min-w-[260px]">
               <div className="flex items-center gap-2 min-w-0">
                 <activeSection.icon className="size-4 text-brand shrink-0" />
                 <span className="text-xs font-semibold text-foreground truncate">
@@ -274,13 +311,13 @@ export default function AcademicsPage() {
                 >
                   {activeSection.count}
                 </Badge>
-                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-transform duration-200 ease-out group-data-[popup-open]:rotate-180" />
               </div>
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
               align="start"
-              className="w-60 p-1.5 rounded-xl shadow-lg border-border/80 bg-card"
+              className="min-w-[var(--anchor-width,16.5rem)] w-[276px] p-1.5 rounded-xl shadow-xl border-border/80 bg-card"
             >
               {sectionOptions.map((sec) => {
                 const Icon = sec.icon;
@@ -348,7 +385,7 @@ export default function AcademicsPage() {
 
             {/* Filter Toolbar */}
             <div className="flex flex-col md:flex-row md:items-center gap-3 px-5 py-3.5 border-b border-border/60">
-              <div className="relative w-full sm:w-64 md:w-72 shrink-0">
+              <div className="relative w-full sm:w-56 lg:w-64 shrink-0">
                 <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                 <Input
                   type="text"
@@ -360,6 +397,68 @@ export default function AcademicsPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2 md:ml-auto">
+                {/* Class Selection Filter */}
+                <Select
+                  value={classNameFilter}
+                  onValueChange={(val) => {
+                    if (!val) return;
+                    setClassNameFilter(val);
+                    if (val !== "ALL") {
+                      const matched = classes.filter((c) => c.className === val);
+                      const maxSec = matched.reduce(
+                        (max, c) => Math.max(max, (c as { sectionsCount?: number }).sectionsCount || c.sections || 1),
+                        1
+                      );
+                      const validLetters = getClassSectionLetters(maxSec);
+                      if (classSectionFilter !== "ALL" && !validLetters.includes(classSectionFilter)) {
+                        setClassSectionFilter("ALL");
+                      }
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-9 text-xs min-w-[195px] w-auto max-w-[265px] shrink-0 font-medium bg-background/60">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                      <GraduationCap className="size-3.5 text-muted-foreground shrink-0" />
+                      <SelectValue placeholder="All Classes" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="w-max min-w-[var(--anchor-width)] max-h-[280px]">
+                    <SelectItem value="ALL" className="text-xs">
+                      All Classes
+                    </SelectItem>
+                    {directoryClassNames.map((name) => (
+                      <SelectItem key={name} value={name} className="text-xs">
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Section Filter */}
+                <Select
+                  value={classSectionFilter}
+                  onValueChange={(val) => {
+                    if (val) setClassSectionFilter(val);
+                  }}
+                >
+                  <SelectTrigger className="h-9 text-xs w-[132px] shrink-0 font-medium bg-background/60">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                      <Layers className="size-3.5 text-muted-foreground shrink-0" />
+                      <SelectValue placeholder="All Sections" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="w-max min-w-[var(--anchor-width)]">
+                    <SelectItem value="ALL" className="text-xs">
+                      All Sections
+                    </SelectItem>
+                    {availableClassSections.map((sec) => (
+                      <SelectItem key={sec} value={sec} className="text-xs">
+                        Section {sec}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 {/* Campus Filter */}
                 <Select
                   value={classCampusFilter}
@@ -367,14 +466,14 @@ export default function AcademicsPage() {
                     if (val) setClassCampusFilter(val);
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs w-[190px] shrink-0 font-medium">
-                    <div className="flex items-center gap-1.5 truncate">
+                  <SelectTrigger className="h-9 text-xs w-[185px] shrink-0 font-medium bg-background/60">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
                       <Building2 className="size-3.5 text-muted-foreground shrink-0" />
-                      <SelectValue placeholder="All Campuses" />
+                      <SelectValue placeholder="All Branches" />
                     </div>
                   </SelectTrigger>
-                  <SelectContent className="max-h-[260px]">
-                    <SelectItem value="ALL">All Campuses</SelectItem>
+                  <SelectContent className="w-max min-w-[var(--anchor-width)] max-h-[260px]">
+                    <SelectItem value="ALL" className="text-xs">All Branches</SelectItem>
                     {classCampuses.map((c) => (
                       <SelectItem key={c} value={c} className="text-xs">
                         {c}
@@ -383,31 +482,15 @@ export default function AcademicsPage() {
                   </SelectContent>
                 </Select>
 
-                {/* Status Filter */}
-                <Select
-                  value={classStatusFilter}
-                  onValueChange={(val) => {
-                    if (val) setClassStatusFilter(val);
-                  }}
-                >
-                  <SelectTrigger className="h-9 text-xs w-[130px] shrink-0 font-medium">
-                    <SelectValue placeholder="All Statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">All Statuses</SelectItem>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {(classSearch || classCampusFilter !== "ALL" || classStatusFilter !== "ALL") && (
+                {(classSearch || classNameFilter !== "ALL" || classCampusFilter !== "ALL" || classSectionFilter !== "ALL") && (
                   <Button
                     variant="ghost"
                     size="xs"
                     onClick={() => {
                       setClassSearch("");
+                      setClassNameFilter("ALL");
                       setClassCampusFilter("ALL");
-                      setClassStatusFilter("ALL");
+                      setClassSectionFilter("ALL");
                     }}
                     className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
                   >
@@ -418,26 +501,29 @@ export default function AcademicsPage() {
             </div>
 
             {/* Table */}
-            <div>
-              <Table className="w-full text-sm">
+            <div className="w-full md:[&_[data-slot=table-container]]:overflow-x-hidden">
+              <Table className="w-full md:table-fixed text-sm">
                 <TableHeader>
                   <TableRow className="bg-muted/60 border-b border-border/70">
-                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-left">
-                      Class & Campus
+                    <TableHead className="md:w-[13%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Class
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center">
+                    <TableHead className="md:w-[18%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Branch
+                    </TableHead>
+                    <TableHead className="md:w-[16%] font-semibold text-xs text-foreground px-3 py-3 text-center">
                       Class Teacher
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
-                      Capacity
+                    <TableHead className="md:w-[14%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Students
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
+                    <TableHead className="md:w-[13%] font-semibold text-xs text-foreground px-3 py-3 text-center">
                       Subjects
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
+                    <TableHead className="md:w-[12%] font-semibold text-xs text-foreground px-3 py-3 text-center">
                       Status
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-right">
+                    <TableHead className="md:w-[14%] font-semibold text-xs text-foreground px-3 py-3 text-center">
                       Actions
                     </TableHead>
                   </TableRow>
@@ -450,41 +536,86 @@ export default function AcademicsPage() {
                         (cls as any).subjectsCount ||
                         cls.subjects ||
                         0;
+                      const rowKey = cls.id || cls.className;
+                      const clsSectionsCount =
+                        (cls as { sectionsCount?: number }).sectionsCount || cls.sections || 1;
+                      const explicitSectionMatch = cls.className.trim().match(/-([A-Z])$/i);
+                      const isSingleFixedSection = Boolean(explicitSectionMatch) || clsSectionsCount <= 1;
+                      const clsSectionLetters = explicitSectionMatch
+                        ? [explicitSectionMatch[1].toUpperCase()]
+                        : getClassSectionLetters(clsSectionsCount);
+                      const rowSelectedSection = isSingleFixedSection
+                        ? clsSectionLetters[0]
+                        : classSectionFilter !== "ALL" &&
+                          clsSectionLetters.includes(classSectionFilter)
+                        ? classSectionFilter
+                        : "ALL";
+                      const totalStudentsInClass =
+                        (cls as any).studentsCount || cls.students || 0;
+                      const selectedIdx =
+                        rowSelectedSection !== "ALL"
+                          ? clsSectionLetters.indexOf(rowSelectedSection)
+                          : -1;
+                      const sectionInfo =
+                        selectedIdx >= 0 ? getSectionAllocation(cls, selectedIdx) : null;
+                      const displayedTeacher =
+                        sectionInfo?.incharge ||
+                        cls.classTeacher ||
+                        (cls as any).teacher ||
+                        "Unassigned";
+                      const displayedStudents = sectionInfo
+                        ? sectionInfo.students
+                        : totalStudentsInClass;
 
                       return (
                         <TableRow
-                          key={cls.id || cls.className}
+                          key={rowKey}
                           className="hover:bg-muted/30 transition-colors border-b border-border/60"
                         >
-                          {/* Class & Campus */}
-                          <TableCell className="font-medium text-xs text-foreground px-5 py-3 text-left">
-                            <div className="flex flex-col min-w-0">
-                              <span className="font-semibold text-foreground text-[13px] leading-tight truncate">
-                                {cls.className}
-                              </span>
-                              <span className="text-[11px] text-muted-foreground mt-0.5 truncate flex items-center gap-1.5">
-                                <span>Grade {cls.gradeLevel}</span>
-                                <span className="text-muted-foreground/60">•</span>
-                                <span className="truncate">{cls.campus}</span>
-                              </span>
-                            </div>
-                          </TableCell>
-
-                          {/* Class Teacher */}
-                          <TableCell className="text-xs px-4 py-3 text-center">
-                            <span className="font-medium text-foreground truncate inline-block max-w-[160px]">
-                              {cls.classTeacher || (cls as any).teacher || "Unassigned"}
+                          {/* Class */}
+                          <TableCell className="font-medium text-xs text-foreground px-3 py-3 text-center whitespace-nowrap">
+                            <span
+                              className="block font-semibold text-foreground text-[12.5px] truncate"
+                              title={cls.className}
+                            >
+                              {cls.className}
                             </span>
                           </TableCell>
 
-                          {/* Capacity (Students & Sections) */}
-                          <TableCell className="text-xs px-3 py-3 text-center">
+                          {/* Branch */}
+                          <TableCell className="text-xs px-3 py-3 text-center overflow-hidden">
+                            <span
+                              className="block truncate font-medium text-foreground/90"
+                              title={cls.campus || "Unassigned"}
+                            >
+                              {cls.campus || "Unassigned"}
+                            </span>
+                          </TableCell>
+
+                          {/* Class Teacher */}
+                          <TableCell className="text-xs px-3 py-3 text-center overflow-hidden">
+                            <span
+                              className="font-medium text-foreground truncate block"
+                              title={
+                                sectionInfo
+                                  ? `Section ${rowSelectedSection} Incharge: ${displayedTeacher}`
+                                  : `Head Class Teacher: ${displayedTeacher}`
+                              }
+                            >
+                              {displayedTeacher}
+                            </span>
+                          </TableCell>
+
+                          {/* Students */}
+                          <TableCell className="text-xs px-3 py-3 text-center whitespace-nowrap">
                             <div className="inline-flex flex-col items-center justify-center leading-tight">
                               <span className="font-semibold text-xs tabular-nums text-foreground">
-                                {(cls as any).studentsCount || cls.students} Students
+                                {displayedStudents} Students
                               </span>
                               <span className="text-[11px] text-muted-foreground font-medium mt-0.5">
-                                {(cls as any).sectionsCount || cls.sections} Sections
+                                {sectionInfo
+                                  ? `Sec ${rowSelectedSection} of ${totalStudentsInClass}`
+                                  : `${clsSectionsCount} ${clsSectionsCount === 1 ? "Section" : "Sections"}`}
                               </span>
                             </div>
                           </TableCell>
@@ -494,7 +625,7 @@ export default function AcademicsPage() {
                             <button
                               type="button"
                               onClick={() => handleViewClassSubjects(cls.className)}
-                              className="inline-flex items-center justify-center px-2.5 py-1 rounded-[4px] text-xs font-semibold text-brand bg-brand-50 hover:bg-brand-100/80 transition-all cursor-pointer shadow-2xs border border-brand/20 tabular-nums"
+                              className="inline-flex items-center justify-center px-2 py-1 rounded-[4px] text-[11.5px] font-semibold text-brand bg-brand-50 hover:bg-brand-100/80 transition-all cursor-pointer shadow-2xs border border-brand/20 tabular-nums whitespace-nowrap"
                               title={`View ${classSubjectsCount} curriculum subjects for ${cls.className}`}
                             >
                               <span>{classSubjectsCount} Subjects</span>
@@ -507,36 +638,43 @@ export default function AcademicsPage() {
                           </TableCell>
 
                           {/* Actions */}
-                          <TableCell className="px-5 py-3 text-right whitespace-nowrap">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                onClick={() => setViewingClass(cls)}
-                                className="h-7.5 px-2.5 text-xs font-semibold text-brand hover:bg-brand-soft/50 hover:text-brand border-border/80 cursor-pointer shadow-2xs gap-1.5"
-                                title={`View ${cls.className} Class & Section Information`}
+                          <TableCell className="px-3 py-3 text-center whitespace-nowrap">
+                            <div className="inline-flex items-center justify-center gap-1">
+                              <ActionIconButton
+                                tone="view"
+                                onClick={() => {
+                                  setViewingSection(rowSelectedSection);
+                                  setViewingClass(cls);
+                                }}
+                                aria-label={
+                                  rowSelectedSection === "ALL"
+                                    ? `View ${cls.className} class and section details`
+                                    : `View ${cls.className} section ${rowSelectedSection}`
+                                }
+                                title={
+                                  rowSelectedSection === "ALL"
+                                    ? `View ${cls.className} Class & Section Information`
+                                    : `View ${cls.className} — Section ${rowSelectedSection}`
+                                }
                               >
-                                <Eye className="size-3.5" />
-                                <span>View Class & Section</span>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="xs"
+                                <Eye />
+                              </ActionIconButton>
+                              <ActionIconButton
+                                tone="edit"
                                 onClick={() => setEditingClass(cls)}
-                                className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-brand hover:bg-brand-soft/40 cursor-pointer"
+                                aria-label={`Edit ${cls.className}`}
                                 title="Edit Class"
                               >
-                                <Pencil className="size-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="xs"
+                                <Pencil />
+                              </ActionIconButton>
+                              <ActionIconButton
+                                tone="delete"
                                 onClick={() => handleDeleteClass(cls.id, cls.className)}
-                                className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-danger hover:bg-danger-soft/60 cursor-pointer"
+                                aria-label={`Delete ${cls.className}`}
                                 title="Delete Class"
                               >
-                                <Trash2 className="size-3.5" />
-                              </Button>
+                                <Trash2 />
+                              </ActionIconButton>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -544,7 +682,7 @@ export default function AcademicsPage() {
                     })
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-xs text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-12 text-xs text-muted-foreground">
                         <div className="flex flex-col items-center justify-center gap-2">
                           <School className="size-8 text-muted-foreground/50" />
                           <p className="font-medium text-sm text-foreground">No classes found</p>
@@ -570,15 +708,15 @@ export default function AcademicsPage() {
                 <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
                   <BookOpen className="size-4" />
                 </div>
-                <div>
+                <div className="flex items-center gap-2">
                   <h2 className="text-sm font-semibold text-foreground">
                     {subjectClassFilter === "ALL"
                       ? "Curriculum Subjects"
                       : `${subjectClassFilter} — Subjects`}
                   </h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Showing {filteredSubjects.length} of {subjects.length} registered subjects
-                  </p>
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-brand-50 text-brand font-mono">
+                    {filteredSubjects.length} {filteredSubjects.length === 1 ? "Subject" : "Subjects"}
+                  </span>
                 </div>
               </div>
               {subjectClassFilter !== "ALL" && (
@@ -614,16 +752,16 @@ export default function AcademicsPage() {
                     if (val) setSubjectClassFilter(val);
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs w-[210px] shrink-0 font-medium">
-                    <div className="flex items-center gap-1.5 truncate">
+                  <SelectTrigger className="h-9 text-xs w-[210px] shrink-0 font-medium bg-background/60">
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
                       <GraduationCap className="size-3.5 text-muted-foreground shrink-0" />
                       <SelectValue placeholder="All Classes" />
                     </div>
                   </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    <SelectItem value="ALL">All Classes</SelectItem>
+                  <SelectContent className="w-max min-w-[var(--anchor-width)] max-h-[300px]">
+                    <SelectItem value="ALL" className="text-xs">All Classes</SelectItem>
                     {availableClasses.map((cls) => (
-                      <SelectItem key={cls} value={cls}>
+                      <SelectItem key={cls} value={cls} className="text-xs">
                         {cls}
                       </SelectItem>
                     ))}
@@ -637,30 +775,44 @@ export default function AcademicsPage() {
                     if (val) setSubjectTypeFilter(val);
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs w-[140px] shrink-0 font-medium">
+                  <SelectTrigger className="h-9 text-xs w-[140px] shrink-0 font-medium bg-background/60">
                     <SelectValue placeholder="All Types" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL">All Types</SelectItem>
-                    <SelectItem value="core">Core Subjects</SelectItem>
-                    <SelectItem value="elective">Electives</SelectItem>
+                  <SelectContent className="w-max min-w-[var(--anchor-width)]">
+                    <SelectItem value="ALL" className="text-xs">All Types</SelectItem>
+                    <SelectItem value="core" className="text-xs">Core Subjects</SelectItem>
+                    <SelectItem value="elective" className="text-xs">Electives</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
             {/* Subjects Data Table */}
-            <div className="overflow-x-auto">
-              <Table className="w-full text-sm">
+            <div className="w-full md:[&_[data-slot=table-container]]:overflow-x-hidden">
+              <Table className="w-full md:table-fixed text-sm">
                 <TableHeader>
                   <TableRow className="bg-muted/60 border-b border-border/70">
-                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3">Subject</TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3">Code</TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3">Target Class</TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3">Classification</TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3">Marks (Max / Pass)</TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3">Teacher</TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-right">Actions</TableHead>
+                    <TableHead className="md:w-[19%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Subject
+                    </TableHead>
+                    <TableHead className="md:w-[12%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Code
+                    </TableHead>
+                    <TableHead className="md:w-[14%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Target Class
+                    </TableHead>
+                    <TableHead className="md:w-[13%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Classification
+                    </TableHead>
+                    <TableHead className="md:w-[12%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Marks
+                    </TableHead>
+                    <TableHead className="md:w-[17%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Teacher
+                    </TableHead>
+                    <TableHead className="md:w-[13%] font-semibold text-xs text-foreground px-3 py-3 text-center">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -670,23 +822,27 @@ export default function AcademicsPage() {
                         key={subject.id}
                         className="hover:bg-muted/30 transition-colors border-b border-border/60"
                       >
-                        <TableCell className="font-medium text-xs text-foreground px-4 py-3">
-                          <div className="flex items-center gap-2">
+                        <TableCell className="font-medium text-xs text-foreground px-3 py-3 text-center overflow-hidden">
+                          <div className="inline-flex items-center justify-center gap-2 max-w-full min-w-0">
                             <div className="size-7 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0">
                               <BookOpen className="size-3.5" />
                             </div>
-                            <span className="font-semibold">{subject.subjectName}</span>
+                            <span className="font-semibold truncate" title={subject.subjectName}>
+                              {subject.subjectName}
+                            </span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground font-mono px-3 py-3">
+                        <TableCell className="text-xs text-muted-foreground font-mono px-3 py-3 text-center">
                           <span className="inline-flex px-1.5 py-0.5 rounded text-[11px] font-bold uppercase bg-muted text-foreground">
                             {subject.subjectCode}
                           </span>
                         </TableCell>
-                        <TableCell className="text-xs text-foreground px-3 py-3 font-medium">
-                          {subject.className || "-"}
+                        <TableCell className="text-xs text-foreground px-3 py-3 text-center font-medium whitespace-nowrap">
+                          <span className="block truncate" title={subject.className || "-"}>
+                            {subject.className || "-"}
+                          </span>
                         </TableCell>
-                        <TableCell className="px-3 py-3">
+                        <TableCell className="px-3 py-3 text-center">
                           {subject.isElective ? (
                             <Badge variant="outline" className="text-[10px] font-semibold text-muted-foreground">
                               Elective
@@ -697,37 +853,36 @@ export default function AcademicsPage() {
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground tabular-nums px-3 py-3">
+                        <TableCell
+                          className="text-xs text-muted-foreground tabular-nums px-3 py-3 text-center"
+                          title={`Max: ${subject.maxMarks} / Pass: ${subject.passMarks}`}
+                        >
                           <span className="font-medium text-foreground">{subject.maxMarks}</span> /{" "}
                           <span className="text-success font-medium">{subject.passMarks}</span>
                         </TableCell>
-                        <TableCell className="text-xs font-medium text-foreground px-3 py-3">
-                          <div className="flex items-center gap-1.5 truncate max-w-[150px]">
-                            <Users className="size-3 text-muted-foreground shrink-0" />
-                            <span className="truncate">{subject.teacher || "Unassigned"}</span>
-                          </div>
+                        <TableCell className="text-xs font-medium text-foreground px-3 py-3 text-center overflow-hidden">
+                          <span className="block truncate" title={subject.teacher || "Unassigned"}>
+                            {subject.teacher || "Unassigned"}
+                          </span>
                         </TableCell>
-                        <TableCell className="px-4 py-3 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <Button
-                              variant="outline"
-                              size="xs"
+                        <TableCell className="px-3 py-3 text-center whitespace-nowrap">
+                          <div className="inline-flex items-center justify-center gap-1">
+                            <ActionIconButton
+                              tone="edit"
                               onClick={() => setEditingSubject(subject)}
-                              className="h-7 px-2.5 text-xs font-semibold cursor-pointer border-border/80 hover:bg-muted gap-1 text-foreground"
+                              aria-label={`Edit ${subject.subjectName}`}
                               title="Edit Subject"
                             >
-                              <Pencil className="size-3 text-muted-foreground" />
-                              Edit
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="xs"
+                              <Pencil />
+                            </ActionIconButton>
+                            <ActionIconButton
+                              tone="delete"
                               onClick={() => handleDeleteSubject(subject.id)}
-                              className="h-7 px-2 text-danger hover:bg-danger-soft/30 hover:text-danger cursor-pointer"
+                              aria-label={`Delete ${subject.subjectName}`}
                               title="Delete Subject"
                             >
-                              <Trash2 className="size-3" />
-                            </Button>
+                              <Trash2 />
+                            </ActionIconButton>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -765,7 +920,9 @@ export default function AcademicsPage() {
 
       {/* View Class Interactive Dialog */}
       <ViewClassDialog
+        key={viewingClass ? `${viewingClass.id}-${viewingSection}` : "closed"}
         classItem={viewingClass}
+        initialSection={viewingSection}
         open={!!viewingClass}
         onOpenChange={(isOpen) => {
           if (!isOpen) setViewingClass(null);

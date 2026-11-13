@@ -11,29 +11,19 @@ export const PAKISTANI_SCHOOL_CLASSES = [
   "Grade 10th (Science - Biology)",
   "Grade 10th (Science - Computer)",
   "Grade 10th (Arts)",
-  "Grade 11 (FSc Pre-Medical)",
-  "Grade 11 (FSc Pre-Engineering)",
-  "Grade 11 (ICS)",
-  "Grade 12 (FSc Pre-Medical)",
-  "Grade 12 (FSc Pre-Engineering)",
-  "Grade 12 (I.Com)",
 ] as const;
 
 /**
- * Standard Pakistani School & College Subjects across:
+ * Standard School Subjects (Grades 5 to 10):
  * - Compulsory (English, Urdu, Islamiat, Tarjuma-tul-Quran, Ethics, Pakistan Studies)
- * - Science & Medical (Physics, Chemistry, Biology, Mathematics, Computer Science)
- * - Humanities & Arts (General Science, General Mathematics, Civics, Education, Economics, History, Geography, Fine Arts, Arabic, Persian)
- * - Commerce & Business (Accounting, Commerce, Commercial Geography, Banking, Business Mathematics)
+ * - Science Group (Physics, Chemistry, Biology, Mathematics, Computer Science)
+ * - Primary, Middle & Arts Group (General Science, General Mathematics, Social Studies, History, Geography, Civics, Education, Home Economics, Fine Arts, Arabic)
  */
 export const PAKISTANI_SCHOOL_SUBJECTS = [
   "Arabic",
-  "Banking",
   "Biology",
-  "Business Mathematics",
   "Chemistry",
   "Civics",
-  "Commercial Geography",
   "Computer Science",
   "Economics",
   "Education (Ilm-ut-Taleem)",
@@ -48,13 +38,9 @@ export const PAKISTANI_SCHOOL_SUBJECTS = [
   "History",
   "Home Economics",
   "Islamiat",
-  "Islamic Studies (Elective)",
   "Mathematics",
   "Pakistan Studies",
-  "Persian",
   "Physics",
-  "Principles of Accounting",
-  "Principles of Commerce",
   "Social Studies",
   "Tarjuma-tul-Quran",
   "Urdu",
@@ -85,6 +71,7 @@ export function sortPakistaniClasses(classes: readonly string[] | string[]): str
     if (lower.includes("bio") || lower.includes("pre-med")) return 1;
     if (lower.includes("pre-eng")) return 2;
     if (lower.includes("computer") || lower.includes("ics")) return 3;
+    if (lower.includes("science")) return 1;
     if (lower.includes("arts") || lower.includes("general") || lower.includes("humanities")) return 4;
     if (lower.includes("commerce") || lower.includes("i.com")) return 5;
     return 10;
@@ -111,7 +98,7 @@ export function sortPakistaniClasses(classes: readonly string[] | string[]): str
 /**
  * Formats lengthy class names into standard concise Pakistani school designations:
  * e.g. "Grade 10th (Science - Biology)" -> "Class 10 (Bio)"
- *      "Grade 11 (FSc Pre-Medical)"     -> "Class 11 (Pre-Med)"
+ *      "Grade 9th (Arts)"               -> "Class 9 (Arts)"
  */
 export function formatCompactClass(className: string): string {
   if (!className) return "";
@@ -122,46 +109,36 @@ export function formatCompactClass(className: string): string {
     .replace(/(?:Grade|Class)?\s*9(?:th)?\s*\((?:Science\s*-\s*)?Bio(?:logy)?\)/i, "Class 9 (Bio)")
     .replace(/(?:Grade|Class)?\s*9(?:th)?\s*\((?:Science\s*-\s*)?Comp(?:uter)?\)/i, "Class 9 (CS)")
     .replace(/(?:Grade|Class)?\s*9(?:th)?\s*\(Arts\)/i, "Class 9 (Arts)")
-    .replace(/(?:Grade|Class)?\s*11(?:th)?\s*\((?:FSc\s+)?Pre-Med(?:ical)?\)/i, "Class 11 (Pre-Med)")
-    .replace(/(?:Grade|Class)?\s*11(?:th)?\s*\((?:FSc\s+)?Pre-Eng(?:ineering)?\)/i, "Class 11 (Pre-Eng)")
-    .replace(/(?:Grade|Class)?\s*11(?:th)?\s*\(ICS\)/i, "Class 11 (ICS)")
-    .replace(/(?:Grade|Class)?\s*12(?:th)?\s*\((?:FSc\s+)?Pre-Med(?:ical)?\)/i, "Class 12 (Pre-Med)")
-    .replace(/(?:Grade|Class)?\s*12(?:th)?\s*\((?:FSc\s+)?Pre-Eng(?:ineering)?\)/i, "Class 12 (Pre-Eng)")
-    .replace(/(?:Grade|Class)?\s*12(?:th)?\s*\(I\.Com\)/i, "Class 12 (I.Com)")
     .replace(/Grade\s+/i, "Class ");
 }
 
 /**
- * Extracts a concise subject name from a verbose course title:
- * e.g. "Grade 10 Mathematics (Core)" -> "Mathematics"
- *      "Grade 9 Physics & Lab Mechanics" -> "Physics"
- *      "Grade 6 General Science & Environment" -> "General Science"
- *      "Grade 11 Calculus & Analytical Geometry" -> "Mathematics"
- *      "Grade 11 Programming in C++ (ICS)" -> "Computer Science"
+ * Extracts a concise subject name from a course title:
+ * e.g. "Grade 10 Mathematics" -> "Mathematics"
+ *      "Grade 9 Physics" -> "Physics"
  */
 export function formatCourseSubject(courseName: string): string {
   if (!courseName) return "";
   const lower = courseName.toLowerCase();
-  if (lower.includes("calculus") || lower.includes("math")) {
-    if (lower.includes("business math")) return "Business Mathematics";
+  if (lower.includes("math")) {
     if (lower.includes("general math")) return "General Mathematics";
     return "Mathematics";
   }
   if (lower.includes("physics")) return "Physics";
   if (lower.includes("chemistry")) return "Chemistry";
   if (lower.includes("biology")) return "Biology";
-  if (lower.includes("computer") || lower.includes("programming") || lower.includes("c++")) return "Computer Science";
+  if (lower.includes("computer")) return "Computer Science";
   if (lower.includes("urdu")) return "Urdu";
   if (lower.includes("english")) return "English";
   if (lower.includes("islam") || lower.includes("islamiat")) return "Islamiat";
   if (lower.includes("tarjuma") || lower.includes("quran")) return "Tarjuma-tul-Quran";
-  if (lower.includes("pakistan studies") || lower.includes("civics")) return "Pakistan Studies";
+  if (lower.includes("pakistan studies")) return "Pakistan Studies";
+  if (lower.includes("civics")) return "Civics";
   if (lower.includes("general science") || lower.includes("science")) return "General Science";
-  if (lower.includes("accounting")) return "Principles of Accounting";
   if (lower.includes("economics")) return "Economics";
   if (lower.includes("geography")) return "Geography";
   if (lower.includes("social studies")) return "Social Studies";
-  if (lower.includes("education") || lower.includes("pedagogy")) return "Education";
+  if (lower.includes("education")) return "Education";
 
   return courseName
     .replace(/^Grade\s+\d+(?:th)?\s*/i, "")
@@ -169,10 +146,24 @@ export function formatCourseSubject(courseName: string): string {
     .trim();
 }
 
+export function formatLmsDate(value: string): string {
+  try {
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return value;
+    return d.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return value;
+  }
+}
+
 export const LMS_COURSES: LmsCourse[] = [
   {
     id: "lms-c1",
-    title: "Grade 10 Mathematics (Core)",
+    title: "Grade 10 Mathematics",
     courseCode: "MTH-10",
     className: "Grade 10th (Science - Biology)",
     subject: "Mathematics",
@@ -187,7 +178,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c2",
-    title: "Grade 9 Physics & Lab Mechanics",
+    title: "Grade 9 Physics",
     courseCode: "PHY-09",
     className: "Grade 9th (Science - Biology)",
     subject: "Physics",
@@ -202,7 +193,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c3",
-    title: "Grade 10 Chemistry & Reactions",
+    title: "Grade 10 Chemistry",
     courseCode: "CHM-10",
     className: "Grade 10th (Science - Biology)",
     subject: "Chemistry",
@@ -217,7 +208,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c4",
-    title: "Grade 9 Computer Science & Python",
+    title: "Grade 9 Computer Science",
     courseCode: "CS-09",
     className: "Grade 9th (Science - Computer)",
     subject: "Computer Science",
@@ -232,7 +223,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c5",
-    title: "Grade 10 Computer Science & Databases",
+    title: "Grade 10 Computer Science",
     courseCode: "CS-10",
     className: "Grade 10th (Science - Computer)",
     subject: "Computer Science",
@@ -247,7 +238,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c6",
-    title: "Grade 9 General Science & Arts Foundation",
+    title: "Grade 9 General Science",
     courseCode: "GSC-09",
     className: "Grade 9th (Arts)",
     subject: "General Science",
@@ -262,7 +253,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c7",
-    title: "Grade 10 Pakistan Studies & Civics",
+    title: "Grade 10 Pakistan Studies",
     courseCode: "PST-10",
     className: "Grade 10th (Arts)",
     subject: "Pakistan Studies",
@@ -277,7 +268,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c8",
-    title: "Grade 8 English Language & Comp",
+    title: "Grade 8 English",
     courseCode: "ENG-08",
     className: "Grade 8-A",
     subject: "English",
@@ -291,53 +282,8 @@ export const LMS_COURSES: LmsCourse[] = [
     colorTone: "gold",
   },
   {
-    id: "lms-c9",
-    title: "Grade 11 Biology (Pre-Medical)",
-    courseCode: "BIO-11",
-    className: "Grade 11 (FSc Pre-Medical)",
-    subject: "Biology",
-    teacher: "Ms. Amina Tariq",
-    campus: "DHA Phase 5 Campus",
-    totalLessons: 34,
-    completedLessons: 19,
-    enrolledStudents: 29,
-    activeAssignments: 1,
-    status: "Active",
-    colorTone: "warning",
-  },
-  {
-    id: "lms-c10",
-    title: "Grade 11 Calculus & Analytical Geometry",
-    courseCode: "MTH-11",
-    className: "Grade 11 (FSc Pre-Engineering)",
-    subject: "Mathematics",
-    teacher: "Mr. Adeel Hassan",
-    campus: "Main Campus — Gulberg",
-    totalLessons: 36,
-    completedLessons: 22,
-    enrolledStudents: 31,
-    activeAssignments: 1,
-    status: "Active",
-    colorTone: "brand",
-  },
-  {
-    id: "lms-c11",
-    title: "Grade 11 Programming in C++ (ICS)",
-    courseCode: "CS-11",
-    className: "Grade 11 (ICS)",
-    subject: "Computer Science",
-    teacher: "Mr. Usman Ali",
-    campus: "F-8 Islamabad Campus",
-    totalLessons: 30,
-    completedLessons: 17,
-    enrolledStudents: 27,
-    activeAssignments: 1,
-    status: "Active",
-    colorTone: "ocean",
-  },
-  {
     id: "lms-c12",
-    title: "Grade 7 Social Studies & Geography",
+    title: "Grade 7 Social Studies",
     courseCode: "SST-07",
     className: "Grade 7-A",
     subject: "Social Studies",
@@ -352,10 +298,10 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c13",
-    title: "Grade 6 General Science & Environment",
+    title: "Grade 6 General Science",
     courseCode: "SCI-06",
     className: "Grade 6-A",
-    subject: "Science",
+    subject: "General Science",
     teacher: "Mr. Usman Ali",
     campus: "Main Campus — Gulberg",
     totalLessons: 24,
@@ -367,7 +313,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c14",
-    title: "Grade 5 Primary Mathematics",
+    title: "Grade 5 Mathematics",
     courseCode: "MTH-05",
     className: "Grade 5-A",
     subject: "Mathematics",
@@ -381,38 +327,8 @@ export const LMS_COURSES: LmsCourse[] = [
     colorTone: "brand",
   },
   {
-    id: "lms-c15",
-    title: "Grade 12 Physics & Nuclear Mechanics",
-    courseCode: "PHY-12",
-    className: "Grade 12 (FSc Pre-Engineering)",
-    subject: "Physics",
-    teacher: "Dr. Saima Riaz",
-    campus: "F-8 Islamabad Campus",
-    totalLessons: 36,
-    completedLessons: 26,
-    enrolledStudents: 28,
-    activeAssignments: 1,
-    status: "Active",
-    colorTone: "ocean",
-  },
-  {
-    id: "lms-c16",
-    title: "Grade 12 Principles of Accounting",
-    courseCode: "ACC-12",
-    className: "Grade 12 (I.Com)",
-    subject: "Principles of Accounting",
-    teacher: "Mr. Waqas Anwar",
-    campus: "DHA Phase 5 Campus",
-    totalLessons: 28,
-    completedLessons: 20,
-    enrolledStudents: 26,
-    activeAssignments: 1,
-    status: "Active",
-    colorTone: "warning",
-  },
-  {
     id: "lms-c17",
-    title: "Grade 10 Urdu Literature & Grammar (Lazmi)",
+    title: "Grade 10 Urdu",
     courseCode: "URD-10",
     className: "Grade 10th (Science - Biology)",
     subject: "Urdu",
@@ -427,7 +343,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c18",
-    title: "Grade 9 Islamiat Compulsory & Hadith Studies",
+    title: "Grade 9 Islamiat",
     courseCode: "ISL-09",
     className: "Grade 9th (Science - Biology)",
     subject: "Islamiat",
@@ -442,7 +358,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c19",
-    title: "Grade 9 Tarjuma-tul-Quran & Surah Studies",
+    title: "Grade 9 Tarjuma-tul-Quran",
     courseCode: "TQ-09",
     className: "Grade 9th (Arts)",
     subject: "Tarjuma-tul-Quran",
@@ -457,7 +373,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c20",
-    title: "Grade 10 General Mathematics (Arts Stream)",
+    title: "Grade 10 General Mathematics",
     courseCode: "GMTH-10",
     className: "Grade 10th (Arts)",
     subject: "General Mathematics",
@@ -472,7 +388,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c21",
-    title: "Grade 9 Biology & Plant Tissues Lab",
+    title: "Grade 9 Biology",
     courseCode: "BIO-09",
     className: "Grade 9th (Science - Biology)",
     subject: "Biology",
@@ -487,7 +403,7 @@ export const LMS_COURSES: LmsCourse[] = [
   },
   {
     id: "lms-c22",
-    title: "Grade 10 Civics & Constitutional Structure",
+    title: "Grade 10 Civics",
     courseCode: "CIV-10",
     className: "Grade 10th (Arts)",
     subject: "Civics",
@@ -501,23 +417,8 @@ export const LMS_COURSES: LmsCourse[] = [
     colorTone: "ocean",
   },
   {
-    id: "lms-c23",
-    title: "Grade 12 Principles of Economics (I.Com)",
-    courseCode: "ECO-12",
-    className: "Grade 12 (I.Com)",
-    subject: "Economics",
-    teacher: "Mr. Tariq Mehmood",
-    campus: "DHA Phase 5 Campus",
-    totalLessons: 26,
-    completedLessons: 18,
-    enrolledStudents: 26,
-    activeAssignments: 1,
-    status: "Active",
-    colorTone: "warning",
-  },
-  {
     id: "lms-c24",
-    title: "Grade 9 Education & Pedagogy Concepts",
+    title: "Grade 9 Education",
     courseCode: "EDU-09",
     className: "Grade 9th (Arts)",
     subject: "Education (Ilm-ut-Taleem)",
@@ -529,36 +430,6 @@ export const LMS_COURSES: LmsCourse[] = [
     activeAssignments: 1,
     status: "Active",
     colorTone: "gold",
-  },
-  {
-    id: "lms-c25",
-    title: "Grade 12 Commercial Geography & Trade Routes",
-    courseCode: "CGEO-12",
-    className: "Grade 12 (I.Com)",
-    subject: "Commercial Geography",
-    teacher: "Mr. Waqas Anwar",
-    campus: "DHA Phase 5 Campus",
-    totalLessons: 24,
-    completedLessons: 16,
-    enrolledStudents: 26,
-    activeAssignments: 1,
-    status: "Active",
-    colorTone: "ocean",
-  },
-  {
-    id: "lms-c26",
-    title: "Grade 12 Business Mathematics & Statistics",
-    courseCode: "BMTH-12",
-    className: "Grade 12 (I.Com)",
-    subject: "Business Mathematics",
-    teacher: "Mr. Adeel Hassan",
-    campus: "Main Campus — Gulberg",
-    totalLessons: 28,
-    completedLessons: 19,
-    enrolledStudents: 26,
-    activeAssignments: 1,
-    status: "Active",
-    colorTone: "brand",
   },
 ];
 
@@ -666,8 +537,8 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   // 9th Class (Science Bio, Science Computer, Arts)
   {
     id: "asg-9",
-    title: "Electromagnetism Lab",
-    courseName: "Grade 9 Physics & Lab Mechanics",
+    title: "Motion & Laws Worksheet",
+    courseName: "Grade 9 Physics",
     className: "Grade 9th (Science - Biology)",
     teacher: "Dr. Saima Riaz",
     dueDate: "2026-10-24",
@@ -685,17 +556,17 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
     dueDate: "2026-10-27",
     totalSubmissions: 29,
     totalStudents: 32,
-    maxMarks: 25,
+    maxMarks: 20,
     status: "Active",
   },
   {
     id: "asg-11",
-    title: "Python Functions & Logic",
-    courseName: "Grade 9 Computer Science & Python",
+    title: "Flowcharts & Problem Solving",
+    courseName: "Grade 9 Computer Science",
     className: "Grade 9th (Science - Computer)",
     teacher: "Mr. Usman Ali",
     dueDate: "2026-10-26",
-    totalSubmissions: 14,
+    totalSubmissions: 21,
     totalStudents: 28,
     maxMarks: 15,
     status: "Active",
@@ -703,7 +574,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   {
     id: "asg-12",
     title: "Health & Nutrition",
-    courseName: "Grade 9 General Science & Arts Foundation",
+    courseName: "Grade 9 General Science",
     className: "Grade 9th (Arts)",
     teacher: "Mr. Usman Ali",
     dueDate: "2026-10-25",
@@ -715,7 +586,7 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   {
     id: "asg-13",
     title: "Urdu Grammar & Tashbih",
-    courseName: "Grade 9 Arts Urdu",
+    courseName: "Grade 9 Urdu",
     className: "Grade 9th (Arts)",
     teacher: "Ms. Kiran Aziz",
     dueDate: "2026-10-21",
@@ -728,32 +599,32 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   // 10th Class (Science Bio, Science Computer, Arts)
   {
     id: "asg-14",
-    title: "Quadratic Equations Ex 4.2",
-    courseName: "Grade 10 Mathematics (Core)",
+    title: "Quadratic Equations Ex 1.2",
+    courseName: "Grade 10 Mathematics",
     className: "Grade 10th (Science - Biology)",
     teacher: "Mr. Adeel Hassan",
     dueDate: "2026-10-25",
     totalSubmissions: 31,
     totalStudents: 34,
-    maxMarks: 25,
+    maxMarks: 20,
     status: "Active",
   },
   {
     id: "asg-15",
-    title: "Chemical Bonding Lab",
-    courseName: "Grade 10 Chemistry & Reactions",
+    title: "Acids, Bases & Salts Questions",
+    courseName: "Grade 10 Chemistry",
     className: "Grade 10th (Science - Biology)",
     teacher: "Mr. Fahad Mir",
     dueDate: "2026-10-27",
-    totalSubmissions: 20,
+    totalSubmissions: 24,
     totalStudents: 31,
     maxMarks: 20,
     status: "Active",
   },
   {
     id: "asg-16",
-    title: "SQL Database Queries",
-    courseName: "Grade 10 Computer Science & Databases",
+    title: "HTML Basics Worksheet",
+    courseName: "Grade 10 Computer Science",
     className: "Grade 10th (Science - Computer)",
     teacher: "Mr. Usman Ali",
     dueDate: "2026-10-28",
@@ -764,8 +635,8 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-17",
-    title: "1973 Constitution",
-    courseName: "Grade 10 Pakistan Studies & Civics",
+    title: "Pakistan History Chapter 3",
+    courseName: "Grade 10 Pakistan Studies",
     className: "Grade 10th (Arts)",
     teacher: "Mr. Waqas Anwar",
     dueDate: "2026-10-18",
@@ -776,91 +647,15 @@ export const LMS_ASSIGNMENTS: LmsAssignment[] = [
   },
   {
     id: "asg-18",
-    title: "Business Math & Zakat",
+    title: "Percentage & Zakat Ex 1.1",
     courseName: "Grade 10 General Mathematics",
     className: "Grade 10th (Arts)",
     teacher: "Mr. Bilal Saeed",
     dueDate: "2026-10-26",
     totalSubmissions: 30,
     totalStudents: 33,
-    maxMarks: 25,
-    status: "Active",
-  },
-
-  // Intermediate / HSSC-I (Grade 11 College)
-  {
-    id: "asg-19",
-    title: "Meiosis & Cell Division",
-    courseName: "Grade 11 Biology (Pre-Medical)",
-    className: "Grade 11 (FSc Pre-Medical)",
-    teacher: "Ms. Amina Tariq",
-    dueDate: "2026-10-28",
-    totalSubmissions: 16,
-    totalStudents: 29,
-    maxMarks: 25,
-    status: "Active",
-  },
-  {
-    id: "asg-20",
-    title: "Conic Sections Derivations",
-    courseName: "Grade 11 Calculus & Analytical Geometry",
-    className: "Grade 11 (FSc Pre-Engineering)",
-    teacher: "Mr. Adeel Hassan",
-    dueDate: "2026-10-29",
-    totalSubmissions: 22,
-    totalStudents: 31,
-    maxMarks: 30,
-    status: "Active",
-  },
-  {
-    id: "asg-21",
-    title: "C++ OOP Lab Task",
-    courseName: "Grade 11 Programming in C++ (ICS)",
-    className: "Grade 11 (ICS)",
-    teacher: "Mr. Usman Ali",
-    dueDate: "2026-10-27",
-    totalSubmissions: 18,
-    totalStudents: 27,
     maxMarks: 20,
     status: "Active",
-  },
-
-  // Intermediate / HSSC-II (Grade 12 College)
-  {
-    id: "asg-22",
-    title: "Genetics & DNA Replication",
-    courseName: "Grade 12 Biology (Pre-Medical)",
-    className: "Grade 12 (FSc Pre-Medical)",
-    teacher: "Ms. Amina Tariq",
-    dueDate: "2026-10-28",
-    totalSubmissions: 19,
-    totalStudents: 28,
-    maxMarks: 25,
-    status: "Active",
-  },
-  {
-    id: "asg-23",
-    title: "Nuclear Physics & Half-Life",
-    courseName: "Grade 12 Physics & Nuclear Mechanics",
-    className: "Grade 12 (FSc Pre-Engineering)",
-    teacher: "Dr. Saima Riaz",
-    dueDate: "2026-10-29",
-    totalSubmissions: 15,
-    totalStudents: 28,
-    maxMarks: 25,
-    status: "Active",
-  },
-  {
-    id: "asg-24",
-    title: "Partnership Balance Sheet",
-    courseName: "Grade 12 Principles of Accounting",
-    className: "Grade 12 (I.Com)",
-    teacher: "Mr. Waqas Anwar",
-    dueDate: "2026-10-20",
-    totalSubmissions: 26,
-    totalStudents: 26,
-    maxMarks: 20,
-    status: "Graded",
   },
 ];
 
@@ -889,18 +684,18 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-3",
-    title: "Chemical Reactions Slides",
+    title: "Acids & Bases Revision Slides",
     subject: "Chemistry",
     className: "Grade 10th (Science - Biology)",
     fileType: "SLIDES",
-    fileSize: "5.1 MB",
+    fileSize: "3.1 MB",
     uploadedBy: "Mr. Fahad Mir",
     uploadDate: "2026-10-15",
     downloadCount: 96,
   },
   {
     id: "mat-4",
-    title: "Python Basics Cheatsheet",
+    title: "Flowcharts & Binary Worksheet",
     subject: "Computer Science",
     className: "Grade 9th (Science - Computer)",
     fileType: "DOCX",
@@ -911,7 +706,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-5",
-    title: "English Grammar Guide",
+    title: "English Grammar & Tenses Guide",
     subject: "English",
     className: "Grade 8-A",
     fileType: "PDF",
@@ -922,29 +717,18 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-6",
-    title: "5-Year Solved Past Papers",
+    title: "Chapter 1–4 Revision Practice Sheet",
     subject: "Mathematics",
     className: "Grade 10th (Science - Biology)",
     fileType: "PDF",
-    fileSize: "4.6 MB",
+    fileSize: "3.2 MB",
     uploadedBy: "Mr. Adeel Hassan",
     uploadDate: "2026-10-05",
     downloadCount: 210,
   },
   {
-    id: "mat-7",
-    title: "Cell Biology Diagrams",
-    subject: "Biology",
-    className: "Grade 11 (FSc Pre-Medical)",
-    fileType: "PDF",
-    fileSize: "3.2 MB",
-    uploadedBy: "Ms. Amina Tariq",
-    uploadDate: "2026-10-11",
-    downloadCount: 88,
-  },
-  {
     id: "mat-8",
-    title: "General Science Notes",
+    title: "General Science Chapter Notes",
     subject: "General Science",
     className: "Grade 9th (Arts)",
     fileType: "PDF",
@@ -955,7 +739,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-9",
-    title: "Mental Math Drills",
+    title: "Fractions & Mental Math Drills",
     subject: "Mathematics",
     className: "Grade 5-A",
     fileType: "PDF",
@@ -966,7 +750,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-10",
-    title: "SQL Queries Guide",
+    title: "HTML Tags Practice Notes",
     subject: "Computer Science",
     className: "Grade 10th (Science - Computer)",
     fileType: "PDF",
@@ -977,7 +761,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-11",
-    title: "Urdu Grammar Notes",
+    title: "Urdu Grammar & Essay Notes",
     subject: "Urdu",
     className: "Grade 10th (Science - Biology)",
     fileType: "PDF",
@@ -988,7 +772,7 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-12",
-    title: "Ahadith & Tashreeh Notes",
+    title: "Ahadith & Short Questions Notes",
     subject: "Islamiat",
     className: "Grade 9th (Science - Biology)",
     fileType: "PDF",
@@ -999,18 +783,18 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-13",
-    title: "Surah Al-Anfal Tafseer",
+    title: "Surah Al-Anfal Translation Notes",
     subject: "Tarjuma-tul-Quran",
     className: "Grade 9th (Arts)",
     fileType: "PDF",
-    fileSize: "3.4 MB",
+    fileSize: "2.6 MB",
     uploadedBy: "Qari Muhammad Imran",
     uploadDate: "2026-10-17",
     downloadCount: 160,
   },
   {
     id: "mat-14",
-    title: "Zakat & Inheritance Formulas",
+    title: "Zakat & Percentage Solved Examples",
     subject: "General Mathematics",
     className: "Grade 10th (Arts)",
     fileType: "PDF",
@@ -1021,43 +805,21 @@ export const LMS_MATERIALS: LmsMaterial[] = [
   },
   {
     id: "mat-15",
-    title: "1973 Constitution Summary",
+    title: "Civics Chapter 1–3 Summary",
     subject: "Civics",
     className: "Grade 10th (Arts)",
     fileType: "SLIDES",
-    fileSize: "4.2 MB",
+    fileSize: "2.2 MB",
     uploadedBy: "Mr. Waqas Anwar",
     uploadDate: "2026-10-14",
     downloadCount: 94,
-  },
-  {
-    id: "mat-16",
-    title: "Microeconomics Notes",
-    subject: "Economics",
-    className: "Grade 12 (I.Com)",
-    fileType: "PDF",
-    fileSize: "2.5 MB",
-    uploadedBy: "Mr. Tariq Mehmood",
-    uploadDate: "2026-10-11",
-    downloadCount: 88,
-  },
-  {
-    id: "mat-17",
-    title: "Accounting Ledger & Entries",
-    subject: "Principles of Accounting",
-    className: "Grade 12 (I.Com)",
-    fileType: "PDF",
-    fileSize: "3.1 MB",
-    uploadedBy: "Mr. Waqas Anwar",
-    uploadDate: "2026-10-10",
-    downloadCount: 130,
   },
 ];
 
 export const LMS_LIVE_CLASSES: LmsLiveClass[] = [
   {
     id: "live-1",
-    title: "Mathematics: Revision on Word Problems (Quadratic Eq)",
+    title: "Mathematics: Quadratic Equations Revision",
     subject: "Mathematics",
     className: "Grade 10th (Science - Biology)",
     teacher: "Mr. Adeel Hassan",
@@ -1070,7 +832,7 @@ export const LMS_LIVE_CLASSES: LmsLiveClass[] = [
   },
   {
     id: "live-2",
-    title: "Physics: Wave Optics & Ray Diagrams Doubt Session",
+    title: "Physics: Motion & Numericals Help Session",
     subject: "Physics",
     className: "Grade 9th (Science - Biology)",
     teacher: "Dr. Saima Riaz",
@@ -1082,21 +844,8 @@ export const LMS_LIVE_CLASSES: LmsLiveClass[] = [
     joinUrl: "https://zoom.us/j/987654321",
   },
   {
-    id: "live-3",
-    title: "Biology: Meiosis Stages & Genetic Variations Tutorial",
-    subject: "Biology",
-    className: "Grade 11 (FSc Pre-Medical)",
-    teacher: "Ms. Amina Tariq",
-    date: "2026-10-24",
-    startTime: "10:00 AM",
-    endTime: "11:00 AM",
-    platform: "Google Meet",
-    status: "Upcoming",
-    joinUrl: "https://meet.google.com/edu-bio-live",
-  },
-  {
     id: "live-4",
-    title: "Computer Science: Practical Lab on Databases & SQL",
+    title: "Computer Science: HTML Class Practice",
     subject: "Computer Science",
     className: "Grade 10th (Science - Computer)",
     teacher: "Mr. Usman Ali",
@@ -1109,7 +858,7 @@ export const LMS_LIVE_CLASSES: LmsLiveClass[] = [
   },
   {
     id: "live-5",
-    title: "Computer Science: Practical Lab on Arrays & Loops",
+    title: "Computer Science: Flowcharts Review",
     subject: "Computer Science",
     className: "Grade 9th (Science - Computer)",
     teacher: "Mr. Usman Ali",

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/shared/page-header";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
@@ -353,19 +354,17 @@ export function LeaveRequestsClient() {
         headerClassName: "text-center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <AttendanceActionButton
-              size="xs"
-              tone="outline"
-              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+            <ActionIconButton
+              tone="view"
+              aria-label={`View leave request for ${r.applicant}`}
               title="View full details"
               onClick={() => {
                 setSelectedRequest(r);
                 setViewDialogOpen(true);
               }}
             >
-              <Eye className="size-3.5 text-blue-600" />
-              <span>View</span>
-            </AttendanceActionButton>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },

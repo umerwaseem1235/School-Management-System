@@ -135,7 +135,7 @@ export function ExportStaffDialog({
               <DialogTitle className="font-heading text-lg font-bold text-foreground">
                 Export Staff & Faculty Directory
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Generate and download an official landscape PDF dossier for staff records.
               </DialogDescription>
             </div>

@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { PersonCell } from "@/components/shared/user-avatar";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,15 +17,19 @@ import { cn } from "@/lib/utils";
 import type { Role, Status, User } from "@/types";
 import {
   Award,
+  Ban,
   Building2,
   Calculator,
-  ChevronDown,
+  CheckCircle2,
+  Clock,
+  Eye,
   FileCheck2,
   GraduationCap,
   Laptop,
   Lock,
   Pencil,
   PhoneCall,
+  Power,
   ShieldCheck,
   UserCheck,
   Users,
@@ -34,9 +37,44 @@ import {
 
 interface UserTableProps {
   data: User[];
+  onViewUser?: (user: User) => void;
   onSelectUser?: (user: User) => void;
   onStatusChange?: (id: string, newStatus: Status) => void;
 }
+
+const STATUS_ICON_STYLES: Record<
+  Status,
+  {
+    icon: React.ComponentType<{ className?: string }>;
+    className: string;
+    label: string;
+  }
+> = {
+  Active: {
+    icon: CheckCircle2,
+    className:
+      "border-emerald-200/80 bg-emerald-50/75 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:hover:bg-emerald-900/60",
+    label: "Active",
+  },
+  Inactive: {
+    icon: Power,
+    className:
+      "border-slate-200/90 bg-slate-100/80 text-slate-600 hover:border-slate-300 hover:bg-slate-200/75 dark:border-slate-700/70 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-800",
+    label: "Inactive (Deactivated)",
+  },
+  Suspended: {
+    icon: Ban,
+    className:
+      "border-red-200/80 bg-red-50/75 text-red-700 hover:border-red-300 hover:bg-red-100 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-900/60",
+    label: "Suspended",
+  },
+  Pending: {
+    icon: Clock,
+    className:
+      "border-amber-200/80 bg-amber-50/75 text-amber-700 hover:border-amber-300 hover:bg-amber-100 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/60",
+    label: "Pending Verification",
+  },
+};
 
 const STATUS_OPTIONS: {
   status: Status;
@@ -77,14 +115,20 @@ function UserStatusDropdown({
   status: Status;
   onStatusChange?: (status: Status) => void;
 }) {
+  const cfg = STATUS_ICON_STYLES[status] ?? STATUS_ICON_STYLES.Active;
+  const Icon = cfg.icon;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group inline-flex items-center gap-1 rounded-full outline-none transition-all hover:scale-102 active:scale-95 cursor-pointer focus-visible:ring-1 focus-visible:ring-ring"
-        title="Click to toggle status or deactivate user"
+        className={cn(
+          "inline-flex size-7 shrink-0 items-center justify-center rounded-md border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          cfg.className
+        )}
+        title={`Status: ${cfg.label} — Click to change`}
+        aria-label={`Account status: ${cfg.label}. Click to change`}
       >
-        <StatusBadge status={status} dot={false} className="cursor-pointer group-hover:brightness-95 shadow-2xs text-[11px] py-0.5" />
-        <ChevronDown className="size-3 text-muted-foreground/60 transition-transform group-data-[popup-open]:rotate-180" />
+        <Icon className="size-3.5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
@@ -288,38 +332,21 @@ const filters: FilterDef<User>[] = [
   },
 ];
 
-export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProps) {
+export function UsersTable({ data, onViewUser, onSelectUser, onStatusChange }: UserTableProps) {
   const columns = React.useMemo<Column<User>[]>(
     () => [
       {
         key: "name",
         header: "User & Profile",
         align: "left",
-        cell: (row) => {
-          let detailTag = "";
-          if (row.role === "Teacher") {
-            detailTag = row.assignedSubjects ? row.assignedSubjects : "Faculty";
-          } else if (row.role === "Student") {
-            detailTag = row.studentRollNo ? row.studentRollNo : "Student";
-          } else if (row.role === "Parent") {
-            detailTag = row.guardianName ? `Child: ${row.guardianName}` : "Parent Portal";
-          } else if (row.role === "HR Admin") {
-            detailTag = row.designation || "HR Operations";
-          } else if (row.role === "Accountant") {
-            detailTag = row.designation || "Accounts & Finance";
-          } else if (row.designation) {
-            detailTag = row.designation;
-          }
-
-          const subtitle = detailTag ? `${row.email} · ${detailTag}` : row.email;
-          return <PersonCell name={row.name} subtitle={subtitle} />;
-        },
+        cell: (row) => <PersonCell name={row.name} />,
         sortValue: (row) => row.name,
       },
       {
         key: "role",
         header: "Role",
         align: "center",
+        headerAlign: "center",
         cell: (row) => (
           <div className="flex items-center justify-center">
             <RoleBadge role={row.role} />
@@ -332,6 +359,7 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
         key: "campus",
         header: "Campus / Scope",
         align: "center",
+        headerAlign: "center",
         cell: (row) => {
           const info = formatCampusDisplay(row.campus);
           const secondaryDisplay =
@@ -361,6 +389,7 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
         key: "lastLogin",
         header: "Last Login",
         align: "center",
+        headerAlign: "center",
         cell: (row) => (
           <span className="text-[12px] tabular-nums text-muted-foreground whitespace-nowrap">
             {row.lastLogin ? formatDateTime(row.lastLogin) : "Never"}
@@ -370,50 +399,83 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
         className: "whitespace-nowrap",
       },
       {
-        key: "actions",
-        header: "Status / Actions",
+        key: "status",
+        header: "Status",
         align: "center",
+        headerAlign: "center",
         cell: (row) => {
           const isSuperAdmin = row.role === "Super Admin";
-
           if (isSuperAdmin) {
+            const cfg = STATUS_ICON_STYLES[row.status] ?? STATUS_ICON_STYLES.Active;
+            const StatusIcon = cfg.icon;
             return (
-              <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-                {/* Static Protected Status Badge - no dropdown */}
-                <StatusBadge status={row.status} />
-
-                {/* Root Protected Account Pill */}
+              <div className="flex items-center justify-center">
                 <span
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-muted-foreground bg-muted/60 border border-border/80 shadow-2xs select-none"
-                  title="Root Super Admin account is protected against modification and deactivation."
+                  className={cn(
+                    "inline-flex size-7 shrink-0 items-center justify-center rounded-md border select-none",
+                    cfg.className
+                  )}
+                  title={`Status: ${cfg.label} (Protected root account)`}
+                  aria-label={`Status: ${cfg.label}`}
                 >
-                  <Lock className="size-3 text-red-600 dark:text-red-400" />
-                  <span>Protected</span>
+                  <StatusIcon className="size-3.5" />
                 </span>
               </div>
             );
           }
 
           return (
-            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-              {/* Clickable Status Badge Dropdown */}
+            <div className="flex items-center justify-center">
               <UserStatusDropdown
                 status={row.status}
                 onStatusChange={(newStatus) => onStatusChange?.(row.id, newStatus)}
               />
+            </div>
+          );
+        },
+        sortValue: (row) => row.status,
+        className: "whitespace-nowrap",
+      },
+      {
+        key: "actions",
+        header: "Actions",
+        align: "center",
+        headerAlign: "center",
+        cell: (row) => {
+          const isSuperAdmin = row.role === "Super Admin";
 
-              {/* Quick Edit Button */}
-              {onSelectUser && (
-                <Button
-                  variant="outline"
-                  size="xs"
-                  onClick={() => onSelectUser(row)}
-                  className="h-7 gap-1 px-2.5 rounded-lg text-xs font-semibold border-border/80 text-brand hover:bg-brand-50 hover:text-brand hover:border-brand/40 shadow-2xs transition-all active:scale-95 cursor-pointer"
-                  title="Edit user details, assignments, or reset password"
+          return (
+            <div className="inline-flex items-center justify-center gap-1 whitespace-nowrap">
+              {onViewUser && (
+                <ActionIconButton
+                  tone="view"
+                  onClick={() => onViewUser(row)}
+                  aria-label={`View details for ${row.name}`}
+                  title="View full user details"
                 >
-                  <Pencil className="size-3" />
-                  <span>Edit</span>
-                </Button>
+                  <Eye />
+                </ActionIconButton>
+              )}
+
+              {isSuperAdmin ? (
+                <span
+                  className="inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-rose-200/80 bg-rose-50/75 text-rose-600 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-400 select-none shadow-2xs"
+                  title="Protected root account — editing is locked"
+                  aria-label="Protected root account"
+                >
+                  <Lock className="size-3.5" />
+                </span>
+              ) : (
+                onSelectUser && (
+                  <ActionIconButton
+                    tone="edit"
+                    onClick={() => onSelectUser(row)}
+                    aria-label={`Edit ${row.name}`}
+                    title="Edit user details, assignments, or reset password"
+                  >
+                    <Pencil />
+                  </ActionIconButton>
+                )
               )}
             </div>
           );
@@ -421,7 +483,7 @@ export function UsersTable({ data, onSelectUser, onStatusChange }: UserTableProp
         className: "whitespace-nowrap",
       },
     ],
-    [onSelectUser, onStatusChange]
+    [onViewUser, onSelectUser, onStatusChange]
   );
 
   return (

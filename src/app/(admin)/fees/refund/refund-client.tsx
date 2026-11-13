@@ -26,6 +26,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Dialog,
@@ -364,10 +365,9 @@ export function RefundClient() {
         headerClassName: "w-[14%] text-center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+            <ActionIconButton
+              tone="view"
+              aria-label={`View refund request for ${r.student}`}
               title="View notification details & approval controls"
               onClick={() => {
                 setSelectedRefundId(r.id);
@@ -375,9 +375,8 @@ export function RefundClient() {
                 setViewDialogOpen(true);
               }}
             >
-              <Eye className="size-3.5 text-blue-600" />
-              <span>View</span>
-            </ActionButton>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },

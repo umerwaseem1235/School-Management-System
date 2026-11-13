@@ -27,6 +27,7 @@ import {
 } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -391,16 +392,14 @@ export function AccountsClient() {
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+            <ActionIconButton
+              tone="view"
+              aria-label={`View account details for ${r.studentName}`}
               title="View assigned student email, password, and login history"
               onClick={() => openStudent(r, "overview", "student")}
             >
-              <Eye className="size-3.5 text-blue-600" />
-              <span>View</span>
-            </ActionButton>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -488,16 +487,14 @@ export function AccountsClient() {
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+            <ActionIconButton
+              tone="view"
+              aria-label={`View parent account details for ${r.guardianName}`}
               title="View assigned parent email, password, and login history"
               onClick={() => openStudent(r, "overview", "parent")}
             >
-              <Eye className="size-3.5 text-blue-600" />
-              <span>View</span>
-            </ActionButton>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -606,16 +603,14 @@ export function AccountsClient() {
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+            <ActionIconButton
+              tone="view"
+              aria-label={`View staff account details for ${r.name}`}
               title="View assigned staff email, password, and login history"
               onClick={() => openStaff(r)}
             >
-              <Eye className="size-3.5 text-blue-600" />
-              <span>View</span>
-            </ActionButton>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },

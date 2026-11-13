@@ -25,6 +25,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 
 import {
   Select,
@@ -598,10 +599,9 @@ export function ReportsClient({ title = "Fee Reports" }: { title?: string } = {}
         headerClassName: "w-[10%] text-center",
         cell: (r) => (
           <div className="flex justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-purple-200 bg-purple-50/70 text-purple-700 hover:border-purple-400 hover:bg-purple-100 hover:text-purple-800 shadow-2xs"
+            <ActionIconButton
+              tone="purple"
+              aria-label={`Print fee statement for ${r.student}`}
               title={`Print ${periodMode === "annual" ? selectedSession : selectedMonth} Fee Statement for ${r.student}`}
               onClick={() => {
                 printSingleStudentFeeStatement(r, periodMode, selectedMonth, selectedSession);
@@ -610,9 +610,8 @@ export function ReportsClient({ title = "Fee Reports" }: { title?: string } = {}
                 );
               }}
             >
-              <Printer className="size-3.5 text-purple-600" />
-              <span>Statement</span>
-            </ActionButton>
+              <Printer />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -737,10 +736,9 @@ export function ReportsClient({ title = "Fee Reports" }: { title?: string } = {}
         headerClassName: "w-[10%] text-center",
         cell: (r) => (
           <div className="flex justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-purple-200 bg-purple-50/70 text-purple-700 hover:border-purple-400 hover:bg-purple-100 hover:text-purple-800 shadow-2xs"
+            <ActionIconButton
+              tone="purple"
+              aria-label={`Print pay slip for ${r.name}`}
               title={`Print ${periodMode === "annual" ? selectedSession : selectedMonth} Salary Statement for ${r.name}`}
               onClick={() => {
                 printSingleStaffSalaryStatement(r, periodMode, selectedMonth, selectedSession);
@@ -749,9 +747,8 @@ export function ReportsClient({ title = "Fee Reports" }: { title?: string } = {}
                 );
               }}
             >
-              <Printer className="size-3.5 text-purple-600" />
-              <span>Pay Slip</span>
-            </ActionButton>
+              <Printer />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -848,14 +845,14 @@ export function ReportsClient({ title = "Fee Reports" }: { title?: string } = {}
         headerClassName: "w-[10%] text-center",
         cell: (r) => (
           <div className="flex justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
+            <ActionIconButton
+              tone="edit"
+              aria-label={`Send fee reminder to ${r.student}`}
+              title={`Send fee reminder alert to ${r.student}`}
               onClick={() => handleSendReminder(r.phone, r.student)}
             >
-              <Send className="size-3.5" />
-              <span>Send Alert</span>
-            </ActionButton>
+              <Send />
+            </ActionIconButton>
           </div>
         ),
       },

@@ -8,13 +8,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { LmsMaterial } from "@/types";
-import { formatCompactClass } from "@/lib/mock/lms";
+import { formatCompactClass, formatLmsDate } from "@/lib/mock/lms";
 import {
   FileText,
   Download,
-  Calendar,
   Users,
   GraduationCap,
   BookOpen,
@@ -24,7 +22,6 @@ import {
   Check,
   Presentation,
   FileSpreadsheet,
-  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -81,76 +78,60 @@ function getMaterialHighlights(subject: string, title: string): string[] {
   const s = (subject || "").toLowerCase();
   const t = (title || "").toLowerCase();
 
-  if (s.includes("math") || t.includes("math") || t.includes("equations") || t.includes("calculus")) {
+  if (s.includes("math") || t.includes("math") || t.includes("equations")) {
     return [
-      "Core definitions, formulas, and step-by-step proofs",
-      "Comprehensive solved textbook exercises & examples",
-      "5-year past board exam practice questions",
-      "Summary formula cheatsheet for quick exam revision",
+      "Key definitions, formulas, and worked examples",
+      "Solved textbook exercises for class practice",
+      "Revision practice questions for class tests",
     ];
   }
   if (s.includes("phy") || t.includes("physics")) {
     return [
-      "Key laws, principles, SI units, and vector diagrams",
-      "Step-by-step derivations with labeled diagrams",
-      "Conceptual numerical problems with model solutions",
-      "Laboratory practical guidelines and observations",
+      "Important laws, definitions, and SI units",
+      "Simple labeled diagrams and formulas",
+      "Solved numericals and short questions",
     ];
   }
-  if (s.includes("chem") || t.includes("chemical") || t.includes("bonding")) {
+  if (s.includes("chem") || t.includes("chemical") || t.includes("acids")) {
     return [
-      "Balanced chemical equations and reaction mechanisms",
-      "Periodic trends, atomic structures, and bonding models",
-      "Organic nomenclature and functional group comparisons",
-      "Important board questions with detailed marking points",
+      "Important chemical equations and properties",
+      "Chapter summary tables and definitions",
+      "Solved short and long chapter questions",
     ];
   }
-  if (s.includes("bio") || t.includes("biology") || t.includes("cell") || t.includes("genetics")) {
+  if (s.includes("bio") || t.includes("biology") || t.includes("cell")) {
     return [
-      "High-yield labeled biological & physiological diagrams",
-      "Cell division, meiosis, and genetic replication charts",
-      "Key scientific terminology and differentiation tables",
-      "Past paper board questions with standard model answers",
+      "Clear labeled biological diagrams",
+      "Important terms and differences tables",
+      "Chapter exercise questions and answers",
     ];
   }
-  if (s.includes("computer") || t.includes("python") || t.includes("sql") || t.includes("c++")) {
+  if (s.includes("computer") || t.includes("flowchart") || t.includes("html")) {
     return [
-      "Syntax rules, code snippets, and variable declarations",
-      "Logic gate diagrams, relational schemas, and SQL queries",
-      "Algorithmic walkthroughs with dry-run trace tables",
-      "Hands-on lab practical assignments and exercise tasks",
+      "Step-by-step examples and diagrams",
+      "Practice worksheet exercises for lab period",
+      "Solved short questions from textbook chapters",
     ];
   }
   if (s.includes("urdu") || s.includes("english") || t.includes("grammar") || t.includes("mazmoon")) {
     return [
-      "Grammar rules, sentence structures, and applied exercises",
-      "Vocabulary lists with contextual meanings and idioms",
-      "Model essays, formal letters, and comprehension passages",
-      "Exam preparation guidelines according to board standards",
+      "Grammar rules and practice sentences",
+      "Important vocabulary, idioms, and meanings",
+      "Model essays, letters, and comprehension notes",
     ];
   }
   if (s.includes("islam") || s.includes("quran") || s.includes("pakistan") || s.includes("civics")) {
     return [
-      "Authentic text references, translations, and commentary",
-      "Historical timeline of events and constitutional developments",
-      "Key headings, analytical points, and essay structures",
-      "Past board questions with verified high-scoring outlines",
-    ];
-  }
-  if (s.includes("account") || s.includes("econ") || s.includes("commerce")) {
-    return [
-      "Accounting ledger formats, journal entries, and trial balances",
-      "Supply, demand, and elasticity graph interpretations",
-      "Solved practical case studies and financial statements",
-      "Standard board questions with complete calculation steps",
+      "Important translations and chapter points",
+      "Key dates, events, and summary headings",
+      "Solved textbook exercise questions",
     ];
   }
 
   return [
-    "Comprehensive lecture notes aligned with national curriculum",
-    "Key concept summaries and high-yield topic overviews",
-    "Solved review questions and practice problems",
-    "Important tips and guidelines for term and board exams",
+    "Clear chapter notes aligned with school syllabus",
+    "Key topic summaries for easy revision",
+    "Solved practice questions for class tests",
   ];
 }
 
@@ -191,19 +172,7 @@ export function ViewMaterialDialog({
     }
   };
 
-  const uploadDateFormatted = React.useMemo(() => {
-    try {
-      const d = new Date(material.uploadDate);
-      if (isNaN(d.getTime())) return material.uploadDate;
-      return d.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    } catch {
-      return material.uploadDate;
-    }
-  }, [material.uploadDate]);
+  const uploadDateFormatted = formatLmsDate(material.uploadDate);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -326,7 +295,7 @@ export function ViewMaterialDialog({
               </div>
 
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Instructional resource prepared by {material.uploadedBy} for {material.subject} ({compactClass}), curated for classroom learning and board exam revision.
+                Prepared by {material.uploadedBy} for {material.subject} ({compactClass}) for classroom teaching and exam revision.
               </p>
 
               <div className="space-y-2 pt-1 border-t border-border/50">
@@ -339,28 +308,16 @@ export function ViewMaterialDialog({
                   </div>
                 ))}
               </div>
-
-              <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
-                  Curriculum Aligned
-                </Badge>
-                <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
-                  Verified Notes
-                </Badge>
-                <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
-                  Print Ready
-                </Badge>
-              </div>
             </div>
 
-            {/* Right: Technical & Academic Specifications */}
+            {/* Right: Note Details */}
             <div className="p-4 rounded-xl border border-border/70 bg-card space-y-3">
               <div className="flex items-center gap-2">
                 <div className="flex size-6 items-center justify-center rounded-md bg-brand-soft text-brand">
                   <FileCheck className="size-3.5" />
                 </div>
                 <h5 className="text-xs font-bold text-foreground">
-                  Document Specifications
+                  Note Details
                 </h5>
               </div>
 
@@ -370,15 +327,15 @@ export function ViewMaterialDialog({
                   <span className="font-semibold text-foreground text-right">{material.subject}</span>
                 </div>
                 <div className="py-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Class & Stream</span>
+                  <span className="text-muted-foreground">Class</span>
                   <span className="font-semibold text-foreground text-right">{compactClass}</span>
                 </div>
                 <div className="py-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Uploaded By</span>
+                  <span className="text-muted-foreground">Teacher</span>
                   <span className="font-semibold text-foreground text-right">{material.uploadedBy}</span>
                 </div>
                 <div className="py-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Published Date</span>
+                  <span className="text-muted-foreground">Upload Date</span>
                   <span className="font-semibold text-foreground text-right">{uploadDateFormatted}</span>
                 </div>
                 <div className="py-2 flex items-center justify-between">
@@ -388,19 +345,11 @@ export function ViewMaterialDialog({
                   </span>
                 </div>
                 <div className="py-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Student Circulation</span>
-                  <span className="font-bold text-brand text-right">{material.downloadCount} Downloads</span>
+                  <span className="text-muted-foreground">Downloads</span>
+                  <span className="font-bold text-brand text-right">{material.downloadCount}</span>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Department Verification Strip */}
-          <div className="px-3.5 py-2.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 flex items-center gap-2 text-xs">
-            <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span className="text-xs font-medium text-foreground">
-              Verified Teaching Document • Approved for Term Study & Exam Preparation
-            </span>
           </div>
         </div>
       </DialogContent>

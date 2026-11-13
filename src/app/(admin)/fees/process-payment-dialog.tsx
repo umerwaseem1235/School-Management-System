@@ -302,7 +302,7 @@ function InstallmentPlanForm({
             {challan.challanNumber}
           </span>
         </DialogTitle>
-        <DialogDescription className="text-xs text-muted-foreground">
+        <DialogDescription className="sr-only">
           Split unpaid fee dues into 2 to 5 separate Unpaid installment challans.
         </DialogDescription>
       </DialogHeader>

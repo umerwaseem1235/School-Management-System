@@ -54,7 +54,7 @@ export function KeyboardShortcutsDialog({
               <DialogTitle className="font-heading text-base font-bold text-brand">
                 Keyboard Shortcuts
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
+              <DialogDescription className="sr-only">
                 Speed up Super Admin navigation with executive hotkeys.
               </DialogDescription>
             </div>

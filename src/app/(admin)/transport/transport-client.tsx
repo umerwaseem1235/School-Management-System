@@ -33,6 +33,7 @@ import {
   type FilterDef,
 } from "@/components/shared/data-table";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { cn } from "@/lib/utils";
 import { formatNumber } from "@/lib/format";
 import {
@@ -354,21 +355,17 @@ export function TransportClient() {
         className: "w-[16%] px-3 text-center",
         headerClassName: "w-[16%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex items-center justify-center gap-1.5">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+          <div className="flex items-center justify-center gap-1">
+            <ActionIconButton
+              tone="indigo"
               title={`Download route manifest PDF for ${r.routeName}`}
               aria-label={`Download route manifest PDF for ${r.routeName}`}
               onClick={() => handleDownloadRouteStudentsPdf(r)}
             >
-              <FileDown className="size-3.5 text-indigo-600" />
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+              <FileDown />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="edit"
               title={`Edit ${r.routeName}`}
               aria-label={`Edit ${r.routeName}`}
               onClick={() => {
@@ -376,12 +373,10 @@ export function TransportClient() {
                 setRouteModalOpen(true);
               }}
             >
-              <Edit className="size-3.5 text-amber-600" />
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+              <Edit />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="delete"
               title={`Delete ${r.routeName}`}
               aria-label={`Delete ${r.routeName}`}
               onClick={() =>
@@ -392,8 +387,8 @@ export function TransportClient() {
                 })
               }
             >
-              <Trash2 className="size-3.5 text-rose-600" />
-            </ActionButton>
+              <Trash2 />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -483,21 +478,17 @@ export function TransportClient() {
         className: "w-[12%] px-3 text-center",
         headerClassName: "w-[12%] px-3 text-center whitespace-nowrap",
         cell: (v) => (
-          <div className="flex items-center justify-center gap-1.5">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+          <div className="flex items-center justify-center gap-1">
+            <ActionIconButton
+              tone="indigo"
               title={`Download student manifest PDF for ${v.vehicleNo} (${v.model})`}
               aria-label={`Download student manifest PDF for ${v.vehicleNo}`}
               onClick={() => handleDownloadVehicleStudentsPdf(v)}
             >
-              <FileDown className="size-3.5 text-indigo-600" />
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+              <FileDown />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="edit"
               title={`Edit vehicle ${v.vehicleNo}`}
               aria-label={`Edit vehicle ${v.vehicleNo}`}
               onClick={() => {
@@ -505,12 +496,10 @@ export function TransportClient() {
                 setVehicleModalOpen(true);
               }}
             >
-              <Edit className="size-3.5 text-amber-600" />
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+              <Edit />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="delete"
               title={`Delete vehicle ${v.vehicleNo}`}
               aria-label={`Delete vehicle ${v.vehicleNo}`}
               onClick={() =>
@@ -521,8 +510,8 @@ export function TransportClient() {
                 })
               }
             >
-              <Trash2 className="size-3.5" />
-            </ActionButton>
+              <Trash2 />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -678,21 +667,17 @@ export function TransportClient() {
         className: "w-[11%] px-2 text-center",
         headerClassName: "w-[11%] px-2 text-center whitespace-nowrap",
         cell: (a) => (
-          <div className="flex items-center justify-center gap-1.5">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+          <div className="flex items-center justify-center gap-1">
+            <ActionIconButton
+              tone="indigo"
               title={`Download transport pass PDF for ${a.studentName}`}
               aria-label={`Download transport pass PDF for ${a.studentName}`}
               onClick={() => handleDownloadStudentPassPdf(a)}
             >
-              <FileDown className="size-3.5 text-indigo-600" />
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+              <FileDown />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="edit"
               title={`Edit assignment for ${a.studentName}`}
               aria-label={`Edit assignment for ${a.studentName}`}
               onClick={() => {
@@ -700,12 +685,10 @@ export function TransportClient() {
                 setAssignmentModalOpen(true);
               }}
             >
-              <Edit className="size-3.5 text-amber-600" />
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="h-7 w-7 p-0 rounded-md border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 transition-colors shadow-2xs [&_svg]:size-3.5"
+              <Edit />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="delete"
               title={`Remove ${a.studentName} from route`}
               aria-label={`Remove ${a.studentName} from route`}
               onClick={() =>
@@ -716,8 +699,8 @@ export function TransportClient() {
                 })
               }
             >
-              <Trash2 className="size-3.5" />
-            </ActionButton>
+              <Trash2 />
+            </ActionIconButton>
           </div>
         ),
       },

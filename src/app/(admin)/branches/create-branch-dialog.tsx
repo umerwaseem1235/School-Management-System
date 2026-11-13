@@ -194,7 +194,7 @@ export function CreateBranchDialog({
               <DialogTitle className="text-base font-semibold text-foreground">
                 Add New Branch
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Register a new school branch or campus location.
               </DialogDescription>
             </div>

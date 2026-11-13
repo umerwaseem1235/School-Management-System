@@ -115,7 +115,7 @@ export function AddPaperDialog({
                 <DialogTitle className="text-base font-bold text-foreground leading-tight truncate">
                   Add Paper to Datesheet
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="sr-only">
                   Schedule an examination paper with timing, room, and marks criteria.
                 </DialogDescription>
               </div>

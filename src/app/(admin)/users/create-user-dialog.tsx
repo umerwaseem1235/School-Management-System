@@ -476,7 +476,7 @@ export function CreateUserDialog({
               <DialogTitle className="text-base font-heading font-bold text-foreground">
                 Create User & Access Account
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Onboard teachers, students, HR staff, accountants, and parents with role-tailored profiles.
               </DialogDescription>
             </div>

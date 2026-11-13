@@ -7,30 +7,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { LmsCourse } from "@/types";
 import { formatCompactClass } from "@/lib/mock/lms";
 import {
   BookOpen,
-  CheckCircle2,
   Circle,
   Clock,
   GraduationCap,
   MapPin,
   Users,
   Layers,
-  Calendar,
   Check,
 } from "lucide-react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface ViewSyllabusDialogProps {
   course: LmsCourse | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddAssignment?: () => void;
 }
 
 interface SyllabusUnit {
@@ -57,118 +51,118 @@ function getSubjectUnits(course: LmsCourse): SyllabusUnit[] {
 
   let unitTemplates: { title: string; topics: string }[] = [];
 
-  if (subject.includes("math") || subject.includes("calculus")) {
+  if (subject.includes("math")) {
     unitTemplates = [
       {
-        title: "Unit 1: Number Systems & Algebraic Expressions",
-        topics: "Sets, complex numbers, factorization, algebraic identities",
+        title: "Term 1: Numbers & Basic Algebra",
+        topics: "Whole numbers, fractions, algebraic expressions, linear equations",
       },
       {
-        title: "Unit 2: Quadratic Equations & Variations",
-        topics: "Completing square, quadratic formula, direct and inverse variations",
+        title: "Term 2: Equations, Ratio & Proportion",
+        topics: "Quadratic equations, ratios, percentages, word problems",
       },
       {
-        title: "Unit 3: Matrices, Determinants & Trigonometry",
-        topics: "Cramer's rule, matrix inverse, trigonometric ratios, angle formulas",
+        title: "Term 3: Geometry & Measurements",
+        topics: "Angles, triangles, area, perimeter, practical geometry",
       },
       {
-        title: "Unit 4: Coordinate Geometry & Board Examination Revision",
-        topics: "Distance formula, collinear points, 5-year past papers review",
+        title: "Final Review: Practice Exercises & Tests",
+        topics: "Chapter worksheets, class tests, annual exam revision",
       },
     ];
   } else if (subject.includes("phy")) {
     unitTemplates = [
       {
-        title: "Unit 1: Physical Quantities & Kinematics",
-        topics: "SI units, precision instruments, velocity, acceleration, motion graphs",
+        title: "Term 1: Measurement & Motion",
+        topics: "Physical quantities, measuring instruments, speed, velocity",
       },
       {
-        title: "Unit 2: Dynamics, Work, Energy & Power",
-        topics: "Newton's laws of motion, friction, conservation of energy, work done",
+        title: "Term 2: Force, Work & Energy",
+        topics: "Newton's laws of motion, friction, work, energy forms",
       },
       {
-        title: "Unit 3: Wave Optics, Electricity & Magnetism",
-        topics: "Ohm's law, circuits, electromagnetic induction, optical instruments",
+        title: "Term 3: Heat, Light & Electricity",
+        topics: "Temperature, reflection of light, basic circuits, magnets",
       },
       {
-        title: "Unit 4: Atomic Physics, Nuclear Radiation & Practicals",
-        topics: "Half-life calculations, radioactivity, laboratory experiment logs",
+        title: "Final Review: Numericals & Class Revision",
+        topics: "Textbook numericals, diagram practice, term exam review",
       },
     ];
   } else if (subject.includes("chem")) {
     unitTemplates = [
       {
-        title: "Unit 1: Fundamentals of Chemistry & Atomic Structure",
-        topics: "Atomic number, isotopes, electronic configuration, Bohr model",
+        title: "Term 1: Matter & Atomic Structure",
+        topics: "Elements, compounds, mixtures, atomic number and shells",
       },
       {
-        title: "Unit 2: Periodic Table, Trends & Chemical Bonding",
-        topics: "Ionic/covalent bonds, electronegativity, ionization energy trends",
+        title: "Term 2: Periodic Table & Chemical Bonding",
+        topics: "Metals and non-metals, ionic and covalent bonds",
       },
       {
-        title: "Unit 3: States of Matter, Solutions & Electrochemistry",
-        topics: "Gas laws, molarity, oxidation-reduction, electrolytic cells",
+        title: "Term 3: Solutions, Acids & Bases",
+        topics: "Acids, bases, salts, pH scale, everyday reactions",
       },
       {
-        title: "Unit 4: Organic Chemistry & Environmental Chemistry",
-        topics: "Hydrocarbons, functional groups, atmospheric pollution, lab tests",
+        title: "Final Review: Equations & Chapter Tests",
+        topics: "Balancing equations, short questions, annual revision",
       },
     ];
   } else if (subject.includes("bio")) {
     unitTemplates = [
       {
-        title: "Unit 1: Introduction to Biology & Cell Structure",
-        topics: "Microscopy, organelle functions, plant vs animal cells, enzymes",
+        title: "Term 1: Cells & Living Organisms",
+        topics: "Plant and animal cells, microscope use, tissues and organs",
       },
       {
-        title: "Unit 2: Cell Cycle, Meiosis & Plant Physiology",
-        topics: "Mitosis stages, gamete formation, photosynthesis, transpiration",
+        title: "Term 2: Nutrition & Respiration",
+        topics: "Photosynthesis, human digestive system, breathing",
       },
       {
-        title: "Unit 3: Human Organ Systems & Genetics",
-        topics: "Digestive/respiratory systems, Mendel's laws, DNA replication",
+        title: "Term 3: Transport & Coordination",
+        topics: "Blood circulation, transport in plants, sense organs",
       },
       {
-        title: "Unit 4: Ecology, Biotechnology & Exam Revision",
-        topics: "Ecosystems, genetic engineering, high-yield board question bank",
+        title: "Final Review: Labeled Diagrams & Tests",
+        topics: "Diagram practice, key terms, annual exam preparation",
       },
     ];
   } else if (subject.includes("comp") || subject.includes("cs")) {
     unitTemplates = [
       {
-        title: "Unit 1: Fundamentals of Computer Architecture & OS",
-        topics: "CPU components, memory hierarchy, software types, logic gates",
+        title: "Term 1: Computer Basics & Hardware",
+        topics: "Input/output devices, CPU, storage, operating systems",
       },
       {
-        title: "Unit 2: Computational Logic & Programming Basics",
-        topics: "Flowcharts, algorithms, control structures, loops, data types",
+        title: "Term 2: Problem Solving & Flowcharts",
+        topics: "Algorithms, flowcharts, binary numbers, logic basics",
       },
       {
-        title: "Unit 3: Relational Database Systems & SQL",
-        topics: "Database tables, primary/foreign keys, SELECT queries, JOINs",
+        title: "Term 3: Office Tools & Internet Safety",
+        topics: "Word processing, spreadsheets, HTML basics, safe browsing",
       },
       {
-        title: "Unit 4: Web Technologies, Networks & Practical Tasks",
-        topics: "Network topologies, internet protocols, HTML/CSS, practical labs",
+        title: "Final Review: Practical Exercises & Tests",
+        topics: "Lab worksheets, short questions, annual exam revision",
       },
     ];
   } else {
     unitTemplates = [
       {
-        title: "Unit 1: Foundational Principles & Core Concepts",
-        topics: "Definitions, historical context, core curriculum terminology",
+        title: "Term 1: Reading & Core Chapters",
+        topics: "Foundational chapters, key vocabulary, class reading",
       },
       {
-        title: "Unit 2: Theoretical Models & Analytical Applications",
-        topics: "Case studies, comparative analysis, standard framework studies",
+        title: "Term 2: Grammar & Written Exercises",
+        topics: "Textbook exercises, short questions, comprehension",
       },
       {
-        title: "Unit 3: Contemporary Practice & Applied Exercises",
-        topics: "Guided exercises, essay compositions, critical review problems",
+        title: "Term 3: Practice & Classwork Activities",
+        topics: "Guided notebook work, compositions, class quizzes",
       },
       {
-        title: "Unit 4: Syllabus Revision & Examination Preparation",
-        topics: "Comprehensive review, past paper walkthroughs, model exam tests",
+        title: "Final Review: Revision & Model Tests",
+        topics: "Full syllabus review, practice tests, exam preparation",
       },
     ];
   }
@@ -201,7 +195,6 @@ export function ViewSyllabusDialog({
   course,
   open,
   onOpenChange,
-  onAddAssignment,
 }: ViewSyllabusDialogProps) {
   if (!course) return null;
 
@@ -257,15 +250,15 @@ export function ViewSyllabusDialog({
 
         {/* Content Body */}
         <div className="px-6 py-5 pb-6 space-y-4 max-h-[75vh] overflow-y-auto">
-          {/* Executive Syllabus Progress Card */}
-          <div className="p-4 rounded-xl border border-border/80 bg-gradient-to-r from-muted/40 via-muted/20 to-card space-y-3">
+          {/* Syllabus Progress Card */}
+          <div className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-xs font-bold text-foreground">
-                  Curriculum Progress Overview
+                  Syllabus Progress
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  {completedLessons} of {totalLessons} planned lessons delivered
+                  {completedLessons} of {totalLessons} lessons taught
                 </p>
               </div>
               <div className="text-right">
@@ -273,7 +266,7 @@ export function ViewSyllabusDialog({
                   {progressPct}%
                 </span>
                 <span className="text-[11px] text-muted-foreground block">
-                  {completedUnits} of {units.length} Units Complete
+                  {completedUnits} of {units.length} Terms Done
                 </span>
               </div>
             </div>
@@ -295,50 +288,50 @@ export function ViewSyllabusDialog({
 
             {/* 4 Clean Key Metrics */}
             <div className="grid grid-cols-4 gap-2.5 pt-2.5 border-t border-border/50 text-center">
-              <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+              <div className="p-2 rounded-lg bg-card/70 border border-border/50">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
-                  Total Lessons
+                  Lessons
                 </p>
-                <p className="text-sm font-bold text-foreground mt-0.5">
+                <p className="text-sm font-bold text-foreground mt-0.5 tabular-nums">
                   {totalLessons}
                 </p>
               </div>
-              <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+              <div className="p-2 rounded-lg bg-card/70 border border-border/50">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
                   Completed
                 </p>
-                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 tabular-nums">
                   {completedLessons}
                 </p>
               </div>
-              <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+              <div className="p-2 rounded-lg bg-card/70 border border-border/50">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
-                  Enrolled
+                  Students
                 </p>
-                <p className="text-sm font-bold text-foreground mt-0.5">
+                <p className="text-sm font-bold text-foreground mt-0.5 tabular-nums">
                   {course.enrolledStudents}
                 </p>
               </div>
-              <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+              <div className="p-2 rounded-lg bg-card/70 border border-border/50">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
-                  Active Tasks
+                  Homework
                 </p>
-                <p className="text-sm font-bold text-brand mt-0.5">
+                <p className="text-sm font-bold text-brand mt-0.5 tabular-nums">
                   {course.activeAssignments}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Detailed Units Outline */}
+          {/* Syllabus Plan */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
               <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Layers className="size-3.5 text-brand" />
-                Syllabus Units Breakdown ({units.length} Units)
+                Term Syllabus Plan ({units.length} Terms)
               </h5>
               <span className="text-[11px] text-muted-foreground font-medium">
-                Academic Year 2026-2027
+                Session 2026-2027
               </span>
             </div>
 

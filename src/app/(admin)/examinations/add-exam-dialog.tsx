@@ -92,7 +92,7 @@ export function AddExamDialog({
                 <DialogTitle className="text-base sm:text-lg font-bold text-foreground leading-tight truncate">
                   Schedule Examination
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-1">
+                <DialogDescription className="sr-only">
                   Create an academic examination term and configure its schedule.
                 </DialogDescription>
               </div>

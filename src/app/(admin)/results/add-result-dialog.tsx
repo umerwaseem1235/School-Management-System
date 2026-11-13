@@ -325,7 +325,7 @@ export function AddResultDialog({
               <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
                 Add Student Examination Result
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Record subject-wise marks for a student. Percentage, grade, and pass status are calculated automatically in real time.
               </DialogDescription>
             </div>

@@ -393,7 +393,7 @@ export function NewStaffDialog({
               <DialogTitle className="text-base font-heading font-bold text-foreground">
                 Register New Staff Member
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Onboard teaching faculty or administrative staff with comprehensive school assignments.
               </DialogDescription>
             </div>

@@ -430,7 +430,7 @@ export function ScheduleSessionDialog({
                 <DialogTitle className="text-base font-bold text-foreground leading-tight">
                   Schedule Entry Test Session
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="sr-only">
                   Set up a new admission test batch for incoming applicants.
                 </DialogDescription>
               </div>

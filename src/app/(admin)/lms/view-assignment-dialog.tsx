@@ -8,22 +8,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { LmsAssignment } from "@/types";
-import { formatCompactClass, formatCourseSubject } from "@/lib/mock/lms";
+import { formatCompactClass, formatCourseSubject, formatLmsDate } from "@/lib/mock/lms";
 import {
   FileText,
   Calendar,
-  Clock,
   Users,
   GraduationCap,
   BookOpen,
-  CheckCircle2,
-  AlertCircle,
   FileCheck,
-  Award,
   BellRing,
-  Download,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -50,40 +44,23 @@ export function ViewAssignmentDialog({
   const pending = Math.max(0, total - submitted);
   const submissionPct = Math.round((submitted / total) * 100);
   const isPast = new Date(assignment.dueDate) < new Date("2026-10-20");
-
-  const rubricWorking = Math.round(assignment.maxMarks * 0.6);
-  const rubricFormula = Math.round(assignment.maxMarks * 0.2);
-  const rubricNeatness = Math.max(1, assignment.maxMarks - (rubricWorking + rubricFormula));
-
-  const dueDateFormatted = React.useMemo(() => {
-    try {
-      const d = new Date(assignment.dueDate);
-      if (isNaN(d.getTime())) return assignment.dueDate;
-      return d.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      });
-    } catch {
-      return assignment.dueDate;
-    }
-  }, [assignment.dueDate]);
+  const dueDateFormatted = formatLmsDate(assignment.dueDate);
 
   const handleNotifyPending = () => {
     if (pending === 0) {
-      toast.info("All submissions received", {
-        description: "No pending students remaining for this assignment.",
+      toast.info("All homework checked", {
+        description: "All students have submitted this homework.",
       });
       return;
     }
     toast.success("Reminder Sent", {
-      description: `Notification dispatched to ${pending} pending students in ${compactClass}.`,
+      description: `Reminder sent to ${pending} pending students in ${compactClass}.`,
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[760px] md:max-w-[800px] w-full p-0 overflow-hidden rounded-2xl border border-border shadow-2xl">
+      <DialogContent className="sm:max-w-[640px] w-full p-0 overflow-hidden rounded-2xl border border-border shadow-2xl">
         {/* Header */}
         <DialogHeader className="px-6 pt-5 pb-4 bg-muted/30 border-b border-border/60 pr-12">
           <div className="flex items-start justify-between gap-3">
@@ -118,12 +95,12 @@ export function ViewAssignmentDialog({
 
         {/* Content Body */}
         <div className="px-6 py-5 pb-6 space-y-4 max-h-[75vh] overflow-y-auto">
-          {/* Executive Submission Banner Card */}
-          <div className="p-4 rounded-xl border border-border/80 bg-gradient-to-r from-muted/40 via-muted/20 to-card space-y-3">
+          {/* Submission Progress Card */}
+          <div className="p-4 rounded-xl border border-border/80 bg-muted/20 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-bold text-foreground">
-                  Submission & Evaluation Overview
+                  Homework Submissions
                 </p>
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
                   <Calendar className="size-3 text-muted-foreground" />
@@ -156,15 +133,14 @@ export function ViewAssignmentDialog({
                       ? "bg-muted hover:bg-muted/80 text-foreground border border-border"
                       : "bg-primary hover:bg-primary/90 text-white"
                   )}
-                  title={assignment.status === "Graded" ? "Reopen assignment submissions" : "Mark assignment as graded"}
+                  title={assignment.status === "Graded" ? "Reopen homework submissions" : "Mark homework as checked"}
                 >
                   <FileCheck className="size-3.5" />
-                  <span>{assignment.status === "Graded" ? "Reopen Submissions" : "Mark as Graded"}</span>
+                  <span>{assignment.status === "Graded" ? "Reopen" : "Mark Checked"}</span>
                 </Button>
               </div>
             </div>
 
-            {/* Progress Track */}
             <div className="w-full h-2 bg-muted rounded-full overflow-hidden border border-border/40">
               <div
                 className={cn(
@@ -179,135 +155,90 @@ export function ViewAssignmentDialog({
               />
             </div>
 
-            {/* 4 Clean Key Metrics */}
             <div className="grid grid-cols-4 gap-2.5 pt-2.5 border-t border-border/50 text-center">
-              <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+              <div className="p-2 rounded-lg bg-card/70 border border-border/50">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
-                  Enrolled
+                  Students
                 </p>
-                <p className="text-sm font-bold text-foreground mt-0.5">
-                  {total} Students
+                <p className="text-sm font-bold text-foreground mt-0.5 tabular-nums">
+                  {total}
                 </p>
               </div>
-              <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+              <div className="p-2 rounded-lg bg-card/70 border border-border/50">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
                   Submitted
                 </p>
-                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  {submitted} Done
+                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 tabular-nums">
+                  {submitted}
                 </p>
               </div>
-              <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+              <div className="p-2 rounded-lg bg-card/70 border border-border/50">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
                   Pending
                 </p>
-                <p className={cn("text-sm font-bold mt-0.5", pending > 0 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>
-                  {pending} Awaiting
+                <p className={cn("text-sm font-bold mt-0.5 tabular-nums", pending > 0 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>
+                  {pending}
                 </p>
               </div>
-              <div className="p-2 rounded-lg bg-card/60 border border-border/50">
+              <div className="p-2 rounded-lg bg-card/70 border border-border/50">
                 <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">
-                  Max Marks
+                  Marks
                 </p>
-                <p className="text-sm font-bold text-brand mt-0.5">
-                  {assignment.maxMarks} Pts
+                <p className="text-sm font-bold text-brand mt-0.5 tabular-nums">
+                  {assignment.maxMarks}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Two-Column Clean Layout: Instructions & Rubric + Cohort Roster Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            {/* Left: Assignment Instructions & Rubric */}
-            <div className="p-4 rounded-xl border border-border/70 bg-card space-y-3">
+          {/* Homework Details Card */}
+          <div className="p-4 rounded-xl border border-border/70 bg-card space-y-3">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="flex size-6 items-center justify-center rounded-md bg-brand-soft text-brand">
-                  <Award className="size-3.5" />
+                  <BookOpen className="size-3.5" />
                 </div>
                 <h5 className="text-xs font-bold text-foreground">
-                  Instructions & Marking Rubric
+                  Homework Details
                 </h5>
               </div>
-
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Students must solve all exercises neatly with step-by-step working, clear formula derivations, and labeled diagrams following board examination standards.
-              </p>
-
-              <div className="space-y-2 pt-1 border-t border-border/50 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground/90">Core Calculations & Working</span>
-                  <span className="font-bold text-brand">{rubricWorking} Marks</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground/90">Formula Application & Steps</span>
-                  <span className="font-bold text-brand">{rubricFormula} Marks</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-foreground/90">Presentation & Diagram Labels</span>
-                  <span className="font-bold text-brand">{rubricNeatness} Marks</span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-1.5 pt-2">
-                <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
-                  Board Format
-                </Badge>
-                <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
-                  Workbook Submission
-                </Badge>
-                <Badge variant="secondary" className="text-[10px] font-semibold px-2 py-0.5">
-                  Individual Work
-                </Badge>
-              </div>
-            </div>
-
-            {/* Right: Class Cohort Breakdown */}
-            <div className="p-4 rounded-xl border border-border/70 bg-card space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="flex size-6 items-center justify-center rounded-md bg-brand-soft text-brand">
-                    <Users className="size-3.5" />
-                  </div>
-                  <h5 className="text-xs font-bold text-foreground">
-                    Cohort Status
-                  </h5>
-                </div>
+              {pending > 0 && (
                 <Button
                   type="button"
                   variant="ghost"
                   size="xs"
                   onClick={handleNotifyPending}
-                  className="h-6 px-2 text-[11px] gap-1 text-muted-foreground hover:text-foreground cursor-pointer"
-                  title="Notify pending students"
+                  className="h-7 px-2.5 text-[11px] gap-1 text-muted-foreground hover:text-foreground cursor-pointer"
+                  title="Send reminder to students with pending homework"
                 >
                   <BellRing className="size-3" />
-                  <span>Remind</span>
+                  <span>Send Reminder</span>
                 </Button>
-              </div>
+              )}
+            </div>
 
-              <div className="divide-y divide-border/50 text-xs">
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Class Cohort</span>
-                  <span className="font-semibold text-foreground">{compactClass}</span>
-                </div>
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Turned In</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    {submitted} Students ({submissionPct}%)
-                  </span>
-                </div>
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Pending / Overdue</span>
-                  <span className={cn("font-semibold", pending > 0 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground")}>
-                    {pending} Students
-                  </span>
-                </div>
-                <div className="py-2 flex items-center justify-between">
-                  <span className="text-muted-foreground">Due Date</span>
-                  <span className={cn("font-semibold", isPast ? "text-rose-600 dark:text-rose-400" : "text-foreground")}>
-                    {dueDateFormatted} {isPast && "(Past Due)"}
-                  </span>
-                </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Students should complete the assigned exercises neatly in their classwork/homework notebook and submit on or before the due date.
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-border/50 text-xs">
+              <div>
+                <span className="text-[11px] text-muted-foreground block">Class</span>
+                <span className="font-semibold text-foreground">{compactClass}</span>
+              </div>
+              <div>
+                <span className="text-[11px] text-muted-foreground block">Subject</span>
+                <span className="font-semibold text-foreground">{cleanSubject}</span>
+              </div>
+              <div>
+                <span className="text-[11px] text-muted-foreground block">Teacher</span>
+                <span className="font-semibold text-foreground">{assignment.teacher}</span>
+              </div>
+              <div>
+                <span className="text-[11px] text-muted-foreground block">Due Date</span>
+                <span className={cn("font-semibold", isPast ? "text-rose-600 dark:text-rose-400" : "text-foreground")}>
+                  {dueDateFormatted} {isPast && "(Past Due)"}
+                </span>
               </div>
             </div>
           </div>

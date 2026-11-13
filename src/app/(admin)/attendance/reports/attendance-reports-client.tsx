@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { UserAvatar } from "@/components/shared/user-avatar";
@@ -387,20 +388,17 @@ export function AttendanceReportsClient() {
         className: "w-[14%] whitespace-nowrap",
         headerClassName: "w-[14%]",
         cell: (r) => (
-          <div className="flex items-center justify-center gap-1.5">
-            <AttendanceActionButton
-              size="xs"
-              tone="outline"
-              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+          <div className="flex items-center justify-center gap-1">
+            <ActionIconButton
+              tone="view"
+              aria-label={`View attendance report for ${r.name}`}
+              title={`View ${r.name}'s report`}
               onClick={() => setViewingStudent(r)}
             >
-              <Eye className="size-3 text-blue-600" />
-              <span>View</span>
-            </AttendanceActionButton>
-            <AttendanceActionButton
-              size="xs"
-              tone="outline"
-              className="border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 hover:text-indigo-800 shadow-2xs"
+              <Eye />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="indigo"
               title={`Download ${r.name}'s report`}
               aria-label={`Download ${r.name}'s report`}
               onClick={() => {
@@ -415,9 +413,8 @@ export function AttendanceReportsClient() {
                 );
               }}
             >
-              <Download className="size-3 text-indigo-600" />
-              <span>PDF</span>
-            </AttendanceActionButton>
+              <Download />
+            </ActionIconButton>
           </div>
         ),
       },

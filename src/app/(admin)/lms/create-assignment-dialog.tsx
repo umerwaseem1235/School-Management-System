@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { LmsAssignment, LmsCourse } from "@/types";
-import { PAKISTANI_SCHOOL_CLASSES } from "@/lib/mock/lms";
+import { formatCompactClass, PAKISTANI_SCHOOL_CLASSES } from "@/lib/mock/lms";
 import { FilePlus, Calendar, Award, User, BookOpen, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 
@@ -41,13 +41,13 @@ export function CreateAssignmentDialog({
 }: CreateAssignmentDialogProps) {
   const [title, setTitle] = React.useState("");
   const [selectedCourseId, setSelectedCourseId] = React.useState(defaultCourseId || courses[0]?.id || "");
-  const [className, setClassName] = React.useState(courses[0]?.className || PAKISTANI_SCHOOL_CLASSES[7]);
+  const [className, setClassName] = React.useState(courses[0]?.className || PAKISTANI_SCHOOL_CLASSES[4]);
   const [teacher, setTeacher] = React.useState(courses[0]?.teacher || "Mr. Adeel Hassan");
   const [dueDate, setDueDate] = React.useState("2026-10-28");
-  const [maxMarks, setMaxMarks] = React.useState("25");
+  const [maxMarks, setMaxMarks] = React.useState("20");
   const [instructions, setInstructions] = React.useState("");
 
-  // Update class and teacher when course selection changes
+  // Update class and teacher when subject selection changes
   const handleCourseChange = React.useCallback((courseId: string) => {
     setSelectedCourseId(courseId);
     const matched = courses.find((c) => c.id === courseId);
@@ -57,12 +57,6 @@ export function CreateAssignmentDialog({
     }
   }, [courses]);
 
-  React.useEffect(() => {
-    if (defaultCourseId && open) {
-      handleCourseChange(defaultCourseId);
-    }
-  }, [defaultCourseId, open, handleCourseChange]);
-
   const resetForm = () => {
     setTitle("");
     if (courses[0]) {
@@ -71,14 +65,14 @@ export function CreateAssignmentDialog({
       setTeacher(courses[0].teacher);
     }
     setDueDate("2026-10-28");
-    setMaxMarks("25");
+    setMaxMarks("20");
     setInstructions("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      toast.error("Please provide an assignment title.");
+      toast.error("Please provide a homework title.");
       return;
     }
 
@@ -88,19 +82,19 @@ export function CreateAssignmentDialog({
     const newAssignment: LmsAssignment = {
       id: `asg-${Date.now()}`,
       title: title.trim(),
-      courseName: matchedCourse ? matchedCourse.title : "General Coursework",
+      courseName: matchedCourse ? matchedCourse.title : "General Classwork",
       className: className.trim() || "All Sections",
-      teacher: teacher.trim() || "Course Instructor",
+      teacher: teacher.trim() || "Subject Teacher",
       dueDate: dueDate || "2026-10-28",
       totalSubmissions: 0,
       totalStudents: matchedCourse ? matchedCourse.enrolledStudents : 30,
-      maxMarks: isNaN(parsedMarks) || parsedMarks <= 0 ? 25 : parsedMarks,
+      maxMarks: isNaN(parsedMarks) || parsedMarks <= 0 ? 20 : parsedMarks,
       status: "Active",
     };
 
     onAddAssignment(newAssignment);
-    toast.success("Assignment Published", {
-      description: `"${newAssignment.title}" was published for ${newAssignment.className}.`,
+    toast.success("Homework Assigned", {
+      description: `"${newAssignment.title}" was assigned to ${formatCompactClass(newAssignment.className)}.`,
     });
     resetForm();
     onOpenChange(false);
@@ -122,20 +116,20 @@ export function CreateAssignmentDialog({
             </div>
             <div>
               <DialogTitle className="text-base font-semibold text-foreground">
-                Create New Assignment
+                Assign Homework
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Assign homework, lab tasks, or assessments to enrolled students.
+              <DialogDescription className="sr-only">
+                Assign classwork or homework with a due date and total marks.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4 max-h-[75vh] overflow-y-auto">
-          {/* Assignment Title */}
+          {/* Homework Title */}
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground">
-              Assignment Title <span className="text-danger">*</span>
+              Homework Title <span className="text-danger">*</span>
             </label>
             <Input
               type="text"
@@ -147,11 +141,11 @@ export function CreateAssignmentDialog({
             />
           </div>
 
-          {/* Course Selection */}
+          {/* Subject Selection */}
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
               <BookOpen className="size-3.5 text-muted-foreground" />
-              Related Course
+              Subject
             </label>
             <Select
               value={selectedCourseId}
@@ -160,24 +154,24 @@ export function CreateAssignmentDialog({
               }}
             >
               <SelectTrigger className="h-9 text-sm w-full">
-                <SelectValue placeholder="Select course" />
+                <SelectValue placeholder="Select subject" />
               </SelectTrigger>
               <SelectContent>
                 {courses.map((course) => (
                   <SelectItem key={course.id} value={course.id}>
-                    {course.title} ({course.courseCode})
+                    {course.subject} — {formatCompactClass(course.className)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Class & Teacher (Auto-filled but editable) */}
+          {/* Class & Teacher */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <GraduationCap className="size-3.5 text-muted-foreground" />
-                Target Class / Section
+                Class
               </label>
               <Select
                 value={className}
@@ -186,7 +180,7 @@ export function CreateAssignmentDialog({
                 }}
               >
                 <SelectTrigger className="h-9 text-sm w-full">
-                  <SelectValue placeholder="Select target class" />
+                  <SelectValue placeholder="Select class" />
                 </SelectTrigger>
                 <SelectContent>
                   {PAKISTANI_SCHOOL_CLASSES.map((cls) => (
@@ -200,7 +194,7 @@ export function CreateAssignmentDialog({
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <User className="size-3.5 text-muted-foreground" />
-                Instructor / Teacher
+                Teacher
               </label>
               <Input
                 type="text"
@@ -211,7 +205,7 @@ export function CreateAssignmentDialog({
             </div>
           </div>
 
-          {/* Due Date & Maximum Marks */}
+          {/* Due Date & Total Marks */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
@@ -228,12 +222,12 @@ export function CreateAssignmentDialog({
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <Award className="size-3.5 text-muted-foreground" />
-                Max Marks
+                Total Marks
               </label>
               <Input
                 type="number"
                 min="1"
-                max="200"
+                max="100"
                 value={maxMarks}
                 onChange={(e) => setMaxMarks(e.target.value)}
                 className="h-9 text-sm"
@@ -241,13 +235,13 @@ export function CreateAssignmentDialog({
             </div>
           </div>
 
-          {/* Instructions / Description */}
+          {/* Instructions */}
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground">
-              Task Guidelines & Instructions (Optional)
+              Homework Note (Optional)
             </label>
             <Textarea
-              placeholder="Provide submission guidelines, reference textbook pages, or rubric details..."
+              placeholder="e.g. Complete Questions 1 to 5 neatly in your notebook..."
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
               rows={3}
@@ -269,7 +263,7 @@ export function CreateAssignmentDialog({
               size="lg"
               className="px-4 cursor-pointer"
             >
-              Publish Assignment
+              Assign Homework
             </Button>
           </DialogFooter>
         </form>

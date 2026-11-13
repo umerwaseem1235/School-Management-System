@@ -25,6 +25,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Dialog,
@@ -317,27 +318,23 @@ export function FinesClient() {
         cell: (r) => (
           <div className="flex items-center justify-center">
             {r.status === "Unpaid" ? (
-              <ActionButton
-                tone="outline"
-                size="xs"
-                className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
+              <ActionIconButton
+                tone="edit"
                 onClick={() => openSettlementDialog(r)}
+                aria-label={`Update fine for ${r.student}`}
                 title="Choose Mark as Paid or Waived option"
               >
-                <SlidersHorizontal className="size-3.5 text-amber-600" />
-                <span>Update</span>
-              </ActionButton>
+                <SlidersHorizontal />
+              </ActionIconButton>
             ) : (
-              <ActionButton
-                tone="outline"
-                size="xs"
-                className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+              <ActionIconButton
+                tone="view"
                 onClick={() => openSettlementDialog(r)}
+                aria-label={`View fine details for ${r.student}`}
                 title="View settlement receipt & details"
               >
-                <Eye className="size-3.5 text-blue-600" />
-                <span>Details</span>
-              </ActionButton>
+                <Eye />
+              </ActionIconButton>
             )}
           </div>
         ),

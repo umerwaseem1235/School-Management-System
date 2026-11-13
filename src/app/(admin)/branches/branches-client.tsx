@@ -6,6 +6,7 @@ import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import {
   Building2,
@@ -202,65 +203,52 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
         cell: (r) => (
           <div className="flex items-center justify-center gap-1 whitespace-nowrap">
             {/* View Branch */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <ActionIconButton
+              tone="view"
               onClick={() => setViewBranch(r)}
-              className="size-7 rounded-[4px] text-muted-foreground hover:text-brand hover:bg-brand-50 transition-colors cursor-pointer"
+              aria-label={`View ${r.campusName}`}
               title="View Branch Profile"
             >
-              <Eye className="size-3.5" />
-              <span className="sr-only">View</span>
-            </Button>
+              <Eye />
+            </ActionIconButton>
 
             {/* Edit Branch */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <ActionIconButton
+              tone="edit"
               onClick={() => setEditBranch(r)}
-              className="size-7 rounded-[4px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+              aria-label={`Edit ${r.campusName}`}
               title="Edit Branch"
             >
-              <Pencil className="size-3.5" />
-              <span className="sr-only">Edit</span>
-            </Button>
+              <Pencil />
+            </ActionIconButton>
 
             {/* Quick Toggle Status */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <ActionIconButton
+              tone={r.status === "Active" ? "approve" : "edit"}
               onClick={() => handleToggleStatus(r.id, r.status, r.campusName)}
-              className={cn(
-                "size-7 rounded-[4px] transition-colors cursor-pointer",
+              aria-label={
                 r.status === "Active"
-                  ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
-                  : "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/40"
-              )}
+                  ? `Deactivate ${r.campusName}`
+                  : `Activate ${r.campusName}`
+              }
               title={
                 r.status === "Active"
                   ? "Deactivate Branch (Set Inactive)"
                   : "Activate Branch (Set Active)"
               }
             >
-              {r.status === "Active" ? (
-                <CheckCircle2 className="size-3.5" />
-              ) : (
-                <Ban className="size-3.5" />
-              )}
-              <span className="sr-only">Toggle Status</span>
-            </Button>
+              {r.status === "Active" ? <CheckCircle2 /> : <Ban />}
+            </ActionIconButton>
 
             {/* Delete Branch */}
-            <Button
-              variant="ghost"
-              size="icon"
+            <ActionIconButton
+              tone="delete"
               onClick={() => setDeleteBranchState(r)}
-              className="size-7 rounded-[4px] text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors cursor-pointer"
+              aria-label={`Remove ${r.campusName}`}
               title="Remove Branch"
             >
-              <Trash2 className="size-3.5" />
-              <span className="sr-only">Remove</span>
-            </Button>
+              <Trash2 />
+            </ActionIconButton>
           </div>
         ),
       },

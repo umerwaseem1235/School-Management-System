@@ -133,7 +133,7 @@ export function EditPaperDialog({
                 <DialogTitle className="text-base font-bold text-foreground leading-tight truncate">
                   Edit Scheduled Paper
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="sr-only">
                   Update examination hall, timings, date, or invigilator.
                 </DialogDescription>
               </div>

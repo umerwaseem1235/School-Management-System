@@ -353,14 +353,9 @@ export function ProfileClient() {
                       <div className="grid size-8 place-items-center rounded-lg bg-brand-50 text-brand">
                         <User className="size-4" />
                       </div>
-                      <div>
-                        <h3 className="text-sm font-semibold text-foreground">
-                          Personal Information & Identity
-                        </h3>
-                        <p className="text-[11px] text-muted-foreground">
-                          Official administrative credentials and identity record
-                        </p>
-                      </div>
+                      <h3 className="text-sm font-semibold text-foreground">
+                        Personal Information & Identity
+                      </h3>
                     </div>
                     {isEditing && (
                       <span className="text-xs font-semibold text-brand bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand/20">
@@ -530,10 +525,7 @@ export function ProfileClient() {
                     <div className="grid size-8 place-items-center rounded-lg bg-brand-50 text-brand">
                       <Building2 className="size-4" />
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-foreground">Institutional Placement</h3>
-                      <p className="text-[11px] text-muted-foreground">Governance scope & department</p>
-                    </div>
+                    <h3 className="text-sm font-semibold text-foreground">Institutional Placement</h3>
                   </div>
 
                   <div className="space-y-3 text-xs">
@@ -668,12 +660,7 @@ export function ProfileClient() {
                   <div className="grid size-9 place-items-center rounded-lg bg-brand-50 text-brand border border-brand/20">
                     <KeyRound className="size-4" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground">Update Master Password</h3>
-                    <p className="text-[11px] text-muted-foreground">
-                      Ensure your password contains uppercase letters, numbers, and symbols
-                    </p>
-                  </div>
+                  <h3 className="text-sm font-semibold text-foreground">Update Master Password</h3>
                 </div>
 
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
@@ -772,10 +759,7 @@ export function ProfileClient() {
                     <div className="grid size-8 place-items-center rounded-lg bg-brand-50 text-brand">
                       <Laptop className="size-4" />
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-foreground">Active Sessions</h3>
-                      <p className="text-[11px] text-muted-foreground">Authorized administrative devices</p>
-                    </div>
+                    <h3 className="text-sm font-semibold text-foreground">Active Sessions</h3>
                   </div>
                 </div>
 
@@ -843,14 +827,9 @@ export function ProfileClient() {
                 <div className="grid size-10 place-items-center rounded-xl bg-brand text-cream shadow-sm">
                   <KeyRound className="size-5" />
                 </div>
-                <div>
-                  <h3 className="text-base font-heading font-bold text-foreground">
-                    Super Administrator Authority & Privileges Matrix
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Unrestricted root jurisdiction across all 5 school branches, academic wings, and fiscal accounts
-                  </p>
-                </div>
+                <h3 className="text-base font-heading font-bold text-foreground">
+                  Super Administrator Authority & Privileges Matrix
+                </h3>
               </div>
               <Badge className="bg-brand text-cream font-semibold">Tier 0 Root</Badge>
             </div>
@@ -935,14 +914,9 @@ export function ProfileClient() {
                 <div className="grid size-9 place-items-center rounded-lg bg-brand-50 text-brand">
                   <Bell className="size-4" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground">
-                    Administrative Notification Channels
-                  </h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    Configure high-priority dispatch preferences for this account
-                  </p>
-                </div>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Administrative Notification Channels
+                </h3>
               </div>
             </div>
 

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Subject } from "@/types";
+import { normalizeAcademicClassName, isAcademicDirectoryClass } from "@/lib/mock/academics";
 import { PAKISTANI_SCHOOL_CLASSES, PAKISTANI_SCHOOL_SUBJECTS } from "@/lib/mock/lms";
 import {
   BookOpen,
@@ -172,7 +173,7 @@ export function EditSubjectDialog({
                 <DialogTitle className="text-base font-semibold text-foreground">
                   Edit Subject
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="sr-only">
                   Update subject details, allocated class, marks grading, and assigned teacher.
                 </DialogDescription>
               </div>
@@ -255,7 +256,14 @@ export function EditSubjectDialog({
                   <SelectValue placeholder="Select class" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[260px]">
-                  {PAKISTANI_SCHOOL_CLASSES.map((cls) => (
+                  {Array.from(
+                    new Set([
+                      ...PAKISTANI_SCHOOL_CLASSES
+                        .map(normalizeAcademicClassName)
+                        .filter(isAcademicDirectoryClass),
+                      className,
+                    ].filter(Boolean))
+                  ).map((cls) => (
                     <SelectItem key={cls} value={cls}>
                       {cls}
                     </SelectItem>

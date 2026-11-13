@@ -4,7 +4,7 @@ import * as React from "react";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { PersonCell } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Button } from "@/components/ui/button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -293,18 +293,17 @@ export function StudentsTable({
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <Button
-              variant="outline"
-              size="xs"
+            <ActionIconButton
+              tone="view"
               onClick={() => {
                 onViewStudent?.(r);
                 setSelectedStudent(r);
               }}
-              className="h-7.5 gap-1.5 px-3 rounded-lg text-xs font-semibold text-foreground/80 border-border/80 hover:border-brand/40 hover:bg-brand-50 hover:text-brand shadow-2xs transition-all duration-150 active:scale-95 cursor-pointer"
+              aria-label={`View profile for ${r.name}`}
+              title="View Student Profile"
             >
-              <Eye className="size-3.5 text-brand" />
-              <span>View</span>
-            </Button>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
         className: "whitespace-nowrap",

@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { UsersTable } from "./users-table";
 import { CreateUserDialog } from "./create-user-dialog";
 import { EditUserDialog } from "./edit-user-dialog";
+import { ViewUserDialog } from "./view-user-dialog";
 
 interface UsersClientProps {
   initialUsers: User[];
@@ -26,6 +27,8 @@ interface UsersClientProps {
 export function UsersClient({ initialUsers }: UsersClientProps) {
   const [usersList, setUsersList] = React.useState<User[]>(initialUsers);
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
+  const [selectedUserForView, setSelectedUserForView] = React.useState<User | null>(null);
+  const [isViewOpen, setIsViewOpen] = React.useState(false);
   const [selectedUserForEdit, setSelectedUserForEdit] = React.useState<User | null>(null);
   const [isEditOpen, setIsEditOpen] = React.useState(false);
 
@@ -80,6 +83,9 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
       prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
     );
     setSelectedUserForEdit(updatedUser);
+    setSelectedUserForView((prev) =>
+      prev && prev.id === updatedUser.id ? updatedUser : prev
+    );
   };
 
   const handleStatusChange = (id: string, newStatus: Status) => {
@@ -99,6 +105,9 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
     );
 
     setSelectedUserForEdit((prev) =>
+      prev && prev.id === id ? { ...prev, status: newStatus } : prev
+    );
+    setSelectedUserForView((prev) =>
       prev && prev.id === id ? { ...prev, status: newStatus } : prev
     );
 
@@ -121,6 +130,11 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
         description: `${name} status set to ${newStatus}.`,
       });
     }
+  };
+
+  const handleOpenView = (user: User) => {
+    setSelectedUserForView(user);
+    setIsViewOpen(true);
   };
 
   const handleOpenEdit = (user: User) => {
@@ -176,6 +190,7 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
       <SectionCard flush>
         <UsersTable
           data={usersList}
+          onViewUser={handleOpenView}
           onSelectUser={handleOpenEdit}
           onStatusChange={handleStatusChange}
         />
@@ -187,6 +202,14 @@ export function UsersClient({ initialUsers }: UsersClientProps) {
         onOpenChange={setIsCreateOpen}
         onAddUser={handleAddUser}
         existingCount={usersList.length}
+      />
+
+      {/* View User Dialog */}
+      <ViewUserDialog
+        user={selectedUserForView}
+        open={isViewOpen}
+        onOpenChange={setIsViewOpen}
+        onEditUser={handleOpenEdit}
       />
 
       {/* Edit User Dialog */}

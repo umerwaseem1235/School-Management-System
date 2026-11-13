@@ -23,6 +23,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import {
   Dialog,
@@ -413,30 +414,26 @@ export function ScholarshipsClient() {
       className: "w-[14%] px-2 text-center",
       headerClassName: "w-[14%] text-center",
       cell: (r) => (
-        <div className="flex items-center justify-center gap-1.5">
-          <ActionButton
-            tone="outline"
-            size="xs"
-            className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+        <div className="flex items-center justify-center gap-1">
+          <ActionIconButton
+            tone="view"
+            aria-label={`View scholarship for ${r.student}`}
             title="View scholarship award details"
             onClick={() => {
               setSelectedAward(r);
               setViewDialogOpen(true);
             }}
           >
-            <Eye className="size-3.5 text-blue-600" />
-            <span>View</span>
-          </ActionButton>
-          <ActionButton
-            tone="outline"
-            size="xs"
-            className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
+            <Eye />
+          </ActionIconButton>
+          <ActionIconButton
+            tone="edit"
+            aria-label={`Edit scholarship for ${r.student}`}
             title="Edit scholarship award"
             onClick={() => handleOpenEdit(r)}
           >
-            <Pencil className="size-3.5 text-amber-600" />
-            <span>Edit</span>
-          </ActionButton>
+            <Pencil />
+          </ActionIconButton>
         </div>
       ),
     },

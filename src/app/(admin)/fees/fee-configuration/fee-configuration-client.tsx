@@ -20,6 +20,7 @@ import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -276,15 +277,14 @@ export function FeeConfigurationClient() {
       align: "center",
       cell: (r) => (
         <div className="flex justify-center">
-          <ActionButton
-            tone="outline"
-            size="xs"
-            className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
+          <ActionIconButton
+            tone="edit"
+            aria-label={`Revise fee structure for ${r.className}`}
+            title={`Revise fee tier for ${r.className}`}
             onClick={() => openEditor(r)}
           >
-            <Edit className="size-3 text-amber-600" />
-            <span>Revise</span>
-          </ActionButton>
+            <Edit />
+          </ActionIconButton>
         </div>
       ),
       className: "text-center",

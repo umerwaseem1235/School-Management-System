@@ -19,6 +19,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AcademicClass } from "@/types";
+import {
+  getClassSectionLetters,
+  normalizeAcademicClassName,
+  isAcademicDirectoryClass,
+} from "@/lib/mock/academics";
 import { PAKISTANI_SCHOOL_CLASSES } from "@/lib/mock/lms";
 import { useBranches } from "@/context/branches-context";
 import {
@@ -44,6 +49,14 @@ const CAMPUS_OPTIONS = [
   "Clifton Karachi Campus",
   "Bahria Town Campus",
 ];
+
+const STANDARD_ACADEMIC_CLASSES = Array.from(
+  new Set(
+    PAKISTANI_SCHOOL_CLASSES
+      .map(normalizeAcademicClassName)
+      .filter(isAcademicDirectoryClass)
+  )
+);
 
 const STREAM_OPTIONS: Array<AcademicClass["stream"]> = [
   "General",
@@ -72,12 +85,12 @@ export function AddClassDialog({
   onOpenChange,
   onAddClass,
 }: AddClassDialogProps) {
-  const [className, setClassName] = React.useState<string>(PAKISTANI_SCHOOL_CLASSES[4]);
+  const [className, setClassName] = React.useState<string>(STANDARD_ACADEMIC_CLASSES[4] || "Grade 9th");
   const [customName, setCustomName] = React.useState("");
   const [isCustom, setIsCustom] = React.useState(false);
   const [gradeLevel, setGradeLevel] = React.useState("9");
   const { activeBranches } = useBranches();
-  const [stream, setStream] = React.useState<AcademicClass["stream"]>("Science");
+  const [stream, setStream] = React.useState<AcademicClass["stream"]>("General");
   const [campus, setCampus] = React.useState(activeBranches[0]?.campusName || "Main Campus — Gulberg");
   const [classTeacher, setClassTeacher] = React.useState(TEACHER_OPTIONS[0]);
   const [sections, setSections] = React.useState("2");
@@ -127,11 +140,11 @@ export function AddClassDialog({
   };
 
   const resetForm = () => {
-    setClassName(PAKISTANI_SCHOOL_CLASSES[4]);
+    setClassName(STANDARD_ACADEMIC_CLASSES[4] || "Grade 9th");
     setCustomName("");
     setIsCustom(false);
     setGradeLevel("9");
-    setStream("Science");
+    setStream("General");
     setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
     setClassTeacher(TEACHER_OPTIONS[0]);
     setSections("2");
@@ -193,7 +206,7 @@ export function AddClassDialog({
               <DialogTitle className="text-base font-semibold text-foreground">
                 Add Academic Class
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Register a new class level, stream, and campus section allocation.
               </DialogDescription>
             </div>
@@ -217,7 +230,7 @@ export function AddClassDialog({
                 <SelectValue placeholder="Select class standard" />
               </SelectTrigger>
               <SelectContent className="max-h-[260px]">
-                {PAKISTANI_SCHOOL_CLASSES.map((cls) => (
+                {STANDARD_ACADEMIC_CLASSES.map((cls) => (
                   <SelectItem key={cls} value={cls}>
                     {cls}
                   </SelectItem>
@@ -253,7 +266,7 @@ export function AddClassDialog({
               <Input
                 type="number"
                 min="-2"
-                max="12"
+                max="10"
                 value={gradeLevel}
                 onChange={(e) => setGradeLevel(e.target.value)}
                 className="h-9 text-sm"
@@ -343,15 +356,30 @@ export function AddClassDialog({
               <label className="text-xs font-medium text-foreground">
                 Sections
               </label>
-              <Input
-                type="number"
-                min="1"
-                max="10"
+              <Select
                 value={sections}
-                onChange={(e) => setSections(e.target.value)}
-                className="h-9 text-sm"
-                required
-              />
+                onValueChange={(val) => {
+                  if (val) setSections(val);
+                }}
+              >
+                <SelectTrigger className="h-9 text-sm w-full">
+                  <SelectValue placeholder="Select sections" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => {
+                    const letters = getClassSectionLetters(count);
+                    const rangeLabel =
+                      letters.length === 1
+                        ? letters[0]
+                        : `${letters[0]}–${letters[letters.length - 1]}`;
+                    return (
+                      <SelectItem key={count} value={String(count)}>
+                        {count} {count === 1 ? "Sec" : "Secs"} ({rangeLabel})
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">

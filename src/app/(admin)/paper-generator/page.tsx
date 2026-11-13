@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -1312,25 +1313,23 @@ export default function PaperGeneratorPage() {
 
                       <TableCell className="text-right pr-5 py-3">
                         <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon-xs"
+                          <ActionIconButton
+                            tone="view"
                             onClick={() => setViewingQuestion(q)}
+                            aria-label="View Question and Key"
                             title="View Question & Key"
-                            className="text-muted-foreground hover:text-brand cursor-pointer"
                           >
-                            <Eye className="size-3.5" />
-                          </Button>
+                            <Eye />
+                          </ActionIconButton>
 
-                          <Button
-                            variant="ghost"
-                            size="icon-xs"
+                          <ActionIconButton
+                            tone="delete"
                             onClick={() => handleDeleteQuestion(q.id)}
+                            aria-label="Delete Question"
                             title="Delete Question"
-                            className="text-muted-foreground hover:text-destructive cursor-pointer"
                           >
-                            <Trash2 className="size-3.5" />
-                          </Button>
+                            <Trash2 />
+                          </ActionIconButton>
                         </div>
                       </TableCell>
                     </TableRow>

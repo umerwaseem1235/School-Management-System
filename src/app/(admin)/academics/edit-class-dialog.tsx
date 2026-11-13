@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AcademicClass } from "@/types";
+import { getClassSectionLetters } from "@/lib/mock/academics";
 import { useBranches } from "@/context/branches-context";
 import {
   School,
@@ -129,7 +130,7 @@ export function EditClassDialog({
                   <DialogTitle className="text-base font-semibold text-foreground">
                     Edit Academic Class
                   </DialogTitle>
-                  <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                  <DialogDescription className="sr-only">
                     Modify class details, campus allocation, teacher, and student capacity.
                   </DialogDescription>
                 </div>
@@ -148,7 +149,7 @@ export function EditClassDialog({
               <Input
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
-                placeholder="e.g. Grade 9th (Science - Biology)"
+                placeholder="e.g. Grade 9th"
                 className="h-9 text-xs"
                 required
               />
@@ -178,12 +179,12 @@ export function EditClassDialog({
 
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">
-                  Grade Level (1 – 12)
+                  Grade Level (1 – 10)
                 </label>
                 <Input
                   type="number"
                   min={1}
-                  max={12}
+                  max={10}
                   value={gradeLevel}
                   onChange={(e) => setGradeLevel(parseInt(e.target.value, 10) || 1)}
                   className="h-9 text-xs"
@@ -219,15 +220,34 @@ export function EditClassDialog({
                   <Grid className="size-3.5 text-muted-foreground" />
                   Sections
                 </label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={15}
+                <Select
                   value={sections}
-                  onChange={(e) => setSections(e.target.value)}
-                  className="h-9 text-xs"
-                  required
-                />
+                  onValueChange={(val) => {
+                    if (val) setSections(val);
+                  }}
+                >
+                  <SelectTrigger className="h-9 text-xs w-full">
+                    <SelectValue placeholder="Select sections" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from(
+                      new Set([1, 2, 3, 4, 5, 6, 7, 8, Math.max(1, parseInt(sections, 10) || 1)])
+                    )
+                      .sort((a, b) => a - b)
+                      .map((count) => {
+                        const letters = getClassSectionLetters(count);
+                        const rangeLabel =
+                          letters.length === 1
+                            ? letters[0]
+                            : `${letters[0]}–${letters[letters.length - 1]}`;
+                        return (
+                          <SelectItem key={count} value={String(count)} className="text-xs">
+                            {count} {count === 1 ? "Section" : "Sections"} ({rangeLabel})
+                          </SelectItem>
+                        );
+                      })}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-1.5">

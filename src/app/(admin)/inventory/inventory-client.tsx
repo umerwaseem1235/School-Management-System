@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/shared/page-header";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import {
@@ -394,12 +395,11 @@ export function InventoryClient() {
         className: "w-[31%] px-3 text-center",
         headerClassName: "w-[31%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex items-center justify-center gap-1.5">
-            <ActionButton
-              tone="outline"
-              size="xs"
+          <div className="flex items-center justify-center gap-1">
+            <ActionIconButton
+              tone="approve"
               disabled={r.quantity <= 0}
-              className="border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 hover:text-emerald-800 disabled:opacity-50 transition-colors shadow-2xs"
+              aria-label={`Issue ${r.name}`}
               title={
                 r.quantity <= 0
                   ? `${r.name} is out of stock`
@@ -407,35 +407,30 @@ export function InventoryClient() {
               }
               onClick={() => openIssueModal(r.id)}
             >
-              <PackageMinus className="size-3.5 text-emerald-600" />
-              <span>Issue</span>
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-sky-200 bg-sky-50/70 text-sky-700 hover:border-sky-400 hover:bg-sky-100 hover:text-sky-800 transition-colors shadow-2xs"
+              <PackageMinus />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="indigo"
+              aria-label={`Adjust stock for ${r.name}`}
               title={`Adjust stock quantity for ${r.name}`}
               onClick={() => {
                 setSelectedItemId(r.id);
                 setAdjustModalOpen(true);
               }}
             >
-              <ArrowUpDown className="size-3.5 text-sky-600" />
-              <span>Adjust</span>
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 transition-colors shadow-2xs"
+              <ArrowUpDown />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="edit"
+              aria-label={`Edit ${r.name}`}
               title={`Edit details for ${r.name}`}
               onClick={() => {
                 setEditingItem(r);
                 setAddFormOpen(true);
               }}
             >
-              <Edit className="size-3.5 text-amber-600" />
-              <span>Edit</span>
-            </ActionButton>
+              <Edit />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -536,33 +531,25 @@ export function InventoryClient() {
         className: "w-[16%] px-3 text-center",
         headerClassName: "w-[16%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
-          <div className="flex items-center justify-center gap-1.5">
-            <div className="w-[68px] shrink-0">
-              <ActionButton
-                tone="outline"
-                size="xs"
-                className="w-full justify-center border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 transition-colors shadow-2xs"
-                title={`View issue slip ${r.issueNo}`}
-                onClick={() => setViewIssuanceId(r.id)}
+          <div className="flex items-center justify-center gap-1">
+            <ActionIconButton
+              tone="view"
+              aria-label={`View issue slip ${r.issueNo}`}
+              title={`View issue slip ${r.issueNo}`}
+              onClick={() => setViewIssuanceId(r.id)}
+            >
+              <Eye />
+            </ActionIconButton>
+            {r.status === "Issued" && (
+              <ActionIconButton
+                tone="approve"
+                aria-label={`Receive ${r.itemName} back from ${r.issuedTo}`}
+                title={`Receive ${r.itemName} back from ${r.issuedTo}`}
+                onClick={() => setReturnIssuanceId(r.id)}
               >
-                <Eye className="size-3.5 text-blue-600" />
-                <span>View</span>
-              </ActionButton>
-            </div>
-            <div className="w-[74px] shrink-0">
-              {r.status === "Issued" ? (
-                <ActionButton
-                  tone="success"
-                  size="xs"
-                  className="w-full justify-center border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 hover:text-emerald-800 transition-colors shadow-2xs"
-                  title={`Receive ${r.itemName} back from ${r.issuedTo}`}
-                  onClick={() => setReturnIssuanceId(r.id)}
-                >
-                  <Undo2 className="size-3.5 text-emerald-600" />
-                  <span>Return</span>
-                </ActionButton>
-              ) : null}
-            </div>
+                <Undo2 />
+              </ActionIconButton>
+            )}
           </div>
         ),
       },

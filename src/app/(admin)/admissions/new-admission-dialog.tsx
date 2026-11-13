@@ -144,7 +144,7 @@ export function NewAdmissionDialog({
                     Session 2026
                   </span>
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="sr-only">
                   Enroll a new student and generate their academic and fee record.
                 </DialogDescription>
               </div>

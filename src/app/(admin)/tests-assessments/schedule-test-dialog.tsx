@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -127,9 +128,9 @@ export function ScheduleTestDialog({
               <DialogTitle className="text-base font-semibold">
                 Schedule New Class Test
               </DialogTitle>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Register a weekly test, monthly assessment, or chapter evaluation.
-              </p>
+              </DialogDescription>
             </div>
           </div>
         </DialogHeader>

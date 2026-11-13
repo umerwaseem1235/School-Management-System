@@ -143,7 +143,7 @@ export function ExportStudentsDialog({
               <DialogTitle className="font-heading text-lg font-bold text-foreground">
                 Export Student Records to PDF
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Download official student rosters for all schools or select a specific campus.
               </DialogDescription>
             </div>

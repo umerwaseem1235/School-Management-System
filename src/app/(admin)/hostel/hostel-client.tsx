@@ -13,6 +13,7 @@ import {
 } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { formatNumber } from "@/lib/format";
 import {
   INITIAL_HOSTEL_ROOMS,
@@ -157,25 +158,27 @@ export function HostelClient() {
         className: "w-[100px]",
         cell: (r) => (
           <div className="flex items-center justify-center gap-1">
-            <ActionButton
-              tone="outline"
-              size="xs"
+            <ActionIconButton
+              tone="edit"
+              aria-label={`Edit ${r.hostel} ${r.roomNo}`}
+              title="Edit Room"
               onClick={() => {
                 setEditingRoom(r);
                 setFormOpen(true);
               }}
             >
-              <Edit className="h-3 w-3" />
-            </ActionButton>
-            <ActionButton
-              tone="danger"
-              size="xs"
+              <Edit />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="delete"
+              aria-label={`Delete ${r.hostel} ${r.roomNo}`}
+              title="Delete Room"
               onClick={() =>
                 setDeleteTarget({ id: r.id, name: `${r.hostel} ${r.roomNo}` })
               }
             >
-              <Trash2 className="h-3 w-3" />
-            </ActionButton>
+              <Trash2 />
+            </ActionIconButton>
           </div>
         ),
       },

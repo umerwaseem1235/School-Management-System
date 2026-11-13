@@ -105,7 +105,7 @@ export function ScheduleClassDialog({
               <DialogTitle className="text-base font-semibold text-foreground">
                 Schedule Virtual Class
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Set up a live lecture, webinar, or revision session for students.
               </DialogDescription>
             </div>

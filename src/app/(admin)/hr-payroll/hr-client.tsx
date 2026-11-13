@@ -1,6 +1,7 @@
 "use client";
 
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonCell } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
@@ -75,9 +76,9 @@ const leaveColumns: Column<LeaveRequest>[] = [
     header: "",
     cell: (r) =>
       r.status === "Pending" ? (
-        <div className="flex gap-1">
-          <Button size="icon-xs" variant="outline" className="h-6 w-6 border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 shadow-2xs"><Check className="size-3 text-emerald-600" /></Button>
-          <Button size="icon-xs" variant="outline" className="h-6 w-6 border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 shadow-2xs"><X className="size-3 text-rose-600" /></Button>
+        <div className="inline-flex items-center justify-center gap-1">
+          <ActionIconButton tone="approve" aria-label={`Approve leave for ${r.applicant}`} title="Approve Leave"><Check /></ActionIconButton>
+          <ActionIconButton tone="delete" aria-label={`Reject leave for ${r.applicant}`} title="Reject Leave"><X /></ActionIconButton>
         </div>
       ) : null,
     className: "w-20",

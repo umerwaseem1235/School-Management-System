@@ -92,7 +92,7 @@ export function UploadMaterialDialog({
     };
 
     onUploadMaterial(newMaterial);
-    toast.success("Learning Material Uploaded", {
+    toast.success("Study Notes Uploaded", {
       description: `"${newMaterial.title}" is now available for ${newMaterial.className}.`,
     });
     resetForm();
@@ -115,24 +115,24 @@ export function UploadMaterialDialog({
             </div>
             <div>
               <DialogTitle className="text-base font-semibold text-foreground">
-                Upload Learning Material
+                Upload Study Notes
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Share syllabus notes, past papers, presentations, or video resources.
+              <DialogDescription className="sr-only">
+                Share class notes, worksheets, or revision sheets with students.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4 max-h-[75vh] overflow-y-auto">
-          {/* Material Title */}
+          {/* Note Title */}
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-foreground">
-              Document / Resource Title <span className="text-danger">*</span>
+              Title <span className="text-danger">*</span>
             </label>
             <Input
               type="text"
-              placeholder="e.g. Chapter 5: Thermochemistry Lecture Notes"
+              placeholder="e.g. Chapter 2 Notes & Solved Questions"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="h-9 text-sm"
@@ -169,7 +169,7 @@ export function UploadMaterialDialog({
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <GraduationCap className="size-3.5 text-muted-foreground" />
-                Grade / Class
+                Class
               </label>
               <Select
                 value={className}
@@ -191,7 +191,7 @@ export function UploadMaterialDialog({
             </div>
           </div>
 
-          {/* File Type & Uploader */}
+          {/* File Type & Teacher */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">File Format</label>
@@ -207,15 +207,14 @@ export function UploadMaterialDialog({
                 <SelectContent>
                   <SelectItem value="PDF">PDF Document</SelectItem>
                   <SelectItem value="DOCX">Word Document (.docx)</SelectItem>
-                  <SelectItem value="SLIDES">Slide Deck (PowerPoint)</SelectItem>
-                  <SelectItem value="VIDEO">Video Lecture</SelectItem>
-                  <SelectItem value="LINK">External Web Link</SelectItem>
+                  <SelectItem value="SLIDES">Presentation Slides</SelectItem>
+                  <SelectItem value="LINK">Web Link</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">Uploaded By</label>
+              <label className="text-xs font-medium text-foreground">Teacher</label>
               <Input
                 type="text"
                 value={uploadedBy}
@@ -230,7 +229,7 @@ export function UploadMaterialDialog({
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <LinkIcon className="size-3.5 text-muted-foreground" />
-                Resource URL
+                Link URL
               </label>
               <Input
                 type="url"
@@ -244,7 +243,7 @@ export function UploadMaterialDialog({
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <FileText className="size-3.5 text-muted-foreground" />
-                Select File (PDF, DOCX, PPT)
+                Select File (PDF, DOCX, Slides)
               </label>
               <div className="border border-dashed border-border rounded-lg p-3 text-center bg-muted/20 hover:bg-muted/30 transition-colors">
                 <input
@@ -262,7 +261,7 @@ export function UploadMaterialDialog({
                     {fileName ? fileName : "Click to select a file from device"}
                   </span>
                   <span className="text-[11px] text-muted-foreground">
-                    Max size: 25 MB per document
+                    Max size: 25 MB
                   </span>
                 </label>
               </div>
@@ -283,7 +282,7 @@ export function UploadMaterialDialog({
               size="lg"
               className="px-4 cursor-pointer"
             >
-              Save & Upload
+              Upload Notes
             </Button>
           </DialogFooter>
         </form>

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Subject } from "@/types";
+import { normalizeAcademicClassName, isAcademicDirectoryClass } from "@/lib/mock/academics";
 import { PAKISTANI_SCHOOL_CLASSES, PAKISTANI_SCHOOL_SUBJECTS } from "@/lib/mock/lms";
 import {
   BookOpen,
@@ -38,6 +39,14 @@ interface AddSubjectDialogProps {
   onAddSubject: (newSubject: Subject) => void;
   defaultClassName?: string;
 }
+
+const STANDARD_SUBJECT_CLASSES = Array.from(
+  new Set(
+    PAKISTANI_SCHOOL_CLASSES
+      .map(normalizeAcademicClassName)
+      .filter(isAcademicDirectoryClass)
+  )
+);
 
 const TEACHER_OPTIONS = [
   "Mr. Adeel Hassan",
@@ -64,7 +73,7 @@ export function AddSubjectDialog({
   const [isCustomName, setIsCustomName] = React.useState(false);
   const [customTitle, setCustomTitle] = React.useState("");
   const [subjectCode, setSubjectCode] = React.useState("MTH-09");
-  const [className, setClassName] = React.useState<string>(defaultClassName || PAKISTANI_SCHOOL_CLASSES[4]);
+  const [className, setClassName] = React.useState<string>(defaultClassName || STANDARD_SUBJECT_CLASSES[4] || "Grade 9th");
   const [isElective, setIsElective] = React.useState(false);
   const [maxMarks, setMaxMarks] = React.useState("100");
   const [passMarks, setPassMarks] = React.useState("40");
@@ -109,7 +118,7 @@ export function AddSubjectDialog({
     setIsCustomName(false);
     setCustomTitle("");
     setSubjectCode("MTH-09");
-    setClassName(PAKISTANI_SCHOOL_CLASSES[4]);
+    setClassName(STANDARD_SUBJECT_CLASSES[4] || "Grade 9th");
     setIsElective(false);
     setMaxMarks("100");
     setPassMarks("40");
@@ -186,7 +195,7 @@ export function AddSubjectDialog({
               <DialogTitle className="text-base font-semibold text-foreground">
                 Add New Subject
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="sr-only">
                 Register a new curriculum course, class mapping, passing marks, and instructor.
               </DialogDescription>
             </div>
@@ -268,7 +277,7 @@ export function AddSubjectDialog({
                   <SelectValue placeholder="Select class" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[260px]">
-                  {PAKISTANI_SCHOOL_CLASSES.map((cls) => (
+                  {Array.from(new Set([...STANDARD_SUBJECT_CLASSES, className].filter(Boolean))).map((cls) => (
                     <SelectItem key={cls} value={cls}>
                       {cls}
                     </SelectItem>

@@ -298,7 +298,7 @@ function AssignBookDialogContent({
             <DialogTitle className="text-base font-bold leading-tight text-foreground">
               Assign Book to Borrower
             </DialogTitle>
-            <DialogDescription className="text-[11.5px] text-muted-foreground mt-0.5">
+            <DialogDescription className="sr-only">
               Issue an available library title to a student or faculty member and set a return due date.
             </DialogDescription>
           </div>
@@ -1060,7 +1060,7 @@ export function ViewIssuanceModal({
                 <DialogTitle className="text-sm font-bold text-foreground truncate">
                   Book Issuance Slip · {record.issueCode}
                 </DialogTitle>
-                <DialogDescription className="text-[11px] text-muted-foreground">
+                <DialogDescription className="sr-only">
                   Circulation record &amp; borrower details
                 </DialogDescription>
               </div>

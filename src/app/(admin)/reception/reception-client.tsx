@@ -6,6 +6,7 @@ import { StatGrid, StatCard } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -214,15 +215,14 @@ export function ReceptionClient({
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-warning-soft text-warning">
                 Inside
               </span>
-              <Button
-                variant="outline"
-                size="xs"
+              <ActionIconButton
+                tone="delete"
                 onClick={() => handleCheckOutVisitor(r.id)}
-                className="h-7 gap-1 px-2.5 rounded-[4px] text-xs font-semibold border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 cursor-pointer shadow-2xs"
+                aria-label={`Check out ${r.visitorName}`}
+                title="Check Out Visitor"
               >
-                <LogOut className="size-3 text-rose-600" />
-                <span>Check Out</span>
-              </Button>
+                <LogOut />
+              </ActionIconButton>
             </div>
           );
         },
@@ -361,28 +361,18 @@ export function ReceptionClient({
               >
                 {isResolved ? "Resolved" : "Pending"}
               </span>
-              <Button
-                variant="outline"
-                size="xs"
+              <ActionIconButton
+                tone={isResolved ? "edit" : "approve"}
                 onClick={() => handleToggleInquiryStatus(r.id)}
-                className={`h-7 gap-1 px-2.5 rounded-lg text-xs font-semibold cursor-pointer shadow-2xs ${
+                aria-label={
                   isResolved
-                    ? "border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800"
-                    : "border-emerald-200 bg-emerald-50/70 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 hover:text-emerald-800"
-                }`}
+                    ? `Reopen inquiry for ${r.callerName}`
+                    : `Resolve inquiry for ${r.callerName}`
+                }
+                title={isResolved ? "Reopen Inquiry" : "Mark Inquiry Resolved"}
               >
-                {isResolved ? (
-                  <>
-                    <RotateCcw className="size-3 text-amber-600" />
-                    <span>Reopen</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="size-3 text-emerald-600" />
-                    <span>Resolve</span>
-                  </>
-                )}
-              </Button>
+                {isResolved ? <RotateCcw /> : <CheckCircle2 />}
+              </ActionIconButton>
             </div>
           );
         },

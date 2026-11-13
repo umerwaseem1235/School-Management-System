@@ -32,6 +32,7 @@ import {
 } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -424,16 +425,14 @@ export function ExpensesClient() {
         headerClassName: "w-[4%] px-2 text-center whitespace-nowrap",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="mx-auto border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+            <ActionIconButton
+              tone="view"
+              aria-label={`View voucher ${r.voucherNo}`}
               title={`View Details • ${r.voucherNo}`}
               onClick={() => openVoucher(r, "overview")}
             >
-              <Eye className="size-3.5 text-blue-600" />
-              <span>View</span>
-            </ActionButton>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -561,16 +560,14 @@ export function ExpensesClient() {
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+            <ActionIconButton
+              tone="view"
+              aria-label={`View budget allocation for ${r.category}`}
               title="View & adjust category budget allocation"
               onClick={() => openBudget(r)}
             >
-              <Eye className="size-3.5 text-blue-600" />
-              <span>View</span>
-            </ActionButton>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },

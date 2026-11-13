@@ -23,6 +23,7 @@ import {
   type FilterDef,
 } from "@/components/shared/data-table";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatDate, formatNumber } from "@/lib/format";
 import {
@@ -182,27 +183,27 @@ export function AssetsClient() {
         className: "w-[100px]",
         cell: (r) => (
           <div className="flex items-center justify-center gap-1">
-            <ActionButton
-              tone="outline"
-              size="xs"
-              className="border-amber-200 bg-amber-50/70 text-amber-700 hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 shadow-2xs"
+            <ActionIconButton
+              tone="edit"
+              aria-label={`Edit ${r.name}`}
+              title="Edit Asset"
               onClick={() => {
                 setEditingAsset(r);
                 setFormOpen(true);
               }}
             >
-              <Edit className="h-3 w-3 text-amber-600" />
-            </ActionButton>
-            <ActionButton
-              tone="danger"
-              size="xs"
-              className="border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 shadow-2xs"
+              <Edit />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="delete"
+              aria-label={`Delete ${r.name}`}
+              title="Delete Asset"
               onClick={() =>
                 setDeleteTarget({ id: r.id, name: r.name })
               }
             >
-              <Trash2 className="h-3 w-3 text-rose-600" />
-            </ActionButton>
+              <Trash2 />
+            </ActionIconButton>
           </div>
         ),
       },

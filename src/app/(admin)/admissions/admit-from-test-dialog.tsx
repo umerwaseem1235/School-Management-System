@@ -104,7 +104,7 @@ export function AdmitFromTestDialog({
                     Entry Test Merit
                   </span>
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="sr-only">
                   Directly admit and register students who passed the Examination Entry Test.
                 </DialogDescription>
               </div>

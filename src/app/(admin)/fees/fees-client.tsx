@@ -9,6 +9,7 @@ import { DataTable, ALL, type Column, type FilterDef, type FilterOption } from "
 import { StatusBadge } from "@/components/shared/status-badge";
 import { SectionCard } from "@/components/shared/section-card";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatCurrencyCompact, formatDate, formatNumber, formatOrdinal } from "@/lib/format";
@@ -416,56 +417,48 @@ function getChallanColumns(
       align: "center",
       headerAlign: "center",
       cell: (r) => (
-        <div className="inline-flex items-center justify-center gap-0.5 whitespace-nowrap xl:gap-1">
+        <div className="inline-flex items-center justify-center gap-1 whitespace-nowrap">
           {/* Installment Icon Action (strictly for Unpaid challans only) */}
           {r.status !== "Paid" && (
-            <Button
-              size="icon-sm"
-              variant="ghost"
+            <ActionIconButton
+              tone="approve"
               onClick={() => onProcessPayment(r)}
-              className="h-[26px] w-[26px] shrink-0 rounded-md border border-emerald-200/80 bg-emerald-50/70 text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-400 dark:hover:bg-emerald-900/60 cursor-pointer"
               aria-label="Make installment"
               title={`Make Installment for ${r.student} (Due: ${formatCurrency(Math.max(0, getChallanTotalDueWithFines(r, fines).totalDue - r.paid))})`}
             >
-              <Layers className="size-3.5" />
-            </Button>
+              <Layers />
+            </ActionIconButton>
           )}
 
           {/* Primary Action - View Details */}
-          <Button
-            size="icon-sm"
-            variant="ghost"
+          <ActionIconButton
+            tone="view"
             onClick={() => onViewDetails(r)}
-            className="h-[26px] w-[26px] shrink-0 rounded-md border border-blue-200/80 bg-blue-50/70 text-blue-700 transition-colors hover:border-blue-300 hover:bg-blue-100 hover:text-blue-800 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/60 cursor-pointer"
             aria-label="View details"
             title="View Details"
           >
-            <Eye className="size-3.5" />
-          </Button>
+            <Eye />
+          </ActionIconButton>
 
           {/* Edit Action */}
-          <Button
-            size="icon-sm"
-            variant="ghost"
+          <ActionIconButton
+            tone="edit"
             onClick={() => onEdit(r)}
-            className="h-[26px] w-[26px] shrink-0 rounded-md border border-amber-200/80 bg-amber-50/70 text-amber-700 transition-colors hover:border-amber-300 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-900/60 cursor-pointer"
             aria-label="Edit challan"
             title="Edit Challan"
           >
-            <Pencil className="size-3.5" />
-          </Button>
+            <Pencil />
+          </ActionIconButton>
 
           {/* Print Statement Action */}
-          <Button
-            size="icon-sm"
-            variant="ghost"
+          <ActionIconButton
+            tone="purple"
             onClick={() => onPrintStatement(r)}
-            className="h-[26px] w-[26px] shrink-0 rounded-md border border-purple-200/80 bg-purple-50/70 text-purple-700 transition-colors hover:border-purple-300 hover:bg-purple-100 hover:text-purple-800 dark:border-purple-800/60 dark:bg-purple-950/40 dark:text-purple-400 dark:hover:bg-purple-900/60 cursor-pointer"
             aria-label="Print statement"
             title="Print Statement"
           >
-            <Printer className="size-3.5" />
-          </Button>
+            <Printer />
+          </ActionIconButton>
         </div>
       ),
       className: "w-[17%] !px-1 text-center whitespace-nowrap",

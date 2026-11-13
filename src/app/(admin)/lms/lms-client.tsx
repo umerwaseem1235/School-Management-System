@@ -5,14 +5,13 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatGrid, StatCard } from "@/components/shared/stat-card";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Meter } from "@/components/shared/meter";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -28,7 +27,6 @@ import {
   Calendar,
   CheckCircle2,
   Download,
-  FileCheck,
   Eye,
   ChevronDown,
   Check,
@@ -37,7 +35,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { formatNumber, formatPercent } from "@/lib/format";
-import type { LmsAssignment, LmsCourse, LmsLiveClass, LmsMaterial } from "@/types";
+import type { LmsAssignment, LmsCourse, LmsMaterial } from "@/types";
 import {
   PAKISTANI_SCHOOL_CLASSES,
   PAKISTANI_SCHOOL_SUBJECTS,
@@ -56,14 +54,12 @@ interface LmsClientProps {
   initialCourses: LmsCourse[];
   initialAssignments: LmsAssignment[];
   initialMaterials: LmsMaterial[];
-  initialLiveClasses?: LmsLiveClass[];
 }
 
 export function LmsClient({
   initialCourses,
   initialAssignments,
   initialMaterials,
-  initialLiveClasses,
 }: LmsClientProps) {
   // Main states
   const [courses, setCourses] = React.useState<LmsCourse[]>(initialCourses);
@@ -75,13 +71,13 @@ export function LmsClient({
   const [isMaterialDialogOpen, setIsMaterialDialogOpen] = React.useState(false);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = React.useState(false);
 
-  // Pre-selected course context
+  // Pre-selected subject context
   const [selectedCourseForAssignment, setSelectedCourseForAssignment] = React.useState<string | undefined>(undefined);
   const [viewingSyllabusCourse, setViewingSyllabusCourse] = React.useState<LmsCourse | null>(null);
   const [viewingAssignment, setViewingAssignment] = React.useState<LmsAssignment | null>(null);
   const [viewingMaterial, setViewingMaterial] = React.useState<LmsMaterial | null>(null);
 
-  // Active LMS portion dropdown selector
+  // Active LMS section selector
   const [activeTab, setActiveTab] = React.useState<"courses" | "assignments" | "materials">("courses");
 
   // Key KPI metrics calculations
@@ -93,24 +89,24 @@ export function LmsClient({
   const avgSubmissionRate =
     totalStudentsSum > 0 ? (totalSubmissionsSum / totalStudentsSum) * 100 : 0;
 
-  // LMS portions metadata for dropdown selector
+  // LMS sections metadata for dropdown selector
   const sections = React.useMemo(
     () => [
       {
         id: "courses" as const,
-        label: "Courses & Syllabus",
+        label: "Subjects & Syllabus",
         icon: BookOpen,
         count: courses.length,
       },
       {
         id: "assignments" as const,
-        label: "Assignments",
+        label: "Homework",
         icon: FileText,
         count: assignments.length,
       },
       {
         id: "materials" as const,
-        label: "Study Materials",
+        label: "Study Notes",
         icon: FolderArchive,
         count: materials.length,
       },
@@ -121,7 +117,7 @@ export function LmsClient({
   const activeSectionObj =
     sections.find((s) => s.id === activeTab) || sections[0];
 
-  // Unique subjects for filter (comprehensive Pakistani school subjects + courses)
+  // Unique subjects for filter
   const courseSubjects = React.useMemo(() => {
     const set = new Set<string>([...PAKISTANI_SCHOOL_SUBJECTS, ...courses.map((c) => c.subject)]);
     return Array.from(set).sort((a, b) => a.localeCompare(b));
@@ -147,11 +143,6 @@ export function LmsClient({
     setCourses((prev) => [newCourse, ...prev]);
   };
 
-  const handleOpenAssignmentForCourse = (course: LmsCourse) => {
-    setSelectedCourseForAssignment(course.id);
-    setIsAssignmentDialogOpen(true);
-  };
-
   const handleOpenNewAssignmentGlobal = () => {
     setSelectedCourseForAssignment(undefined);
     setIsAssignmentDialogOpen(true);
@@ -164,8 +155,8 @@ export function LmsClient({
           const nextStatus = a.status === "Graded" ? "Active" : "Graded";
           toast.success(
             nextStatus === "Graded"
-              ? "Assignment marked as Graded"
-              : "Assignment reopened for submissions"
+              ? "Homework marked as Checked"
+              : "Homework reopened for submissions"
           );
           return { ...a, status: nextStatus };
         }
@@ -180,17 +171,17 @@ export function LmsClient({
         m.id === material.id ? { ...m, downloadCount: m.downloadCount + 1 } : m
       )
     );
-    toast.success("Downloading Resource", {
+    toast.success("Downloading Notes", {
       description: `"${material.title}" (${material.fileType}) download started.`,
     });
   };
 
-  // Assignment Columns (Professional Enterprise Layout)
+  // Homework Columns
   const assignmentColumns: Column<LmsAssignment>[] = React.useMemo(
     () => [
       {
         key: "title",
-        header: "Assignment",
+        header: "Homework",
         align: "left",
         cell: (r) => (
           <div className="flex flex-col min-w-0 py-0.5 leading-tight">
@@ -210,7 +201,7 @@ export function LmsClient({
             </span>
           </div>
         ),
-        className: "pl-6 pr-3 py-3 text-left min-w-[200px] max-w-[280px]",
+        className: "pl-6 pr-3 py-3 text-left min-w-[190px] max-w-[260px]",
         headerClassName: "pl-6 pr-3 text-left",
       },
       {
@@ -232,12 +223,12 @@ export function LmsClient({
       },
       {
         key: "teacher",
-        header: "Instructor",
+        header: "Teacher",
         align: "left",
         cell: (r) => {
           const initials =
             r.teacher
-              .replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.)\s*/, "")
+              .replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.|Qari)\s*/, "")
               .split(" ")
               .map((w) => w[0])
               .join("")
@@ -248,18 +239,13 @@ export function LmsClient({
               <div className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-brand font-semibold text-[10.5px]">
                 {initials}
               </div>
-              <div className="min-w-0 flex flex-col leading-tight">
-                <span className="text-xs font-semibold text-foreground truncate" title={r.teacher}>
-                  {r.teacher}
-                </span>
-                <span className="text-[10.5px] text-muted-foreground truncate">
-                  Instructor
-                </span>
-              </div>
+              <span className="text-xs font-semibold text-foreground truncate" title={r.teacher}>
+                {r.teacher}
+              </span>
             </div>
           );
         },
-        className: "px-3 py-3 text-left min-w-[150px]",
+        className: "px-3 py-3 text-left min-w-[140px]",
         headerClassName: "px-3 text-left",
       },
       {
@@ -277,7 +263,7 @@ export function LmsClient({
                 </span>
               </div>
               <span className="text-[11px] font-medium text-muted-foreground tabular-nums mt-0.5 text-center">
-                {r.maxMarks} marks max
+                {r.maxMarks} marks
               </span>
             </div>
           );
@@ -287,7 +273,7 @@ export function LmsClient({
       },
       {
         key: "submissions",
-        header: "Submissions",
+        header: "Submitted",
         align: "center",
         cell: (r) => {
           const pct = Math.round((r.totalSubmissions / r.totalStudents) * 100);
@@ -297,7 +283,7 @@ export function LmsClient({
                 {r.totalSubmissions} / {r.totalStudents}
               </span>
               <span className="text-[11px] text-muted-foreground tabular-nums mt-0.5 text-center">
-                {pct}% Turned In
+                {pct}%
               </span>
             </div>
           );
@@ -323,16 +309,14 @@ export function LmsClient({
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <Button
-              variant="outline"
-              size="xs"
+            <ActionIconButton
+              tone="view"
               onClick={() => setViewingAssignment(r)}
-              className="h-7 px-3 text-xs font-semibold cursor-pointer border-border/80 hover:bg-muted gap-1.5 text-foreground"
-              title="View assignment details & submissions"
+              aria-label={`View homework ${r.title}`}
+              title="View homework details & submissions"
             >
-              <Eye className="size-3.5 text-brand" />
-              <span>View</span>
-            </Button>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
         className: "px-4 py-3 text-center whitespace-nowrap",
@@ -371,12 +355,12 @@ export function LmsClient({
     [assignments]
   );
 
-  // Materials Columns (Professional Enterprise Layout)
+  // Study Notes Columns
   const materialColumns: Column<LmsMaterial>[] = React.useMemo(
     () => [
       {
         key: "title",
-        header: "Document",
+        header: "Note Title",
         align: "left",
         cell: (r) => (
           <div className="flex flex-col min-w-0 py-0.5 leading-tight">
@@ -393,7 +377,7 @@ export function LmsClient({
             </span>
           </div>
         ),
-        className: "pl-6 pr-3 py-3 text-left min-w-[200px] max-w-[280px]",
+        className: "pl-6 pr-3 py-3 text-left min-w-[190px] max-w-[260px]",
         headerClassName: "pl-6 pr-3 text-left",
       },
       {
@@ -416,12 +400,12 @@ export function LmsClient({
             </span>
           </div>
         ),
-        className: "px-3 py-3 text-center min-w-[150px]",
+        className: "px-3 py-3 text-center min-w-[140px]",
         headerClassName: "px-3 text-center",
       },
       {
         key: "fileType",
-        header: "Format & Size",
+        header: "Format",
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
@@ -455,16 +439,14 @@ export function LmsClient({
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <Button
-              variant="outline"
-              size="xs"
+            <ActionIconButton
+              tone="view"
               onClick={() => setViewingMaterial(r)}
-              className="h-7 px-3 text-xs font-semibold cursor-pointer border-border/80 hover:bg-muted gap-1.5 text-foreground"
-              title="View resource details & download"
+              aria-label={`View notes ${r.title}`}
+              title="View note details & download"
             >
-              <Eye className="size-3.5 text-brand" />
-              <span>View</span>
-            </Button>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
         className: "px-4 py-3 text-center whitespace-nowrap",
@@ -516,12 +498,12 @@ export function LmsClient({
     [materials]
   );
 
-  // Courses Columns (Professional Enterprise Layout)
+  // Subjects & Syllabus Columns
   const courseColumns: Column<LmsCourse>[] = React.useMemo(
     () => [
       {
         key: "title",
-        header: "Course",
+        header: "Subject",
         align: "left",
         cell: (r) => {
           const courseName =
@@ -550,7 +532,7 @@ export function LmsClient({
             </div>
           );
         },
-        className: "pl-6 pr-3 py-3 text-left min-w-[200px] max-w-[280px]",
+        className: "pl-6 pr-3 py-3 text-left min-w-[190px] max-w-[260px]",
         headerClassName: "pl-6 pr-3 text-left",
       },
       {
@@ -572,12 +554,12 @@ export function LmsClient({
       },
       {
         key: "teacher",
-        header: "Instructor",
+        header: "Teacher",
         align: "left",
         cell: (r) => {
           const initials =
             r.teacher
-              .replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.)\s*/, "")
+              .replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.|Qari)\s*/, "")
               .split(" ")
               .map((w) => w[0])
               .join("")
@@ -588,23 +570,18 @@ export function LmsClient({
               <div className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-soft text-brand font-semibold text-[10.5px]">
                 {initials}
               </div>
-              <div className="min-w-0 flex flex-col leading-tight">
-                <span className="text-xs font-semibold text-foreground truncate" title={r.teacher}>
-                  {r.teacher}
-                </span>
-                <span className="text-[10.5px] text-muted-foreground truncate">
-                  Instructor
-                </span>
-              </div>
+              <span className="text-xs font-semibold text-foreground truncate" title={r.teacher}>
+                {r.teacher}
+              </span>
             </div>
           );
         },
-        className: "px-3 py-3 text-left min-w-[150px]",
+        className: "px-3 py-3 text-left min-w-[140px]",
         headerClassName: "px-3 text-left",
       },
       {
         key: "enrollment",
-        header: "Students & Tasks",
+        header: "Class & Homework",
         align: "center",
         cell: (r) => (
           <div className="flex flex-col items-center justify-center text-center min-w-0 leading-tight whitespace-nowrap">
@@ -612,7 +589,7 @@ export function LmsClient({
               {r.enrolledStudents} Students
             </span>
             <span className="text-[11px] text-muted-foreground tabular-nums mt-0.5 text-center">
-              {r.activeAssignments} Active {r.activeAssignments === 1 ? "Task" : "Tasks"}
+              {r.activeAssignments} Homework
             </span>
           </div>
         ),
@@ -637,16 +614,14 @@ export function LmsClient({
         align: "center",
         cell: (r) => (
           <div className="flex items-center justify-center">
-            <Button
-              variant="outline"
-              size="xs"
+            <ActionIconButton
+              tone="view"
               onClick={() => setViewingSyllabusCourse(r)}
-              className="h-7 px-3 text-xs font-semibold cursor-pointer border-border/80 hover:bg-muted gap-1.5 text-foreground"
-              title="View course curriculum & progress"
+              aria-label={`View syllabus for ${r.subject}`}
+              title="View subject syllabus & progress"
             >
-              <Eye className="size-3.5 text-brand" />
-              <span>View</span>
-            </Button>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
         className: "px-4 py-3 text-center whitespace-nowrap",
@@ -697,7 +672,7 @@ export function LmsClient({
     <div className="space-y-6 overflow-x-hidden">
       {/* Top Header */}
       <PageHeader
-        title="Learning Management System (LMS)"
+        title="School LMS"
         actions={
           <div className="flex items-center gap-2.5">
             {activeTab === "courses" && (
@@ -707,7 +682,7 @@ export function LmsClient({
                 className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
               >
                 <Plus className="size-4" />
-                <span>Add Course</span>
+                <span>Add Subject</span>
               </Button>
             )}
             {activeTab === "assignments" && (
@@ -717,7 +692,7 @@ export function LmsClient({
                 className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
               >
                 <Plus className="size-4" />
-                <span>New Assignment</span>
+                <span>Assign Homework</span>
               </Button>
             )}
             {activeTab === "materials" && (
@@ -727,7 +702,7 @@ export function LmsClient({
                 className="h-9.5 px-5 gap-2 cursor-pointer shadow-sm text-xs font-semibold"
               >
                 <Upload className="size-4" />
-                <span>Upload Material</span>
+                <span>Upload Notes</span>
               </Button>
             )}
           </div>
@@ -737,22 +712,22 @@ export function LmsClient({
       {/* KPI Stats Row */}
       <StatGrid className="max-w-none">
         <StatCard
-          label="Active Courses"
+          label="Active Subjects"
           value={formatNumber(activeCoursesCount)}
           icon={BookOpen}
         />
         <StatCard
-          label="Active Assignments"
+          label="Active Homework"
           value={formatNumber(activeAssignmentsCount)}
           icon={FileText}
         />
         <StatCard
-          label="Average Submission Rate"
+          label="Homework Submitted"
           value={formatPercent(avgSubmissionRate, 1)}
           icon={CheckCircle2}
         />
         <StatCard
-          label="Learning Resources"
+          label="Study Notes"
           value={formatNumber(materials.length)}
           icon={FolderArchive}
         />
@@ -761,7 +736,9 @@ export function LmsClient({
       {/* LMS Controlled Tabs with Single Dropdown Selector */}
       <Tabs
         value={activeTab}
-        onValueChange={(val) => setActiveTab(val as any)}
+        onValueChange={(val) =>
+          setActiveTab(val as "courses" | "assignments" | "materials")
+        }
         className="space-y-4"
       >
         {/* Module Tabs Selector Bar */}
@@ -831,7 +808,7 @@ export function LmsClient({
           </DropdownMenu>
         </div>
 
-        {/* TAB 1: Courses & Syllabus */}
+        {/* TAB 1: Subjects & Syllabus */}
         <TabsContent value="courses" className="space-y-4 outline-none">
           <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden pt-5">
             <DataTable
@@ -839,22 +816,21 @@ export function LmsClient({
               columns={courseColumns}
               getRowId={(r) => r.id}
               filters={courseFilters}
-              searchPlaceholder="Search courses…"
+              searchPlaceholder="Search subjects…"
               searchFn={(r, q) =>
                 r.title.toLowerCase().includes(q.toLowerCase()) ||
-                r.courseCode.toLowerCase().includes(q.toLowerCase()) ||
                 r.subject.toLowerCase().includes(q.toLowerCase()) ||
                 r.teacher.toLowerCase().includes(q.toLowerCase()) ||
                 r.className.toLowerCase().includes(q.toLowerCase())
               }
               pageSize={8}
               tableClassName="w-full text-sm"
-              emptyMessage="No courses found."
+              emptyMessage="No subjects found."
             />
           </div>
         </TabsContent>
 
-        {/* TAB 2: Assignments & Homework */}
+        {/* TAB 2: Homework */}
         <TabsContent value="assignments" className="space-y-4 outline-none">
           <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden pt-5">
             <DataTable
@@ -862,7 +838,7 @@ export function LmsClient({
               columns={assignmentColumns}
               getRowId={(r) => r.id}
               filters={assignmentFilters}
-              searchPlaceholder="Search assignments…"
+              searchPlaceholder="Search homework…"
               searchFn={(r, q) =>
                 r.title.toLowerCase().includes(q.toLowerCase()) ||
                 r.courseName.toLowerCase().includes(q.toLowerCase()) ||
@@ -871,12 +847,12 @@ export function LmsClient({
               }
               pageSize={8}
               tableClassName="w-full text-sm"
-              emptyMessage="No assignments found."
+              emptyMessage="No homework found."
             />
           </div>
         </TabsContent>
 
-        {/* TAB 3: Study Materials & Notes */}
+        {/* TAB 3: Study Notes */}
         <TabsContent value="materials" className="space-y-4 outline-none">
           <div className="bg-card rounded-2xl border border-border shadow-xs overflow-hidden pt-5">
             <DataTable
@@ -884,7 +860,7 @@ export function LmsClient({
               columns={materialColumns}
               getRowId={(r) => r.id}
               filters={materialFilters}
-              searchPlaceholder="Search materials…"
+              searchPlaceholder="Search study notes…"
               searchFn={(r, q) =>
                 r.title.toLowerCase().includes(q.toLowerCase()) ||
                 r.subject.toLowerCase().includes(q.toLowerCase()) ||
@@ -893,7 +869,7 @@ export function LmsClient({
               }
               pageSize={8}
               tableClassName="w-full text-sm"
-              emptyMessage="No learning materials found."
+              emptyMessage="No study notes found."
             />
           </div>
         </TabsContent>
@@ -925,12 +901,6 @@ export function LmsClient({
         open={!!viewingSyllabusCourse}
         onOpenChange={(open) => {
           if (!open) setViewingSyllabusCourse(null);
-        }}
-        onAddAssignment={() => {
-          if (viewingSyllabusCourse) {
-            setSelectedCourseForAssignment(viewingSyllabusCourse.id);
-            setIsAssignmentDialogOpen(true);
-          }
         }}
       />
 

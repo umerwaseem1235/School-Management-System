@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -763,25 +764,23 @@ export default function ResultsPage() {
                       </TableCell>
 
                       <TableCell className="text-right pr-6 py-3">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="ghost"
-                            size="icon-xs"
+                        <div className="flex items-center justify-end gap-1">
+                          <ActionIconButton
+                            tone="edit"
                             onClick={() => setEditingResult(r)}
+                            aria-label={`Edit marks for ${r.studentName}`}
                             title="Edit Student Marks"
-                            className="size-7 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer rounded-lg"
                           >
-                            <Pencil className="size-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-xs"
+                            <Pencil />
+                          </ActionIconButton>
+                          <ActionIconButton
+                            tone="view"
                             onClick={() => setViewingResult(r)}
+                            aria-label={`View DMC for ${r.studentName}`}
                             title="View & Print Detailed Marks Certificate (DMC)"
-                            className="size-7 text-muted-foreground hover:text-brand hover:bg-brand/10 cursor-pointer rounded-[4px]"
                           >
-                            <Eye className="size-3.5" />
-                          </Button>
+                            <Eye />
+                          </ActionIconButton>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -942,13 +941,6 @@ export default function ResultsPage() {
                   <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
                     Select Student
                   </h3>
-                  <p className="text-[10.5px] text-muted-foreground truncate">
-                    {reportCardClassFilter === "ALL"
-                      ? "All Classes"
-                      : reportCardClassFilter
-                          .replace(" (Science - Biology)", " (Bio)")
-                          .replace(" (Science - Computer)", " (CS)")}
-                  </p>
                 </div>
                 <span className="text-xs font-mono font-semibold text-brand bg-brand-50 px-2 py-0.5 rounded shrink-0">
                   {reportCardStudents.length} Found
@@ -1046,14 +1038,9 @@ export default function ResultsPage() {
               {activeReportCardStudent ? (
                 <>
                   <div className="px-5 py-3.5 border-b border-border/70 bg-muted/20 flex flex-wrap items-center justify-between gap-2">
-                    <div>
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Detailed Marks Certificate (DMC)
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {activeReportCardStudent.studentName} ({activeReportCardStudent.rollNo})
-                      </p>
-                    </div>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      Detailed Marks Certificate (DMC)
+                    </h3>
 
                     <div className="flex items-center gap-1.5">
                       <Button

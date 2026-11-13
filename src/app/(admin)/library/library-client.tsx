@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PageHeader } from "@/components/shared/page-header";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import {
@@ -300,10 +301,10 @@ export function LibraryClient() {
         className: "w-[155px]",
         cell: (r) => (
           <div className="flex items-center justify-center gap-1">
-            <ActionButton
-              tone="info"
-              size="xs"
+            <ActionIconButton
+              tone="view"
               disabled={r.availableCopies <= 0}
+              aria-label={`Assign ${r.title}`}
               title={
                 r.availableCopies <= 0
                   ? "No copies available to assign"
@@ -311,30 +312,29 @@ export function LibraryClient() {
               }
               onClick={() => openAssignModal(r.id)}
             >
-              <BookUp className="h-3 w-3" />
-              <span>Assign</span>
-            </ActionButton>
-            <ActionButton
-              tone="outline"
-              size="xs"
+              <BookUp />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="edit"
+              aria-label={`Edit ${r.title}`}
               title="Edit book details"
               onClick={() => {
                 setEditingBook(r);
                 setFormOpen(true);
               }}
             >
-              <Edit className="h-3 w-3" />
-            </ActionButton>
-            <ActionButton
-              tone="danger"
-              size="xs"
+              <Edit />
+            </ActionIconButton>
+            <ActionIconButton
+              tone="delete"
+              aria-label={`Delete ${r.title}`}
               title="Delete book"
               onClick={() =>
                 setDeleteTarget({ id: r.id, title: r.title })
               }
             >
-              <Trash2 className="h-3 w-3" />
-            </ActionButton>
+              <Trash2 />
+            </ActionIconButton>
           </div>
         ),
       },
@@ -456,24 +456,23 @@ export function LibraryClient() {
         cell: (r) => (
           <div className="flex items-center justify-center gap-1">
             {r.status === "Issued" && (
-              <ActionButton
-                tone="success"
-                size="xs"
+              <ActionIconButton
+                tone="approve"
+                aria-label={`Mark ${r.bookTitle} returned`}
                 title="Mark book as returned"
                 onClick={() => setReturnTarget(r)}
               >
-                <RotateCcw className="h-3 w-3" />
-                <span>Return</span>
-              </ActionButton>
+                <RotateCcw />
+              </ActionIconButton>
             )}
-            <ActionButton
-              tone="outline"
-              size="xs"
+            <ActionIconButton
+              tone="view"
+              aria-label={`View issuance details for ${r.bookTitle}`}
               title="View issuance details"
               onClick={() => setViewTarget(r)}
             >
-              <Eye className="h-3 w-3" />
-            </ActionButton>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },

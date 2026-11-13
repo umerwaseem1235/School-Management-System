@@ -24,6 +24,7 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -391,16 +392,14 @@ export function StaffAttendanceClient() {
         headerClassName: "w-[16%]",
         cell: (r) => (
           <div className="flex justify-center">
-            <button
-              type="button"
+            <ActionIconButton
+              tone="view"
               onClick={() => setViewingStaff(r)}
               title={`View ${r.name}'s attendance record, contact details (${r.email || "staff@edusphere.edu.pk"}) & department`}
               aria-label={`View ${r.name}'s attendance record & contact details`}
-              className="inline-flex h-8 items-center gap-1.5 rounded-[4px] border border-blue-200 bg-blue-50/70 px-2.5 text-xs font-semibold text-blue-700 shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-all duration-150 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 active:translate-y-px cursor-pointer"
             >
-              <Eye className="size-3.5 text-blue-600" />
-              <span>View</span>
-            </button>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
       },

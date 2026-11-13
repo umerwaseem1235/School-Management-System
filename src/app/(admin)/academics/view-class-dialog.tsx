@@ -8,6 +8,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  getClassSectionLetters,
+  getScienceSpecializationTracks,
+  getSectionAllocation,
+} from "@/lib/mock/academics";
 import type { AcademicClass } from "@/types";
 import {
   Building2,
@@ -22,6 +34,8 @@ import {
   CheckCircle2,
   ShieldCheck,
   DoorOpen,
+  Dna,
+  Cpu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -29,30 +43,39 @@ interface ViewClassDialogProps {
   classItem: AcademicClass | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialSection?: string;
 }
-
-const SECTION_CO_INCHARGES = [
-  "Mrs. Nida Farooq",
-  "Ms. Ayesha Khan",
-  "Mr. Tariq Mehmood",
-  "Ms. Sadia Munir",
-  "Mr. Bilal Saeed",
-];
 
 export function ViewClassDialog({
   classItem,
   open,
   onOpenChange,
+  initialSection = "ALL",
 }: ViewClassDialogProps) {
+  const sectionsCount = classItem
+    ? (classItem as { sectionsCount?: number }).sectionsCount || classItem.sections || 1
+    : 1;
+  const sectionLetters = getClassSectionLetters(sectionsCount);
+  const [selectedSection, setSelectedSection] = React.useState<string>(() =>
+    initialSection !== "ALL" && sectionLetters.includes(initialSection)
+      ? initialSection
+      : "ALL"
+  );
+
   if (!classItem) return null;
 
-  const sectionsCount = (classItem as any).sectionsCount || classItem.sections || 1;
-  const studentsCount = (classItem as any).studentsCount || classItem.students || 0;
+  const studentsCount = (classItem as { studentsCount?: number }).studentsCount || classItem.students || 0;
   const avgStudentsPerSection =
     sectionsCount > 0 ? Math.round(studentsCount / sectionsCount) : 0;
 
-  // Generate sections list based on sectionsCount
-  const sectionLetters = ["A", "B", "C", "D", "E", "F"].slice(0, Math.max(1, sectionsCount));
+  const scienceTracks = getScienceSpecializationTracks(classItem);
+
+  const visibleSections =
+    selectedSection === "ALL"
+      ? sectionLetters.map((letter, idx) => ({ letter, idx }))
+      : sectionLetters
+          .map((letter, idx) => ({ letter, idx }))
+          .filter((item) => item.letter === selectedSection);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -135,25 +158,113 @@ export function ViewClassDialog({
             </div>
           </div>
 
+          {/* Science Stream Groups (Biology & Computer Science) */}
+          {scienceTracks.length > 0 && (
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <GraduationCap className="size-3.5 text-brand" />
+                  <span>Science Elective Groups (Biology & Computer)</span>
+                </h3>
+                <span className="text-[11px] font-medium text-muted-foreground">
+                  2 Specialization Tracks
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {scienceTracks.map((track) => {
+                  const isBio = track.id === "biology";
+                  const TrackIcon = isBio ? Dna : Cpu;
+                  return (
+                    <div
+                      key={track.id}
+                      className="rounded-xl border border-border/80 bg-muted/20 p-3.5 shadow-2xs space-y-2.5"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div
+                            className={`flex size-8 items-center justify-center rounded-lg shrink-0 ${
+                              isBio
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-400"
+                                : "bg-blue-50 text-blue-700 border border-blue-200/80 dark:bg-blue-950/40 dark:text-blue-400"
+                            }`}
+                          >
+                            <TrackIcon className="size-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="text-xs font-bold text-foreground truncate">
+                              {track.title}
+                            </h4>
+                            <p className="text-[11px] text-muted-foreground truncate">
+                              {track.wing}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="inline-flex items-center rounded-md border border-border/80 bg-background px-2 py-0.5 text-[10px] font-bold font-mono text-brand shrink-0">
+                          {track.subjectCode}
+                        </span>
+                      </div>
+
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        <span className="font-semibold text-foreground/85">Subjects:</span>{" "}
+                        {track.focusSummary}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-border/60 text-[11px]">
+                        <span className="font-medium text-foreground truncate">
+                          {track.leadTeacher}
+                        </span>
+                        <div className="flex items-center gap-2 shrink-0 text-muted-foreground">
+                          <span className="font-medium text-foreground/80">
+                            {track.sectionRange}
+                          </span>
+                          <span>•</span>
+                          <span className="font-mono font-bold text-brand">
+                            {track.students} Students
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Section Information Directory */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Layers className="size-3.5 text-brand" />
                 <span>Class & Section Roster ({sectionsCount} Sections)</span>
               </h3>
-              <span className="text-[11px] text-muted-foreground font-medium">
-                Standard Section Capacity: 35 Students
-              </span>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={selectedSection}
+                  onValueChange={(val) => {
+                    if (val) setSelectedSection(val);
+                  }}
+                >
+                  <SelectTrigger className="h-8 text-xs w-[155px] font-medium">
+                    <SelectValue placeholder="All Sections" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL" className="text-xs">
+                      All Sections ({sectionLetters.length})
+                    </SelectItem>
+                    {sectionLetters.map((letter) => (
+                      <SelectItem key={letter} value={letter} className="text-xs">
+                        Section {letter}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {sectionLetters.map((letter, idx) => {
-                const incharge =
-                  idx === 0
-                    ? classItem.classTeacher || SECTION_CO_INCHARGES[0]
-                    : SECTION_CO_INCHARGES[idx % SECTION_CO_INCHARGES.length];
-                const roomNo = `Room ${classItem.gradeLevel}0${idx + 1} (Wing A)`;
+              {visibleSections.map(({ letter, idx }) => {
+                const { incharge, roomNo, students: sectionStudents } = getSectionAllocation(classItem, idx);
 
                 return (
                   <div
@@ -185,7 +296,7 @@ export function ViewClassDialog({
                           {roomNo}
                         </span>
                         <span className="font-mono font-bold text-brand">
-                          {avgStudentsPerSection} / 35
+                          {sectionStudents} / 35
                         </span>
                       </div>
                     </div>

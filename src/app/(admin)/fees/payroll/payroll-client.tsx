@@ -21,6 +21,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import { ActionButton } from "@/components/shared/action-button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { cn } from "@/lib/utils";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/format";
 import {
@@ -668,37 +669,34 @@ export function PayrollClient() {
 
                         {/* Actions */}
                         <td className="px-5 py-3 text-center align-middle whitespace-nowrap">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <ActionButton
-                              tone="outline"
-                              size="xs"
-                              className="border-purple-200 bg-purple-50/70 text-purple-700 hover:border-purple-400 hover:bg-purple-100 hover:text-purple-800 shadow-2xs"
+                          <div className="flex items-center justify-center gap-1">
+                            <ActionIconButton
+                              tone="purple"
+                              aria-label={`Print payslip for ${s.name}`}
                               title="Print payslip"
                               onClick={() => printSinglePayslip(s)}
                             >
-                              <Printer className="size-3 text-purple-600" />
-                            </ActionButton>
-                            <ActionButton
-                              tone="outline"
-                              size="xs"
-                              className="border-blue-200 bg-blue-50/70 text-blue-700 hover:border-blue-400 hover:bg-blue-100 hover:text-blue-800 shadow-2xs"
+                              <Printer />
+                            </ActionIconButton>
+                            <ActionIconButton
+                              tone="view"
+                              aria-label={`View compensation details for ${s.name}`}
                               title="View full compensation details"
                               onClick={() => {
                                 setSelectedSalary(s);
                                 setPayslipOpen(true);
                               }}
                             >
-                              <Eye className="size-3 text-blue-600" />
-                            </ActionButton>
-                            <ActionButton
-                              tone="danger"
-                              size="xs"
-                              className="border-rose-200 bg-rose-50/70 text-rose-700 hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800 shadow-2xs"
+                              <Eye />
+                            </ActionIconButton>
+                            <ActionIconButton
+                              tone="delete"
+                              aria-label={`Remove salary record for ${s.name}`}
                               title="Remove salary record"
                               onClick={() => handleDeleteRecord(s.id)}
                             >
-                              <Trash2 className="size-3 text-rose-600" />
-                            </ActionButton>
+                              <Trash2 />
+                            </ActionIconButton>
                           </div>
                         </td>
                       </tr>

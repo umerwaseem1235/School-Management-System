@@ -6,8 +6,8 @@ import {
 } from "@/lib/mock/lms";
 
 export const metadata = {
-  title: "LMS — Learning Management System",
-  description: "Courses, syllabus progress, homework assignments, and learning resources.",
+  title: "School LMS — Subjects, Homework & Study Notes",
+  description: "School-level class subjects, syllabus progress, daily homework, and study notes.",
 };
 
 export default function LmsPage() {

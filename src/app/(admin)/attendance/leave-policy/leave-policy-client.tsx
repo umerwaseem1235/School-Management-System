@@ -1293,7 +1293,7 @@ export function LeavePolicyClient() {
               <SlidersHorizontal className="size-4 text-brand" />
               <span>Update Institutional Leave Quotas (Session 2026–27)</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="sr-only">
               Adjust statutory annual leave day allocations for Academic Session 2026–27. Changes apply across all campus portals.
             </DialogDescription>
           </DialogHeader>
@@ -1440,7 +1440,7 @@ export function LeavePolicyClient() {
               <Pencil className="size-4 text-brand" />
               <span>Adjust Policy: {editingSinglePolicy?.category}</span>
             </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
+            <DialogDescription className="sr-only">
               Configure parameters, notice requirements, carry-forward terms, and sanctioning authority.
             </DialogDescription>
           </DialogHeader>

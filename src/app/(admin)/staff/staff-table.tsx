@@ -3,7 +3,7 @@
 import * as React from "react";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { Button } from "@/components/ui/button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -214,16 +214,14 @@ export function StaffTable({
             />
 
             {/* Quick View Button */}
-            <Button
-              variant="outline"
-              size="xs"
+            <ActionIconButton
+              tone="view"
               onClick={() => onSelectStaff(r)}
-              className="h-7.5 gap-1.5 px-3 rounded-[4px] text-xs font-semibold border-brand/20 text-brand hover:bg-brand-50 hover:text-brand hover:border-brand/40 shadow-2xs transition-all active:scale-95 cursor-pointer"
+              aria-label={`View profile for ${r.name}`}
               title={`View complete profile: ${r.name} (${r.empCode}) — ${r.designation} (${r.department})`}
             >
-              <Eye className="size-3.5" />
-              <span>View</span>
-            </Button>
+              <Eye />
+            </ActionIconButton>
           </div>
         ),
         className: "whitespace-nowrap",

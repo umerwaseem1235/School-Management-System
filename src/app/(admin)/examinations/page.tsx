@@ -29,6 +29,7 @@ import {
   Check,
 } from "lucide-react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -478,26 +479,23 @@ export default function ExaminationsPage() {
 
                         {/* Actions */}
                         <TableCell className="px-5 py-3 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <Button
-                              variant="outline"
-                              size="xs"
+                          <div className="flex items-center justify-end gap-1">
+                            <ActionIconButton
+                              tone="indigo"
                               onClick={() => handleViewTermDatesheet(term.id)}
-                              className="h-7.5 px-2.5 text-xs font-semibold text-brand hover:bg-brand-soft/50 hover:text-brand border-border/80 cursor-pointer shadow-2xs gap-1"
+                              aria-label={`View datesheet for ${term.examName}`}
                               title="View Datesheet for this term"
                             >
-                              <CalendarDays className="size-3.5" />
-                              <span>Datesheet</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="xs"
+                              <CalendarDays />
+                            </ActionIconButton>
+                            <ActionIconButton
+                              tone="delete"
                               onClick={() => handleDeleteExam(term.id, term.examName)}
-                              className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-danger hover:bg-danger-soft/60 cursor-pointer"
+                              aria-label={`Delete ${term.examName}`}
                               title="Delete Exam Term"
                             >
-                              <Trash2 className="size-3.5" />
-                            </Button>
+                              <Trash2 />
+                            </ActionIconButton>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -534,31 +532,29 @@ export default function ExaminationsPage() {
                   <h2 className="text-sm font-semibold text-foreground">
                     Examination Datesheet
                   </h2>
-                  <p className="text-xs text-muted-foreground">
-                    Paper timings, examination shifts, and assigned examination halls
-                  </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <Button
                   type="button"
-                  size="xs"
+                  variant="secondary"
+                  size="default"
                   onClick={() => setIsAutoGenerateOpen(true)}
-                  className="h-8 px-2.5 text-xs font-semibold bg-brand-soft text-brand hover:bg-brand-soft/80 border border-brand/20 gap-1.5 cursor-pointer shadow-2xs"
+                  className="h-8 px-3 text-xs font-semibold border border-brand/25 gap-1.5 cursor-pointer"
                   title="Automatically generate datesheet for a class with date range and room"
                 >
-                  <Sparkles className="size-3" />
+                  <Sparkles className="size-3.5" />
                   <span>Auto-Generate</span>
                 </Button>
 
                 <Button
                   type="button"
-                  size="sm"
+                  size="default"
                   onClick={() => setIsAddPaperOpen(true)}
-                  className="h-8 px-2.5 gap-1.5 cursor-pointer"
+                  className="h-8 px-3 gap-1.5 cursor-pointer"
                 >
-                  <Plus className="size-3" />
+                  <Plus className="size-3.5" />
                   <span>Add Paper</span>
                 </Button>
               </div>
@@ -640,26 +636,26 @@ export default function ExaminationsPage() {
             </div>
 
             {/* Datesheet Table */}
-            <div>
-              <Table className="w-full text-sm">
+            <div className="w-full md:[&_[data-slot=table-container]]:overflow-x-hidden">
+              <Table className="w-full md:table-fixed text-sm">
                 <TableHeader>
                   <TableRow className="bg-muted/60 border-b border-border/70">
-                    <TableHead className="font-semibold text-xs text-foreground px-5 py-3 text-left">
-                      Date & Day
+                    <TableHead className="md:w-[15%] font-semibold text-xs text-foreground pl-5 pr-2 py-3 text-left">
+                      Date
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-left">
+                    <TableHead className="md:w-[19%] font-semibold text-xs text-foreground px-2 py-3 text-center">
                       Class
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-left">
+                    <TableHead className="md:w-[22%] font-semibold text-xs text-foreground px-2 py-3 text-center">
                       Subject Paper
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
-                      Timing & Shift
+                    <TableHead className="md:w-[18%] font-semibold text-xs text-foreground px-2 py-3 text-center">
+                      Timing
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-3 py-3 text-center">
+                    <TableHead className="md:w-[15%] font-semibold text-xs text-foreground px-2 py-3 text-center">
                       Exam Hall
                     </TableHead>
-                    <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-right">
+                    <TableHead className="md:w-[11%] font-semibold text-xs text-foreground pl-2 pr-5 py-3 text-center">
                       Action
                     </TableHead>
                   </TableRow>
@@ -671,71 +667,69 @@ export default function ExaminationsPage() {
                         key={entry.id}
                         className="hover:bg-muted/30 transition-colors border-b border-border/60"
                       >
-                        {/* Date & Day */}
-                        <TableCell className="font-medium text-xs text-foreground px-5 py-3 text-left whitespace-nowrap">
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-semibold text-foreground text-xs leading-tight">
-                              {formatDate(entry.examDate)}
-                            </span>
-                            <span className="text-[11px] text-muted-foreground mt-0.5">
-                              {entry.day}
-                            </span>
-                          </div>
+                        {/* Date */}
+                        <TableCell className="font-medium text-xs text-foreground pl-5 pr-2 py-3 text-left whitespace-nowrap">
+                          <span
+                            className="font-semibold text-foreground text-xs"
+                            title={`${formatDate(entry.examDate)} (${entry.day})`}
+                          >
+                            {formatDate(entry.examDate)}
+                          </span>
                         </TableCell>
 
                         {/* Class */}
-                        <TableCell className="text-xs px-4 py-3 text-left font-medium text-foreground">
-                          {entry.className}
+                        <TableCell className="text-xs px-2 py-3 text-center font-medium text-foreground whitespace-normal">
+                          <span className="leading-snug">{entry.className}</span>
                         </TableCell>
 
                         {/* Subject */}
-                        <TableCell className="text-xs px-4 py-3 text-left font-semibold text-foreground">
-                          <div className="flex flex-col min-w-0">
-                            <span className="truncate">{entry.subject}</span>
-                            {entry.invigilator && (
-                              <span className="text-[11px] text-muted-foreground font-normal mt-0.5 truncate">
-                                Invigilator: {entry.invigilator}
-                              </span>
-                            )}
-                          </div>
+                        <TableCell className="text-xs px-2 py-3 text-center font-semibold text-foreground whitespace-normal">
+                          <span
+                            className="leading-snug"
+                            title={
+                              entry.invigilator
+                                ? `${entry.subject} — Invigilator: ${entry.invigilator}`
+                                : entry.subject
+                            }
+                          >
+                            {entry.subject}
+                          </span>
                         </TableCell>
 
                         {/* Timing */}
-                        <TableCell className="text-xs px-3 py-3 text-center font-mono whitespace-nowrap">
-                          <span className="font-medium text-foreground block">
+                        <TableCell className="text-xs px-2 py-3 text-center font-mono whitespace-nowrap">
+                          <span
+                            className="font-medium text-foreground"
+                            title={`${entry.startTime} – ${entry.endTime} (${entry.shift} Shift)`}
+                          >
                             {entry.startTime} – {entry.endTime}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground uppercase font-sans font-medium">
-                            {entry.shift} Shift
                           </span>
                         </TableCell>
 
                         {/* Hall */}
-                        <TableCell className="text-xs px-3 py-3 text-center text-muted-foreground whitespace-nowrap font-medium">
+                        <TableCell className="text-xs px-2 py-3 text-center text-muted-foreground whitespace-nowrap font-medium">
                           {entry.roomHall}
                         </TableCell>
 
                         {/* Actions */}
-                        <TableCell className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="xs"
+                        <TableCell className="pl-2 pr-5 py-3 text-center whitespace-nowrap">
+                          <div className="inline-flex items-center justify-center gap-1">
+                            <ActionIconButton
+                              tone="edit"
                               onClick={() => handleEditPaper(entry)}
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-brand hover:bg-brand-soft/60 cursor-pointer"
+                              aria-label={`Edit schedule for ${entry.subject}`}
                               title="Edit Paper Schedule / Hall"
                             >
-                              <Edit3 className="size-3.5" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="xs"
+                              <Edit3 />
+                            </ActionIconButton>
+                            <ActionIconButton
+                              tone="delete"
                               onClick={() => handleDeletePaper(entry.id, entry.subject, entry.className)}
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-danger hover:bg-danger-soft/60 cursor-pointer"
+                              aria-label={`Remove ${entry.subject} paper`}
                               title="Remove Paper"
                             >
-                              <Trash2 className="size-3.5" />
-                            </Button>
+                              <Trash2 />
+                            </ActionIconButton>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -771,14 +765,9 @@ export default function ExaminationsPage() {
                       <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
                         <GraduationCap className="size-4" />
                       </div>
-                      <div>
-                        <h2 className="text-sm font-semibold text-foreground">
-                          Academic Grading Scale
-                        </h2>
-                        <p className="text-xs text-muted-foreground">
-                          Performance benchmarks and grade boundaries
-                        </p>
-                      </div>
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Academic Grading Scale
+                      </h2>
                     </div>
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-50 text-brand font-mono">
                       7 Bands
@@ -845,14 +834,9 @@ export default function ExaminationsPage() {
                       <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
                         <ShieldCheck className="size-4" />
                       </div>
-                      <div>
-                        <h2 className="text-sm font-semibold text-foreground">
-                          Passing & Promotion Criteria
-                        </h2>
-                        <p className="text-xs text-muted-foreground">
-                          Core institutional standards & clearance
-                        </p>
-                      </div>
+                      <h2 className="text-sm font-semibold text-foreground">
+                        Passing & Promotion Criteria
+                      </h2>
                     </div>
                   </div>
 

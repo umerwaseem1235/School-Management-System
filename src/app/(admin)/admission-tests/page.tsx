@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -893,28 +894,26 @@ export default function AdmissionTestsPage() {
                           </TableCell>
 
                           <TableCell className="px-5 py-3.5 text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <Button
-                                variant="outline"
-                                size="xs"
+                            <div className="flex items-center justify-end gap-1">
+                              <ActionIconButton
+                                tone="view"
                                 onClick={() => {
                                   setViewSession(ses);
                                   setIsViewSessionOpen(true);
                                 }}
-                                className="h-7.5 px-2.5 text-xs font-semibold text-foreground hover:text-brand hover:bg-brand-soft/50 hover:border-brand/30 border-border/80 cursor-pointer shadow-2xs gap-1.5"
+                                aria-label={`View ${ses.title}`}
+                                title="View Session Details"
                               >
-                                <Eye className="size-3.5" />
-                                <span>View</span>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="xs"
+                                <Eye />
+                              </ActionIconButton>
+                              <ActionIconButton
+                                tone="delete"
                                 onClick={() => handleDeleteSession(ses.id)}
-                                className="h-7.5 w-7.5 p-0 text-muted-foreground hover:text-danger hover:bg-danger-soft/60 cursor-pointer"
+                                aria-label={`Delete ${ses.title}`}
                                 title="Delete Session"
                               >
-                                <Trash2 className="size-3.5" />
-                              </Button>
+                                <Trash2 />
+                              </ActionIconButton>
                             </div>
                           </TableCell>
                         </TableRow>
@@ -1231,18 +1230,17 @@ export default function AdmissionTestsPage() {
                             </TableCell>
 
                             <TableCell className="px-5 py-3 text-right whitespace-nowrap">
-                              <Button
-                                variant="outline"
-                                size="xs"
+                              <ActionIconButton
+                                tone="view"
                                 onClick={() => {
                                   setViewApplicant(app);
                                   setIsViewApplicantOpen(true);
                                 }}
-                                className="h-7.5 px-2.5 text-xs font-semibold text-foreground hover:text-brand hover:bg-brand-soft/50 hover:border-brand/30 border-border/80 cursor-pointer shadow-2xs gap-1.5"
+                                aria-label={`View applicant ${app.applicantName}`}
+                                title="View Applicant Details"
                               >
-                                <Eye className="size-3.5" />
-                                <span>View</span>
-                              </Button>
+                                <Eye />
+                              </ActionIconButton>
                             </TableCell>
                           </TableRow>
                         ))
@@ -1543,30 +1541,28 @@ export default function AdmissionTestsPage() {
                                   Enrolled in SIS
                                 </span>
                               ) : (
-                                <Button
-                                  size="xs"
+                                <ActionIconButton
+                                  tone="approve"
                                   onClick={() => handleEnrollCandidate(cand)}
-                                  className="h-7.5 px-2.5 gap-1.5 cursor-pointer"
+                                  aria-label={`Enroll ${cand.applicantName} in SIS`}
                                   title="Officially admit and register this qualified candidate into Admissions and Students"
                                 >
-                                  <UserPlus className="size-3.5" />
-                                  <span>Enroll Student</span>
-                                </Button>
+                                  <UserPlus />
+                                </ActionIconButton>
                               )}
 
-                              <Button
-                                variant="outline"
-                                size="xs"
+                              <ActionIconButton
+                                tone="view"
                                 onClick={() => {
                                   setViewApplicant(cand);
                                   setViewSession(candSession);
                                   setIsViewApplicantOpen(true);
                                 }}
-                                className="h-7.5 px-2.5 text-xs font-semibold text-foreground hover:text-brand hover:bg-brand-soft/50 hover:border-brand/30 border-border/80 cursor-pointer shadow-2xs gap-1.5"
+                                aria-label={`View ${cand.applicantName}`}
+                                title="View Candidate Details"
                               >
-                                <Eye className="size-3.5" />
-                                <span>View</span>
-                              </Button>
+                                <Eye />
+                              </ActionIconButton>
                             </div>
                           </TableCell>
                         </TableRow>

@@ -32,13 +32,15 @@ interface CreateCourseDialogProps {
 
 const SUBJECT_OPTIONS = PAKISTANI_SCHOOL_SUBJECTS;
 
-const CAMPUS_OPTIONS = [
-  "Main Campus — Gulberg",
-  "DHA Phase 5 Campus",
-  "F-8 Islamabad Campus",
-  "Clifton Karachi Campus",
-  "Bahria Town Campus",
-];
+function buildSubjectCode(subject: string, className: string): string {
+  const letters = subject
+    .replace(/[^A-Za-z]/g, "")
+    .slice(0, 3)
+    .toUpperCase() || "SUB";
+  const gradeMatch = className.match(/\d+/);
+  const grade = gradeMatch ? gradeMatch[0].padStart(2, "0") : "00";
+  return `${letters}-${grade}`;
+}
 
 export function CreateCourseDialog({
   open,
@@ -46,40 +48,35 @@ export function CreateCourseDialog({
   onAddCourse,
 }: CreateCourseDialogProps) {
   const [title, setTitle] = React.useState("");
-  const [courseCode, setCourseCode] = React.useState("");
-  const [className, setClassName] = React.useState<string>(PAKISTANI_SCHOOL_CLASSES[7]);
+  const [className, setClassName] = React.useState<string>(PAKISTANI_SCHOOL_CLASSES[4]);
   const [subject, setSubject] = React.useState("Mathematics");
   const { activeBranches } = useBranches();
   const [teacher, setTeacher] = React.useState("Mr. Adeel Hassan");
   const [campus, setCampus] = React.useState(activeBranches[0]?.campusName || "Main Campus — Gulberg");
-  const [totalLessons, setTotalLessons] = React.useState("30");
+  const [totalLessons, setTotalLessons] = React.useState("28");
   const [enrolledStudents, setEnrolledStudents] = React.useState("32");
 
   const resetForm = () => {
     setTitle("");
-    setCourseCode("");
-    setClassName(PAKISTANI_SCHOOL_CLASSES[7]);
+    setClassName(PAKISTANI_SCHOOL_CLASSES[4]);
     setSubject("Mathematics");
     setTeacher("Mr. Adeel Hassan");
     setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
-    setTotalLessons("30");
+    setTotalLessons("28");
     setEnrolledStudents("32");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !courseCode.trim()) {
-      toast.error("Please fill in course title and course code.");
-      return;
-    }
+    const resolvedTitle = title.trim() || `${className.split(" (")[0]} ${subject}`;
 
     const newCourse: LmsCourse = {
       id: `lms-c${Date.now()}`,
-      title: title.trim(),
-      courseCode: courseCode.trim().toUpperCase(),
+      title: resolvedTitle,
+      courseCode: buildSubjectCode(subject, className),
       className: className.trim(),
       subject,
-      teacher: teacher.trim() || "Lead Instructor",
+      teacher: teacher.trim() || "Subject Teacher",
       campus,
       totalLessons: parseInt(totalLessons, 10) || 28,
       completedLessons: 0,
@@ -90,8 +87,8 @@ export function CreateCourseDialog({
     };
 
     onAddCourse(newCourse);
-    toast.success("Course Created", {
-      description: `Course "${newCourse.title}" is now added to the curriculum.`,
+    toast.success("Subject Added", {
+      description: `"${newCourse.subject}" has been added for ${newCourse.className}.`,
     });
     resetForm();
     onOpenChange(false);
@@ -113,47 +110,18 @@ export function CreateCourseDialog({
             </div>
             <div>
               <DialogTitle className="text-base font-semibold text-foreground">
-                Add Academic Course
+                Add Class Subject
               </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-                Set up a new digital curriculum track, syllabus modules, and enrolled class.
+              <DialogDescription className="sr-only">
+                Assign a subject, teacher, and planned lessons for a school class.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4 max-h-[75vh] overflow-y-auto">
-          {/* Course Title */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground">
-              Course Title <span className="text-danger">*</span>
-            </label>
-            <Input
-              type="text"
-              placeholder="e.g. Grade 10 Mathematics (Core)"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="h-9 text-sm"
-              required
-            />
-          </div>
-
-          {/* Course Code & Subject */}
+          {/* Subject & Class */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">
-                Course Code <span className="text-danger">*</span>
-              </label>
-              <Input
-                type="text"
-                placeholder="MTH-10"
-                value={courseCode}
-                onChange={(e) => setCourseCode(e.target.value)}
-                className="h-9 text-sm uppercase"
-                required
-              />
-            </div>
-
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <BookOpen className="size-3.5 text-muted-foreground" />
@@ -177,14 +145,11 @@ export function CreateCourseDialog({
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          {/* Target Class & Teacher */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
                 <GraduationCap className="size-3.5 text-muted-foreground" />
-                Target Class
+                Class
               </label>
               <Select
                 value={className}
@@ -193,7 +158,7 @@ export function CreateCourseDialog({
                 }}
               >
                 <SelectTrigger className="h-9 text-sm w-full">
-                  <SelectValue placeholder="Select target class" />
+                  <SelectValue placeholder="Select class" />
                 </SelectTrigger>
                 <SelectContent>
                   {PAKISTANI_SCHOOL_CLASSES.map((cls) => (
@@ -204,44 +169,61 @@ export function CreateCourseDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
 
+          {/* Optional Custom Title */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-foreground">
+              Subject Display Name (Optional)
+            </label>
+            <Input
+              type="text"
+              placeholder="e.g. Grade 9 Mathematics (leave blank to auto-fill)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="h-9 text-sm"
+            />
+          </div>
+
+          {/* Teacher & Branch */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">Lead Teacher</label>
+              <label className="text-xs font-medium text-foreground">Teacher</label>
               <Input
                 type="text"
                 value={teacher}
                 onChange={(e) => setTeacher(e.target.value)}
                 className="h-9 text-sm"
+                required
               />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground flex items-center gap-1">
+                <MapPin className="size-3.5 text-muted-foreground" />
+                Branch
+              </label>
+              <Select
+                value={campus}
+                onValueChange={(val) => {
+                  if (val) setCampus(val);
+                }}
+              >
+                <SelectTrigger className="h-9 text-sm w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeBranches.map((c) => (
+                    <SelectItem key={c.id} value={c.campusName}>
+                      {c.campusName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          {/* Campus */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground flex items-center gap-1">
-              <MapPin className="size-3.5 text-muted-foreground" />
-              Campus
-            </label>
-            <Select
-              value={campus}
-              onValueChange={(val) => {
-                if (val) setCampus(val);
-              }}
-            >
-              <SelectTrigger className="h-9 text-sm w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {activeBranches.map((c) => (
-                  <SelectItem key={c.id} value={c.campusName}>
-                    {c.campusName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Lessons & Capacity */}
+          {/* Lessons & Students */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground flex items-center gap-1">
@@ -259,7 +241,7 @@ export function CreateCourseDialog({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-foreground">Enrolled Students</label>
+              <label className="text-xs font-medium text-foreground">Students</label>
               <Input
                 type="number"
                 min="1"
@@ -285,7 +267,7 @@ export function CreateCourseDialog({
               size="lg"
               className="px-4 cursor-pointer"
             >
-              Add Course
+              Save Subject
             </Button>
           </DialogFooter>
         </form>

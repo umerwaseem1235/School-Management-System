@@ -152,7 +152,7 @@ export function AddQuestionDialog({
                 <DialogTitle className="text-base font-bold text-foreground leading-tight">
                   Add Question to Bank
                 </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                <DialogDescription className="sr-only">
                   Save a reusable MCQ, short, or long question for exam papers.
                 </DialogDescription>
               </div>

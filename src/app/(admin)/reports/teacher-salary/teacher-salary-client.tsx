@@ -34,6 +34,7 @@ import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -960,35 +961,32 @@ export function TeacherSalaryClient() {
                       {/* Row Actions */}
                       <td className="py-2.5 px-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="size-7 p-0"
+                          <ActionIconButton
+                            tone="view"
+                            aria-label={`View 12-month statement for ${s.teacher.name}`}
                             title="View 12-Month Statement"
                             onClick={() => handleInspectTeacher(s)}
                           >
-                            <Eye className="size-3.5 text-blue-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="size-7 p-0"
+                            <Eye />
+                          </ActionIconButton>
+                          <ActionIconButton
+                            tone="purple"
+                            aria-label={`Print statement for ${s.teacher.name}`}
                             title="Print Statement"
                             onClick={() =>
                               printIndividualTeacherAnnualStatement(s, periodLabel)
                             }
                           >
-                            <Printer className="size-3.5 text-slate-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="size-7 p-0"
+                            <Printer />
+                          </ActionIconButton>
+                          <ActionIconButton
+                            tone="approve"
+                            aria-label={`View tax certificate for ${s.teacher.name}`}
                             title="Tax Certificate"
                             onClick={() => handleOpenTaxCert(s)}
                           >
-                            <ShieldCheck className="size-3.5 text-emerald-600" />
-                          </Button>
+                            <ShieldCheck />
+                          </ActionIconButton>
                         </div>
                       </td>
                     </tr>
