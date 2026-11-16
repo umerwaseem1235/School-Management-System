@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionIconButton } from "@/components/shared/action-icon-button";
 import {
@@ -12,7 +13,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { formatCampusDisplay, initials } from "@/lib/format";
+import { formatCampusDisplay, formatStaffRole } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { StaffMember, Status } from "@/types";
 import { Check, ChevronDown, Eye } from "lucide-react";
@@ -65,15 +66,19 @@ function StaffStatusDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group inline-flex items-center gap-1 rounded-full outline-none transition-all hover:scale-102 active:scale-95 cursor-pointer focus-visible:ring-1 focus-visible:ring-ring"
+        className="group inline-flex items-center gap-1 rounded-full outline-none transition-all hover:scale-102 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring"
         title="Click to change status or deactivate"
       >
-        <StatusBadge status={status} dot={false} className="cursor-pointer group-hover:brightness-95 shadow-2xs text-[11px] py-0.5" />
+        <StatusBadge
+          status={status}
+          dot={false}
+          className="cursor-pointer group-hover:brightness-95 shadow-2xs"
+        />
         <ChevronDown className="size-3 text-muted-foreground/60 transition-transform group-data-[popup-open]:rotate-180" />
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align="end"
-        className="w-56 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
+        align="start"
+        className="w-56 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground"
       >
         <DropdownMenuGroup className="space-y-0.5">
           <DropdownMenuLabel className="px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -84,6 +89,7 @@ function StaffStatusDropdown({
             return (
               <DropdownMenuItem
                 key={opt.status}
+                selected={isCurrent}
                 onClick={() => {
                   if (!isCurrent && onStatusChange) {
                     onStatusChange(opt.status);
@@ -144,17 +150,19 @@ export function StaffTable({
       {
         key: "staff",
         header: "Staff Member",
-        align: "left",
+        align: "center",
+        headerAlign: "center",
+        className: "w-[25%] min-w-0 px-3 sm:px-4 text-center",
+        headerClassName: "w-[25%] px-3 sm:px-4 text-center",
         cell: (r) => (
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="grid size-9 shrink-0 place-items-center rounded-full bg-brand-50 text-brand font-heading text-xs font-bold ring-1 ring-brand/20">
-              {initials(r.name)}
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-semibold text-foreground text-[13px] leading-tight truncate" title={r.name}>
-                {r.name}
-              </span>
-            </div>
+          <div className="w-[185px] max-w-full mx-auto flex items-center gap-2.5 text-left">
+            <UserAvatar name={r.name} size="sm" className="shrink-0" />
+            <span
+              className="text-[13px] font-semibold text-foreground whitespace-nowrap truncate text-left"
+              title={r.name}
+            >
+              {r.name}
+            </span>
           </div>
         ),
         sortValue: (r) => r.name,
@@ -163,28 +171,35 @@ export function StaffTable({
         key: "designation",
         header: "Role",
         align: "center",
+        headerAlign: "center",
+        className: "w-[18%] min-w-0 px-3 sm:px-4 text-center",
+        headerClassName: "w-[18%] px-3 sm:px-4 text-center",
         cell: (r) => (
-          <div className="inline-flex flex-col items-center justify-center min-w-0">
-            <span className="text-xs font-semibold text-foreground leading-tight truncate" title={r.designation}>
-              {r.designation}
-            </span>
-          </div>
+          <span
+            className="text-[13px] font-medium text-foreground/90 whitespace-nowrap"
+            title={r.designation}
+          >
+            {formatStaffRole(r.designation)}
+          </span>
         ),
-        sortValue: (r) => r.designation,
+        sortValue: (r) => formatStaffRole(r.designation),
       },
       {
         key: "campus",
         header: "Campus",
         align: "center",
+        headerAlign: "center",
+        className: "w-[17%] px-3 sm:px-4 text-center",
+        headerClassName: "w-[17%] px-3 sm:px-4 text-center",
         cell: (r) => {
           const info = formatCampusDisplay(r.campus);
           return (
-            <div className="inline-flex flex-col items-center justify-center leading-tight min-w-0">
-              <span className="text-xs font-medium text-foreground truncate">{info.primary}</span>
-              {info.secondary && (
-                <span className="text-[11px] text-muted-foreground truncate">{info.secondary}</span>
-              )}
-            </div>
+            <span
+              className="text-[13px] font-medium text-foreground whitespace-nowrap"
+              title={info.secondary ? `${info.primary} (${info.secondary})` : info.primary}
+            >
+              {info.primary}
+            </span>
           );
         },
         sortValue: (r) => r.campus,
@@ -193,38 +208,52 @@ export function StaffTable({
         key: "contact",
         header: "Phone",
         align: "center",
+        headerAlign: "center",
+        className: "w-[15%] px-3 sm:px-4 text-center",
+        headerClassName: "w-[15%] px-3 sm:px-4 text-center",
         cell: (r) => (
-          <span className="text-xs font-mono font-medium text-foreground whitespace-nowrap">
+          <span className="text-[13px] font-medium text-foreground/90 tabular-nums whitespace-nowrap">
             {r.phone}
           </span>
         ),
         sortValue: (r) => r.phone,
-        className: "whitespace-nowrap",
       },
       {
-        key: "actions",
-        header: "Status / Action",
+        key: "status",
+        header: "Status",
         align: "center",
+        headerAlign: "center",
+        className: "w-[14%] px-3 sm:px-4 text-center",
+        headerClassName: "w-[14%] px-3 sm:px-4 text-center",
         cell: (r) => (
-          <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-            {/* Clickable Status Badge Dropdown */}
+          <div className="flex items-center justify-center">
             <StaffStatusDropdown
               status={r.status}
               onStatusChange={(newStatus) => onStatusChange?.(r.id, newStatus)}
             />
-
-            {/* Quick View Button */}
+          </div>
+        ),
+        sortValue: (r) => r.status,
+      },
+      {
+        key: "actions",
+        header: "Action",
+        align: "center",
+        headerAlign: "center",
+        className: "w-[11%] px-3 sm:px-4 text-center whitespace-nowrap",
+        headerClassName: "w-[11%] px-3 sm:px-4 text-center whitespace-nowrap",
+        cell: (r) => (
+          <div className="flex items-center justify-center">
             <ActionIconButton
               tone="view"
               onClick={() => onSelectStaff(r)}
               aria-label={`View profile for ${r.name}`}
-              title={`View complete profile: ${r.name} (${r.empCode}) — ${r.designation} (${r.department})`}
+              title={`View complete profile: ${r.name} (${r.empCode}) — ${r.designation}`}
             >
               <Eye />
             </ActionIconButton>
           </div>
         ),
-        className: "whitespace-nowrap",
       },
     ],
     [onSelectStaff, onStatusChange]
@@ -288,7 +317,8 @@ export function StaffTable({
       }
       filters={filters}
       pageSize={8}
-      tableClassName="w-full text-sm"
+      tableClassName="w-full table-fixed"
+      containerClassName="overflow-x-clip"
     />
   );
 }

@@ -96,8 +96,8 @@ function TreeSubItem({
         "group relative flex h-8.5 items-center gap-2.5 rounded-lg px-2 text-[13px] font-medium transition-colors duration-150 motion-reduce:transition-none",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
         active
-          ? "bg-white/[0.14] text-white shadow-xs font-semibold"
-          : "text-white/65 hover:bg-white/[0.08] hover:text-white"
+          ? "bg-white/[0.16] text-white shadow-xs font-semibold"
+          : "text-white hover:bg-white/[0.10] hover:text-white"
       )}
     >
       {/* Horizontal tick connecting the vertical tree rail to this item */}
@@ -107,7 +107,7 @@ function TreeSubItem({
           "absolute -left-3 top-1/2 h-px w-3 -translate-y-1/2 transition-colors duration-150",
           active
             ? "bg-white shadow-[0_0_6px_rgba(255,255,255,0.7)]"
-            : "bg-white/30 group-hover:bg-white/60"
+            : "bg-white/40 group-hover:bg-white/80"
         )}
       />
       <Icon
@@ -115,15 +115,15 @@ function TreeSubItem({
           "size-4 shrink-0 transition-colors duration-150",
           active
             ? "text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]"
-            : "text-white/70 group-hover:text-white"
+            : "text-white group-hover:text-white"
         )}
       />
-      <span className="min-w-0 flex-1 truncate">{item.title}</span>
+      <span className="min-w-0 flex-1 truncate text-white">{item.title}</span>
       {item.badge && (
         <span
           className={cn(
             "shrink-0 rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums",
-            active ? "bg-white text-primary" : "bg-white/15 text-white"
+            active ? "bg-white text-[#381e0f]" : "bg-white/20 text-white font-semibold"
           )}
         >
           {item.badge}
@@ -188,8 +188,8 @@ export function CollapsibleNavGroup({
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
               "px-2.5",
               active
-                ? "bg-white/[0.14] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_12px_-2px_rgba(0,0,0,0.35)] font-semibold"
-                : "text-white/75 hover:bg-white/[0.08] hover:text-white"
+                ? "bg-white/[0.16] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_12px_-2px_rgba(0,0,0,0.35)] font-semibold"
+                : "text-white hover:bg-white/[0.10] hover:text-white"
             )}
           >
             {/* Sliding active indicator bar — always rendered to guarantee stable DOM structure across SSR & client */}
@@ -206,7 +206,7 @@ export function CollapsibleNavGroup({
                   "size-[18px] shrink-0 transition-colors duration-150",
                   active
                     ? "text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]"
-                    : "text-white/80 group-hover:text-white"
+                    : "text-white group-hover:text-white"
                 )}
               />
             </div>
@@ -218,12 +218,12 @@ export function CollapsibleNavGroup({
                   : "opacity-0 -translate-x-2 pointer-events-none"
               )}
             >
-              <span className="truncate text-left">{item.title}</span>
+              <span className="truncate text-left text-white">{item.title}</span>
               {item.badge && (
                 <span
                   className={cn(
                     "ml-2 shrink-0 rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums",
-                    active ? "bg-white text-primary" : "bg-white/20 text-white"
+                    active ? "bg-white text-[#381e0f]" : "bg-white/20 text-white font-semibold"
                   )}
                 >
                   {item.badge}
@@ -258,10 +258,10 @@ export function CollapsibleNavGroup({
           className={cn(
             "group relative flex h-10 w-full items-center rounded-xl text-[13.5px] font-medium transition-colors duration-150 motion-reduce:transition-none",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40",
-            "px-2.5",
+            "px-2.5 cursor-pointer",
             hasActiveItem || (isNavExpanded && isExpanded)
-              ? "bg-white/[0.10] text-white"
-              : "text-white/75 hover:bg-white/[0.08] hover:text-white"
+              ? "bg-white/[0.12] text-white font-semibold"
+              : "text-white hover:bg-white/[0.10] hover:text-white"
           )}
         >
           {/* Active indicator bar — always rendered to guarantee stable DOM structure across SSR & client */}
@@ -278,7 +278,7 @@ export function CollapsibleNavGroup({
                 "size-[18px] shrink-0 transition-colors duration-150",
                 hasActiveItem
                   ? "text-white drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]"
-                  : "text-white/80 group-hover:text-white"
+                  : "text-white group-hover:text-white"
               )}
             />
           </div>
@@ -290,10 +290,10 @@ export function CollapsibleNavGroup({
                 : "opacity-0 -translate-x-2 pointer-events-none"
             )}
           >
-            <span className="truncate text-left">{group.label}</span>
+            <span className="truncate text-left text-white">{group.label}</span>
             <ChevronDown
               className={cn(
-                "ml-2 size-4 shrink-0 text-white/50 transition-transform duration-200 ease-out group-hover:text-white/80",
+                "ml-2 size-4 shrink-0 text-white/80 transition-transform duration-200 ease-out group-hover:text-white",
                 isExpanded && "rotate-180"
               )}
             />
@@ -312,7 +312,7 @@ export function CollapsibleNavGroup({
       >
         <div className="min-h-0 overflow-hidden">
           <div
-            className="relative ml-[22px] space-y-0.5 border-l border-white/20 pl-3"
+            className="relative ml-[22px] space-y-0.5 border-l border-white/25 pl-3"
             suppressHydrationWarning
           >
             {group.items.map((item, index) => (

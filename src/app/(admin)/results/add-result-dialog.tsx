@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -555,17 +556,15 @@ export function AddResultDialog({
                           </span>
                         </td>
                         <td className="py-2 pr-3 pl-1 text-center">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-xs"
+                          <ActionIconButton
+                            tone="delete"
                             disabled={subjects.length <= 1}
                             onClick={() => handleRemoveSubjectRow(idx)}
-                            className="text-muted-foreground hover:text-destructive cursor-pointer disabled:opacity-30"
                             title="Remove Subject"
+                            aria-label="Remove Subject"
                           >
-                            <Trash2 className="size-3.5" />
-                          </Button>
+                            <Trash2 />
+                          </ActionIconButton>
                         </td>
                       </tr>
                     );

@@ -3,10 +3,27 @@ import {
   INITIAL_ADMISSION_APPLICANTS,
   type AdmissionApplicantRecord,
 } from "@/lib/mock/admission-tests";
-import type { AdmissionApplication, Student, FeeStatus, StudentStatus } from "@/types";
+import type {
+  AdmissionApplication,
+  AdmissionDossier,
+  Student,
+  FeeStatus,
+  StudentStatus,
+} from "@/types";
 
 export const STUDENTS_STORAGE_KEY = "edusphere.students.v2";
 export const ADMISSIONS_STORAGE_KEY = "edusphere.admissions.v2";
+export const ADMISSION_DRAFTS_STORAGE_KEY = "edusphere.admission-drafts.v1";
+
+export interface StoredAdmissionDraft<T = Record<string, unknown>> {
+  id: string;
+  studentName: string;
+  applyingClass: string;
+  campus: string;
+  currentStep: number;
+  updatedAt: string;
+  data: T;
+}
 
 function readList<T>(key: string, fallback: T[]): T[] {
   if (typeof window === "undefined") return fallback;
@@ -104,7 +121,10 @@ export interface EnrollStudentParams {
   status?: StudentStatus;
   score?: number;
   admissionType?: "Entry Test" | "Direct Admission";
+  admissionCategory?: "New" | "Transfer";
   admissionNumber?: string;
+  enrolledOn?: string;
+  dossier?: AdmissionDossier;
 }
 
 /**
@@ -129,7 +149,7 @@ export function enrollNewStudent(params: EnrollStudentParams): {
   const gender = params.gender || "Male";
   const feeStatus = params.feeStatus || "Paid";
   const status = params.status || "Active";
-  const today = new Date().toISOString().slice(0, 10);
+  const enrolledDate = params.enrolledOn || new Date().toISOString().slice(0, 10);
   const studentId = `s-${Date.now()}`;
   const admissionId = `adm-${Date.now()}`;
   const admissionType = params.admissionType || (params.score ? "Entry Test" : "Direct Admission");
@@ -148,7 +168,8 @@ export function enrollNewStudent(params: EnrollStudentParams): {
     attendance: 100,
     feeStatus,
     status,
-    enrolledOn: today,
+    enrolledOn: enrolledDate,
+    dossier: params.dossier,
   };
 
   const newAdmission: AdmissionApplication = {
@@ -161,12 +182,14 @@ export function enrollNewStudent(params: EnrollStudentParams): {
     section,
     campus: params.campus,
     stage: "Enrolled",
-    appliedOn: today,
+    appliedOn: enrolledDate,
     score: params.score,
     rollNo,
     gender,
     admissionType,
+    admissionCategory: params.admissionCategory || params.dossier?.admissionCategory,
     status: "Active",
+    dossier: params.dossier,
   };
 
   const updatedStudents = [newStudent, ...currentStudents];
@@ -176,6 +199,58 @@ export function enrollNewStudent(params: EnrollStudentParams): {
   saveStoredAdmissions(updatedAdmissions);
 
   return { student: newStudent, admission: newAdmission };
+}
+
+/**
+ * Read all saved admission drafts from localStorage.
+ */
+export function getStoredAdmissionDrafts<T = Record<string, unknown>>(): StoredAdmissionDraft<T>[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(ADMISSION_DRAFTS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as StoredAdmissionDraft<T>[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Save or update an admission draft and notify listeners.
+ */
+export function saveAdmissionDraft<T = Record<string, unknown>>(
+  draft: StoredAdmissionDraft<T>
+): StoredAdmissionDraft<T>[] {
+  const existing = getStoredAdmissionDrafts<T>();
+  const filtered = existing.filter((d) => d.id !== draft.id);
+  const updated = [draft, ...filtered];
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(ADMISSION_DRAFTS_STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // Ignore storage quota issues safely
+    }
+    window.dispatchEvent(new CustomEvent("edusphere:admission-drafts-updated", { detail: updated }));
+  }
+  return updated;
+}
+
+/**
+ * Delete a saved admission draft by ID and notify listeners.
+ */
+export function deleteAdmissionDraft(draftId: string): StoredAdmissionDraft[] {
+  const existing = getStoredAdmissionDrafts();
+  const updated = existing.filter((d) => d.id !== draftId);
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(ADMISSION_DRAFTS_STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // Ignore storage errors
+    }
+    window.dispatchEvent(new CustomEvent("edusphere:admission-drafts-updated", { detail: updated }));
+  }
+  return updated;
 }
 
 /**

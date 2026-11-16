@@ -3,7 +3,6 @@
 import * as React from "react";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
 import { ActionIconButton } from "@/components/shared/action-icon-button";
-import { PersonCell } from "@/components/shared/user-avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +19,7 @@ import {
   Ban,
   Building2,
   Calculator,
+  Check,
   CheckCircle2,
   Clock,
   Eye,
@@ -80,31 +80,26 @@ const STATUS_OPTIONS: {
   status: Status;
   label: string;
   tone: "success" | "neutral" | "danger" | "warning";
-  desc: string;
 }[] = [
   {
     status: "Active",
     label: "Active",
     tone: "success",
-    desc: "Permitted to login & access portal",
   },
   {
     status: "Inactive",
     label: "Deactivated (Inactive)",
     tone: "neutral",
-    desc: "Login access revoked; records kept",
   },
   {
     status: "Suspended",
     label: "Suspended",
     tone: "danger",
-    desc: "Temporarily blocked from portal",
   },
   {
     status: "Pending",
     label: "Pending Verification",
     tone: "warning",
-    desc: "Awaiting activation / first login",
   },
 ];
 
@@ -132,7 +127,7 @@ function UserStatusDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-56 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
+        className="w-52 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground"
       >
         <DropdownMenuGroup className="space-y-0.5">
           <DropdownMenuLabel className="px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -143,14 +138,17 @@ function UserStatusDropdown({
             return (
               <DropdownMenuItem
                 key={opt.status}
+                selected={isCurrent}
                 onClick={() => {
                   if (!isCurrent && onStatusChange) {
                     onStatusChange(opt.status);
                   }
                 }}
                 className={cn(
-                  "flex items-center justify-between rounded-lg px-2 py-1.5 text-xs font-medium cursor-pointer transition-colors",
-                  isCurrent ? "bg-accent/80 font-semibold" : "hover:bg-accent/50"
+                  "flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium cursor-pointer transition-colors",
+                  isCurrent
+                    ? "bg-brand-50/80 text-brand font-semibold"
+                    : "hover:bg-accent/50"
                 )}
               >
                 <div className="flex items-center gap-2 min-w-0">
@@ -163,13 +161,9 @@ function UserStatusDropdown({
                       opt.tone === "warning" && "bg-amber-500"
                     )}
                   />
-                  <div className="flex flex-col min-w-0">
-                    <span className="truncate">{opt.label}</span>
-                    <span className="text-[10px] text-muted-foreground font-normal truncate">
-                      {opt.desc}
-                    </span>
-                  </div>
+                  <span className="truncate">{opt.label}</span>
                 </div>
+                {isCurrent && <Check className="size-3.5 text-brand shrink-0" />}
               </DropdownMenuItem>
             );
           })}
@@ -281,7 +275,7 @@ export function RoleBadge({ role, className }: { role: Role; className?: string 
   return (
     <span
       className={cn(
-        "inline-flex h-7 items-center gap-2 rounded-full border py-0 pl-1 pr-3 text-xs font-semibold shadow-[0_1px_2px_rgb(9_29_62/0.05)] select-none whitespace-nowrap transition-transform duration-150 hover:scale-[1.02]",
+        "inline-flex h-6.5 items-center gap-1.5 rounded-full border py-0 pl-1 pr-2.5 text-[11.5px] font-semibold shadow-[0_1px_2px_rgb(9_29_62/0.05)] select-none whitespace-nowrap transition-transform duration-150 hover:scale-[1.02]",
         cfg.pillBorder,
         cfg.pillBg,
         cfg.textColor,
@@ -290,11 +284,11 @@ export function RoleBadge({ role, className }: { role: Role; className?: string 
     >
       <span
         className={cn(
-          "grid size-5 shrink-0 place-items-center rounded-full text-white shadow-2xs ring-1 ring-white/20",
+          "grid size-4.5 shrink-0 place-items-center rounded-full text-white shadow-2xs ring-1 ring-white/20",
           cfg.bubbleBg
         )}
       >
-        <Icon className="size-3 text-white" />
+        <Icon className="size-2.5 text-white" />
       </span>
       <span className="leading-none">{role}</span>
     </span>
@@ -338,9 +332,18 @@ export function UsersTable({ data, onViewUser, onSelectUser, onStatusChange }: U
       {
         key: "name",
         header: "User & Profile",
-        align: "left",
-        cell: (row) => <PersonCell name={row.name} />,
+        align: "center",
+        headerAlign: "center",
+        cell: (row) => (
+          <span
+            className="block max-w-[200px] mx-auto font-semibold text-[12.5px] text-foreground truncate"
+            title={row.name}
+          >
+            {row.name}
+          </span>
+        ),
         sortValue: (row) => row.name,
+        className: "whitespace-nowrap",
       },
       {
         key: "role",
@@ -357,33 +360,22 @@ export function UsersTable({ data, onViewUser, onSelectUser, onStatusChange }: U
       },
       {
         key: "campus",
-        header: "Campus / Scope",
+        header: "Campus",
         align: "center",
         headerAlign: "center",
         cell: (row) => {
           const info = formatCampusDisplay(row.campus);
-          const secondaryDisplay =
-            row.role === "Teacher" && row.assignedClasses
-              ? row.assignedClasses
-              : row.role === "Student" && row.assignedClasses
-              ? row.assignedClasses
-              : row.department || info.secondary || "Central Operations";
-
           return (
-            <div className="inline-flex flex-col items-center justify-center leading-tight min-w-0">
-              <span className="text-[13px] font-medium text-foreground truncate">
-                {info.primary}
-              </span>
-              <span
-                className="text-[11px] text-muted-foreground truncate max-w-[180px]"
-                title={secondaryDisplay}
-              >
-                {secondaryDisplay}
-              </span>
-            </div>
+            <span
+              className="block max-w-[190px] mx-auto text-xs font-medium text-foreground/90 truncate"
+              title={info.secondary ? `${info.primary} (${info.secondary})` : info.primary}
+            >
+              {info.primary}
+            </span>
           );
         },
         sortValue: (row) => row.campus,
+        className: "whitespace-nowrap",
       },
       {
         key: "lastLogin",
@@ -391,7 +383,7 @@ export function UsersTable({ data, onViewUser, onSelectUser, onStatusChange }: U
         align: "center",
         headerAlign: "center",
         cell: (row) => (
-          <span className="text-[12px] tabular-nums text-muted-foreground whitespace-nowrap">
+          <span className="text-xs tabular-nums text-muted-foreground whitespace-nowrap">
             {row.lastLogin ? formatDateTime(row.lastLogin) : "Never"}
           </span>
         ),
@@ -510,7 +502,7 @@ export function UsersTable({ data, onViewUser, onSelectUser, onStatusChange }: U
         );
       }}
       pageSize={8}
-      tableClassName="w-full text-sm"
+      tableClassName="w-full text-xs"
     />
   );
 }

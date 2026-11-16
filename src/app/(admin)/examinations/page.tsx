@@ -244,7 +244,7 @@ export default function ExaminationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-base font-bold tracking-tight text-foreground sm:text-lg md:text-[19px]">
-            Examination Management
+            Exam Management
           </h1>
         </div>
 
@@ -335,6 +335,7 @@ export default function ExaminationsPage() {
                   return (
                     <DropdownMenuItem
                       key={sec.id}
+                      selected={isSelected}
                       onClick={() => setActiveTab(sec.id)}
                       className={cn(
                         "flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs transition-colors",

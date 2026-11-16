@@ -11,18 +11,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  AcademicDropdownMenu,
+  AcademicDropdownMenuContent,
+  AcademicDropdownMenuItem,
+  AcademicDropdownMenuTrigger,
+  AcademicSelect,
+  AcademicSelectContent,
+  AcademicSelectItem,
+  AcademicSelectTrigger,
+  AcademicSelectValue,
+} from "./academic-dropdown";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   CLASSES,
@@ -296,10 +294,10 @@ export default function AcademicsPage() {
       {/* ───────────────────────── Classes / Subjects Dropdown Menu Selector Bar ───────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-2xl border border-border/80 shadow-2xs">
         <div className="flex items-center gap-3">
-          <DropdownMenu>
-            <DropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3.5 h-9.5 text-xs font-semibold shadow-2xs transition-all duration-150 hover:border-brand/40 data-[popup-open]:border-brand/50 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[220px] sm:min-w-[260px]">
+          <AcademicDropdownMenu>
+            <AcademicDropdownMenuTrigger className="group inline-flex items-center justify-between gap-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 px-3.5 h-9.5 text-xs font-semibold shadow-2xs transition-all duration-200 ease-out hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-3 data-[popup-open]:ring-brand/15 data-[popup-open]:bg-brand-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 cursor-pointer min-w-[220px] sm:min-w-[260px]">
               <div className="flex items-center gap-2 min-w-0">
-                <activeSection.icon className="size-4 text-brand shrink-0" />
+                <activeSection.icon className="size-4 text-brand shrink-0 transition-transform duration-200 group-data-[popup-open]:scale-110" />
                 <span className="text-xs font-semibold text-foreground truncate">
                   {activeSection.label}
                 </span>
@@ -307,52 +305,56 @@ export default function AcademicsPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <Badge
                   variant="secondary"
-                  className="text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-4 flex items-center justify-center tabular-nums"
+                  className="text-[10px] font-bold px-1.5 py-0 h-4.5 min-w-4 flex items-center justify-center tabular-nums transition-colors duration-150"
                 >
                   {activeSection.count}
                 </Badge>
-                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-transform duration-200 ease-out group-data-[popup-open]:rotate-180" />
+                <ChevronDown className="size-3.5 text-muted-foreground group-hover:text-foreground transition-transform duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[popup-open]:rotate-180" />
               </div>
-            </DropdownMenuTrigger>
+            </AcademicDropdownMenuTrigger>
 
-            <DropdownMenuContent
+            <AcademicDropdownMenuContent
               align="start"
-              className="min-w-[var(--anchor-width,16.5rem)] w-[276px] p-1.5 rounded-xl shadow-xl border-border/80 bg-card"
+              className="min-w-[var(--anchor-width,16.5rem)] w-[276px] p-1.5 rounded-xl border-border/80"
             >
               {sectionOptions.map((sec) => {
                 const Icon = sec.icon;
                 const isSelected = activeTab === sec.id;
                 return (
-                  <DropdownMenuItem
+                  <AcademicDropdownMenuItem
                     key={sec.id}
+                    selected={isSelected}
                     onClick={() => setActiveTab(sec.id)}
                     className={cn(
-                      "flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg cursor-pointer transition-colors",
+                      "flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg cursor-pointer transition-all duration-150 ease-out active:scale-[0.99]",
                       isSelected
-                        ? "bg-brand-50 text-brand font-semibold dark:bg-brand-950/40"
-                        : "text-foreground hover:bg-muted"
+                        ? "bg-brand-50 text-brand font-semibold shadow-2xs dark:bg-brand-950/40"
+                        : "text-foreground hover:bg-muted/80"
                     )}
                   >
                     <div className="flex items-center gap-2.5">
-                      <Icon className="size-4 text-brand" />
+                      <Icon className={cn("size-4 transition-transform duration-150", isSelected ? "text-brand scale-110" : "text-brand/70")} />
                       <span>{sec.label}</span>
                     </div>
                     <Badge
-                      variant="secondary"
-                      className="text-[10px] font-mono px-1.5 py-0"
+                      variant={isSelected ? "default" : "secondary"}
+                      className={cn(
+                        "text-[10px] font-mono px-1.5 py-0 transition-all duration-150",
+                        isSelected && "bg-brand text-white border-transparent shadow-2xs"
+                      )}
                     >
                       {sec.count}
                     </Badge>
-                  </DropdownMenuItem>
+                  </AcademicDropdownMenuItem>
                 );
               })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </AcademicDropdownMenuContent>
+          </AcademicDropdownMenu>
         </div>
 
         <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
           <Building2 className="size-3.5 text-brand" />
-          <span>Academic Year 2026–27 · Central Curriculum Registry</span>
+          <span>Academic Year 2026–27</span>
         </div>
       </div>
 
@@ -398,7 +400,7 @@ export default function AcademicsPage() {
 
               <div className="flex flex-wrap items-center gap-2 md:ml-auto">
                 {/* Class Selection Filter */}
-                <Select
+                <AcademicSelect
                   value={classNameFilter}
                   onValueChange={(val) => {
                     if (!val) return;
@@ -416,71 +418,71 @@ export default function AcademicsPage() {
                     }
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs min-w-[195px] w-auto max-w-[265px] shrink-0 font-medium bg-background/60">
+                  <AcademicSelectTrigger className="h-9 text-xs min-w-[195px] w-auto max-w-[265px] shrink-0 font-medium bg-background/60 hover:bg-background hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 transition-all duration-200">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <GraduationCap className="size-3.5 text-muted-foreground shrink-0" />
-                      <SelectValue placeholder="All Classes" />
+                      <GraduationCap className="size-3.5 text-muted-foreground shrink-0 transition-colors duration-200 group-hover/select-trigger:text-brand group-data-[popup-open]/select-trigger:text-brand" />
+                      <AcademicSelectValue placeholder="All Classes" />
                     </div>
-                  </SelectTrigger>
-                  <SelectContent className="w-max min-w-[var(--anchor-width)] max-h-[280px]">
-                    <SelectItem value="ALL" className="text-xs">
+                  </AcademicSelectTrigger>
+                  <AcademicSelectContent className="w-max min-w-[var(--anchor-width)] max-h-[280px]">
+                    <AcademicSelectItem value="ALL" className="text-xs">
                       All Classes
-                    </SelectItem>
+                    </AcademicSelectItem>
                     {directoryClassNames.map((name) => (
-                      <SelectItem key={name} value={name} className="text-xs">
+                      <AcademicSelectItem key={name} value={name} className="text-xs">
                         {name}
-                      </SelectItem>
+                      </AcademicSelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </AcademicSelectContent>
+                </AcademicSelect>
 
                 {/* Section Filter */}
-                <Select
+                <AcademicSelect
                   value={classSectionFilter}
                   onValueChange={(val) => {
                     if (val) setClassSectionFilter(val);
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs w-[132px] shrink-0 font-medium bg-background/60">
+                  <AcademicSelectTrigger className="h-9 text-xs min-w-[156px] w-auto max-w-[210px] shrink-0 font-medium bg-background/60 hover:bg-background hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 transition-all duration-200">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <Layers className="size-3.5 text-muted-foreground shrink-0" />
-                      <SelectValue placeholder="All Sections" />
+                      <Layers className="size-3.5 text-muted-foreground shrink-0 transition-colors duration-200 group-hover/select-trigger:text-brand group-data-[popup-open]/select-trigger:text-brand" />
+                      <AcademicSelectValue placeholder="All Sections" />
                     </div>
-                  </SelectTrigger>
-                  <SelectContent className="w-max min-w-[var(--anchor-width)]">
-                    <SelectItem value="ALL" className="text-xs">
+                  </AcademicSelectTrigger>
+                  <AcademicSelectContent className="w-max min-w-[var(--anchor-width)]">
+                    <AcademicSelectItem value="ALL" className="text-xs">
                       All Sections
-                    </SelectItem>
+                    </AcademicSelectItem>
                     {availableClassSections.map((sec) => (
-                      <SelectItem key={sec} value={sec} className="text-xs">
+                      <AcademicSelectItem key={sec} value={sec} className="text-xs">
                         Section {sec}
-                      </SelectItem>
+                      </AcademicSelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </AcademicSelectContent>
+                </AcademicSelect>
 
                 {/* Campus Filter */}
-                <Select
+                <AcademicSelect
                   value={classCampusFilter}
                   onValueChange={(val) => {
                     if (val) setClassCampusFilter(val);
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs w-[185px] shrink-0 font-medium bg-background/60">
+                  <AcademicSelectTrigger className="h-9 text-xs min-w-[185px] w-auto max-w-[250px] shrink-0 font-medium bg-background/60 hover:bg-background hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 transition-all duration-200">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <Building2 className="size-3.5 text-muted-foreground shrink-0" />
-                      <SelectValue placeholder="All Branches" />
+                      <Building2 className="size-3.5 text-muted-foreground shrink-0 transition-colors duration-200 group-hover/select-trigger:text-brand group-data-[popup-open]/select-trigger:text-brand" />
+                      <AcademicSelectValue placeholder="All Branches" />
                     </div>
-                  </SelectTrigger>
-                  <SelectContent className="w-max min-w-[var(--anchor-width)] max-h-[260px]">
-                    <SelectItem value="ALL" className="text-xs">All Branches</SelectItem>
+                  </AcademicSelectTrigger>
+                  <AcademicSelectContent className="w-max min-w-[var(--anchor-width)] max-h-[260px]">
+                    <AcademicSelectItem value="ALL" className="text-xs">All Branches</AcademicSelectItem>
                     {classCampuses.map((c) => (
-                      <SelectItem key={c} value={c} className="text-xs">
+                      <AcademicSelectItem key={c} value={c} className="text-xs">
                         {c}
-                      </SelectItem>
+                      </AcademicSelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </AcademicSelectContent>
+                </AcademicSelect>
 
                 {(classSearch || classNameFilter !== "ALL" || classCampusFilter !== "ALL" || classSectionFilter !== "ALL") && (
                   <Button
@@ -746,44 +748,44 @@ export default function AcademicsPage() {
 
               <div className="flex flex-wrap items-center gap-2">
                 {/* Class Selection Dropdown */}
-                <Select
+                <AcademicSelect
                   value={subjectClassFilter}
                   onValueChange={(val) => {
                     if (val) setSubjectClassFilter(val);
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs w-[210px] shrink-0 font-medium bg-background/60">
+                  <AcademicSelectTrigger className="h-9 text-xs min-w-[195px] w-auto max-w-[265px] shrink-0 font-medium bg-background/60 hover:bg-background hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 transition-all duration-200">
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <GraduationCap className="size-3.5 text-muted-foreground shrink-0" />
-                      <SelectValue placeholder="All Classes" />
+                      <GraduationCap className="size-3.5 text-muted-foreground shrink-0 transition-colors duration-200 group-hover/select-trigger:text-brand group-data-[popup-open]/select-trigger:text-brand" />
+                      <AcademicSelectValue placeholder="All Classes" />
                     </div>
-                  </SelectTrigger>
-                  <SelectContent className="w-max min-w-[var(--anchor-width)] max-h-[300px]">
-                    <SelectItem value="ALL" className="text-xs">All Classes</SelectItem>
+                  </AcademicSelectTrigger>
+                  <AcademicSelectContent className="w-max min-w-[var(--anchor-width)] max-h-[300px]">
+                    <AcademicSelectItem value="ALL" className="text-xs">All Classes</AcademicSelectItem>
                     {availableClasses.map((cls) => (
-                      <SelectItem key={cls} value={cls} className="text-xs">
+                      <AcademicSelectItem key={cls} value={cls} className="text-xs">
                         {cls}
-                      </SelectItem>
+                      </AcademicSelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </AcademicSelectContent>
+                </AcademicSelect>
 
                 {/* Classification Type Dropdown */}
-                <Select
+                <AcademicSelect
                   value={subjectTypeFilter}
                   onValueChange={(val) => {
                     if (val) setSubjectTypeFilter(val);
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs w-[140px] shrink-0 font-medium bg-background/60">
-                    <SelectValue placeholder="All Types" />
-                  </SelectTrigger>
-                  <SelectContent className="w-max min-w-[var(--anchor-width)]">
-                    <SelectItem value="ALL" className="text-xs">All Types</SelectItem>
-                    <SelectItem value="core" className="text-xs">Core Subjects</SelectItem>
-                    <SelectItem value="elective" className="text-xs">Electives</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <AcademicSelectTrigger className="h-9 text-xs min-w-[148px] w-auto max-w-[200px] shrink-0 font-medium bg-background/60 hover:bg-background hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 transition-all duration-200">
+                    <AcademicSelectValue placeholder="All Types" />
+                  </AcademicSelectTrigger>
+                  <AcademicSelectContent className="w-max min-w-[var(--anchor-width)]">
+                    <AcademicSelectItem value="ALL" className="text-xs">All Types</AcademicSelectItem>
+                    <AcademicSelectItem value="core" className="text-xs">Core Subjects</AcademicSelectItem>
+                    <AcademicSelectItem value="elective" className="text-xs">Electives</AcademicSelectItem>
+                  </AcademicSelectContent>
+                </AcademicSelect>
               </div>
             </div>
 

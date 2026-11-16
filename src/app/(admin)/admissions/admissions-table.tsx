@@ -1,209 +1,434 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
-import { PersonCell } from "@/components/shared/user-avatar";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  AcademicSelect,
+  AcademicSelectContent,
+  AcademicSelectItem,
+  AcademicSelectTrigger,
+  AcademicSelectValue,
+} from "../academics/academic-dropdown";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { formatDate, formatCampusDisplay } from "@/lib/format";
 import type { AdmissionApplication } from "@/types";
-import { Award, CheckCircle2, ExternalLink, GraduationCap } from "lucide-react";
-
-const columns: Column<AdmissionApplication>[] = [
-  {
-    key: "admissionNumber",
-    header: "Admission #",
-    cell: (r) => (
-      <span className="font-mono text-xs font-bold text-brand bg-brand-50/70 border border-brand/20 px-2 py-0.5 rounded-md whitespace-nowrap">
-        {r.admissionNumber || `SMS-2026-${r.id.slice(-4).toUpperCase()}`}
-      </span>
-    ),
-    sortValue: (r) => r.admissionNumber || r.id,
-  },
-  {
-    key: "applicant",
-    header: "Enrolled Student",
-    cell: (r) => (
-      <div className="flex flex-col">
-        <PersonCell name={r.applicant} subtitle={r.guardian ? `S/D of ${r.guardian}` : undefined} />
-        {r.phone && (
-          <span className="text-[10.5px] text-muted-foreground/80 pl-9 font-mono">
-            {r.phone}
-          </span>
-        )}
-      </div>
-    ),
-    sortValue: (r) => r.applicant,
-  },
-  {
-    key: "class",
-    header: "Class & Section",
-    cell: (r) => (
-      <div className="flex items-center gap-1.5 whitespace-nowrap">
-        <span className="text-[13px] font-semibold text-foreground">
-          {r.appliedClass}
-        </span>
-        {r.section && (
-          <span className="text-[11px] font-medium text-muted-foreground bg-muted px-1.5 py-0.2 rounded border border-border/50">
-            Sec {r.section}
-          </span>
-        )}
-      </div>
-    ),
-    sortValue: (r) => r.appliedClass,
-  },
-  {
-    key: "campus",
-    header: "Campus",
-    cell: (r) => {
-      const info = formatCampusDisplay(r.campus);
-      return (
-        <div className="flex flex-col leading-tight">
-          <span className="text-[13px] font-medium text-foreground">{info.primary}</span>
-          {info.secondary && (
-            <span className="text-[11px] text-muted-foreground">{info.secondary}</span>
-          )}
-        </div>
-      );
-    },
-    sortValue: (r) => r.campus,
-  },
-  {
-    key: "admissionType",
-    header: "Admission Pathway",
-    cell: (r) => {
-      const isTest = r.admissionType === "Entry Test" || Boolean(r.score);
-      return isTest ? (
-        <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-          <Award className="size-3 text-emerald-600 shrink-0" />
-          <span>Entry Test {r.score ? `(${r.score}%)` : ""}</span>
-        </div>
-      ) : (
-        <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-          <GraduationCap className="size-3 text-slate-500 shrink-0" />
-          <span>Direct Admission</span>
-        </div>
-      );
-    },
-    sortValue: (r) => (r.score ? 1 : 0),
-  },
-  {
-    key: "appliedOn",
-    header: "Enrolled On",
-    cell: (r) => (
-      <span className="text-[13px] tabular-nums text-muted-foreground whitespace-nowrap">
-        {formatDate(r.appliedOn)}
-      </span>
-    ),
-    sortValue: (r) => r.appliedOn,
-  },
-  {
-    key: "status",
-    header: "Status",
-    align: "center",
-    cell: () => (
-      <div className="flex justify-center">
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-          <CheckCircle2 className="size-3" />
-          Enrolled
-        </span>
-      </div>
-    ),
-  },
-  {
-    key: "action",
-    header: "SIS Action",
-    align: "right",
-    cell: (r) => (
-      <div className="flex items-center justify-end">
-        <Link
-          href={`/students?search=${encodeURIComponent(r.applicant)}`}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline cursor-pointer group"
-          title="Open student record in Student Information System"
-        >
-          <span>View in SIS</span>
-          <ExternalLink className="size-3 opacity-70 group-hover:opacity-100" />
-        </Link>
-      </div>
-    ),
-  },
-];
+import {
+  Award,
+  Building2,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  GraduationCap,
+  Search,
+} from "lucide-react";
+import { AdmissionDetailsDialog } from "./admission-details-dialog";
 
 interface AdmissionsTableProps {
   data: AdmissionApplication[];
 }
 
+const PAGE_SIZE = 10;
+
 export function AdmissionsTable({ data }: AdmissionsTableProps) {
-  const uniqueCampuses = React.useMemo(() => {
-    return [...new Set(data.map((a) => a.campus))].sort();
-  }, [data]);
+  const [search, setSearch] = React.useState("");
+  const [campusFilter, setCampusFilter] = React.useState("ALL");
+  const [classFilter, setClassFilter] = React.useState("ALL");
+  const [pathwayFilter, setPathwayFilter] = React.useState("ALL");
+  const [page, setPage] = React.useState(0);
+  const [viewingAdmission, setViewingAdmission] =
+    React.useState<AdmissionApplication | null>(null);
 
   const campusOptions = React.useMemo(() => {
-    return uniqueCampuses.map((c) => ({
-      value: c,
-      label: formatCampusDisplay(c).label,
-    }));
-  }, [uniqueCampuses]);
+    return [...new Set(data.map((a) => a.campus))]
+      .sort()
+      .map((c) => ({
+        value: c,
+        label: formatCampusDisplay(c).primary || c,
+      }));
+  }, [data]);
 
-  const uniqueClasses = React.useMemo(() => {
+  const classOptions = React.useMemo(() => {
     return [...new Set(data.map((a) => a.appliedClass))].sort();
   }, [data]);
 
-  const pathwayOptions = [
-    { value: "Entry Test", label: "Entry Test Merit" },
-    { value: "Direct Admission", label: "Direct Admission" },
-  ];
+  const filtered = React.useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return data.filter((r) => {
+      const admissionNo =
+        r.admissionNumber || `SMS-2026-${r.id.slice(-4).toUpperCase()}`;
+      const matchesSearch =
+        q === "" ||
+        r.applicant.toLowerCase().includes(q) ||
+        r.guardian.toLowerCase().includes(q) ||
+        r.appliedClass.toLowerCase().includes(q) ||
+        admissionNo.toLowerCase().includes(q) ||
+        (r.phone && r.phone.toLowerCase().includes(q));
 
-  const filters: FilterDef<AdmissionApplication>[] = React.useMemo(
-    () => [
-      {
-        key: "campus",
-        label: "Campus",
-        allLabel: "All Campuses",
-        options: campusOptions,
-        triggerClassName: "min-w-44 sm:min-w-48",
-        getValue: (r) => r.campus,
-      },
-      {
-        key: "appliedClass",
-        label: "Class",
-        allLabel: "All Classes",
-        options: uniqueClasses,
-        triggerClassName: "min-w-36",
-        getValue: (r) => r.appliedClass,
-      },
-      {
-        key: "pathway",
-        label: "Pathway",
-        allLabel: "All Pathways",
-        options: pathwayOptions,
-        triggerClassName: "min-w-40",
-        getValue: (r) =>
-          r.admissionType === "Entry Test" || Boolean(r.score)
-            ? "Entry Test"
-            : "Direct Admission",
-      },
-    ],
-    [campusOptions, uniqueClasses]
+      const matchesCampus = campusFilter === "ALL" || r.campus === campusFilter;
+      const matchesClass =
+        classFilter === "ALL" || r.appliedClass === classFilter;
+      const pathway =
+        r.admissionType === "Entry Test" || Boolean(r.score)
+          ? "Entry Test"
+          : "Direct Admission";
+      const matchesPathway =
+        pathwayFilter === "ALL" || pathway === pathwayFilter;
+
+      return matchesSearch && matchesCampus && matchesClass && matchesPathway;
+    });
+  }, [data, search, campusFilter, classFilter, pathwayFilter]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pageRows = filtered.slice(
+    safePage * PAGE_SIZE,
+    safePage * PAGE_SIZE + PAGE_SIZE
   );
+  const startItem = filtered.length === 0 ? 0 : safePage * PAGE_SIZE + 1;
+  const endItem = Math.min(filtered.length, (safePage + 1) * PAGE_SIZE);
+
+  const hasActiveFilter =
+    search !== "" ||
+    campusFilter !== "ALL" ||
+    classFilter !== "ALL" ||
+    pathwayFilter !== "ALL";
+
+  const handleResetFilters = () => {
+    setSearch("");
+    setCampusFilter("ALL");
+    setClassFilter("ALL");
+    setPathwayFilter("ALL");
+    setPage(0);
+  };
 
   return (
-    <DataTable
-      data={data}
-      columns={columns}
-      getRowId={(r) => r.id}
-      filters={filters}
-      searchPlaceholder="Search enrolled students, admission #, guardian or class…"
-      searchFn={(r, q) =>
-        Boolean(
-          r.applicant.toLowerCase().includes(q) ||
-          r.guardian.toLowerCase().includes(q) ||
-          r.appliedClass.toLowerCase().includes(q) ||
-          (r.admissionNumber && r.admissionNumber.toLowerCase().includes(q)) ||
-          (r.phone && r.phone.includes(q))
-        )
-      }
-      pageSize={10}
-    />
+    <>
+      <Card className="rounded-2xl border border-border/80 overflow-hidden bg-card shadow-xs">
+        {/* Table Section Header (matching Academic Management) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-border/70 bg-muted/20">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-brand shrink-0">
+              <GraduationCap className="size-4" />
+            </div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-foreground">
+                Enrolled Admissions Directory
+              </h2>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Toolbar */}
+        <div className="flex flex-col md:flex-row md:items-center gap-3 px-5 py-3.5 border-b border-border/60">
+          <div className="relative w-full sm:w-56 lg:w-64 shrink-0">
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search admissions…"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(0);
+              }}
+              className="pl-9 h-9 text-xs w-full bg-background/60"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 md:ml-auto">
+            {/* Campus Filter */}
+            <AcademicSelect
+              value={campusFilter}
+              onValueChange={(val) => {
+                if (!val) return;
+                setCampusFilter(val);
+                setPage(0);
+              }}
+            >
+              <AcademicSelectTrigger className="h-9 text-xs min-w-[175px] w-auto max-w-[235px] shrink-0 font-medium bg-background/60 hover:bg-background hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 transition-all duration-200">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <Building2 className="size-3.5 text-muted-foreground shrink-0 transition-colors duration-200 group-hover/select-trigger:text-brand group-data-[popup-open]/select-trigger:text-brand" />
+                  <AcademicSelectValue placeholder="All Campuses" />
+                </div>
+              </AcademicSelectTrigger>
+              <AcademicSelectContent className="w-max min-w-[var(--anchor-width)] max-h-[260px]">
+                <AcademicSelectItem value="ALL" className="text-xs">
+                  All Campuses
+                </AcademicSelectItem>
+                {campusOptions.map((c) => (
+                  <AcademicSelectItem key={c.value} value={c.value} className="text-xs">
+                    {c.label}
+                  </AcademicSelectItem>
+                ))}
+              </AcademicSelectContent>
+            </AcademicSelect>
+
+            {/* Class Filter */}
+            <AcademicSelect
+              value={classFilter}
+              onValueChange={(val) => {
+                if (!val) return;
+                setClassFilter(val);
+                setPage(0);
+              }}
+            >
+              <AcademicSelectTrigger className="h-9 text-xs min-w-[155px] w-auto max-w-[215px] shrink-0 font-medium bg-background/60 hover:bg-background hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 transition-all duration-200">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <GraduationCap className="size-3.5 text-muted-foreground shrink-0 transition-colors duration-200 group-hover/select-trigger:text-brand group-data-[popup-open]/select-trigger:text-brand" />
+                  <AcademicSelectValue placeholder="All Classes" />
+                </div>
+              </AcademicSelectTrigger>
+              <AcademicSelectContent className="w-max min-w-[var(--anchor-width)] max-h-[260px]">
+                <AcademicSelectItem value="ALL" className="text-xs">
+                  All Classes
+                </AcademicSelectItem>
+                {classOptions.map((cls) => (
+                  <AcademicSelectItem key={cls} value={cls} className="text-xs">
+                    {cls}
+                  </AcademicSelectItem>
+                ))}
+              </AcademicSelectContent>
+            </AcademicSelect>
+
+            {/* Pathway Filter */}
+            <AcademicSelect
+              value={pathwayFilter}
+              onValueChange={(val) => {
+                if (!val) return;
+                setPathwayFilter(val);
+                setPage(0);
+              }}
+            >
+              <AcademicSelectTrigger className="h-9 text-xs min-w-[170px] w-auto max-w-[225px] shrink-0 font-medium bg-background/60 hover:bg-background hover:border-brand/40 data-[popup-open]:border-brand/60 data-[popup-open]:ring-2 data-[popup-open]:ring-brand/15 transition-all duration-200">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <Award className="size-3.5 text-muted-foreground shrink-0 transition-colors duration-200 group-hover/select-trigger:text-brand group-data-[popup-open]/select-trigger:text-brand" />
+                  <AcademicSelectValue placeholder="All Pathways" />
+                </div>
+              </AcademicSelectTrigger>
+              <AcademicSelectContent className="w-max min-w-[var(--anchor-width)]">
+                <AcademicSelectItem value="ALL" className="text-xs">
+                  All Pathways
+                </AcademicSelectItem>
+                <AcademicSelectItem value="Entry Test" className="text-xs">
+                  Entry Test Merit
+                </AcademicSelectItem>
+                <AcademicSelectItem value="Direct Admission" className="text-xs">
+                  Direct Admission
+                </AcademicSelectItem>
+              </AcademicSelectContent>
+            </AcademicSelect>
+
+            {hasActiveFilter && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="xs"
+                onClick={handleResetFilters}
+                className="h-9 px-2.5 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Clean Single-Line Table (uniform column spacing) */}
+        <div className="w-full">
+          <Table className="w-full text-sm">
+            <TableHeader>
+              <TableRow className="bg-muted/60 border-b border-border/70">
+                <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center whitespace-nowrap">
+                  Admission #
+                </TableHead>
+                <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center whitespace-nowrap">
+                  Student Name
+                </TableHead>
+                <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center whitespace-nowrap">
+                  Class
+                </TableHead>
+                <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center whitespace-nowrap">
+                  Campus
+                </TableHead>
+                <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center whitespace-nowrap">
+                  Enrolled On
+                </TableHead>
+                <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center whitespace-nowrap">
+                  Status
+                </TableHead>
+                <TableHead className="font-semibold text-xs text-foreground px-4 py-3 text-center whitespace-nowrap">
+                  Action
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pageRows.length > 0 ? (
+                pageRows.map((r) => {
+                  const admissionNo =
+                    r.admissionNumber ||
+                    `SMS-2026-${r.id.slice(-4).toUpperCase()}`;
+                  const campusInfo = formatCampusDisplay(r.campus);
+                  const statusLabel =
+                    r.status === "Active" ? "Enrolled" : r.status || "Enrolled";
+
+                  return (
+                    <TableRow
+                      key={r.id}
+                      className="hover:bg-muted/30 transition-colors border-b border-border/60"
+                    >
+                      {/* Admission # */}
+                      <TableCell className="px-4 py-3 text-center whitespace-nowrap">
+                        <span className="font-mono text-xs font-semibold text-brand">
+                          {admissionNo}
+                        </span>
+                      </TableCell>
+
+                      {/* Student Name */}
+                      <TableCell className="px-4 py-3 text-center whitespace-nowrap">
+                        <span
+                          className="block max-w-[200px] mx-auto font-semibold text-[12.5px] text-foreground truncate"
+                          title={r.applicant}
+                        >
+                          {r.applicant}
+                        </span>
+                      </TableCell>
+
+                      {/* Class */}
+                      <TableCell className="px-4 py-3 text-center whitespace-nowrap">
+                        <span className="text-xs font-medium text-foreground">
+                          {r.appliedClass}
+                          {r.section ? (
+                            <span className="text-muted-foreground font-normal">
+                              {" "}
+                              · Sec {r.section}
+                            </span>
+                          ) : null}
+                        </span>
+                      </TableCell>
+
+                      {/* Campus */}
+                      <TableCell className="px-4 py-3 text-center whitespace-nowrap">
+                        <span
+                          className="block max-w-[200px] mx-auto truncate text-xs font-medium text-foreground/90"
+                          title={r.campus}
+                        >
+                          {campusInfo.primary}
+                        </span>
+                      </TableCell>
+
+                      {/* Enrolled On */}
+                      <TableCell className="px-4 py-3 text-center whitespace-nowrap">
+                        <span className="text-xs tabular-nums text-muted-foreground">
+                          {formatDate(r.appliedOn)}
+                        </span>
+                      </TableCell>
+
+                      {/* Status */}
+                      <TableCell className="px-4 py-3 text-center whitespace-nowrap">
+                        <StatusBadge status={statusLabel} dot={false} />
+                      </TableCell>
+
+                      {/* Action */}
+                      <TableCell className="px-4 py-3 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center justify-center">
+                          <ActionIconButton
+                            tone="view"
+                            onClick={() => setViewingAdmission(r)}
+                            aria-label={`View admission details for ${r.applicant}`}
+                            title="View complete admission details"
+                          >
+                            <Eye />
+                          </ActionIconButton>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-12 text-xs text-muted-foreground"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <GraduationCap className="size-8 text-muted-foreground/50" />
+                      <p className="font-medium text-sm text-foreground">
+                        No enrolled students found
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Try adjusting your search query or filters.
+                      </p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Clean Pagination Footer */}
+        {filtered.length > PAGE_SIZE && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 py-3 border-t border-border/60 bg-muted/15 text-xs text-muted-foreground">
+            <span className="tabular-nums">
+              Showing{" "}
+              <span className="font-semibold text-foreground">
+                {startItem}–{endItem}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-foreground">
+                {filtered.length}
+              </span>{" "}
+              records
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={safePage === 0}
+                className="h-7 px-2 gap-1 cursor-pointer"
+              >
+                <ChevronLeft className="size-3.5" />
+                <span>Previous</span>
+              </Button>
+              <span className="px-2 font-mono text-[11px] font-medium text-foreground tabular-nums">
+                Page {safePage + 1} / {pageCount}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="xs"
+                onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+                disabled={safePage >= pageCount - 1}
+                className="h-7 px-2 gap-1 cursor-pointer"
+              >
+                <span>Next</span>
+                <ChevronRight className="size-3.5" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Extra Details Modal opened from View icon */}
+      <AdmissionDetailsDialog
+        admission={viewingAdmission}
+        open={Boolean(viewingAdmission)}
+        onOpenChange={(open) => {
+          if (!open) setViewingAdmission(null);
+        }}
+      />
+    </>
   );
 }

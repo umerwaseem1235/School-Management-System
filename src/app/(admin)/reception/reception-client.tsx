@@ -23,6 +23,7 @@ import { formatCampusDisplay, formatNumber } from "@/lib/format";
 import type { FrontDeskInquiry, VisitorPass } from "@/types";
 import {
   Clock,
+  Eye,
   LogOut,
   PhoneCall,
   Plus,
@@ -36,6 +37,8 @@ import {
 import { toast } from "sonner";
 import { CheckInVisitorDialog } from "./check-in-visitor-dialog";
 import { LogInquiryDialog } from "./log-inquiry-dialog";
+import { ViewInquiryDialog } from "./view-inquiry-dialog";
+import { ViewVisitorDialog } from "./view-visitor-dialog";
 
 interface ReceptionClientProps {
   initialVisitorPasses: VisitorPass[];
@@ -54,6 +57,8 @@ export function ReceptionClient({
   // Dialog States
   const [isCheckInOpen, setIsCheckInOpen] = React.useState(false);
   const [isLogInquiryOpen, setIsLogInquiryOpen] = React.useState(false);
+  const [viewingVisitor, setViewingVisitor] = React.useState<VisitorPass | null>(null);
+  const [viewingInquiry, setViewingInquiry] = React.useState<FrontDeskInquiry | null>(null);
 
   // Summary Counts
   const totalVisitorsToday = visitorPasses.length;
@@ -141,21 +146,32 @@ export function ReceptionClient({
         key: "visitor",
         header: "Visitor",
         align: "left",
+        className: "w-[28%] min-w-0 px-4 text-left",
+        headerClassName: "w-[28%] px-4 text-left",
         cell: (r) => (
           <div className="flex flex-col min-w-0">
             <span className="font-semibold text-foreground text-[13px] leading-tight truncate">
               {r.visitorName}
             </span>
-            <span className="text-xs text-muted-foreground mt-0.5">{r.phone}</span>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+              <span>{r.phone}</span>
+              {r.cnic && (
+                <>
+                  <span className="text-muted-foreground/40">•</span>
+                  <span className="font-mono text-[11px] text-muted-foreground/80">{r.cnic}</span>
+                </>
+              )}
+            </div>
           </div>
         ),
         sortValue: (r) => r.visitorName,
-        className: "whitespace-nowrap",
       },
       {
         key: "host",
         header: "Whom to Meet & Purpose",
         align: "center",
+        className: "w-[27%] px-3 text-center",
+        headerClassName: "w-[27%] px-3 text-center",
         cell: (r) => (
           <div className="inline-flex flex-col items-center justify-center min-w-0">
             <span className="text-xs font-semibold text-foreground leading-tight truncate">
@@ -174,6 +190,8 @@ export function ReceptionClient({
         key: "campus",
         header: "Campus",
         align: "center",
+        className: "w-[17%] px-3 text-center",
+        headerClassName: "w-[17%] px-3 text-center",
         cell: (r) => (
           <span className="text-xs text-muted-foreground font-medium block truncate">
             {formatCampusDisplay(r.campus).primary}
@@ -185,6 +203,8 @@ export function ReceptionClient({
         key: "timing",
         header: "Timing",
         align: "center",
+        className: "w-[14%] px-3 text-center whitespace-nowrap",
+        headerClassName: "w-[14%] px-3 text-center whitespace-nowrap",
         cell: (r) => (
           <div className="inline-flex flex-col items-center justify-center text-xs font-mono leading-tight whitespace-nowrap">
             <span className="text-foreground">In: {r.checkInTime}</span>
@@ -193,40 +213,46 @@ export function ReceptionClient({
             </span>
           </div>
         ),
-        className: "whitespace-nowrap",
       },
       {
         key: "actions",
         header: "Status / Action",
         align: "center",
+        className: "w-[14%] px-4 text-center whitespace-nowrap",
+        headerClassName: "w-[14%] px-4 text-center whitespace-nowrap",
         cell: (r) => {
           const isInside = r.status === "Inside" || r.status === "Overstay";
-          if (!isInside) {
-            return (
-              <div className="flex items-center justify-center">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-muted text-muted-foreground whitespace-nowrap">
-                  Checked Out
-                </span>
-              </div>
-            );
-          }
           return (
-            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-warning-soft text-warning">
-                Inside
+            <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
+              <span
+                className={cn(
+                  "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold",
+                  isInside ? "bg-warning-soft text-warning" : "bg-muted text-muted-foreground"
+                )}
+              >
+                {isInside ? "Inside" : "Checked Out"}
               </span>
               <ActionIconButton
-                tone="delete"
-                onClick={() => handleCheckOutVisitor(r.id)}
-                aria-label={`Check out ${r.visitorName}`}
-                title="Check Out Visitor"
+                tone="view"
+                onClick={() => setViewingVisitor(r)}
+                aria-label={`View visitor pass for ${r.visitorName}`}
+                title={`View Visitor Details · Date: ${r.date || "Today"}`}
               >
-                <LogOut />
+                <Eye />
               </ActionIconButton>
+              {isInside && (
+                <ActionIconButton
+                  tone="delete"
+                  onClick={() => handleCheckOutVisitor(r.id)}
+                  aria-label={`Check out ${r.visitorName}`}
+                  title="Check Out Visitor"
+                >
+                  <LogOut />
+                </ActionIconButton>
+              )}
             </div>
           );
         },
-        className: "whitespace-nowrap",
       },
     ],
     [handleCheckOutVisitor]
@@ -292,6 +318,9 @@ export function ReceptionClient({
         key: "caller",
         header: "Caller / Inquirer",
         align: "left",
+        headerAlign: "left",
+        className: "w-[30%] min-w-0 px-4 text-left",
+        headerClassName: "w-[30%] px-4 text-left",
         cell: (r) => (
           <div className="flex flex-col min-w-0">
             <span className="font-semibold text-foreground text-[13px] leading-tight truncate">
@@ -301,12 +330,14 @@ export function ReceptionClient({
           </div>
         ),
         sortValue: (r) => r.callerName,
-        className: "whitespace-nowrap",
       },
       {
         key: "inquiryType",
         header: "Category & Message",
         align: "center",
+        headerAlign: "center",
+        className: "w-[34%] px-3 text-center",
+        headerClassName: "w-[34%] px-3 text-center",
         cell: (r) => (
           <div className="inline-flex flex-col items-center justify-center min-w-0 max-w-[280px]">
             <div>
@@ -325,6 +356,9 @@ export function ReceptionClient({
         key: "campus",
         header: "Campus",
         align: "center",
+        headerAlign: "center",
+        className: "w-[16%] px-3 text-center",
+        headerClassName: "w-[16%] px-3 text-center",
         cell: (r) => (
           <span className="text-xs text-muted-foreground font-medium block truncate">
             {formatCampusDisplay(r.campus).primary}
@@ -333,27 +367,18 @@ export function ReceptionClient({
         sortValue: (r) => r.campus,
       },
       {
-        key: "createdAt",
-        header: "Date",
-        align: "center",
-        cell: (r) => (
-          <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">
-            {r.createdAt}
-          </span>
-        ),
-        sortValue: (r) => r.createdAt,
-        className: "whitespace-nowrap",
-      },
-      {
         key: "actions",
         header: "Status / Action",
         align: "center",
+        headerAlign: "center",
+        className: "w-[20%] px-4 text-center whitespace-nowrap",
+        headerClassName: "w-[20%] px-4 text-center whitespace-nowrap",
         cell: (r) => {
           const isResolved = r.status === "Closed" || r.status === "Converted";
           return (
-            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
+            <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
               <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
+                className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
                   isResolved
                     ? "bg-success-soft text-success"
                     : "bg-warning-soft text-warning"
@@ -361,6 +386,14 @@ export function ReceptionClient({
               >
                 {isResolved ? "Resolved" : "Pending"}
               </span>
+              <ActionIconButton
+                tone="view"
+                onClick={() => setViewingInquiry(r)}
+                aria-label={`View inquiry details for ${r.callerName}`}
+                title={`View Inquiry Details · Logged: ${r.createdAt}`}
+              >
+                <Eye />
+              </ActionIconButton>
               <ActionIconButton
                 tone={isResolved ? "edit" : "approve"}
                 onClick={() => handleToggleInquiryStatus(r.id)}
@@ -376,7 +409,6 @@ export function ReceptionClient({
             </div>
           );
         },
-        className: "whitespace-nowrap",
       },
     ],
     [handleToggleInquiryStatus]
@@ -502,6 +534,7 @@ export function ReceptionClient({
                   return (
                     <DropdownMenuItem
                       key={sec.id}
+                      selected={isSelected}
                       onClick={() => setActiveTab(sec.id)}
                       className={cn(
                         "flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs transition-colors",
@@ -554,12 +587,14 @@ export function ReceptionClient({
               searchFn={(r, q) =>
                 r.visitorName.toLowerCase().includes(q) ||
                 r.phone.toLowerCase().includes(q) ||
+                (r.cnic ? r.cnic.toLowerCase().includes(q) : false) ||
                 r.hostPerson.toLowerCase().includes(q) ||
                 r.purpose.toLowerCase().includes(q)
               }
               filters={visitorFilters}
               pageSize={8}
-              tableClassName="w-full text-sm"
+              tableClassName="w-full table-fixed text-sm"
+              containerClassName="overflow-x-clip"
             />
           </SectionCard>
         </TabsContent>
@@ -580,13 +615,14 @@ export function ReceptionClient({
               }
               filters={inquiryFilters}
               pageSize={8}
-              tableClassName="w-full text-sm"
+              tableClassName="w-full table-fixed text-sm"
+              containerClassName="overflow-x-clip"
             />
           </SectionCard>
         </TabsContent>
       </Tabs>
 
-      {/* Simple Dialogs */}
+      {/* Creation Dialogs */}
       <CheckInVisitorDialog
         open={isCheckInOpen}
         onOpenChange={setIsCheckInOpen}
@@ -599,6 +635,21 @@ export function ReceptionClient({
         onOpenChange={setIsLogInquiryOpen}
         onAddInquiry={handleAddInquiry}
         existingCount={inquiries.length}
+      />
+
+      {/* Detail / View Dialogs */}
+      <ViewVisitorDialog
+        visitor={viewingVisitor}
+        open={Boolean(viewingVisitor)}
+        onOpenChange={(open) => !open && setViewingVisitor(null)}
+        onCheckOut={handleCheckOutVisitor}
+      />
+
+      <ViewInquiryDialog
+        inquiry={viewingInquiry}
+        open={Boolean(viewingInquiry)}
+        onOpenChange={(open) => !open && setViewingInquiry(null)}
+        onToggleStatus={handleToggleInquiryStatus}
       />
     </div>
   );

@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import {
   Users,
   UserCheck,
@@ -24,18 +23,15 @@ import {
   ChevronDown,
   School,
   SlidersHorizontal,
-  Plus,
 } from "lucide-react";
 import { formatCampusDisplay, formatNumber, formatPercent } from "@/lib/format";
 import { generateStudentsPDF } from "@/lib/pdf/generate-students-pdf";
 import type { FeeStatus, Student, StudentStatus } from "@/types";
 import { StudentsTable } from "./students-table";
 import { ExportStudentsDialog } from "./export-students-dialog";
-import { NewAdmissionDialog } from "@/app/(admin)/admissions/new-admission-dialog";
 import {
   getStoredStudents,
   saveStoredStudents,
-  enrollNewStudent,
 } from "@/lib/mock/admissions-storage";
 import { toast } from "sonner";
 
@@ -47,7 +43,6 @@ export function StudentsClient({ initialStudents }: StudentsClientProps) {
   const [students, setStudents] = React.useState<Student[]>(initialStudents);
   const [isExportDialogOpen, setIsExportDialogOpen] = React.useState(false);
   const [exportDialogCampus, setExportDialogCampus] = React.useState<string>("all");
-  const [isNewAdmissionOpen, setIsNewAdmissionOpen] = React.useState(false);
 
   // Sync with persistent local storage
   React.useEffect(() => {
@@ -93,32 +88,6 @@ export function StudentsClient({ initialStudents }: StudentsClientProps) {
     });
   }, []);
 
-  const handleAddStudent = React.useCallback(
-    (newStudent: Student & { score?: number; admissionType?: "Entry Test" | "Direct Admission" }) => {
-      const { student } = enrollNewStudent({
-        name: newStudent.name,
-        gender: newStudent.gender,
-        className: newStudent.className,
-        section: newStudent.section,
-        campus: newStudent.campus,
-        guardian: newStudent.guardian,
-        phone: newStudent.phone,
-        rollNo: newStudent.rollNo,
-        feeStatus: newStudent.feeStatus,
-        status: newStudent.status,
-        score: newStudent.score,
-        admissionType: newStudent.admissionType,
-      });
-
-      setStudents(getStoredStudents());
-
-      toast.success("Student Enrolled & Registered in SIS", {
-        description: `${student.name} admitted into ${student.className} - Sec ${student.section} (${student.admissionNumber}). Added to both Students & Admissions Register.`,
-      });
-    },
-    []
-  );
-
   const handleDownloadPDF = React.useCallback(
     (campusName?: string) => {
       try {
@@ -163,15 +132,6 @@ export function StudentsClient({ initialStudents }: StudentsClientProps) {
         title="Student Information System"
         actions={
           <div className="flex items-center gap-2">
-            <Button
-              size="lg"
-              onClick={() => setIsNewAdmissionOpen(true)}
-              className="gap-2 cursor-pointer"
-            >
-              <Plus className="size-4" data-icon="inline-start" />
-              <span>New Admission</span>
-            </Button>
-
             {/* Professional Export PDF Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 rounded-[4px] border border-brand/20 bg-white text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_1px_2px_rgba(9,29,62,0.05)] hover:border-brand/35 hover:bg-brand-50/50 hover:text-brand px-3.5 h-9 text-xs font-semibold transition-all cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -294,13 +254,6 @@ export function StudentsClient({ initialStudents }: StudentsClientProps) {
         onOpenChange={setIsExportDialogOpen}
         students={students}
         initialCampus={exportDialogCampus}
-      />
-
-      <NewAdmissionDialog
-        open={isNewAdmissionOpen}
-        onOpenChange={setIsNewAdmissionOpen}
-        onAddStudent={handleAddStudent}
-        existingCount={students.length}
       />
     </div>
   );

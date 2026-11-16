@@ -137,7 +137,13 @@ export function HRClient() {
                     )}
                     <StatusBadge status={p.status} />
                     {p.status === "Disbursed" && (
-                      <Button variant="outline" size="icon-sm" className="h-7 w-7 border-indigo-200 bg-indigo-50/70 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 shadow-2xs"><Download className="size-3.5 text-indigo-600" /></Button>
+                      <ActionIconButton
+                        tone="indigo"
+                        title="Download Salary Slip"
+                        aria-label="Download Salary Slip"
+                      >
+                        <Download />
+                      </ActionIconButton>
                     )}
                   </div>
                 </div>

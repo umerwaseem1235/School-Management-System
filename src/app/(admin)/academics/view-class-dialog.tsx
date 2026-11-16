@@ -9,12 +9,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  AcademicSelect,
+  AcademicSelectContent,
+  AcademicSelectItem,
+  AcademicSelectTrigger,
+  AcademicSelectValue,
+} from "./academic-dropdown";
 import {
   getClassSectionLetters,
   getScienceSpecializationTracks,
@@ -239,26 +239,26 @@ export function ViewClassDialog({
                 <span>Class & Section Roster ({sectionsCount} Sections)</span>
               </h3>
               <div className="flex items-center gap-2">
-                <Select
+                <AcademicSelect
                   value={selectedSection}
                   onValueChange={(val) => {
                     if (val) setSelectedSection(val);
                   }}
                 >
-                  <SelectTrigger className="h-8 text-xs w-[155px] font-medium">
-                    <SelectValue placeholder="All Sections" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ALL" className="text-xs">
+                  <AcademicSelectTrigger className="h-8 text-xs min-w-[162px] w-auto max-w-[210px] font-medium">
+                    <AcademicSelectValue placeholder="All Sections" />
+                  </AcademicSelectTrigger>
+                  <AcademicSelectContent>
+                    <AcademicSelectItem value="ALL" className="text-xs">
                       All Sections ({sectionLetters.length})
-                    </SelectItem>
+                    </AcademicSelectItem>
                     {sectionLetters.map((letter) => (
-                      <SelectItem key={letter} value={letter} className="text-xs">
+                      <AcademicSelectItem key={letter} value={letter} className="text-xs">
                         Section {letter}
-                      </SelectItem>
+                      </AcademicSelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </AcademicSelectContent>
+                </AcademicSelect>
               </div>
             </div>
 

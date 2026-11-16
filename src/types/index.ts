@@ -66,6 +66,81 @@ export type AdmissionStage =
   | "Approved"
   | "Enrolled";
 
+export interface AdmissionDocumentRecord {
+  fileName?: string;
+  fileSize?: string;
+  fileType?: string;
+  previewUrl?: string;
+  verified: boolean;
+}
+
+export interface AdmissionDossier {
+  // Step 1: Student Information
+  dateOfBirth?: string;
+  bloodGroup?: string;
+  religion?: string;
+  nationality?: string;
+  bFormNumber?: string;
+  photoDataUrl?: string;
+  photoFileName?: string;
+
+  // Step 2: Parent / Guardian Information
+  fatherName?: string;
+  fatherCnic?: string;
+  fatherOccupation?: string;
+  fatherContact?: string;
+  motherName?: string;
+  motherContact?: string;
+  hasSeparateGuardian?: boolean;
+  guardianName?: string;
+  guardianRelation?: string;
+  guardianCnic?: string;
+  guardianContact?: string;
+  email?: string;
+
+  // Step 3: Address Information
+  currentAddress?: string;
+  permanentAddress?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+
+  // Step 4: Academic & Admission Information
+  academicSession?: string;
+  admissionDate?: string;
+  previousSchoolAttended?: "Yes" | "No";
+  previousSchoolName?: string;
+  previousClass?: string;
+  previousAcademicRecord?: string;
+  transferCertificate?: string;
+  admissionCategory?: "New" | "Transfer";
+
+  // Step 5: Fee Details
+  feeDetails?: {
+    admissionFee: number;
+    tuitionFee: number;
+    securityDeposit: number;
+    annualCharges: number;
+    transportFee: number;
+    discountAmount: number;
+    discountReason?: string;
+    totalPayable: number;
+    paidAmount: number;
+    paymentMethod: "Cash Counter" | "Bank Challan" | "Online Transfer" | "Card / POS";
+    challanNumber?: string;
+    feeStatus: FeeStatus;
+  };
+
+  // Step 6: Documents
+  documents?: {
+    studentPhoto: AdmissionDocumentRecord;
+    birthCertificate: AdmissionDocumentRecord;
+    fatherCnicCopy: AdmissionDocumentRecord;
+    leavingCertificate?: AdmissionDocumentRecord;
+    academicDocuments?: AdmissionDocumentRecord;
+  };
+}
+
 export interface AdmissionApplication {
   id: ID;
   admissionNumber?: string;
@@ -81,7 +156,9 @@ export interface AdmissionApplication {
   rollNo?: string;
   gender?: "Male" | "Female";
   admissionType?: "Entry Test" | "Direct Admission";
+  admissionCategory?: "New" | "Transfer";
   status?: "Active" | "Pending" | "Confirmed" | "Enrolled";
+  dossier?: AdmissionDossier;
 }
 
 export type StudentStatus = "Active" | "Transferred" | "Alumni" | "Suspended";
@@ -101,6 +178,7 @@ export interface Student {
   feeStatus: FeeStatus;
   status: StudentStatus;
   enrolledOn: string;
+  dossier?: AdmissionDossier;
 }
 
 export interface AcademicClass {

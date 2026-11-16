@@ -439,6 +439,7 @@ export default function PaperGeneratorPage() {
                   return (
                     <DropdownMenuItem
                       key={sec.id}
+                      selected={isSelected}
                       onClick={() => setActiveTab(sec.id)}
                       className={cn(
                         "flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs transition-colors",
@@ -711,25 +712,23 @@ export default function PaperGeneratorPage() {
 
                         <TableCell className="text-right pr-5 py-3">
                           <div className="flex items-center justify-end gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
+                            <ActionIconButton
+                              tone="indigo"
                               onClick={() => setPrintingPaper(paper)}
+                              aria-label="Preview & Print Paper"
                               title="Preview & Print Paper"
-                              className="text-muted-foreground hover:text-brand cursor-pointer"
                             >
-                              <Printer className="size-3.5" />
-                            </Button>
+                              <Printer />
+                            </ActionIconButton>
 
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
+                            <ActionIconButton
+                              tone="delete"
                               onClick={() => handleDeletePaper(paper.id)}
+                              aria-label="Delete Paper"
                               title="Delete Paper"
-                              className="text-muted-foreground hover:text-destructive cursor-pointer"
                             >
-                              <Trash2 className="size-3.5" />
-                            </Button>
+                              <Trash2 />
+                            </ActionIconButton>
                           </div>
                         </TableCell>
                       </TableRow>

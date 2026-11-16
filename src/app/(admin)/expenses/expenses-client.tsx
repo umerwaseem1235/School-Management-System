@@ -722,6 +722,7 @@ export function ExpensesClient() {
               return (
                 <DropdownMenuItem
                   key={item.key}
+                  selected={isSelected}
                   onClick={() => setActiveTab(item.key)}
                   className={cn(
                     "flex items-center justify-between gap-2 rounded-[4px] px-2.5 py-2 text-xs cursor-pointer transition-colors",

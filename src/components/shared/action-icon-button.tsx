@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +27,7 @@ export const ACTION_ICON_TONES: Record<ActionIconTone, string> = {
 export interface ActionIconButtonProps
   extends Omit<React.ComponentProps<typeof Button>, "variant" | "size"> {
   tone?: ActionIconTone;
+  href?: string;
 }
 
 /**
@@ -35,13 +37,27 @@ export function ActionIconButton({
   tone = "neutral",
   className,
   type = "button",
+  href,
+  render,
+  nativeButton,
   ...props
 }: ActionIconButtonProps) {
+  const effectiveRender = render ?? (href ? <Link href={href} /> : undefined);
+  const resolvedNativeButton =
+    nativeButton ??
+    (href
+      ? false
+      : React.isValidElement(effectiveRender) && effectiveRender.type !== "button"
+        ? false
+        : undefined);
+
   return (
     <Button
-      type={type}
+      type={effectiveRender ? undefined : type}
+      nativeButton={resolvedNativeButton}
       variant="ghost"
       size="icon-sm"
+      render={effectiveRender}
       className={cn(
         "size-7 rounded-md border transition-all duration-150 cursor-pointer shadow-2xs active:scale-95 disabled:opacity-45 disabled:pointer-events-none [&_svg]:size-3.5",
         ACTION_ICON_TONES[tone],

@@ -12,12 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  AcademicSelect,
+  AcademicSelectContent,
+  AcademicSelectItem,
+  AcademicSelectTrigger,
+  AcademicSelectValue,
+} from "./academic-dropdown";
 import type { AcademicClass } from "@/types";
 import {
   getClassSectionLetters,
@@ -220,24 +220,24 @@ export function AddClassDialog({
               <GraduationCap className="size-3.5 text-muted-foreground" />
               Class / Grade Standard <span className="text-danger">*</span>
             </label>
-            <Select
+            <AcademicSelect
               value={isCustom ? "__custom__" : className}
               onValueChange={(val) => {
                 if (val) handleStandardClassSelect(val);
               }}
             >
-              <SelectTrigger className="h-9 text-sm w-full">
-                <SelectValue placeholder="Select class standard" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[260px]">
+              <AcademicSelectTrigger className="h-9 text-sm w-full">
+                <AcademicSelectValue placeholder="Select class standard" />
+              </AcademicSelectTrigger>
+              <AcademicSelectContent className="max-h-[260px]">
                 {STANDARD_ACADEMIC_CLASSES.map((cls) => (
-                  <SelectItem key={cls} value={cls}>
+                  <AcademicSelectItem key={cls} value={cls}>
                     {cls}
-                  </SelectItem>
+                  </AcademicSelectItem>
                 ))}
-                <SelectItem value="__custom__">Custom Class Name...</SelectItem>
-              </SelectContent>
-            </Select>
+                <AcademicSelectItem value="__custom__">Custom Class Name...</AcademicSelectItem>
+              </AcademicSelectContent>
+            </AcademicSelect>
           </div>
 
           {/* Custom Name if selected */}
@@ -279,23 +279,23 @@ export function AddClassDialog({
                 <Layers className="size-3.5 text-muted-foreground" />
                 Academic Stream
               </label>
-              <Select
+              <AcademicSelect
                 value={stream}
                 onValueChange={(val) => {
                   if (val) setStream(val as AcademicClass["stream"]);
                 }}
               >
-                <SelectTrigger className="h-9 text-sm w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
+                <AcademicSelectTrigger className="h-9 text-sm w-full">
+                  <AcademicSelectValue />
+                </AcademicSelectTrigger>
+                <AcademicSelectContent>
                   {STREAM_OPTIONS.map((st) => (
-                    <SelectItem key={st} value={st}>
+                    <AcademicSelectItem key={st} value={st}>
                       {st} Stream
-                    </SelectItem>
+                    </AcademicSelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </AcademicSelectContent>
+              </AcademicSelect>
             </div>
           </div>
 
@@ -306,23 +306,23 @@ export function AddClassDialog({
                 <MapPin className="size-3.5 text-muted-foreground" />
                 Campus Allocation
               </label>
-              <Select
+              <AcademicSelect
                 value={campus}
                 onValueChange={(val) => {
                   if (val) setCampus(val);
                 }}
               >
-                <SelectTrigger className="h-9 text-sm w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
+                <AcademicSelectTrigger className="h-9 text-sm w-full">
+                  <AcademicSelectValue />
+                </AcademicSelectTrigger>
+                <AcademicSelectContent>
                   {activeBranches.map((c) => (
-                    <SelectItem key={c.id} value={c.campusName}>
+                    <AcademicSelectItem key={c.id} value={c.campusName}>
                       {c.campusName}
-                    </SelectItem>
+                    </AcademicSelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </AcademicSelectContent>
+              </AcademicSelect>
             </div>
 
             <div className="space-y-1.5">
@@ -330,23 +330,23 @@ export function AddClassDialog({
                 <User className="size-3.5 text-muted-foreground" />
                 Class In-charge / Teacher
               </label>
-              <Select
+              <AcademicSelect
                 value={classTeacher}
                 onValueChange={(val) => {
                   if (val) setClassTeacher(val);
                 }}
               >
-                <SelectTrigger className="h-9 text-sm w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="max-h-[240px]">
+                <AcademicSelectTrigger className="h-9 text-sm w-full">
+                  <AcademicSelectValue />
+                </AcademicSelectTrigger>
+                <AcademicSelectContent className="max-h-[240px]">
                   {TEACHER_OPTIONS.map((tch) => (
-                    <SelectItem key={tch} value={tch}>
+                    <AcademicSelectItem key={tch} value={tch}>
                       {tch}
-                    </SelectItem>
+                    </AcademicSelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </AcademicSelectContent>
+              </AcademicSelect>
             </div>
           </div>
 
@@ -356,16 +356,16 @@ export function AddClassDialog({
               <label className="text-xs font-medium text-foreground">
                 Sections
               </label>
-              <Select
+              <AcademicSelect
                 value={sections}
                 onValueChange={(val) => {
                   if (val) setSections(val);
                 }}
               >
-                <SelectTrigger className="h-9 text-sm w-full">
-                  <SelectValue placeholder="Select sections" />
-                </SelectTrigger>
-                <SelectContent>
+                <AcademicSelectTrigger className="h-9 text-sm w-full">
+                  <AcademicSelectValue placeholder="Select sections" />
+                </AcademicSelectTrigger>
+                <AcademicSelectContent>
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((count) => {
                     const letters = getClassSectionLetters(count);
                     const rangeLabel =
@@ -373,13 +373,13 @@ export function AddClassDialog({
                         ? letters[0]
                         : `${letters[0]}–${letters[letters.length - 1]}`;
                     return (
-                      <SelectItem key={count} value={String(count)}>
+                      <AcademicSelectItem key={count} value={String(count)}>
                         {count} {count === 1 ? "Sec" : "Secs"} ({rangeLabel})
-                      </SelectItem>
+                      </AcademicSelectItem>
                     );
                   })}
-                </SelectContent>
-              </Select>
+                </AcademicSelectContent>
+              </AcademicSelect>
             </div>
 
             <div className="space-y-1.5">
@@ -418,20 +418,20 @@ export function AddClassDialog({
             <label className="text-xs font-medium text-foreground">
               Initial Status
             </label>
-            <Select
+            <AcademicSelect
               value={status}
               onValueChange={(val) => {
                 if (val) setStatus(val as AcademicClass["status"]);
               }}
             >
-              <SelectTrigger className="h-9 text-sm w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Active">Active (In Session)</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+              <AcademicSelectTrigger className="h-9 text-sm w-full">
+                <AcademicSelectValue />
+              </AcademicSelectTrigger>
+              <AcademicSelectContent>
+                <AcademicSelectItem value="Active">Active (In Session)</AcademicSelectItem>
+                <AcademicSelectItem value="Inactive">Inactive</AcademicSelectItem>
+              </AcademicSelectContent>
+            </AcademicSelect>
           </div>
 
           <DialogFooter className="pt-3 border-t border-border/60 gap-2">

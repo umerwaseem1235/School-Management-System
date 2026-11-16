@@ -195,7 +195,7 @@ function CampusSelector({
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "inline-flex h-9 min-w-[220px] items-center justify-between gap-2 rounded-[5px] border px-3 text-xs font-semibold transition-all duration-150 select-none outline-none",
+          "academic-dropdown-trigger inline-flex h-9 min-w-[220px] items-center justify-between gap-2 rounded-[5px] border px-3 text-xs font-semibold transition-all duration-150 select-none outline-none cursor-pointer",
           "border-brand/18 bg-white text-foreground",
           "shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.06)]",
           "hover:border-brand/35 hover:bg-brand-50/40",
@@ -229,9 +229,7 @@ function CampusSelector({
           role="listbox"
           aria-label="Select campus"
           className={cn(
-            "absolute right-0 top-full z-50 mt-1.5 min-w-[260px] overflow-hidden rounded-[6px] border border-brand/15",
-            "bg-white shadow-[0_4px_16px_-4px_rgb(9_29_62/0.18),0_1px_4px_rgb(9_29_62/0.08)]",
-            "animate-in fade-in-0 slide-in-from-top-1 duration-150"
+            "animate-dropdown academic-dropdown-content absolute right-0 top-full z-50 mt-1.5 min-w-[260px] overflow-hidden rounded-xl border border-brand/15 bg-white"
           )}
         >
           {/* All campuses */}
@@ -241,7 +239,7 @@ function CampusSelector({
               aria-selected={value === ALL_CAMPUSES_VALUE}
               onClick={() => { onChange(ALL_CAMPUSES_VALUE); setOpen(false); }}
               className={cn(
-                "flex w-full items-center gap-2.5 rounded-[4px] px-3 py-2 text-xs font-semibold transition-colors",
+                "academic-dropdown-item flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors cursor-pointer",
                 value === ALL_CAMPUSES_VALUE
                   ? "bg-gradient-to-r from-[#381e0f] to-[#6e3b1f] text-white"
                   : "text-foreground hover:bg-brand-50/70"
@@ -274,7 +272,7 @@ function CampusSelector({
                   aria-selected={isActive}
                   onClick={() => { onChange(opt.value); setOpen(false); }}
                   className={cn(
-                    "flex w-full items-center gap-2.5 rounded-[4px] px-3 py-2.5 text-xs font-semibold transition-colors",
+                    "academic-dropdown-item flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors cursor-pointer",
                     isActive
                       ? "bg-gradient-to-r from-[#381e0f] to-[#6e3b1f] text-white"
                       : "text-foreground hover:bg-brand-50/70"

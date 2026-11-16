@@ -121,3 +121,35 @@ export const formatOrdinal = (n: number): string => {
       return `${n}th`;
   }
 };
+
+const STAFF_ROLE_MAP: [RegExp, string][] = [
+  [/\bvice principal\b/i, "Vice Principal"],
+  [/\bprincipal\b/i, "Principal"],
+  [/\bsenior teacher\b/i, "Senior Teacher"],
+  [/\bteacher\b/i, "Teacher"],
+  [/\bsection head\b/i, "Section Head"],
+  [/\bsubject specialist\b/i, "Subject Specialist"],
+  [/\badmissions\b/i, "Admissions Head"],
+  [/\bhead of\b/i, "Department Head"],
+  [/\bhr\b/i, "HR Coordinator"],
+  [/\baccounts?\b/i, "Accounts Officer"],
+  [/\bsports?\b|\bphysical education\b/i, "Sports Director"],
+  [/\blibrarian\b/i, "Librarian"],
+  [/\bcoordinator\b/i, "Coordinator"],
+  [/\bart\b/i, "Art Instructor"],
+  [/\binventory\b|\bprocurement\b/i, "Inventory Head"],
+  [/\bit\b|\bnetwork\b/i, "IT Lead"],
+  [/\blab\b/i, "Lab Attendant"],
+  [/\btransport\b/i, "Transport Supervisor"],
+  [/\boperations\b|\bfacility\b/i, "Operations Supervisor"],
+];
+
+/** Returns a concise, table-friendly role title (e.g. "Teacher", "Principal") while preserving full details for tooltips and modals. */
+export const formatStaffRole = (designation: string): string => {
+  const trimmed = designation.trim();
+  if (!trimmed) return "";
+  for (const [pattern, shortRole] of STAFF_ROLE_MAP) {
+    if (pattern.test(trimmed)) return shortRole;
+  }
+  return trimmed.split(/\s*[—–-]\s*/)[0].trim();
+};

@@ -21,11 +21,14 @@ import {
 } from "@/components/ui/select";
 import { useBranches } from "@/context/branches-context";
 import { formatCampusDisplay } from "@/lib/format";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import type { StaffMember } from "@/types";
 import {
   BookOpen,
   Briefcase,
+  Check,
   GraduationCap,
+  HelpCircle,
   Plus,
   School,
   UserCheck,
@@ -242,6 +245,10 @@ export function NewStaffDialog({
   // Non-Teaching Scope
   const [nonTeachingScope, setNonTeachingScope] = React.useState("");
 
+  // Confirmation state
+  const [pendingStaff, setPendingStaff] = React.useState<StaffMember | null>(null);
+  const [showConfirm, setShowConfirm] = React.useState(false);
+
   const resetForm = () => {
     setName("");
     setGender("Male");
@@ -262,6 +269,8 @@ export function NewStaffDialog({
     setIsClassIncharge(false);
     setClassInchargeSection("");
     setNonTeachingScope("");
+    setPendingStaff(null);
+    setShowConfirm(false);
   };
 
   // Helper functions for class tags
@@ -369,16 +378,28 @@ export function NewStaffDialog({
       status: "Active",
     };
 
-    onAddStaff(newStaff);
+    setPendingStaff(newStaff);
+    setShowConfirm(true);
+  };
+
+  const handleFinalSave = () => {
+    if (!pendingStaff) return;
+    onAddStaff(pendingStaff);
+    setShowConfirm(false);
     resetForm();
     onOpenChange(false);
   };
 
   return (
-    <Dialog
+    <>
+      <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen) resetForm();
+        if (!isOpen) {
+          resetForm();
+          setShowConfirm(false);
+          setPendingStaff(null);
+        }
         onOpenChange(isOpen);
       }}
     >
@@ -909,5 +930,162 @@ export function NewStaffDialog({
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Confirmation Dialog */}
+    <Dialog
+      open={showConfirm}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) setShowConfirm(false);
+      }}
+    >
+      <DialogContent className="max-w-md p-0 overflow-hidden sm:max-w-lg border border-border/80 shadow-2xl rounded-2xl z-[60]">
+        {/* Header */}
+        <DialogHeader className="px-6 pt-5 pb-4 bg-gradient-to-r from-brand-50/80 via-background to-background border-b border-border/70">
+          <div className="flex items-center gap-3">
+            <div className="grid size-11 place-items-center rounded-xl bg-brand text-cream shadow-sm ring-2 ring-brand/20">
+              <UserCheck className="size-5.5" />
+            </div>
+            <div>
+              <DialogTitle className="text-base font-heading font-bold text-foreground">
+                Confirm Staff Member Addition
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                Please review the staff member&apos;s details before confirming and saving.
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        {pendingStaff && (
+          <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+            {/* Question Banner */}
+            <div className="rounded-xl border border-brand/25 bg-brand-50/50 p-3.5 flex items-start gap-3 shadow-2xs">
+              <div className="grid size-7 shrink-0 place-items-center rounded-lg bg-brand/10 text-brand mt-0.5">
+                <HelpCircle className="size-4" />
+              </div>
+              <div className="text-xs">
+                <p className="font-semibold text-foreground text-[12.5px]">
+                  Are you sure you want to add this staff member and save this?
+                </p>
+                <p className="text-muted-foreground mt-0.5 leading-relaxed text-[11.5px]">
+                  This will officially register <strong className="text-foreground">{pendingStaff.name}</strong> into EduSphere under employee ID <strong className="text-brand font-mono">{pendingStaff.empCode}</strong>.
+                </p>
+              </div>
+            </div>
+
+            {/* Summary Card */}
+            <div className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-3">
+              {/* Identity */}
+              <div className="flex items-center gap-3 pb-3 border-b border-border/60">
+                <UserAvatar name={pendingStaff.name} size="md" className="shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-sm font-bold text-foreground truncate">
+                      {pendingStaff.name}
+                    </h4>
+                    <span className="text-[11px] font-mono font-bold text-brand bg-brand-50 border border-brand/20 px-2 py-0.5 rounded-md shrink-0">
+                      {pendingStaff.empCode}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                    {pendingStaff.designation} · {pendingStaff.department}
+                  </p>
+                </div>
+              </div>
+
+              {/* Specs Grid */}
+              <div className="grid grid-cols-2 gap-2.5 text-xs">
+                <div className="p-2.5 rounded-lg bg-background border border-border/60">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                    Staff Type
+                  </span>
+                  <span className="font-medium text-foreground text-[12px]">
+                    {pendingStaff.type === "Teaching" ? "Teaching Faculty" : "Non-Teaching Staff"}
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-background border border-border/60">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                    Campus Branch
+                  </span>
+                  <span className="font-medium text-foreground text-[12px] truncate block" title={pendingStaff.campus}>
+                    {formatCampusDisplay(pendingStaff.campus).primary}
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-background border border-border/60">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                    Contact Phone
+                  </span>
+                  <span className="font-mono text-foreground text-[12px]">
+                    {pendingStaff.phone}
+                  </span>
+                </div>
+
+                <div className="p-2.5 rounded-lg bg-background border border-border/60">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                    Qualification & Exp
+                  </span>
+                  <span className="font-medium text-foreground text-[12px] truncate block" title={`${pendingStaff.qualification} (${pendingStaff.experience})`}>
+                    {pendingStaff.qualification} ({pendingStaff.experience})
+                  </span>
+                </div>
+              </div>
+
+              {/* Teaching / Non-Teaching Scope */}
+              {pendingStaff.type === "Teaching" && pendingStaff.assignedClasses && (
+                <div className="p-2.5 rounded-lg bg-background border border-border/60 text-xs">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                    Assigned Classes & Subjects
+                  </span>
+                  <p className="font-medium text-foreground text-[12px] mt-0.5">
+                    {pendingStaff.assignedClasses} · {pendingStaff.assignedSubjects}
+                  </p>
+                  {pendingStaff.classTeacherOf && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand bg-brand-50 px-2 py-0.5 rounded mt-1.5 border border-brand/20">
+                      Class Incharge: Section {pendingStaff.classTeacherOf}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {pendingStaff.type === "Non-Teaching" && pendingStaff.assignedSubjects && (
+                <div className="p-2.5 rounded-lg bg-background border border-border/60 text-xs">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block">
+                    Operational Scope & Duties
+                  </span>
+                  <p className="font-medium text-foreground text-[12px] mt-0.5 leading-relaxed">
+                    {pendingStaff.assignedSubjects}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Footer Actions */}
+        <DialogFooter className="px-6 py-3.5 bg-muted/30 border-t border-border/60 flex items-center justify-end gap-2.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowConfirm(false)}
+            className="text-xs cursor-pointer"
+          >
+            Cancel / Review
+          </Button>
+          <Button
+            type="button"
+            size="lg"
+            onClick={handleFinalSave}
+            className="gap-2 px-5 cursor-pointer bg-brand hover:bg-brand/90 text-cream shadow-sm"
+          >
+            <Check className="size-4" />
+            <span>Confirm & Save</span>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </>
   );
 }

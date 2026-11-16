@@ -83,9 +83,17 @@ Enrolled: ${student.enrolledOn}`;
         <DialogHeader className="border-b border-border/70 bg-gradient-to-r from-brand-50/70 via-background to-background px-6 py-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand text-cream shadow-sm font-heading font-bold text-base ring-2 ring-brand/20">
-                {initials(student.name)}
-              </div>
+              {student.dossier?.photoDataUrl ? (
+                <img
+                  src={student.dossier.photoDataUrl}
+                  alt={student.name}
+                  className="size-12 shrink-0 rounded-2xl object-cover shadow-sm ring-2 ring-brand/20"
+                />
+              ) : (
+                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand text-cream shadow-sm font-heading font-bold text-base ring-2 ring-brand/20">
+                  {initials(student.name)}
+                </div>
+              )}
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <DialogTitle className="font-heading text-lg font-bold text-foreground">
@@ -242,6 +250,68 @@ Enrolled: ${student.enrolledOn}`;
               </div>
             </div>
           </div>
+
+          {student.dossier && (
+            <div className="rounded-xl border border-border/80 bg-muted/20 p-4 space-y-3 shadow-2xs">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Admission Dossier Profile
+                </span>
+                {student.dossier.admissionCategory && (
+                  <span className="rounded-full bg-brand-50 border border-brand/20 px-2 py-0.5 text-[10.5px] font-semibold text-brand">
+                    {student.dossier.admissionCategory} Admission
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                {student.dossier.bFormNumber && (
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block">B-Form / Birth Cert</span>
+                    <span className="font-mono font-semibold text-foreground">
+                      {student.dossier.bFormNumber}
+                    </span>
+                  </div>
+                )}
+                {student.dossier.dateOfBirth && (
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block">Date of Birth</span>
+                    <span className="font-semibold text-foreground">
+                      {formatDate(student.dossier.dateOfBirth)}
+                    </span>
+                  </div>
+                )}
+                {student.dossier.bloodGroup && (
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block">Blood Group</span>
+                    <span className="font-semibold text-foreground">{student.dossier.bloodGroup}</span>
+                  </div>
+                )}
+                {student.dossier.fatherName && (
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block">Father&apos;s Name</span>
+                    <span className="font-semibold text-foreground">{student.dossier.fatherName}</span>
+                  </div>
+                )}
+                {(student.dossier.city || student.dossier.province) && (
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block">City / Province</span>
+                    <span className="font-semibold text-foreground">
+                      {[student.dossier.city, student.dossier.province].filter(Boolean).join(", ")}
+                    </span>
+                  </div>
+                )}
+                {student.dossier.previousSchoolAttended === "Yes" &&
+                  student.dossier.previousSchoolName && (
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Previous School</span>
+                      <span className="font-semibold text-foreground truncate block">
+                        {student.dossier.previousSchoolName}
+                      </span>
+                    </div>
+                  )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Actions */}

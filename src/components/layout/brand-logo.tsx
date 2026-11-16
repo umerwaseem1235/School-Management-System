@@ -30,7 +30,7 @@ export function BrandLogo({
         <p className="font-heading text-[16px] font-bold tracking-tight text-white truncate drop-shadow-xs">
           EduSphere
         </p>
-        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#ebdcc6] truncate">
+        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white truncate">
           Super Admin
         </p>
       </div>

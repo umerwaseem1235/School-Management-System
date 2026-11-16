@@ -143,6 +143,7 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   className?: string;
   tableClassName?: string;
+  containerClassName?: string;
   theadRowClassName?: string;
   hideSortArrows?: boolean;
   showFillerRows?: boolean;
@@ -172,6 +173,7 @@ export function DataTable<T>({
   emptyMessage = "No records found.",
   className,
   tableClassName,
+  containerClassName,
   theadRowClassName = DEFAULT_THEAD_ROW_CLASSNAME,
   hideSortArrows = true,
   showFillerRows = false,
@@ -399,7 +401,7 @@ export function DataTable<T>({
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto scrollbar-thin-light">
+      <div className={cn("overflow-x-auto scrollbar-thin-light", containerClassName)}>
         <table className={cn("w-full text-sm", tableClassName ?? "min-w-[720px] table-fixed")}>
           <thead>
             <tr

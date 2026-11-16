@@ -112,27 +112,20 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
       {
         key: "branch",
         header: "Branch / Campus",
-        align: "left",
-        headerClassName: "w-[24%] px-3.5 text-left",
-        className: "w-[24%] px-3.5 text-left",
+        align: "center",
+        headerClassName: "w-[22%] px-3 text-center",
+        className: "w-[22%] px-3 text-center",
         cell: (r) => (
           <div
-            className="flex items-center gap-2.5 min-w-0"
+            className="flex flex-col items-center justify-center min-w-0"
             title={`${r.campusName} (${r.campusCode})`}
           >
-            <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand ring-1 ring-brand/10 dark:bg-brand-soft">
-              <Building2 className="size-4" />
-            </div>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="font-semibold text-foreground text-xs leading-tight truncate">
-                {r.campusName}
-              </span>
-              <div className="mt-0.5">
-                <span className="inline-flex font-mono text-[10px] font-semibold text-muted-foreground bg-muted/80 px-1.5 py-0.2 rounded border border-border/40 shrink-0">
-                  {r.campusCode}
-                </span>
-              </div>
-            </div>
+            <span className="font-semibold text-foreground text-xs leading-tight truncate max-w-full">
+              {r.campusName}
+            </span>
+            <span className="mt-1 inline-flex font-mono text-[10px] font-semibold text-muted-foreground bg-muted/80 px-1.5 py-0.2 rounded border border-border/40 shrink-0">
+              {r.campusCode}
+            </span>
           </div>
         ),
       },
@@ -140,8 +133,8 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
         key: "city",
         header: "City",
         align: "center",
-        headerClassName: "w-[13%] px-2 text-center",
-        className: "w-[13%] px-2 text-center",
+        headerClassName: "w-[14%] px-2 text-center",
+        className: "w-[14%] px-2 text-center",
         cell: (r) => (
           <div className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-foreground">
             <MapPin className="size-3.5 text-brand shrink-0" />
@@ -153,8 +146,8 @@ export function BranchesClient({ initialBranches: _initialBranches }: BranchesCl
         key: "principal",
         header: "Principal / Head",
         align: "center",
-        headerClassName: "w-[19%] px-2 text-center",
-        className: "w-[19%] px-2 text-center",
+        headerClassName: "w-[20%] px-2 text-center",
+        className: "w-[20%] px-2 text-center",
         cell: (r) => (
           <div
             className="inline-flex items-center justify-center gap-1.5 text-xs font-medium text-foreground max-w-full"

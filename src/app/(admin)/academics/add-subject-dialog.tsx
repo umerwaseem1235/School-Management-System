@@ -12,12 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  AcademicSelect,
+  AcademicSelectContent,
+  AcademicSelectItem,
+  AcademicSelectTrigger,
+  AcademicSelectValue,
+} from "./academic-dropdown";
 import type { Subject } from "@/types";
 import { normalizeAcademicClassName, isAcademicDirectoryClass } from "@/lib/mock/academics";
 import { PAKISTANI_SCHOOL_CLASSES, PAKISTANI_SCHOOL_SUBJECTS } from "@/lib/mock/lms";
@@ -209,24 +209,24 @@ export function AddSubjectDialog({
               <BookOpen className="size-3.5 text-muted-foreground" />
               Subject Standard <span className="text-danger">*</span>
             </label>
-            <Select
+            <AcademicSelect
               value={isCustomName ? "__custom__" : subjectName}
               onValueChange={(val) => {
                 if (val) handleSubjectSelect(val);
               }}
             >
-              <SelectTrigger className="h-9 text-sm w-full">
-                <SelectValue placeholder="Select subject standard" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[260px]">
+              <AcademicSelectTrigger className="h-9 text-sm w-full">
+                <AcademicSelectValue placeholder="Select subject standard" />
+              </AcademicSelectTrigger>
+              <AcademicSelectContent className="max-h-[260px]">
                 {PAKISTANI_SCHOOL_SUBJECTS.map((sub) => (
-                  <SelectItem key={sub} value={sub}>
+                  <AcademicSelectItem key={sub} value={sub}>
                     {sub}
-                  </SelectItem>
+                  </AcademicSelectItem>
                 ))}
-                <SelectItem value="__custom__">Custom Subject Name...</SelectItem>
-              </SelectContent>
-            </Select>
+                <AcademicSelectItem value="__custom__">Custom Subject Name...</AcademicSelectItem>
+              </AcademicSelectContent>
+            </AcademicSelect>
           </div>
 
           {isCustomName && (
@@ -267,23 +267,23 @@ export function AddSubjectDialog({
                 <GraduationCap className="size-3.5 text-muted-foreground" />
                 Target Class
               </label>
-              <Select
+              <AcademicSelect
                 value={className}
                 onValueChange={(val) => {
                   if (val) handleClassSelect(val);
                 }}
               >
-                <SelectTrigger className="h-9 text-sm w-full">
-                  <SelectValue placeholder="Select class" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[260px]">
+                <AcademicSelectTrigger className="h-9 text-sm w-full">
+                  <AcademicSelectValue placeholder="Select class" />
+                </AcademicSelectTrigger>
+                <AcademicSelectContent className="max-h-[260px]">
                   {Array.from(new Set([...STANDARD_SUBJECT_CLASSES, className].filter(Boolean))).map((cls) => (
-                    <SelectItem key={cls} value={cls}>
+                    <AcademicSelectItem key={cls} value={cls}>
                       {cls}
-                    </SelectItem>
+                    </AcademicSelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </AcademicSelectContent>
+              </AcademicSelect>
             </div>
           </div>
 
@@ -293,18 +293,18 @@ export function AddSubjectDialog({
               <Layers className="size-3.5 text-muted-foreground" />
               Subject Classification
             </label>
-            <Select
+            <AcademicSelect
               value={isElective ? "elective" : "core"}
               onValueChange={(val) => setIsElective(val === "elective")}
             >
-              <SelectTrigger className="h-9 text-sm w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="core">Core / Compulsory Subject</SelectItem>
-                <SelectItem value="elective">Elective / Optional Subject</SelectItem>
-              </SelectContent>
-            </Select>
+              <AcademicSelectTrigger className="h-9 text-sm w-full">
+                <AcademicSelectValue />
+              </AcademicSelectTrigger>
+              <AcademicSelectContent>
+                <AcademicSelectItem value="core">Core / Compulsory Subject</AcademicSelectItem>
+                <AcademicSelectItem value="elective">Elective / Optional Subject</AcademicSelectItem>
+              </AcademicSelectContent>
+            </AcademicSelect>
           </div>
 
           {/* Marks Configuration */}
@@ -347,23 +347,23 @@ export function AddSubjectDialog({
               <User className="size-3.5 text-muted-foreground" />
               Assigned Teacher
             </label>
-            <Select
+            <AcademicSelect
               value={teacher}
               onValueChange={(val) => {
                 if (val) setTeacher(val);
               }}
             >
-              <SelectTrigger className="h-9 text-sm w-full">
-                <SelectValue placeholder="Select teacher" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[240px]">
+              <AcademicSelectTrigger className="h-9 text-sm w-full">
+                <AcademicSelectValue placeholder="Select teacher" />
+              </AcademicSelectTrigger>
+              <AcademicSelectContent className="max-h-[240px]">
                 {TEACHER_OPTIONS.map((tch) => (
-                  <SelectItem key={tch} value={tch}>
+                  <AcademicSelectItem key={tch} value={tch}>
                     {tch}
-                  </SelectItem>
+                  </AcademicSelectItem>
                 ))}
-              </SelectContent>
-            </Select>
+              </AcademicSelectContent>
+            </AcademicSelect>
           </div>
 
           <DialogFooter className="pt-3 border-t border-border/60 gap-2">

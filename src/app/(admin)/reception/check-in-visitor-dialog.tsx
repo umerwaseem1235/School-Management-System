@@ -46,6 +46,7 @@ export function CheckInVisitorDialog({
 }: CheckInVisitorDialogProps) {
   const [visitorName, setVisitorName] = React.useState("");
   const [phone, setPhone] = React.useState("");
+  const [cnic, setCnic] = React.useState("");
   const [hostPerson, setHostPerson] = React.useState("");
   const { activeBranches } = useBranches();
   const [purpose, setPurpose] = React.useState<VisitorPass["purpose"]>("Parent Meeting");
@@ -54,15 +55,39 @@ export function CheckInVisitorDialog({
   const resetForm = () => {
     setVisitorName("");
     setPhone("");
+    setCnic("");
     setHostPerson("");
     setPurpose("Parent Meeting");
     setCampus(activeBranches[0]?.campusName || "Main Campus — Gulberg");
   };
 
+  const handleCnicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    const digits = raw.replace(/\D/g, "").slice(0, 13);
+    let formatted = digits;
+    if (digits.length > 5 && digits.length <= 12) {
+      formatted = `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    } else if (digits.length > 12) {
+      formatted = `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12)}`;
+    }
+    setCnic(formatted);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!visitorName.trim() || !phone.trim() || !hostPerson.trim()) {
-      toast.error("Please fill in visitor name, phone number, and person to meet.");
+    const trimmedName = visitorName.trim();
+    const trimmedPhone = phone.trim();
+    const trimmedCnic = cnic.trim();
+    const trimmedHost = hostPerson.trim();
+
+    if (!trimmedName || !trimmedPhone || !trimmedCnic || !trimmedHost) {
+      toast.error("Please fill in visitor name, phone number, CNIC, and person to meet.");
+      return;
+    }
+
+    const cnicDigits = trimmedCnic.replace(/\D/g, "");
+    if (cnicDigits.length !== 13) {
+      toast.error("Please enter a valid 13-digit CNIC number (e.g. 35201-1234567-1).");
       return;
     }
 
@@ -73,15 +98,16 @@ export function CheckInVisitorDialog({
       hour12: true,
     });
     const dateStr = now.toISOString().slice(0, 10);
-    const passNumber = `V-${String(existingCount + 1).padStart(3, "0")}`;
+    const passNumber = `GP-${now.getFullYear()}-${String(existingCount + 1).padStart(4, "0")}`;
 
     const newPass: VisitorPass = {
       id: `vp-${Date.now()}`,
       passNumber,
-      visitorName: visitorName.trim(),
-      phone: phone.trim(),
+      visitorName: trimmedName,
+      phone: trimmedPhone,
+      cnic: trimmedCnic,
       purpose,
-      hostPerson: hostPerson.trim(),
+      hostPerson: trimmedHost,
       hostDepartment: "School Office",
       campus,
       checkInTime: timeStr,
@@ -133,19 +159,36 @@ export function CheckInVisitorDialog({
             />
           </div>
 
-          {/* Contact Phone */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-foreground">
-              Phone Number <span className="text-danger">*</span>
-            </label>
-            <input
-              type="tel"
-              required
-              placeholder="e.g. 0300-1234567"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
-            />
+          {/* Contact Phone & CNIC */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Phone Number <span className="text-danger">*</span>
+              </label>
+              <input
+                type="tel"
+                required
+                placeholder="e.g. 0300-1234567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">
+                CNIC <span className="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="35201-1234567-1"
+                value={cnic}
+                onChange={handleCnicChange}
+                maxLength={15}
+                className="w-full h-9 px-3 rounded-lg border border-border bg-background text-sm font-mono text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition-all"
+              />
+            </div>
           </div>
 
           {/* Person / Teacher to Meet */}

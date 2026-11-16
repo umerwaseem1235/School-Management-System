@@ -67,20 +67,20 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
           )}
         >
           <p className="truncate text-xs font-semibold text-white">Hamza Tariq</p>
-          <p className="truncate text-[10.5px] text-white/60">Super Administrator</p>
+          <p className="truncate text-[10.5px] font-medium text-white">Super Administrator</p>
         </Link>
         <button
           type="button"
           aria-label="Sign out"
           title="Sign out"
           className={cn(
-            "grid size-8 shrink-0 place-items-center rounded-lg text-white/60 transition-all duration-200 hover:bg-white/10 hover:text-white",
+            "grid size-8 shrink-0 place-items-center rounded-lg text-white transition-all duration-200 hover:bg-white/15 hover:text-white cursor-pointer",
             collapsed
               ? "pointer-events-none opacity-0 scale-90"
               : "opacity-100 scale-100 delay-75"
           )}
         >
-          <LogOut className="size-4" />
+          <LogOut className="size-4 text-white" />
         </button>
       </div>
     </div>

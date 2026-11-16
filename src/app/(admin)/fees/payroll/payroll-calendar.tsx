@@ -253,7 +253,7 @@ export function PayrollCalendarDropdown({
         <div
           role="dialog"
           aria-label="Payroll calendar selector"
-          className="absolute left-0 top-full mt-1.5 z-50 w-[310px] sm:w-[335px] rounded-xl border border-border/80 bg-white p-3 shadow-xl ring-1 ring-black/5 animate-in fade-in-50 zoom-in-95 dark:bg-card"
+          className="animate-dropdown academic-dropdown-content absolute left-0 top-full mt-1.5 z-50 w-[310px] sm:w-[335px] rounded-xl border border-border/80 bg-white p-3 shadow-xl ring-1 ring-black/5 dark:bg-card"
         >
           {/* ── Header: Segmented Tabs (Years / Months) & Close ── */}
           <div className="flex items-center justify-between gap-2 pb-2.5 mb-2.5 border-b border-border/60">

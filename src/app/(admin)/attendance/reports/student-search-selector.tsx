@@ -247,7 +247,7 @@ export function StudentSearchSelector({
             disabled={disabled}
             aria-label="Filter by specific student"
             className={cn(
-              "group inline-flex cursor-pointer items-center justify-between border bg-white text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-all hover:bg-slate-50/70 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 outline-none select-none",
+              "academic-dropdown-trigger group inline-flex cursor-pointer items-center justify-between border bg-white text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/0.95),0_1px_2px_rgb(9_29_62/0.05)] transition-all hover:bg-slate-50/70 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 outline-none select-none",
               size === "md"
                 ? "h-9 w-[280px] min-w-[280px] max-w-[280px] rounded-[6px] border-[#cbd5e1] px-3 text-[13px] font-semibold gap-2.5 hover:border-brand/40"
                 : "h-8 w-[230px] min-w-[230px] max-w-[230px] rounded-[4px] border-brand/18 px-2.5 text-xs font-semibold gap-2 hover:border-brand/35",
@@ -302,7 +302,7 @@ export function StudentSearchSelector({
                 onKeyDown={handlePopupKeyDown}
                 role="listbox"
                 aria-label="Student search options"
-                className="w-[360px] sm:w-[410px] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-[#cfdbe9] bg-white text-foreground shadow-[0_22px_48px_-12px_rgba(9,29,62,0.28),0_4px_16px_rgba(9,29,62,0.08)] ring-1 ring-brand/10 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 duration-100"
+                className="animate-dropdown academic-dropdown-content w-[360px] sm:w-[410px] max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-[#cfdbe9] bg-white text-foreground shadow-[0_22px_48px_-12px_rgba(9,29,62,0.28),0_4px_16px_rgba(9,29,62,0.08)] ring-1 ring-brand/10 outline-none"
               >
                 {/* Top Search & Grade Filter Bar */}
                 <div className="border-b border-[#e2e8f0] bg-[#f8fafd] p-3 space-y-2.5">
@@ -378,7 +378,7 @@ export function StudentSearchSelector({
                     aria-selected={value === allValue}
                     onClick={() => handleSelectStudent(allValue, true)}
                     className={cn(
-                      "flex cursor-pointer items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-xs transition-colors",
+                      "academic-dropdown-item flex cursor-pointer items-center justify-between gap-3 rounded-lg px-2.5 py-2 text-xs transition-colors",
                       focusedIndex === 0
                         ? "bg-brand-50 text-brand"
                         : "hover:bg-slate-50",
@@ -449,7 +449,7 @@ export function StudentSearchSelector({
                           aria-selected={isSelected}
                           onClick={() => handleSelectStudent(s.studentId, true)}
                           className={cn(
-                            "group flex cursor-pointer items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 transition-colors",
+                            "academic-dropdown-item group flex cursor-pointer items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 transition-colors",
                             isKeyboardFocused
                               ? "bg-brand-50"
                               : "hover:bg-slate-50",

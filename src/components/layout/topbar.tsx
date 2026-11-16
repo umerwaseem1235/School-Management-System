@@ -192,6 +192,7 @@ export function Topbar() {
 
               <DropdownMenuGroup className="space-y-0.5">
                 <DropdownMenuItem
+                  selected={selectedCampus === "all"}
                   onClick={() => handleCampusChange("all", "All Campuses")}
                   className={cn(
                     "flex items-center justify-between rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs font-medium transition-colors",
@@ -214,6 +215,7 @@ export function Topbar() {
                     return (
                       <DropdownMenuItem
                         key={c.id}
+                        selected={isSelected}
                         onClick={() => handleCampusChange(c.id, cleanName)}
                         className={cn(
                           "flex items-center justify-between rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs font-medium transition-colors",
@@ -290,6 +292,7 @@ export function Topbar() {
                   return (
                     <DropdownMenuItem
                       key={y.id}
+                      selected={isSelected}
                       onClick={() => handleYearChange(y.id, y.label)}
                       className={cn(
                         "flex items-center justify-between rounded-[3px] px-2.5 py-1.5 cursor-pointer text-xs font-medium transition-colors",

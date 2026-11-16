@@ -832,14 +832,15 @@ export function TransportClient() {
 
           <DropdownMenuContent
             align="start"
-            className="w-56 p-1 rounded-xl shadow-lg border border-slate-200 bg-white text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
+            className="w-56 p-1 rounded-xl shadow-lg border border-slate-200 bg-white text-popover-foreground"
           >
             <DropdownMenuItem
+              selected={activeTab === "routes"}
               onClick={() => setActiveTab("routes")}
               className={cn(
                 "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
                 activeTab === "routes"
-                  ? "bg-slate-100 font-semibold text-foreground"
+                  ? "bg-brand-50 font-semibold text-brand"
                   : "hover:bg-slate-50 text-slate-700 font-medium"
               )}
             >
@@ -852,17 +853,18 @@ export function TransportClient() {
                   {routes.length}
                 </span>
                 {activeTab === "routes" && (
-                  <Check className="size-3.5 text-foreground" />
+                  <Check className="size-3.5 text-brand" />
                 )}
               </div>
             </DropdownMenuItem>
 
             <DropdownMenuItem
+              selected={activeTab === "vehicles"}
               onClick={() => setActiveTab("vehicles")}
               className={cn(
                 "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
                 activeTab === "vehicles"
-                  ? "bg-slate-100 font-semibold text-foreground"
+                  ? "bg-brand-50 font-semibold text-brand"
                   : "hover:bg-slate-50 text-slate-700 font-medium"
               )}
             >
@@ -875,17 +877,18 @@ export function TransportClient() {
                   {vehicles.length}
                 </span>
                 {activeTab === "vehicles" && (
-                  <Check className="size-3.5 text-foreground" />
+                  <Check className="size-3.5 text-brand" />
                 )}
               </div>
             </DropdownMenuItem>
 
             <DropdownMenuItem
+              selected={activeTab === "assignments"}
               onClick={() => setActiveTab("assignments")}
               className={cn(
                 "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
                 activeTab === "assignments"
-                  ? "bg-slate-100 font-semibold text-foreground"
+                  ? "bg-brand-50 font-semibold text-brand"
                   : "hover:bg-slate-50 text-slate-700 font-medium"
               )}
             >

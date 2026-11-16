@@ -415,6 +415,7 @@ export default function ResultsPage() {
                   return (
                     <DropdownMenuItem
                       key={sec.id}
+                      selected={isSelected}
                       onClick={() => setActiveTab(sec.id)}
                       className={cn(
                         "flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs transition-colors",

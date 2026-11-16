@@ -202,13 +202,14 @@ export function AssetFormModal({
               <div ref={conditionRef} className="relative">
                 <button
                   type="button"
+                  aria-expanded={conditionOpen}
                   onClick={() => {
                     setConditionOpen(!conditionOpen);
                     setCategoryOpen(false);
                   }}
                   className={cn(
                     fieldClass,
-                    "flex items-center justify-between cursor-pointer select-none"
+                    "academic-dropdown-trigger flex items-center justify-between cursor-pointer select-none"
                   )}
                 >
                   <span className="flex items-center gap-2">
@@ -229,19 +230,20 @@ export function AssetFormModal({
                 </button>
 
                 {conditionOpen && (
-                  <div className="absolute z-50 mt-1 w-full rounded-lg border border-border/80 bg-white shadow-lg py-1 animate-in fade-in-0 zoom-in-95 duration-150">
+                  <div className="animate-dropdown academic-dropdown-content absolute z-50 mt-1.5 w-full rounded-xl border border-border/80 bg-white p-1">
                     {ASSET_CONDITIONS.map((c) => (
                       <button
                         key={c}
                         type="button"
+                        data-academic-selected={condition === c ? "true" : undefined}
                         onClick={() => {
                           setCondition(c);
                           setConditionOpen(false);
                         }}
                         className={cn(
-                          "flex w-full items-center gap-2.5 px-3.5 py-2 text-xs font-medium hover:bg-slate-50 transition-colors",
+                          "academic-dropdown-item flex w-full items-center gap-2.5 rounded-lg px-3.5 py-2 text-xs font-medium hover:bg-slate-50 transition-colors cursor-pointer",
                           condition === c &&
-                            "bg-brand/5 text-brand font-semibold"
+                            "bg-brand-50/80 text-brand font-semibold"
                         )}
                       >
                         <span
@@ -250,7 +252,7 @@ export function AssetFormModal({
                             CONDITION_COLORS[c].dot
                           )}
                         />
-                        {c}
+                        <span>{c}</span>
                       </button>
                     ))}
                   </div>
@@ -278,13 +280,14 @@ export function AssetFormModal({
               <div ref={categoryRef} className="relative">
                 <button
                   type="button"
+                  aria-expanded={categoryOpen}
                   onClick={() => {
                     setCategoryOpen(!categoryOpen);
                     setConditionOpen(false);
                   }}
                   className={cn(
                     fieldClass,
-                    "flex items-center justify-between cursor-pointer select-none"
+                    "academic-dropdown-trigger flex items-center justify-between cursor-pointer select-none"
                   )}
                 >
                   <span className="truncate">{category}</span>
@@ -297,22 +300,23 @@ export function AssetFormModal({
                 </button>
 
                 {categoryOpen && (
-                  <div className="absolute z-50 mt-1 w-full rounded-lg border border-border/80 bg-white shadow-lg py-1 max-h-48 overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-150">
+                  <div className="animate-dropdown academic-dropdown-content absolute z-50 mt-1.5 w-full rounded-xl border border-border/80 bg-white p-1 max-h-48 overflow-y-auto">
                     {ASSET_CATEGORIES.map((c) => (
                       <button
                         key={c}
                         type="button"
+                        data-academic-selected={category === c ? "true" : undefined}
                         onClick={() => {
                           setCategory(c);
                           setCategoryOpen(false);
                         }}
                         className={cn(
-                          "flex w-full items-center px-3.5 py-2 text-xs font-medium hover:bg-slate-50 transition-colors text-left",
+                          "academic-dropdown-item flex w-full items-center rounded-lg px-3.5 py-2 text-xs font-medium hover:bg-slate-50 transition-colors text-left cursor-pointer",
                           category === c &&
-                            "bg-brand/5 text-brand font-semibold"
+                            "bg-brand-50/80 text-brand font-semibold"
                         )}
                       >
-                        {c}
+                        <span>{c}</span>
                       </button>
                     ))}
                   </div>

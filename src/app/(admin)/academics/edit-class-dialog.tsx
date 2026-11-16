@@ -12,12 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  AcademicSelect,
+  AcademicSelectContent,
+  AcademicSelectItem,
+  AcademicSelectTrigger,
+  AcademicSelectValue,
+} from "./academic-dropdown";
 import type { AcademicClass } from "@/types";
 import { getClassSectionLetters } from "@/lib/mock/academics";
 import { useBranches } from "@/context/branches-context";
@@ -162,19 +162,19 @@ export function EditClassDialog({
                   <MapPin className="size-3.5 text-muted-foreground" />
                   Campus
                 </label>
-                <Select value={campus} onValueChange={(val) => val && setCampus(val)}>
-                  <SelectTrigger className="h-9 text-xs w-full">
-                    <SelectValue placeholder="Select campus" />
-                  </SelectTrigger>
-                  <SelectContent>
+                <AcademicSelect value={campus} onValueChange={(val) => val && setCampus(val)}>
+                  <AcademicSelectTrigger className="h-9 text-xs w-full">
+                    <AcademicSelectValue placeholder="Select campus" />
+                  </AcademicSelectTrigger>
+                  <AcademicSelectContent>
                     {branches.map((c) => (
-                      <SelectItem key={c.id} value={c.campusName} className="text-xs">
+                      <AcademicSelectItem key={c.id} value={c.campusName} className="text-xs">
                         {c.campusName}
                         {c.status !== "Active" ? " (Inactive)" : ""}
-                      </SelectItem>
+                      </AcademicSelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </AcademicSelectContent>
+                </AcademicSelect>
               </div>
 
               <div className="space-y-1.5">
@@ -199,18 +199,18 @@ export function EditClassDialog({
                 <User className="size-3.5 text-muted-foreground" />
                 Class Teacher
               </label>
-              <Select value={classTeacher} onValueChange={(val) => val && setClassTeacher(val)}>
-                <SelectTrigger className="h-9 text-xs w-full">
-                  <SelectValue placeholder="Assign teacher" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[220px]">
+              <AcademicSelect value={classTeacher} onValueChange={(val) => val && setClassTeacher(val)}>
+                <AcademicSelectTrigger className="h-9 text-xs w-full">
+                  <AcademicSelectValue placeholder="Assign teacher" />
+                </AcademicSelectTrigger>
+                <AcademicSelectContent className="max-h-[220px]">
                   {TEACHER_OPTIONS.map((t) => (
-                    <SelectItem key={t} value={t} className="text-xs">
+                    <AcademicSelectItem key={t} value={t} className="text-xs">
                       {t}
-                    </SelectItem>
+                    </AcademicSelectItem>
                   ))}
-                </SelectContent>
-              </Select>
+                </AcademicSelectContent>
+              </AcademicSelect>
             </div>
 
             {/* Sections & Students Count */}
@@ -220,16 +220,16 @@ export function EditClassDialog({
                   <Grid className="size-3.5 text-muted-foreground" />
                   Sections
                 </label>
-                <Select
+                <AcademicSelect
                   value={sections}
                   onValueChange={(val) => {
                     if (val) setSections(val);
                   }}
                 >
-                  <SelectTrigger className="h-9 text-xs w-full">
-                    <SelectValue placeholder="Select sections" />
-                  </SelectTrigger>
-                  <SelectContent>
+                  <AcademicSelectTrigger className="h-9 text-xs w-full">
+                    <AcademicSelectValue placeholder="Select sections" />
+                  </AcademicSelectTrigger>
+                  <AcademicSelectContent>
                     {Array.from(
                       new Set([1, 2, 3, 4, 5, 6, 7, 8, Math.max(1, parseInt(sections, 10) || 1)])
                     )
@@ -241,13 +241,13 @@ export function EditClassDialog({
                             ? letters[0]
                             : `${letters[0]}–${letters[letters.length - 1]}`;
                         return (
-                          <SelectItem key={count} value={String(count)} className="text-xs">
+                          <AcademicSelectItem key={count} value={String(count)} className="text-xs">
                             {count} {count === 1 ? "Section" : "Sections"} ({rangeLabel})
-                          </SelectItem>
+                          </AcademicSelectItem>
                         );
                       })}
-                  </SelectContent>
-                </Select>
+                  </AcademicSelectContent>
+                </AcademicSelect>
               </div>
 
               <div className="space-y-1.5">
@@ -272,15 +272,15 @@ export function EditClassDialog({
               <label className="text-xs font-semibold text-foreground">
                 Class Status
               </label>
-              <Select value={status} onValueChange={(val) => val && setStatus(val as "Active" | "Inactive")}>
-                <SelectTrigger className="h-9 text-xs w-full">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Active" className="text-xs">Active</SelectItem>
-                  <SelectItem value="Inactive" className="text-xs">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
+              <AcademicSelect value={status} onValueChange={(val) => val && setStatus(val as "Active" | "Inactive")}>
+                <AcademicSelectTrigger className="h-9 text-xs w-full">
+                  <AcademicSelectValue placeholder="Status" />
+                </AcademicSelectTrigger>
+                <AcademicSelectContent>
+                  <AcademicSelectItem value="Active" className="text-xs">Active</AcademicSelectItem>
+                  <AcademicSelectItem value="Inactive" className="text-xs">Inactive</AcademicSelectItem>
+                </AcademicSelectContent>
+              </AcademicSelect>
             </div>
           </div>
 

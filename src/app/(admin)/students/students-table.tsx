@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { DataTable, type Column, type FilterDef } from "@/components/shared/data-table";
-import { PersonCell } from "@/components/shared/user-avatar";
+import { UserAvatar } from "@/components/shared/user-avatar";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionIconButton } from "@/components/shared/action-icon-button";
 import {
@@ -91,7 +91,7 @@ function StudentStatusDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-56 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
+        className="w-56 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground"
       >
         <DropdownMenuGroup className="space-y-0.5">
           <DropdownMenuLabel className="px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -102,6 +102,7 @@ function StudentStatusDropdown({
             return (
               <DropdownMenuItem
                 key={opt.status}
+                selected={isCurrent}
                 onClick={() => {
                   if (!isCurrent && onStatusChange) {
                     onStatusChange(opt.status);
@@ -162,7 +163,7 @@ function FeeStatusDropdown({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-44 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
+        className="w-44 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground"
       >
         <DropdownMenuGroup className="space-y-0.5">
           <DropdownMenuLabel className="px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -173,6 +174,7 @@ function FeeStatusDropdown({
             return (
               <DropdownMenuItem
                 key={opt.status}
+                selected={isCurrent}
                 onClick={() => {
                   if (!isCurrent && onFeeStatusChange) {
                     onFeeStatusChange(opt.status);
@@ -226,33 +228,51 @@ export function StudentsTable({
       {
         key: "student",
         header: "Student",
-        align: "left",
-        cell: (r) => <PersonCell name={r.name} subtitle={r.admissionNumber} />,
+        align: "center",
+        headerAlign: "center",
+        className: "w-[27%] min-w-0 px-3 sm:px-4 text-center",
+        headerClassName: "w-[27%] px-3 sm:px-4 text-center",
+        cell: (r) => (
+          <div className="w-[160px] max-w-full mx-auto flex items-center gap-2.5 text-left">
+            <UserAvatar name={r.name} size="sm" className="shrink-0" />
+            <span
+              className="text-[13px] font-semibold text-foreground whitespace-nowrap text-left"
+              title={r.name}
+            >
+              {r.name}
+            </span>
+          </div>
+        ),
         sortValue: (r) => r.name,
       },
       {
         key: "class",
         header: "Class & Section",
         align: "center",
+        className: "w-[17%] px-3 sm:px-4 text-center",
+        headerClassName: "w-[17%] px-3 sm:px-4 text-center",
         cell: (r) => (
-          <span className="text-[13px] font-medium text-foreground/90">
+          <span className="text-[13px] font-medium text-foreground/90 whitespace-nowrap">
             {r.className} - {r.section}
           </span>
         ),
+        sortValue: (r) => `${r.className} ${r.section}`,
       },
       {
         key: "campus",
         header: "Campus",
         align: "center",
+        className: "w-[18%] px-3 sm:px-4 text-center",
+        headerClassName: "w-[18%] px-3 sm:px-4 text-center",
         cell: (r) => {
           const info = formatCampusDisplay(r.campus);
           return (
-            <div className="inline-flex flex-col items-center justify-center leading-tight">
-              <span className="text-[13px] font-medium text-foreground">{info.primary}</span>
-              {info.secondary && (
-                <span className="text-[11px] text-muted-foreground">{info.secondary}</span>
-              )}
-            </div>
+            <span
+              className="text-[13px] font-medium text-foreground whitespace-nowrap"
+              title={info.secondary ? `${info.primary} (${info.secondary})` : info.primary}
+            >
+              {info.primary}
+            </span>
           );
         },
         sortValue: (r) => r.campus,
@@ -261,6 +281,8 @@ export function StudentsTable({
         key: "feeStatus",
         header: "Fee Status",
         align: "center",
+        className: "w-[14%] px-3 sm:px-4 text-center",
+        headerClassName: "w-[14%] px-3 sm:px-4 text-center",
         cell: (r) => (
           <div className="flex items-center justify-center">
             <FeeStatusDropdown
@@ -276,6 +298,8 @@ export function StudentsTable({
         key: "status",
         header: "Status",
         align: "center",
+        className: "w-[14%] px-3 sm:px-4 text-center",
+        headerClassName: "w-[14%] px-3 sm:px-4 text-center",
         cell: (r) => (
           <div className="flex items-center justify-center">
             <StudentStatusDropdown
@@ -291,6 +315,8 @@ export function StudentsTable({
         key: "actions",
         header: "Action",
         align: "center",
+        className: "w-[10%] px-3 sm:px-4 text-center whitespace-nowrap",
+        headerClassName: "w-[10%] px-3 sm:px-4 text-center whitespace-nowrap",
         cell: (r) => (
           <div className="flex items-center justify-center">
             <ActionIconButton
@@ -306,7 +332,6 @@ export function StudentsTable({
             </ActionIconButton>
           </div>
         ),
-        className: "whitespace-nowrap",
       },
     ],
     [onStatusChange, onFeeStatusChange, onViewStudent]
@@ -375,6 +400,8 @@ export function StudentsTable({
         }
         filters={filters}
         pageSize={8}
+        tableClassName="w-full table-fixed"
+        containerClassName="overflow-x-clip"
       />
       <StudentDetailsDialog
         student={activeStudent}

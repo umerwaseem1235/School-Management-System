@@ -248,7 +248,7 @@ export function FeeCollectionCalendarDropdown({
 
       {/* ─── Clean Date/Month/Year Picker Popover ─── */}
       {isOpen && (
-        <div className="absolute right-0 sm:right-auto sm:left-0 top-full mt-1.5 z-50 w-[315px] sm:w-[325px] rounded-xl border border-border/80 bg-white p-3 shadow-xl ring-1 ring-black/5 animate-in fade-in-50 zoom-in-95 dark:bg-card">
+        <div className="animate-dropdown academic-dropdown-content absolute right-0 sm:right-auto sm:left-0 top-full mt-1.5 z-50 w-[315px] sm:w-[325px] rounded-xl border border-border/80 bg-white p-3 shadow-xl ring-1 ring-black/5 dark:bg-card">
           {/* ── Top View Mode Segmented Bar & Close Button ── */}
           <div className="flex items-center gap-1.5 mb-2.5">
             <div className="flex-1 flex items-center p-0.5 bg-muted/60 rounded-lg">

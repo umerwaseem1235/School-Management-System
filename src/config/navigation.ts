@@ -102,7 +102,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Academics",
     icon: BookOpen,
     items: [
-      { title: "Examinations", href: "/examinations", icon: ClipboardCheck },
+      { title: "Exam Management", href: "/examinations", icon: ClipboardCheck },
       { title: "LMS", href: "/lms", icon: MonitorPlay },
     ],
     defaultExpanded: true,

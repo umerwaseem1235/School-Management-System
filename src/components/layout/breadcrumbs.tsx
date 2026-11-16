@@ -17,7 +17,7 @@ const ROUTE_MAP: Record<string, { title: string; group: string }> = {
   "/users": { title: "Users & Roles", group: "Administration" },
   "/academics": { title: "Academic Management", group: "Administration" },
   "/lms": { title: "LMS", group: "Academics" },
-  "/examinations": { title: "Examinations", group: "Academics" },
+  "/examinations": { title: "Exam Management", group: "Academics" },
   "/tests-assessments": { title: "Tests & Assessments", group: "Examinations" },
   "/admission-tests": { title: "Admission Tests", group: "Examinations" },
   "/paper-generator": { title: "Paper Generator", group: "Examinations" },

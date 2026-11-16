@@ -46,6 +46,7 @@ import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard, StatGrid } from "@/components/shared/stat-card";
 import { SectionCard } from "@/components/shared/section-card";
+import { ActionIconButton } from "@/components/shared/action-icon-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -1035,15 +1036,14 @@ export function LeavePolicyClient() {
                         {cat.days} days
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
+                    <ActionIconButton
+                      tone="edit"
                       onClick={() => handleOpenSingleAdjust(cat.id)}
                       title={`Adjust ${cat.name} Quota`}
-                      className="opacity-60 group-hover/item:opacity-100 hover:bg-brand-50 hover:text-brand cursor-pointer size-6 rounded-[4px]"
+                      aria-label={`Adjust ${cat.name} Quota`}
                     >
-                      <Pencil className="size-3 text-brand" />
-                    </Button>
+                      <Pencil />
+                    </ActionIconButton>
                   </div>
                 </div>
               );

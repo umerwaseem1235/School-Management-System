@@ -161,7 +161,7 @@ Joined: ${staff.joiningDate}`;
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                       align="start"
-                      className="w-56 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
+                      className="w-56 p-1.5 rounded-xl shadow-xl border border-border/70 bg-popover text-popover-foreground"
                     >
                       <DropdownMenuGroup className="space-y-0.5">
                         <DropdownMenuLabel className="px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -172,6 +172,7 @@ Joined: ${staff.joiningDate}`;
                           return (
                             <DropdownMenuItem
                               key={opt.status}
+                              selected={isCurrent}
                               onClick={() => {
                                 if (!isCurrent && onStatusChange) {
                                   onStatusChange(staff.id, opt.status);

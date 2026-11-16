@@ -710,14 +710,15 @@ export function InventoryClient() {
 
           <DropdownMenuContent
             align="start"
-            className="w-48 p-1 rounded-xl shadow-lg border border-slate-200 bg-white text-popover-foreground animate-in fade-in-50 zoom-in-95 duration-100"
+            className="w-48 p-1 rounded-xl shadow-lg border border-slate-200 bg-white text-popover-foreground"
           >
             <DropdownMenuItem
+              selected={activeTab === "stock"}
               onClick={() => setActiveTab("stock")}
               className={cn(
                 "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
                 activeTab === "stock"
-                  ? "bg-slate-100 font-semibold text-foreground"
+                  ? "bg-brand-50 font-semibold text-brand"
                   : "hover:bg-slate-50 text-slate-700 font-medium"
               )}
             >
@@ -726,16 +727,17 @@ export function InventoryClient() {
                 <span>Stock Register</span>
               </div>
               {activeTab === "stock" && (
-                <Check className="size-3.5 text-foreground" />
+                <Check className="size-3.5 text-brand" />
               )}
             </DropdownMenuItem>
 
             <DropdownMenuItem
+              selected={activeTab === "issuance"}
               onClick={() => setActiveTab("issuance")}
               className={cn(
                 "flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs cursor-pointer transition-colors outline-none",
                 activeTab === "issuance"
-                  ? "bg-slate-100 font-semibold text-foreground"
+                  ? "bg-brand-50 font-semibold text-brand"
                   : "hover:bg-slate-50 text-slate-700 font-medium"
               )}
             >
