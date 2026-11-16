@@ -445,6 +445,152 @@ export function syncScholarshipWithFeeChallan(
   return currentChallans;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Attendance-based scholarship localStorage key
+// ─────────────────────────────────────────────────────────────────────────────
+export const ATTENDANCE_OVERRIDES_KEY = "edusphere.attendance.overrides.v1";
+
+/**
+ * Persist an attendance percentage override for a student (by name, lowercased).
+ * This lets the attendance module write updated percentages that the scholarship
+ * module can read without a shared in-memory reference.
+ */
+export function writeStudentAttendancePercent(
+  studentName: string,
+  attendancePercent: number
+): void {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = window.localStorage.getItem(ATTENDANCE_OVERRIDES_KEY);
+    const map: Record<string, number> = raw ? JSON.parse(raw) : {};
+    map[studentName.trim().toLowerCase()] = attendancePercent;
+    window.localStorage.setItem(ATTENDANCE_OVERRIDES_KEY, JSON.stringify(map));
+    window.dispatchEvent(
+      new CustomEvent("edusphere:attendance-updated", {
+        detail: { studentName, attendancePercent },
+      })
+    );
+  } catch {
+    // ignore storage errors
+  }
+}
+
+/**
+ * Read a previously persisted attendance percentage for a student (by name).
+ * Returns undefined if no override exists.
+ */
+export function readStudentAttendancePercent(
+  studentName: string
+): number | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const raw = window.localStorage.getItem(ATTENDANCE_OVERRIDES_KEY);
+    if (!raw) return undefined;
+    const map: Record<string, number> = JSON.parse(raw);
+    return map[studentName.trim().toLowerCase()];
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Read all stored attendance overrides as a Map<lowerName, percent>.
+ */
+export function readAllAttendanceOverrides(): Map<string, number> {
+  if (typeof window === "undefined") return new Map();
+  try {
+    const raw = window.localStorage.getItem(ATTENDANCE_OVERRIDES_KEY);
+    if (!raw) return new Map();
+    const obj: Record<string, number> = JSON.parse(raw);
+    return new Map(Object.entries(obj));
+  } catch {
+    return new Map();
+  }
+}
+
+export interface AttendanceRevocationResult {
+  revoked: boolean;
+  revokedAwards: FeeScholarshipAward[];
+  attendancePercent: number;
+}
+
+/**
+ * Checks whether a student's attendance has fallen below the given threshold.
+ * If it has, automatically revokes all Active scholarships for that student,
+ * sets their status to "Lapsed", adds a revocation reason, syncs the Fee Challan
+ * (removes scholarship concession), and dispatches the update event.
+ *
+ * @param studentName      - Student's full name (case-insensitive)
+ * @param attendancePercent - Computed attendance % (0–100)
+ * @param threshold         - Minimum required attendance % (default 80)
+ * @returns AttendanceRevocationResult with whether revocation happened
+ */
+export function checkAndRevokeScholarshipByAttendance(
+  studentName: string,
+  attendancePercent: number,
+  threshold = 80
+): AttendanceRevocationResult {
+  // Persist the latest attendance percent for cross-module reads
+  writeStudentAttendancePercent(studentName, attendancePercent);
+
+  if (attendancePercent >= threshold) {
+    return { revoked: false, revokedAwards: [], attendancePercent };
+  }
+
+  // Find all Active scholarships for this student
+  const allScholarships = readFeeScholarships();
+  const nameLower = studentName.trim().toLowerCase();
+  const matchingActive = allScholarships.filter(
+    (s) =>
+      s.status === "Active" && s.student.trim().toLowerCase() === nameLower
+  );
+
+  if (matchingActive.length === 0) {
+    return { revoked: false, revokedAwards: [], attendancePercent };
+  }
+
+  // Revoke each matching active scholarship
+  const revokedAwards: FeeScholarshipAward[] = [];
+  const updatedScholarships = allScholarships.map((s) => {
+    if (s.status === "Active" && s.student.trim().toLowerCase() === nameLower) {
+      const revoked: FeeScholarshipAward = {
+        ...s,
+        status: "Lapsed",
+        revocationReason: `Attendance dropped to ${attendancePercent.toFixed(1)}% (below ${threshold}% threshold)`,
+      };
+      revokedAwards.push(revoked);
+      return revoked;
+    }
+    return s;
+  });
+
+  writeFeeScholarships(updatedScholarships);
+
+  // Sync each revoked award with the Fee Collection challan
+  for (const award of revokedAwards) {
+    syncScholarshipWithFeeChallan(award, "revoke");
+  }
+
+  return { revoked: true, revokedAwards, attendancePercent };
+}
+
+/**
+ * Run attendance-based scholarship check for ALL students whose attendance
+ * overrides are stored in localStorage. Called on mount from the Scholarships
+ * page to catch any revocations that happened while the page was not open.
+ */
+export function runAttendanceScholarshipAudit(threshold = 80): AttendanceRevocationResult[] {
+  const overrides = readAllAttendanceOverrides();
+  const results: AttendanceRevocationResult[] = [];
+  for (const [nameLower, pct] of overrides.entries()) {
+    if (pct < threshold) {
+      const result = checkAndRevokeScholarshipByAttendance(nameLower, pct, threshold);
+      if (result.revoked) results.push(result);
+    }
+  }
+  return results;
+}
+
 /**
  * Automatically synchronizes an institutional fine (imposed, paid, waived, reopened)
  * with the student's fee voucher in Fee Collection.
@@ -765,11 +911,14 @@ export function calculateChallanAmountDue(
   const customHeads     = challan.customHeads ?? tier?.customHeads ?? [];
   const customHeadsSum  = customHeads.reduce((s, h) => s + (Math.round(Number(h.amount)) || 0), 0);
 
-  // Calculated sum of all monthly fee heads (same as in payment dialog)
-  const calculatedChargesTotal =
+  // Calculated sum of all monthly fee heads (net of scholarship concession)
+  const scholarshipConcession = challan.scholarshipConcession ?? 0;
+  const grossHeadsSum =
     tier || challan.tuitionFee !== undefined
       ? tuitionFee + labCharges + sportsCharges + libraryFund + utilitySurcharge + otherCharges + customHeadsSum
-      : Math.round(challan.totalPayable ?? 0);
+      : Math.round((challan.totalPayable ?? 0) + scholarshipConcession);
+
+  const calculatedChargesTotal = Math.max(0, grossHeadsSum - scholarshipConcession);
 
   // Supplemental adjustment if totalPayable exceeds the sum of heads (same as payment dialog)
   const priorInfo = calculatePreviousMonthDues(challan, allChallans);

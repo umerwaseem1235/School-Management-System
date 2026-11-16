@@ -69,6 +69,8 @@ export interface FeeScholarshipAward {
   validUntil: string;
   status: "Active" | "Under Review" | "Lapsed";
   authority: string;
+  /** Populated automatically when status is set to "Lapsed" via attendance policy */
+  revocationReason?: string;
 }
 
 export interface FeeAdjustmentRecord {

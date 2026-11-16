@@ -591,26 +591,6 @@ export function StaffAttendanceClient() {
                       <StatusBadge status={activeViewingStaff.statusToday} />
                     </div>
                   </div>
-
-                  {/* Quick Contact Bar in Header */}
-                  <div className="mt-3.5 flex flex-wrap items-center gap-2 pt-3 border-t border-border text-xs text-muted-foreground">
-                    <a
-                      href={`mailto:${activeViewingStaff.email}`}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-muted/60 hover:bg-muted px-2.5 py-1 text-xs text-foreground transition-colors"
-                      title="Send official email"
-                    >
-                      <Mail className="size-3 text-muted-foreground" />
-                      <span className="font-mono text-[11px]">{activeViewingStaff.email}</span>
-                    </a>
-                    <a
-                      href={`tel:${activeViewingStaff.phone}`}
-                      className="inline-flex items-center gap-1.5 rounded-md bg-muted/60 hover:bg-muted px-2.5 py-1 text-xs text-foreground transition-colors"
-                      title="Call staff phone"
-                    >
-                      <Phone className="size-3 text-muted-foreground" />
-                      <span className="font-mono text-[11px]">{activeViewingStaff.phone}</span>
-                    </a>
-                  </div>
                 </DialogHeader>
               </div>
 
@@ -836,7 +816,7 @@ export function StaffAttendanceClient() {
                 <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 font-mono">
                   <span>ID: {activeViewingStaff.empCode}</span>
                   <span>&bull;</span>
-                  <span>{activeViewingStaff.phone}</span>
+                  <span>{activeViewingStaff.department}</span>
                 </div>
                 <Button
                   variant="outline"
